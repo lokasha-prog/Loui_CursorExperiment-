@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NMS.Domain.Attendance;
 using NMS.Domain.Auditing;
 using NMS.Domain.CentreManagement;
 using NMS.Domain.Identity;
@@ -73,6 +74,14 @@ public interface IAppDbContext
     DbSet<Label> Labels { get; }
 
     DbSet<StudentLabel> StudentLabels { get; }
+
+    DbSet<AttendanceRecord> AttendanceRecords { get; }
+
+    DbSet<AttendanceEvent> AttendanceEvents { get; }
+
+    DbSet<LeaveType> LeaveTypes { get; }
+
+    DbSet<LeaveRequest> LeaveRequests { get; }
 
     DbSet<AuditLog> AuditLogs { get; }
 

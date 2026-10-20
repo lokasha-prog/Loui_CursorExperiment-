@@ -140,6 +140,7 @@ app.MapAuthEndpoints();
 app.MapCentreStructureEndpoints();
 app.MapStudentEndpoints();
 app.MapStaffEndpoints();
+app.MapAttendanceEndpoints();
 app.MapUserEndpoints();
 
 app.Run();

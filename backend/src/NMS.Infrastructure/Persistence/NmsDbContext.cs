@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NMS.Application.Abstractions;
+using NMS.Domain.Attendance;
 using NMS.Domain.Auditing;
 using NMS.Domain.CentreManagement;
 using NMS.Domain.Common;
@@ -50,6 +51,14 @@ public sealed class NmsDbContext(
     public DbSet<Label> Labels => Set<Label>();
 
     public DbSet<StudentLabel> StudentLabels => Set<StudentLabel>();
+
+    public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
+
+    public DbSet<AttendanceEvent> AttendanceEvents => Set<AttendanceEvent>();
+
+    public DbSet<LeaveType> LeaveTypes => Set<LeaveType>();
+
+    public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
 
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 

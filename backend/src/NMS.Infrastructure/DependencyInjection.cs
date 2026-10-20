@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NMS.Application.Abstractions;
+using NMS.Application.Attendance;
 using NMS.Application.Auth;
 using NMS.Infrastructure.Persistence;
 using NMS.Infrastructure.Persistence.Interceptors;
@@ -31,6 +32,13 @@ public static class DependencyInjection
                     && o.RefreshTokenDays > 0 && o.MinPasswordLength > 0,
                 "The Auth section must define MaxFailedAttempts, LockoutMinutes, AccessTokenMinutes, RefreshTokenDays and MinPasswordLength.")
             .ValidateOnStart();
+
+        services.AddOptions<AttendanceOptions>().Bind(configuration.GetSection(AttendanceOptions.Section))
+            .Validate(
+                o => TimeZoneInfo.TryFindSystemTimeZoneById(o.TimeZoneId, out _) && o.LateGraceMinutes >= 0 && o.EarlyLeaveGraceMinutes >= 0,
+                "The Attendance section needs a valid TimeZoneId and non-negative grace minutes.")
+            .ValidateOnStart();
+        services.AddSingleton<CentreCalendar>();
 
         var connectionString = configuration.GetConnectionString(ConnectionStringName)
             ?? throw new InvalidOperationException($"Connection string '{ConnectionStringName}' is not configured.");
