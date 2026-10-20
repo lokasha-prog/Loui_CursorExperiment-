@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NMS.Domain.Attendance;
 using NMS.Domain.Auditing;
+using NMS.Domain.Admissions;
 using NMS.Domain.Billing;
 using NMS.Domain.Notifications;
 using NMS.Domain.Communication;
@@ -128,6 +129,9 @@ public interface IAppDbContext
 
     DbSet<InvoicePayment> InvoicePayments { get; }
     DbSet<Expense> Expenses { get; }
+    DbSet<Enquiry> Enquiries { get; }
+    DbSet<EnquiryStageLog> EnquiryStageLogs { get; }
+    DbSet<EnquiryActivity> EnquiryActivities { get; }
     DbSet<BillingSettings> BillingSettings { get; }
     DbSet<ReminderLog> ReminderLogs { get; }
 

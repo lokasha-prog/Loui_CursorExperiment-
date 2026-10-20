@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NMS.Application.Abstractions;
 using NMS.Domain.Attendance;
 using NMS.Domain.Auditing;
+using NMS.Domain.Admissions;
 using NMS.Domain.Billing;
 using NMS.Domain.Notifications;
 using NMS.Domain.Communication;
@@ -126,6 +127,9 @@ public sealed class NmsDbContext(
 
     public DbSet<InvoicePayment> InvoicePayments => Set<InvoicePayment>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<Enquiry> Enquiries => Set<Enquiry>();
+    public DbSet<EnquiryStageLog> EnquiryStageLogs => Set<EnquiryStageLog>();
+    public DbSet<EnquiryActivity> EnquiryActivities => Set<EnquiryActivity>();
     public DbSet<BillingSettings> BillingSettings => Set<BillingSettings>();
     public DbSet<ReminderLog> ReminderLogs => Set<ReminderLog>();
 

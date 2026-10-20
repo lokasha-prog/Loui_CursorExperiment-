@@ -184,6 +184,215 @@ namespace NMS.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NMS.Domain.Admissions.Enquiry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AssignedStaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ChildDateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ChildName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly?>("DesiredStartDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
+
+                    b.Property<DateOnly>("EnquiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("FamilyName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly?>("LastContactDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("PreferredContact")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid?>("ProgramId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedStaffId");
+
+                    b.HasIndex("ProgramId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TenantId", "EnquiryDate");
+
+                    b.HasIndex("TenantId", "Stage");
+
+                    b.ToTable("Enquiries", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Enquiries_Source", "[Source] IN (N'walk_in', N'website', N'referral', N'social_media', N'phone', N'email', N'existing_parent')");
+
+                            t.HasCheckConstraint("CK_Enquiries_Stage", "[Stage] IN (N'no_stage', N'interested', N'contacted', N'tour_appointment', N'toured', N'enrolled')");
+                        });
+                });
+
+            modelBuilder.Entity("NMS.Domain.Admissions.EnquiryActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("EnquiryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EnquiryId");
+
+                    b.HasIndex("TenantId", "EnquiryId", "CreatedAt");
+
+                    b.ToTable("EnquiryActivities", (string)null);
+                });
+
+            modelBuilder.Entity("NMS.Domain.Admissions.EnquiryStageLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("EnquiryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FromStage")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ToStage")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EnquiryId");
+
+                    b.HasIndex("TenantId", "EnquiryId", "CreatedAt");
+
+                    b.ToTable("EnquiryStageLogs", (string)null);
+                });
+
             modelBuilder.Entity("NMS.Domain.Attendance.AttendanceEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2752,6 +2961,60 @@ namespace NMS.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("NMS.Application.Reporting.AuditRetentionSetting", b =>
                 {
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NMS.Domain.Admissions.Enquiry", b =>
+                {
+                    b.HasOne("NMS.Domain.CentreManagement.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedStaffId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NMS.Domain.CentreManagement.Program", null)
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NMS.Domain.CentreManagement.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NMS.Domain.Admissions.EnquiryActivity", b =>
+                {
+                    b.HasOne("NMS.Domain.Admissions.Enquiry", null)
+                        .WithMany()
+                        .HasForeignKey("EnquiryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NMS.Domain.Admissions.EnquiryStageLog", b =>
+                {
+                    b.HasOne("NMS.Domain.Admissions.Enquiry", null)
+                        .WithMany()
+                        .HasForeignKey("EnquiryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("NMS.Domain.Identity.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")
