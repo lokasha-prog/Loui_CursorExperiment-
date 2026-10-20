@@ -178,7 +178,7 @@ public sealed class CheckInHandler(
     CentreCalendar calendar,
     ITenantContext tenant,
     IClock clock,
-    IOptions<AttendanceOptions> options,
+    NMS.Application.Settings.CentreSettingsReader settings,
     IPublisher publisher) : IRequestHandler<CheckInCommand, Result<AttendanceDto>>
 {
     public async Task<Result<AttendanceDto>> Handle(CheckInCommand request, CancellationToken ct)
@@ -255,7 +255,7 @@ public sealed class CheckInHandler(
         }
 
         var start = await db.Programs.AsNoTracking().Where(p => p.Id == person.ProgramId).Select(p => (TimeOnly?)p.StartTime).FirstOrDefaultAsync(ct);
-        return start is not null && calendar.LocalTime > start.Value.AddMinutes(options.Value.LateGraceMinutes);
+        return start is not null && calendar.LocalTime > start.Value.AddMinutes((await settings.AttendanceAsync(ct)).LateGrace);
     }
 
     private async Task Log(CheckInCommand request, ResolvedPerson? person, string type, string outcome, string message, CancellationToken ct)
@@ -286,7 +286,7 @@ public sealed class CheckOutHandler(
     CentreCalendar calendar,
     ITenantContext tenant,
     IClock clock,
-    IOptions<AttendanceOptions> options,
+    NMS.Application.Settings.CentreSettingsReader settings,
     IPublisher publisher) : IRequestHandler<CheckOutCommand, Result<AttendanceDto>>
 {
     public async Task<Result<AttendanceDto>> Handle(CheckOutCommand request, CancellationToken ct)
@@ -379,7 +379,7 @@ public sealed class CheckOutHandler(
         }
 
         var end = await db.Programs.AsNoTracking().Where(p => p.Id == person.ProgramId).Select(p => (TimeOnly?)p.EndTime).FirstOrDefaultAsync(ct);
-        return end is not null && calendar.LocalTime < end.Value.AddMinutes(-options.Value.EarlyLeaveGraceMinutes);
+        return end is not null && calendar.LocalTime < end.Value.AddMinutes(-(await settings.AttendanceAsync(ct)).EarlyGrace);
     }
 
     private async Task Log(CheckOutCommand request, ResolvedPerson? person, string type, string outcome, string message, CancellationToken ct)

@@ -119,11 +119,16 @@ public sealed class GenerateInvoicesValidator : AbstractValidator<GenerateInvoic
 internal static class InvoiceScope
 {
     /// <summary>Families see only issued invoices of their own children; staff with billing access see everything.</summary>
-    public static async Task<IQueryable<Invoice>> ScopeAsync(IQueryable<Invoice> invoices, IAccessScope scope, CancellationToken ct)
+    public static async Task<IQueryable<Invoice>> ScopeAsync(IQueryable<Invoice> invoices, IAccessScope scope, NMS.Application.Settings.CentreSettingsReader settings, CancellationToken ct)
     {
         var own = await scope.GetOwnStudentIdsAsync(ct);
         if (own is not null)
         {
+            if (!await settings.ParentsSeeInvoicesAsync(ct))
+            {
+                return invoices.Where(i => false);
+            }
+
             invoices = invoices.Where(i => own.Contains(i.StudentId) && i.Status != InvoiceStatuses.Draft && i.Status != InvoiceStatuses.Cancelled);
         }
 
@@ -163,11 +168,11 @@ internal static class InvoiceScope
         : invoice.PaidFils > 0 ? InvoiceStatuses.PartiallyPaid : InvoiceStatuses.Issued;
 }
 
-public sealed class ListInvoicesHandler(IAppDbContext db, IAccessScope scope) : IRequestHandler<ListInvoicesQuery, Result<CursorPage<InvoiceDto>>>
+public sealed class ListInvoicesHandler(IAppDbContext db, IAccessScope scope, NMS.Application.Settings.CentreSettingsReader settings) : IRequestHandler<ListInvoicesQuery, Result<CursorPage<InvoiceDto>>>
 {
     public async Task<Result<CursorPage<InvoiceDto>>> Handle(ListInvoicesQuery request, CancellationToken ct)
     {
-        var invoices = await InvoiceScope.ScopeAsync(db.Invoices.AsNoTracking(), scope, ct);
+        var invoices = await InvoiceScope.ScopeAsync(db.Invoices.AsNoTracking(), scope, settings, ct);
         if (request.Status is { } status)
         {
             invoices = invoices.Where(i => i.Status == status);
@@ -186,10 +191,10 @@ public sealed class ListInvoicesHandler(IAppDbContext db, IAccessScope scope) : 
     }
 }
 
-public sealed class GetInvoiceHandler(IAppDbContext db, IAccessScope scope) : IRequestHandler<GetInvoiceQuery, Result<InvoiceDetailDto>>
+public sealed class GetInvoiceHandler(IAppDbContext db, IAccessScope scope, NMS.Application.Settings.CentreSettingsReader settings) : IRequestHandler<GetInvoiceQuery, Result<InvoiceDetailDto>>
 {
     public async Task<Result<InvoiceDetailDto>> Handle(GetInvoiceQuery request, CancellationToken ct) =>
-        await (await InvoiceScope.ScopeAsync(db.Invoices.AsNoTracking(), scope, ct)).AnyAsync(i => i.Id == request.Id, ct)
+        await (await InvoiceScope.ScopeAsync(db.Invoices.AsNoTracking(), scope, settings, ct)).AnyAsync(i => i.Id == request.Id, ct)
             ? Result<InvoiceDetailDto>.Success(await InvoiceScope.DetailAsync(db, request.Id, ct))
             : Error.NotFound("Invoice not found.");
 }
@@ -469,7 +474,7 @@ public sealed class RunBillingHandler(InvoiceGenerator generator, CentreCalendar
     }
 }
 
-public sealed class InvoicePdfHandler(IAppDbContext db, IAccessScope scope, ITenantContext tenant, IInvoiceRenderer renderer)
+public sealed class InvoicePdfHandler(IAppDbContext db, IAccessScope scope, NMS.Application.Settings.CentreSettingsReader settings, ITenantContext tenant, IInvoiceRenderer renderer)
     : IRequestHandler<InvoicePdfQuery, Result<InvoicePdfFile>>
 {
     public async Task<Result<InvoicePdfFile>> Handle(InvoicePdfQuery request, CancellationToken ct)
@@ -479,7 +484,7 @@ public sealed class InvoicePdfHandler(IAppDbContext db, IAccessScope scope, ITen
             return Error.Validation("Language must be en or ar.", "language");
         }
 
-        var invoice = await (await InvoiceScope.ScopeAsync(db.Invoices.AsNoTracking(), scope, ct)).Include(i => i.Lines).FirstOrDefaultAsync(i => i.Id == request.Id, ct);
+        var invoice = await (await InvoiceScope.ScopeAsync(db.Invoices.AsNoTracking(), scope, settings, ct)).Include(i => i.Lines).FirstOrDefaultAsync(i => i.Id == request.Id, ct);
         if (invoice is null)
         {
             return Error.NotFound("Invoice not found.");

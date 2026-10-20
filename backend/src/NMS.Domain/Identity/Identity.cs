@@ -175,3 +175,23 @@ public class LoginDirectoryEntry
 
     public Guid UserId { get; set; }
 }
+
+/// <summary>One row per centre holding the settings that are not on the centre record itself: branding, attendance timing and what parents may see.</summary>
+public class CentreSettings : TenantEntity
+{
+    public string? Address { get; set; }
+
+    public string? Website { get; set; }
+
+    /// <summary>Hex colour such as #0E7C86 used for the centre's branding.</summary>
+    public string? BrandColor { get; set; }
+
+    public Guid? LogoMediaId { get; set; }
+
+    /// <summary>Minutes after the programme starts before a check-in counts as late. Empty means the system default.</summary>
+    public int? LateGraceMinutes { get; set; }
+
+    public int? EarlyLeaveGraceMinutes { get; set; }
+
+    public bool ParentsSeeInvoices { get; set; } = true;
+}

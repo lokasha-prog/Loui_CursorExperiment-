@@ -2807,6 +2807,71 @@ namespace NMS.Infrastructure.Persistence.Migrations
                     b.ToTable("AppUserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("NMS.Domain.Identity.CentreSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("BrandColor")
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("EarlyLeaveGraceMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("LateGraceMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("LogoMediaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("ParentsSeeInvoices")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Website")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("CentreSettings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_CentreSettings_Early", "[EarlyLeaveGraceMinutes] IS NULL OR [EarlyLeaveGraceMinutes] BETWEEN 0 AND 120");
+
+                            t.HasCheckConstraint("CK_CentreSettings_Late", "[LateGraceMinutes] IS NULL OR [LateGraceMinutes] BETWEEN 0 AND 120");
+                        });
+                });
+
             modelBuilder.Entity("NMS.Domain.Identity.LoginDirectoryEntry", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3872,6 +3937,15 @@ namespace NMS.Infrastructure.Persistence.Migrations
                     b.Navigation("AppUser");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("NMS.Domain.Identity.CentreSettings", b =>
+                {
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("NMS.Domain.Identity.LoginDirectoryEntry", b =>

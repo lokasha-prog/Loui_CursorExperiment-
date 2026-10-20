@@ -99,3 +99,31 @@ public static class BillingEndpoints
             ApiResults.From(http, await s.Send(new BillingSnapshotQuery(month), ct))).WithTags("Dashboard").RequireAuthorization(Permissions.BillingWrite);
     }
 }
+
+public sealed record RoleRequest(Dictionary<string, string> DisplayName, string? Description, IReadOnlyList<string> Permissions);
+
+public static class SettingsEndpoints
+{
+    public static void MapSettingsEndpoints(this IEndpointRouteBuilder routes)
+    {
+        var g = routes.MapGroup("/api/v1/settings").WithTags("Settings");
+        g.MapGet("/centre", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new NMS.Application.Settings.GetCentreSettingsQuery(), ct))).RequireAuthorization(Permissions.SettingsRead);
+        g.MapPut("/centre", async (NMS.Application.Settings.SaveCentreSettingsCommand body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(body, ct))).RequireAuthorization(Permissions.SettingsWrite);
+
+        var roles = routes.MapGroup("/api/v1/roles").WithTags("Settings");
+        roles.MapGet("/", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new NMS.Application.Settings.ListRolesQuery(), ct))).RequireAuthorization(Permissions.UserManagementManage);
+        roles.MapGet("/permissions", (HttpContext http) =>
+            ApiResults.Ok(http, NMS.Application.Settings.CustomRoles.Grantable())).RequireAuthorization(Permissions.UserManagementManage);
+        roles.MapPost("/", async (RoleRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new NMS.Application.Settings.SaveRoleCommand(null, body.DisplayName, body.Description, body.Permissions), ct), StatusCodes.Status201Created))
+            .RequireAuthorization(Permissions.UserManagementManage);
+        roles.MapPatch("/{id:guid}", async (Guid id, RoleRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new NMS.Application.Settings.SaveRoleCommand(id, body.DisplayName, body.Description, body.Permissions), ct)))
+            .RequireAuthorization(Permissions.UserManagementManage);
+        roles.MapDelete("/{id:guid}", async (Guid id, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new NMS.Application.Settings.DeleteRoleCommand(id), ct))).RequireAuthorization(Permissions.UserManagementManage);
+    }
+}

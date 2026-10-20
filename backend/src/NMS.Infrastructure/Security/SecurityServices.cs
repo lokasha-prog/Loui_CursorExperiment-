@@ -104,7 +104,7 @@ public sealed class PasswordService : IPasswordService
 
 public sealed class TokenService(IOptions<JwtOptions> jwt, IOptions<AuthOptions> auth, IClock clock) : ITokenService
 {
-    public AccessToken CreateAccessToken(AppUser user, IReadOnlyCollection<string> roles)
+    public AccessToken CreateAccessToken(AppUser user, IReadOnlyCollection<string> roles, IReadOnlyCollection<string>? extraPermissions = null)
     {
         var options = jwt.Value;
         var now = clock.UtcNow;
@@ -119,6 +119,7 @@ public sealed class TokenService(IOptions<JwtOptions> jwt, IOptions<AuthOptions>
             new("preferred_language", user.PreferredLanguage),
         };
         claims.AddRange(roles.Select(r => new Claim("role", r)));
+        claims.AddRange((extraPermissions ?? []).Select(p => new Claim("perm", p)));
 
         var token = new JwtSecurityToken(
             options.Issuer,

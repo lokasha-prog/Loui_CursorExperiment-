@@ -51,7 +51,7 @@ public interface IPasswordService
 
 public interface ITokenService
 {
-    AccessToken CreateAccessToken(AppUser user, IReadOnlyCollection<string> roles);
+    AccessToken CreateAccessToken(AppUser user, IReadOnlyCollection<string> roles, IReadOnlyCollection<string>? extraPermissions = null);
 }
 
 public sealed record TenantSummaryDto(Guid Id, string Slug, Dictionary<string, string> Name);
@@ -149,16 +149,20 @@ internal sealed class SessionFactory(
     {
         var tenant = await db.Tenants.AsNoTracking().FirstAsync(t => t.Id == user.TenantId, ct);
         var roles = user.Roles.Select(r => r.Role!.Name).OrderBy(n => n).ToList();
-        var permissions = RolePermissions.ForRoles(roles).OrderBy(p => p).ToList();
+        var permissions = RolePermissions.ForRoles(roles).Union(CustomPermissions(user)).OrderBy(p => p).ToList();
         return new MeDto(
             user.Id, user.Email, user.FirstName, user.LastName, user.PreferredLanguage, roles, permissions,
             new TenantSummaryDto(tenant.Id, tenant.Slug, tenant.Name));
     }
 
+    /// <summary>What custom roles (made in Settings) give this person. Built-in roles are covered by the permission matrix in code.</summary>
+    internal static List<string> CustomPermissions(AppUser user) =>
+        user.Roles.Where(r => r.Role is { IsSystemRole: false }).SelectMany(r => r.Role!.Permissions).Distinct().ToList();
+
     public async Task<AuthSession> IssueAsync(AppUser user, Guid familyId, string? ip, CancellationToken ct)
     {
         var roles = user.Roles.Select(r => r.Role!.Name).ToList();
-        var access = tokens.CreateAccessToken(user, roles);
+        var access = tokens.CreateAccessToken(user, roles, CustomPermissions(user));
         var raw = RefreshTokens.Generate(user.TenantId);
         var now = clock.UtcNow;
         var expires = now.AddDays(options.Value.RefreshTokenDays);

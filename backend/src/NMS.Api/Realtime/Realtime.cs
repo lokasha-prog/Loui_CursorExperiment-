@@ -46,7 +46,7 @@ public sealed class CentreHub : Hub
             return;
         }
 
-        var permissions = RolePermissions.ForRoles(user.FindAll("role").Select(c => c.Value));
+        var permissions = RolePermissions.ForRoles(user.FindAll("role").Select(c => c.Value)).Union(user.FindAll("perm").Select(c => c.Value)).ToHashSet();
         if (Guid.TryParse(user.FindFirst("sub")?.Value, out var userId))
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.User(tenantId, userId));

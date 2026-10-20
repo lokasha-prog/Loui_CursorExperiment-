@@ -113,3 +113,20 @@ public sealed class OutboundEmailConfiguration : IEntityTypeConfiguration<Outbou
         builder.HasIndex(e => new { e.TenantId, e.Status, e.NextAttemptAt });
     }
 }
+
+public sealed class CentreSettingsConfiguration : IEntityTypeConfiguration<NMS.Domain.Identity.CentreSettings>
+{
+    public void Configure(EntityTypeBuilder<NMS.Domain.Identity.CentreSettings> builder)
+    {
+        builder.ToTable("CentreSettings");
+        builder.Property(s => s.Address).HasMaxLength(300);
+        builder.Property(s => s.Website).HasMaxLength(200);
+        builder.Property(s => s.BrandColor).HasMaxLength(7);
+        builder.HasIndex(s => s.TenantId).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_CentreSettings_Late", "[LateGraceMinutes] IS NULL OR [LateGraceMinutes] BETWEEN 0 AND 120");
+            t.HasCheckConstraint("CK_CentreSettings_Early", "[EarlyLeaveGraceMinutes] IS NULL OR [EarlyLeaveGraceMinutes] BETWEEN 0 AND 120");
+        });
+    }
+}

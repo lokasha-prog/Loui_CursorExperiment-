@@ -129,6 +129,7 @@ public interface IAppDbContext
 
     DbSet<InvoicePayment> InvoicePayments { get; }
     DbSet<Expense> Expenses { get; }
+    DbSet<CentreSettings> CentreSettings { get; }
     DbSet<Enquiry> Enquiries { get; }
     DbSet<EnquiryStageLog> EnquiryStageLogs { get; }
     DbSet<EnquiryActivity> EnquiryActivities { get; }

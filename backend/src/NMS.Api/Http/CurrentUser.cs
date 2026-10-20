@@ -21,7 +21,7 @@ public sealed class CurrentUser(IHttpContextAccessor accessor) : ICurrentUser
     public IReadOnlyCollection<string> Roles =>
         Principal?.FindAll("role").Select(c => c.Value).ToList() ?? [];
 
-    public IReadOnlySet<string> Permissions => _permissions ??= RolePermissions.ForRoles(Roles);
+    public IReadOnlySet<string> Permissions => _permissions ??= RolePermissions.ForRoles(Roles).Union(Principal?.FindAll("perm").Select(c => c.Value) ?? []).ToHashSet();
 
     public string? IpAddress => accessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
 

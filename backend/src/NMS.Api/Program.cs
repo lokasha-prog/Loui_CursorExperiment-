@@ -95,7 +95,8 @@ builder.Services.AddAuthorization(options =>
         options.AddPolicy(permission, policy => policy
             .RequireAuthenticatedUser()
             .RequireAssertion(context =>
-                RolePermissions.ForRoles(context.User.FindAll("role").Select(c => c.Value)).Contains(permission)));
+                RolePermissions.ForRoles(context.User.FindAll("role").Select(c => c.Value)).Contains(permission)
+                || context.User.HasClaim("perm", permission)));
     }
 
     options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
@@ -187,6 +188,7 @@ app.MapCommunicationEndpoints();
 app.MapNotificationEndpoints();
 app.MapBillingEndpoints();
 app.MapEnquiryEndpoints();
+app.MapSettingsEndpoints();
 app.MapTourEndpoints();
 app.MapPublicEnquiryEndpoints();
 app.MapFeedbackEndpoints();
