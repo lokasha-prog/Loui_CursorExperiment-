@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { can, useAuth } from '@/stores/auth'
 
-const REFRESH_KEYS = ['attendance', 'live-ratios', 'dashboard-summary', 'leaves']
+const REFRESH_KEYS = ['attendance', 'live-ratios', 'dashboard-summary', 'leaves', 'activities', 'threads', 'thread', 'daily-reports']
 
 /**
  * Keeps screens fresh without reloading: the server pushes a short message whenever someone is checked in or out or a
@@ -13,7 +13,7 @@ const REFRESH_KEYS = ['attendance', 'live-ratios', 'dashboard-summary', 'leaves'
 export function useLiveUpdates() {
   const queryClient = useQueryClient()
   const me = useAuth((s) => s.me)
-  const allowed = can(me, 'attendance.write')
+  const allowed = can(me, 'attendance.write') || can(me, 'activities.read')
   const userId = me?.id
 
   useEffect(() => {
@@ -30,6 +30,8 @@ export function useLiveUpdates() {
     connection.on('attendance_changed', refresh)
     connection.on('ratio_breach', refresh)
     connection.on('ratio_restored', refresh)
+    connection.on('activity_published', refresh)
+    connection.on('message_received', refresh)
     connection.onreconnected(refresh)
 
     connection.start().catch(() => undefined)

@@ -48,7 +48,9 @@
     "closeMenu": "Close menu",
     "attendance": "Attendance",
     "leave": "Leave",
-    "reports": "Reports"
+    "reports": "Reports",
+    "feed": "Daily feed",
+    "messages": "Messages"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -622,5 +624,82 @@
     "gap": "Staff",
     "gapValue": "{{staff}} here, {{required}} needed",
     "ongoing": "Still short"
+  },
+  "feed": {
+    "title": "Daily feed",
+    "subtitle": "Photos and updates from the day, shared with families.",
+    "parentSubtitle": "What your child has been up to.",
+    "new": "New post",
+    "empty": "Nothing here yet",
+    "emptyBody": "Posts will appear as soon as they are shared.",
+    "waiting": "Waiting for approval",
+    "all": "Everything",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approved": "Post approved",
+    "rejected": "Post rejected",
+    "created": "Post shared",
+    "createdPending": "Post sent for approval",
+    "rejectReason": "Why? (optional)",
+    "by": "By {{name}}",
+    "reportsTitle": "Daily reports",
+    "reportsEmpty": "No daily reports yet",
+    "type": {
+      "announcement": "Announcement",
+      "photo": "Photo",
+      "video": "Video",
+      "diary": "Diary",
+      "food": "Meal",
+      "toilet": "Toilet",
+      "medical": "Medical note",
+      "mood": "Mood"
+    },
+    "status": {
+      "pending": "Waiting",
+      "approved": "Shared",
+      "rejected": "Not shared"
+    },
+    "form": {
+      "title": "New post",
+      "description": "Choose the kind of post, who it is about and add text or photos.",
+      "type": "Kind of post",
+      "children": "Children",
+      "childrenHint": "Leave empty for the whole room or centre.",
+      "text": "Text (English)",
+      "textAr": "Text (Arabic)",
+      "files": "Photos or video",
+      "filesHint": "JPEG, PNG, GIF, WebP or MP4. Photos up to 10 MB, video up to 30 MB.",
+      "submit": "Share",
+      "needApproval": "Announcements and medical notes are checked by a manager before families see them."
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Talk with families and colleagues.",
+    "parentSubtitle": "Write to your child's centre.",
+    "new": "New message",
+    "empty": "No conversations yet",
+    "pick": "Choose a conversation",
+    "unread": "New",
+    "broadcast": "Announcement to everyone",
+    "broadcastRoom": "Only this room",
+    "broadcastNoReply": "This is an announcement. Replies are switched off.",
+    "reply": "Write a reply",
+    "send": "Send",
+    "sent": "Message sent",
+    "from": "{{name}}",
+    "staff": "Staff",
+    "form": {
+      "title": "New message",
+      "subject": "Subject",
+      "body": "Message",
+      "child": "About which child",
+      "send": "Send message",
+      "broadcast": "Send to all families",
+      "room": "Room"
+    },
+    "errors": {
+      "noFamily": "This child's family has no account yet, so they cannot be messaged."
+    }
   }
 }

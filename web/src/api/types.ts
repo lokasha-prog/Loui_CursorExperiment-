@@ -293,3 +293,68 @@ export interface RatioBreach {
   staff_required: number
   created_at: string
 }
+
+export type ActivityType = 'announcement' | 'photo' | 'video' | 'diary' | 'food' | 'toilet' | 'medical' | 'mood'
+
+export interface ActivityPost {
+  id: string
+  type: ActivityType
+  caption: Localized | null
+  posted_by_user_id: string
+  posted_by_name: string | null
+  room_id: string | null
+  student_ids: string[]
+  media: { id: string; content_type: string }[]
+  status: 'pending' | 'approved' | 'rejected'
+  rejection_reason: string | null
+  created_at: string
+}
+
+export interface MediaItem {
+  id: string
+  file_name: string
+  content_type: string
+  size_bytes: number
+}
+
+export interface DailyReport {
+  id: string
+  student_id: string
+  student_name: string
+  date: string
+  activity_count: number
+  check_in_at: string | null
+  check_out_at: string | null
+  summary: Localized
+  created_at: string
+}
+
+export interface MessageThread {
+  id: string
+  subject: string
+  student_id: string | null
+  is_broadcast: boolean
+  last_message_preview: string | null
+  last_sender_name: string | null
+  last_message_at: string
+  unread: boolean
+  created_at: string
+}
+
+export interface ThreadMessage {
+  id: string
+  sender_user_id: string
+  sender_name: string | null
+  from_staff: boolean
+  body: string
+  created_at: string
+}
+
+export interface ThreadDetail {
+  id: string
+  subject: string
+  student_id: string | null
+  is_broadcast: boolean
+  can_reply: boolean
+  messages: ThreadMessage[]
+}

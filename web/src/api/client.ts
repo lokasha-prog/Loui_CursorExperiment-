@@ -116,7 +116,40 @@ async function send<T>(method: string, path: string, options: { body?: unknown; 
   return envelope
 }
 
+/** Uploads one file (multipart). Files are checked again by the server, which decides what they really are. */
+async function upload<T>(path: string, file: File): Promise<T> {
+  const form = new FormData()
+  form.append('file', file)
+  const token = useAuth.getState().accessToken
+  const response = await fetch(`${BASE}${path}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form,
+    credentials: 'same-origin',
+  }).catch(() => {
+    throw new ApiError(0, 'NETWORK', 'Network error')
+  })
+  const body = await parse<T>(response)
+  if (!response.ok || !body?.success) {
+    const first = body?.errors?.[0]
+    throw new ApiError(response.status, first?.code ?? 'UNKNOWN', first?.message ?? response.statusText, body?.errors ?? [])
+  }
+  return body.data as T
+}
+
+/** Downloads a protected file (photos and videos need the signed-in token, so they cannot be plain links). */
+async function blob(path: string): Promise<Blob> {
+  const token = useAuth.getState().accessToken
+  const response = await fetch(`${BASE}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {}, credentials: 'same-origin' }).catch(() => {
+    throw new ApiError(0, 'NETWORK', 'Network error')
+  })
+  if (!response.ok) throw new ApiError(response.status, 'RESOURCE_NOT_FOUND', response.statusText)
+  return response.blob()
+}
+
 export const api = {
+  upload,
+  blob,
   async get<T>(path: string, query?: Query): Promise<T> {
     return (await send<T>('GET', path, { query }))!.data as T
   },

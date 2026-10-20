@@ -1,6 +1,12 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  ActivityPost,
+  DailyReport,
+  MediaItem,
+  MessageThread,
+  ThreadDetail,
+  ThreadMessage,
   Forecast,
   MonthlyReport,
   RatioBreach,
@@ -261,3 +267,48 @@ export const useForecast = (date?: string) =>
   useQuery({ queryKey: ['forecast', date], queryFn: () => api.get<Forecast>('/attendance/forecast', { date }) })
 
 export const useRatioHistory = () => useInfiniteList<RatioBreach>(['ratio-history'], '/attendance/ratio/history', {})
+
+// ── Activity feed ───────────────────────────────────────────────────────────
+
+export const useActivities = (filters: { status?: string }) =>
+  useInfiniteList<ActivityPost>(['activities'], '/activities', { ...filters })
+
+export const useUploadMedia = () => useMutation({ mutationFn: (file: File) => api.upload<MediaItem>('/media', file) })
+
+export const useCreateActivity = () =>
+  useCreate<
+    { type: string; caption: Record<string, string> | null; student_ids: string[]; room_id?: string | null; media_ids: string[] },
+    ActivityPost
+  >('/activities', ['activities'])
+
+export function useDecideActivity() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, action, reason }: { id: string; action: 'approve' | 'reject'; reason?: string }) =>
+      api.post<ActivityPost>(`/activities/${id}/actions/${action}`, action === 'reject' ? { reason } : undefined),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['activities'] }),
+  })
+}
+
+export const useDailyReports = (enabled = true) => useInfiniteList<DailyReport>(['daily-reports'], '/daily-reports', {}, enabled)
+
+// ── Messages ────────────────────────────────────────────────────────────────
+
+export const useThreads = () => useInfiniteList<MessageThread>(['threads'], '/messages/threads', {})
+
+export const useThread = (id: string | null) =>
+  useQuery({ queryKey: ['thread', id], enabled: !!id, queryFn: () => api.get<ThreadDetail>(`/messages/threads/${id}`) })
+
+export const useCreateThread = () =>
+  useCreate<{ subject: string; body: string; student_id?: string | null; broadcast?: boolean; room_id?: string | null }, ThreadDetail>(
+    '/messages/threads',
+    ['threads'],
+  )
+
+export function useReply(threadId: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: string) => api.post<ThreadMessage>(`/messages/threads/${threadId}/messages`, { body }),
+    onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['thread', threadId] }), client.invalidateQueries({ queryKey: ['threads'] })]),
+  })
+}
