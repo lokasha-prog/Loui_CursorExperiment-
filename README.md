@@ -17,3 +17,9 @@ Data lives only in the local Microsoft SQL Server. No seeded data, no hard-coded
 ## Tests
 - Backend: `dotnet test backend/NMS.sln` (integration tests need `NMS_TEST_CONNECTION_STRING`, a SQL Server connection string without a database name; each run creates and deletes its own database).
 - Web: `cd web && pnpm test` (`pnpm test:coverage`, `pnpm lint`, `pnpm typecheck`).
+
+
+## Pilot install and demo data
+- Install on a nursery computer: see `docs/runbooks/PILOT-RUNBOOK.md` (build with `tools/package-pilot.ps1`).
+- UAT: `docs/runbooks/UAT-CHECKLIST.md`; survey: `PILOT-SURVEY.md`.
+- Development only: `tools/load-demo-data.ps1` fills a local system through the API; drop the NMS database to remove it.
