@@ -53,7 +53,8 @@
     "messages": "Messages",
     "audit": "Audit log",
     "feedback": "Feedback",
-    "billing": "Billing"
+    "billing": "Billing",
+    "enquiries": "Enquiries"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -1056,6 +1057,143 @@
         "before_due": "{{days}} days before due",
         "overdue": "{{days}} days overdue"
       }
+    }
+  },
+  "enquiries": {
+    "title": "Enquiries",
+    "subtitle": "Families asking about a place, tours and follow-ups.",
+    "tabs": {
+      "pipeline": "Pipeline",
+      "tours": "Tours",
+      "tasks": "Follow-ups"
+    },
+    "add": "Add enquiry",
+    "saved": "Enquiry saved",
+    "stage": "Stage",
+    "date": "Enquiry date",
+    "pipeline": "Pipeline and next step",
+    "searchPlaceholder": "Search by family, child, phone or e-mail",
+    "allSources": "All sources",
+    "showArchived": "Show archived",
+    "empty": "No enquiries yet",
+    "emptyBody": "Add one when a family calls or visits. Enquiries from your website form arrive here too.",
+    "bySource": "Where families come from",
+    "enrolledCount": "{{count}} enrolled",
+    "archive": "Archive",
+    "unarchive": "Restore",
+    "convert": "Enrol as student",
+    "convertRoom": "Room (optional)",
+    "converted": "Child enrolled and parent added",
+    "log": "Contact log",
+    "logEmpty": "No contact recorded yet.",
+    "kind": "Type",
+    "summary": "What was said",
+    "addLog": "Add to log",
+    "form": {
+      "family": "Family name",
+      "child": "Child name",
+      "phone": "Phone",
+      "email": "E-mail",
+      "preferred": "Preferred contact",
+      "source": "Source",
+      "dob": "Child date of birth",
+      "start": "Wanted start date",
+      "program": "Programme",
+      "staff": "Assigned to",
+      "notes": "Notes",
+      "save": "Save enquiry",
+      "needContact": "Give a phone number or an e-mail so the family can be reached."
+    },
+    "stages": {
+      "no_stage": "New",
+      "interested": "Interested",
+      "contacted": "Contacted",
+      "tour_appointment": "Tour booked",
+      "toured": "Toured",
+      "enrolled": "Enrolled"
+    },
+    "sources": {
+      "walk_in": "Walk-in",
+      "website": "Website",
+      "referral": "Referral",
+      "social_media": "Social media",
+      "phone": "Phone",
+      "email": "E-mail",
+      "existing_parent": "Existing parent"
+    },
+    "contact": {
+      "phone": "Phone call",
+      "whatsapp": "WhatsApp",
+      "email": "E-mail"
+    },
+    "kinds": {
+      "call": "Call",
+      "whatsapp": "WhatsApp",
+      "email": "E-mail",
+      "visit": "Visit",
+      "note": "Note"
+    },
+    "tour": {
+      "add": "Book a tour",
+      "edit": "Change tour",
+      "when": "Date and time",
+      "duration": "Minutes",
+      "staff": "Shown around by",
+      "type": "Tour type",
+      "adults": "Adults",
+      "children": "Children",
+      "notes": "Special requests",
+      "save": "Save tour",
+      "saved": "Tour saved; the family has been e-mailed",
+      "types": {
+        "general": "General",
+        "program_focus": "Programme focus",
+        "birthday_party": "Birthday party"
+      }
+    },
+    "tours": {
+      "weekOf": "Week starting",
+      "staffFilter": "Staff",
+      "everyone": "Everyone",
+      "block": "Block off time",
+      "blockStaff": "Who",
+      "wholeCentre": "Whole centre",
+      "blockFrom": "From",
+      "blockTo": "Until",
+      "blockReason": "Reason",
+      "blockSave": "Block this time",
+      "blockSaved": "Time blocked",
+      "empty": "No tours this week",
+      "emptyBody": "Book a tour from an enquiry and it will show up here.",
+      "noStaff": "No one assigned",
+      "blocked": "Blocked",
+      "markDone": "Done",
+      "markNoShow": "No-show",
+      "markCancelled": "Cancel",
+      "status": {
+        "scheduled": "Scheduled",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "no_show": "No-show"
+      }
+    },
+    "tasks": {
+      "open": "To do",
+      "done": "Done",
+      "empty": "Nothing to follow up",
+      "emptyBody": "After a tour is marked done, a follow-up job appears here.",
+      "due": "Due {{date}}",
+      "markDone": "Mark done"
+    },
+    "public": {
+      "unavailable": "This form is not available",
+      "unavailableBody": "Please check the link or contact the nursery directly.",
+      "thanks": "Thank you!",
+      "thanksBody": "We have received your enquiry and will be in touch soon.",
+      "intro": "Tell us a little about your child and we will get back to you.",
+      "family": "Your name",
+      "message": "Anything you would like us to know",
+      "send": "Send enquiry"
     }
   }
 }

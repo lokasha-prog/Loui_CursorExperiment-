@@ -26,6 +26,8 @@ const AuditPage = lazy(() => import('@/modules/audit/AuditPage'))
 const FeedbackPage = lazy(() => import('@/modules/feedback/FeedbackPage'))
 const BillingPage = lazy(() => import('@/modules/billing/BillingPage'))
 const LeavesPage = lazy(() => import('@/modules/attendance/LeavesPage'))
+const EnquiriesPage = lazy(() => import('@/modules/enquiries/EnquiriesPage'))
+const EnquiryFormPage = lazy(() => import('@/modules/public/EnquiryFormPage'))
 
 export function createQueryClient() {
   return new QueryClient({
@@ -83,6 +85,7 @@ export function AppRoutes() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/setup" element={<SetupPage />} />
+        <Route path="/enquire/:centre" element={<EnquiryFormPage />} />
         <Route element={<RequireAuth />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -97,6 +100,7 @@ export function AppRoutes() {
           <Route path="/audit" element={<RequirePermission permission="audit_log.view"><AuditPage /></RequirePermission>} />
           <Route path="/feedback" element={<RequirePermission permission="settings.read"><FeedbackPage /></RequirePermission>} />
           <Route path="/billing" element={<RequirePermission permission="billing.read"><BillingPage /></RequirePermission>} />
+          <Route path="/enquiries" element={<RequirePermission permission="enquiries.read"><EnquiriesPage /></RequirePermission>} />
           <Route path="/leave" element={<RequirePermission permission="attendance.read"><LeavesPage /></RequirePermission>} />
           <Route path="/rooms" element={<RequirePermission permission="centre_structure.read"><RoomsPage /></RequirePermission>} />
           <Route path="/users" element={<RequirePermission permission="user_management.manage"><UsersPage /></RequirePermission>} />

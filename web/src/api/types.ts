@@ -547,3 +547,81 @@ export interface ReminderLogItem {
   status: string
   created_at: string
 }
+
+export interface Enquiry {
+  id: string
+  family_name: string
+  child_name: string
+  phone: string | null
+  email: string | null
+  preferred_contact: string
+  child_date_of_birth: string | null
+  desired_start_date: string | null
+  program_id: string | null
+  source: string
+  assigned_staff_id: string | null
+  assigned_staff_name: string | null
+  stage: string
+  enquiry_date: string
+  last_contact_date: string | null
+  notes: string | null
+  is_archived: boolean
+  student_id: string | null
+  created_at: string
+}
+
+export interface EnquiryDetail {
+  enquiry: Enquiry
+  history: { from_stage: string | null; to_stage: string; reason: string | null; at: string }[]
+  activities: { id: string; kind: string; summary: string; at: string }[]
+}
+
+export interface EnquirySummary {
+  total: number
+  by_stage: { stage: string; count: number }[]
+  by_source: { source: string; total: number; enrolled: number }[]
+  new_this_month: number
+  enrolled: number
+}
+
+export interface Tour {
+  id: string
+  enquiry_id: string
+  family_name: string
+  child_name: string
+  staff_id: string | null
+  staff_name: string | null
+  starts_at: string
+  duration_minutes: number
+  tour_type: string
+  adults: number
+  children: number
+  notes: string | null
+  status: string
+}
+
+export interface BlockOff {
+  id: string
+  staff_id: string | null
+  staff_name: string | null
+  starts_at: string
+  ends_at: string
+  reason: string | null
+}
+
+export interface FollowUpTask {
+  id: string
+  title: string
+  due_date: string
+  assigned_staff_id: string | null
+  assigned_staff_name: string | null
+  enquiry_id: string | null
+  family_name: string | null
+  is_done: boolean
+  created_at: string
+}
+
+export interface PublicForm {
+  name: Record<string, string>
+  captcha_site_key: string | null
+}

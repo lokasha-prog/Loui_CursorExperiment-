@@ -1,6 +1,12 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  BlockOff,
+  Enquiry,
+  EnquiryDetail,
+  EnquirySummary,
+  FollowUpTask,
+  Tour,
   BillingSettings,
   Expense,
   ExpenseReport,
@@ -529,3 +535,92 @@ export function useRunReminders() {
     onSuccess: () => client.invalidateQueries({ queryKey: ['reminders'] }),
   })
 }
+
+// ── Enquiries, tours and tasks ──────────────────────────────────────────────
+
+export interface EnquiryFilters {
+  stage?: string
+  source?: string
+  staff_id?: string
+  from?: string
+  to?: string
+  archived?: boolean
+  search?: string
+}
+
+export const useEnquiries = (filters: EnquiryFilters) =>
+  useInfiniteList<Enquiry>(['enquiries'], '/enquiries', { ...filters, archived: filters.archived ? 'true' : undefined })
+
+export const useEnquirySummary = () => useQuery({ queryKey: ['enquiry-summary'], queryFn: () => api.get<EnquirySummary>('/enquiries/summary') })
+
+export const useEnquiry = (id: string | null) =>
+  useQuery({ queryKey: ['enquiry', id], enabled: !!id, queryFn: () => api.get<EnquiryDetail>(`/enquiries/${id}`) })
+
+export interface EnquiryInput {
+  family_name: string
+  child_name: string
+  phone: string | null
+  email: string | null
+  preferred_contact: string
+  child_date_of_birth: string | null
+  desired_start_date: string | null
+  program_id: string | null
+  source: string
+  assigned_staff_id: string | null
+  notes: string | null
+}
+
+function useEnquiryMutation<TBody>(run: (body: TBody) => Promise<unknown>) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: run,
+    onSuccess: () => Promise.all(['enquiries', 'enquiry', 'enquiry-summary', 'tours', 'tasks', 'students'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const useSaveEnquiry = (id?: string) =>
+  useEnquiryMutation((body: EnquiryInput) => (id ? api.patch<EnquiryDetail>(`/enquiries/${id}`, body) : api.post<EnquiryDetail>('/enquiries', body)))
+
+export const useChangeStage = (id: string) =>
+  useEnquiryMutation((body: { stage: string; reason?: string | null }) => api.post<EnquiryDetail>(`/enquiries/${id}/actions/change-stage`, body))
+
+export const useAddActivity = (id: string) =>
+  useEnquiryMutation((body: { kind: string; summary: string }) => api.post<EnquiryDetail>(`/enquiries/${id}/activities`, body))
+
+export const useArchiveEnquiry = (id: string) =>
+  useEnquiryMutation((archive: boolean) => api.post<EnquiryDetail>(`/enquiries/${id}/actions/${archive ? 'archive' : 'unarchive'}`))
+
+export const useConvertEnquiry = (id: string) =>
+  useEnquiryMutation((body: { room_id: string | null; start_date: string | null }) => api.post<EnquiryDetail>(`/enquiries/${id}/actions/convert`, body))
+
+export const useTours = (from: string, to: string, staffId?: string) =>
+  useQuery({ queryKey: ['tours', from, to, staffId ?? ''], queryFn: () => api.get<Tour[]>('/tours', { from, to, staff_id: staffId }) })
+
+export interface TourInput {
+  enquiry_id: string
+  starts_at: string
+  duration_minutes: number
+  staff_id: string | null
+  tour_type: string
+  adults: number
+  children: number
+  notes: string | null
+}
+
+export const useSaveTour = (id?: string) =>
+  useEnquiryMutation((body: TourInput) => (id ? api.patch<Tour>(`/tours/${id}`, body) : api.post<Tour>('/tours', body)))
+
+export const useSetTourStatus = () =>
+  useEnquiryMutation(({ id, status }: { id: string; status: string }) => api.post<Tour>(`/tours/${id}/actions/set-status`, { status }))
+
+export const useBlockOffs = (from: string, to: string) =>
+  useQuery({ queryKey: ['tours', 'block-offs', from, to], queryFn: () => api.get<BlockOff[]>('/tours/block-offs', { from, to }) })
+
+export const useAddBlockOff = () =>
+  useEnquiryMutation((body: { staff_id: string | null; starts_at: string; ends_at: string; reason: string | null }) => api.post<BlockOff>('/tours/block-offs', body))
+
+export const useDeleteBlockOff = () => useEnquiryMutation((id: string) => api.delete(`/tours/block-offs/${id}`))
+
+export const useTasks = (done: boolean) => useInfiniteList<FollowUpTask>(['tasks'], '/follow-up-tasks', { done: done ? 'true' : undefined })
+
+export const useCompleteTask = () => useEnquiryMutation((id: string) => api.post<FollowUpTask>(`/follow-up-tasks/${id}/actions/complete`))
