@@ -90,6 +90,11 @@ public static class BillingEndpoints
             return result.IsFailure ? ApiResults.Failure(http, result.Errors) : ApiResults.Ok(http, new { sent = result.Value });
         }).RequireAuthorization(Permissions.InvoicesGenerate);
 
+        routes.MapGet("/api/v1/reports/billing/revenue", async (string? month, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new RevenueReportQuery(month), ct))).WithTags("Reports").RequireAuthorization(Permissions.BillingWrite);
+        routes.MapGet("/api/v1/reports/billing/overdue", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new OverdueReportQuery(), ct))).WithTags("Reports").RequireAuthorization(Permissions.BillingWrite);
+
         routes.MapGet("/api/v1/dashboard/billing-snapshot", async (string? month, HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(new BillingSnapshotQuery(month), ct))).WithTags("Dashboard").RequireAuthorization(Permissions.BillingWrite);
     }
