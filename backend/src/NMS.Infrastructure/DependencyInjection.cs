@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NMS.Application.Abstractions;
+using NMS.Application.Ai;
 using NMS.Application.Attendance;
 using NMS.Application.Auth;
 using NMS.Infrastructure.Persistence;
@@ -39,6 +40,14 @@ public static class DependencyInjection
                 "The Attendance section needs a valid TimeZoneId and non-negative grace minutes.")
             .ValidateOnStart();
         services.AddSingleton<CentreCalendar>();
+
+        services.AddOptions<AiOptions>().Bind(configuration.GetSection(AiOptions.SectionName));
+        services.AddHttpClient<IAiBrain, GroqAiBrain>((provider, client) =>
+        {
+            var ai = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<AiOptions>>().Value;
+            client.BaseAddress = new Uri(ai.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(ai.TimeoutSeconds);
+        });
 
         var connectionString = configuration.GetConnectionString(ConnectionStringName)
             ?? throw new InvalidOperationException($"Connection string '{ConnectionStringName}' is not configured.");

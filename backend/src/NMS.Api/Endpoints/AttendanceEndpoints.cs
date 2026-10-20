@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using NMS.Api.Http;
+using NMS.Application.Ai;
 using NMS.Application.Attendance;
 using NMS.Application.Security;
 
@@ -41,6 +42,11 @@ public static class AttendanceEndpoints
             ApiResults.From(http, await s.Send(new DashboardSummaryQuery(), ct)))
             .WithTags("Dashboard")
             .RequireAuthorization(Permissions.DashboardView);
+
+        routes.MapGet("/api/v1/ai/attendance-summary", async (int? days, string? language, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new AttendanceInsightsQuery(days ?? 14, language ?? "en"), ct)))
+            .WithTags("AI Brain")
+            .RequireAuthorization(Permissions.AttendanceOverride);
 
         var types = routes.MapGroup("/api/v1/leave-types").WithTags("Leaves");
         types.MapGet("/", async (string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>

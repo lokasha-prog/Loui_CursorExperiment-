@@ -587,5 +587,18 @@
       "add": "Add kind of leave",
       "created": "Kind of leave added"
     }
+  },
+  "ai": {
+    "title": "AI insights",
+    "subtitle": "A plain-language summary of recent attendance, written by the AI Brain.",
+    "last": "Last {{days}} days.",
+    "run": "Summarise attendance",
+    "again": "Refresh summary",
+    "working": "The AI Brain is reading the figures...",
+    "privacy": "Only daily totals are shared with the AI provider. No names, photos or health details ever leave your centre.",
+    "made": "Written by {{model}} on {{when}}",
+    "extra": "{{shortages}} staff shortages and {{leaves}} approved leave requests in this period.",
+    "down": "The AI Brain is not available right now. Please try again in a moment.",
+    "disclaimer": "AI summaries can be wrong. Check important decisions against the figures."
   }
 }

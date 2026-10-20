@@ -249,3 +249,13 @@ export interface CreateLeaveTypeRequest {
   affects_attendance: boolean
   affects_ratio: boolean
 }
+
+export interface AttendanceInsights {
+  summary: string
+  days: number
+  language: 'en' | 'ar'
+  model: string
+  generated_at: string
+  shortage_events: number
+  approved_leave_requests: number
+}

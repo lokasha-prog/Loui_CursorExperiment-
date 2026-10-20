@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  AttendanceInsights,
   AttendanceRow,
   CheckOutRequest,
   CreateLeaveRequest,
@@ -235,3 +236,12 @@ export function useLeaveAction() {
     onSuccess: () => Promise.all(['leaves', 'dashboard-summary'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
   })
 }
+
+// ── AI Brain ────────────────────────────────────────────────────────────────
+
+/** Asks the AI Brain for a plain-language summary of recent attendance. Only totals are ever sent to the provider. */
+export const useAttendanceInsights = () =>
+  useMutation({
+    mutationFn: ({ days, language }: { days: number; language: string }) =>
+      api.get<AttendanceInsights>('/ai/attendance-summary', { days, language }),
+  })

@@ -8,6 +8,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.EntityFrameworkCore;
 using NMS.Application.Abstractions;
 using NMS.Application.Auth;
@@ -31,6 +32,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
     private readonly string _database = $"NMS_Test_{Guid.NewGuid():N}";
 
     public const int GraceSeconds = 2;
+
+    public FakeAiBrain Ai { get; } = new();
 
     public string BootstrapToken { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(24));
 
@@ -61,6 +64,13 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseSetting("RateLimiting:LoginPerMinute", "100000");
         builder.UseSetting("RateLimiting:SessionPerMinute", "100000");
         builder.UseSetting("Auth:RefreshReuseGraceSeconds", GraceSeconds.ToString());
+        // Tests never call the real AI provider.
+        builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<NMS.Application.Ai.IAiBrain>();
+            services.AddSingleton(Ai);
+            services.AddSingleton<NMS.Application.Ai.IAiBrain>(Ai);
+        });
     }
 
     public async Task InitializeAsync()
@@ -305,4 +315,24 @@ public sealed class ApiClient(HttpClient http)
 public sealed class ApiCollection : ICollectionFixture<NmsApiFixture>
 {
     public const string Name = "api";
+}
+
+public sealed class FakeAiBrain : NMS.Application.Ai.IAiBrain
+{
+    public bool IsConfigured { get; set; } = true;
+
+    public string ModelName => "fake-model";
+
+    public string? LastSystem { get; private set; }
+
+    public string? LastUser { get; private set; }
+
+    public NMS.Shared.Results.Result<string> Answer { get; set; } = NMS.Shared.Results.Result<string>.Success("Attendance was steady.");
+
+    public Task<NMS.Shared.Results.Result<string>> CompleteAsync(string system, string user, CancellationToken cancellationToken)
+    {
+        LastSystem = system;
+        LastUser = user;
+        return Task.FromResult(Answer);
+    }
 }
