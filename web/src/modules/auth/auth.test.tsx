@@ -255,3 +255,27 @@ describe('slugify', () => {
     ['الشروق', 'centre'],
   ])('turns %s into %s', (name, slug) => expect(slugify(name)).toBe(slug))
 })
+
+describe('LoginPage test-user helper', () => {
+  it('offers test users per role when the local server provides them, and enters without a password', async () => {
+    routeFetch({
+      'setup-status': () => envelope({ setup_required: false, password_min_length: 12 }),
+      '/dev/test-users': () => envelope([{ role: 'teacher', email: 't@dev.local', exists: false }, { role: 'parent', email: 'p@dev.local', exists: true }]),
+      '/dev/quick-login': () => envelope({ access_token: 'dev-tok', expires_at: '', me: makeMe() }),
+    })
+    renderLogin()
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Teacher' }))
+
+    expect(await screen.findByText('DASHBOARD')).toBeInTheDocument()
+    expect(useAuth.getState().accessToken).toBe('dev-tok')
+  })
+
+  it('shows no helper at all when the server does not offer it', async () => {
+    routeFetch({ 'setup-status': () => envelope({ setup_required: false, password_min_length: 12 }) })
+    renderLogin()
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+    expect(screen.queryByText(/Test users/)).not.toBeInTheDocument()
+  })
+})

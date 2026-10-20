@@ -294,7 +294,7 @@
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Instant push updates and shortage banner (Redis sharing between servers is optional configuration)</span></label>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Scheduled jobs (background tasks), monthly report and forecast, history tables for speed</span></label>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Phone app skeleton with camera scanning, dashboard speed test</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Owner decisions open: AI Brain, and the test-accounts login panel (ADR-0006)</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Test-user helper on the login screen (local only, done). Owner decision open: AI Brain first features</span></label>
       </div>
 
       <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-200">
@@ -302,7 +302,7 @@
         <a href="spec-20-adrs.html" class="pill pill-info">📖 Original ADRs</a>
         <span class="pill pill-neutral">ADR-0004 SQL Server only</span>
         <span class="pill pill-neutral">ADR-0005 Built-in sign-in</span>
-        <span class="pill pill-amber">ADR-0006 proposed</span>
+        <span class="pill pill-amber">ADR-0006 accepted (A)</span>
         <a href="spec-19-roadmap-sprints.html" class="pill pill-info">📖 Roadmap</a>
       </div>
     </div>
@@ -707,7 +707,7 @@
       { severity: "warning",  title: "Arabic RTL quality in production", mitigation: "Mandatory RTL QA every sprint + Arabic tester on team from Sprint 1." },
       { severity: "warning",  title: "PDPL legal review not started", mitigation: "Legal counsel identified. Required before go-live (Sprint 17)." },
       { severity: "critical", title: "AI Brain scope and provider undecided", mitigation: "Owner decision needed: provider, where child data is processed (UAE data law), first features. Blocks AI design from Sprint 2." },
-      { severity: "critical", title: "Test-accounts login panel conflicts with security rules", mitigation: "Owner decision needed (ADR-0006): safer local-only option recommended; must be removed before pilot go-live." },
+      { severity: "warning", title: "Test-user helper must never ship", mitigation: "Local-only by design (ADR-0006 A); verify it is off in the pilot deployment checklist." },
       { severity: "warning",  title: "Free MinIO storage images discontinued", mitigation: "Local development uses a compatible store; confirm production file storage before Sprint 5." }
     ],
 

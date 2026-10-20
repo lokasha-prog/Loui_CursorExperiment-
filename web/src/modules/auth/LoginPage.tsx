@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Building2, Eye, EyeOff } from 'lucide-react'
+import { Building2, Eye, EyeOff, FlaskConical } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -30,6 +31,13 @@ export default function LoginPage() {
   const setup = useSetupStatus()
   const [showPassword, setShowPassword] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
+  const testUsers = useQuery({
+    queryKey: ['dev-test-users'],
+    queryFn: () => authApi.devTestUsers(),
+    enabled: import.meta.env.DEV,
+    retry: false,
+    staleTime: Infinity,
+  })
   const [choices, setChoices] = useState<CentreChoice[] | null>(null)
   const [submitted, setSubmitted] = useState<Values | null>(null)
   const {
@@ -66,6 +74,16 @@ export default function LoginPage() {
   }
 
   const onSubmit = handleSubmit((values) => attempt(values))
+
+  const enterAs = async (role: string) => {
+    setFailure(null)
+    try {
+      await authApi.devQuickLogin(role)
+      navigate(destination, { replace: true })
+    } catch {
+      setFailure(t('errors.NETWORK'))
+    }
+  }
 
   if (choices && submitted) {
     return (
@@ -135,6 +153,25 @@ export default function LoginPage() {
           {isSubmitting ? t('auth.login.submitting') : t('auth.login.submit')}
         </Button>
       </form>
+
+      {testUsers.data && testUsers.data.length > 0 && (
+        <section aria-labelledby="dev-users" className="mt-8 rounded-md border border-dashed border-amber-400 bg-amber-50/60 p-4">
+          <h3 id="dev-users" className="flex items-center gap-2 text-sm font-bold text-amber-900">
+            <FlaskConical className="h-4 w-4" aria-hidden="true" />
+            {t('auth.dev.title')}
+          </h3>
+          <p className="mb-3 mt-1 text-xs text-amber-900/80">{t('auth.dev.note')}</p>
+          <ul className="flex flex-wrap gap-2">
+            {testUsers.data.map((user) => (
+              <li key={user.role}>
+                <Button type="button" size="sm" variant="secondary" onClick={() => void enterAs(user.role)}>
+                  {t(`roles.${user.role}`)}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {setup.data?.setupRequired && (
         <p className="mt-6 text-center text-sm text-muted-foreground">

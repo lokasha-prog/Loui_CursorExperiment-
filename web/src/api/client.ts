@@ -164,6 +164,32 @@ export const authApi = {
     return body.data
   },
 
+  /** Development helper: the list of test users, or null when the server does not offer it (always so outside local development). */
+  async devTestUsers(): Promise<{ role: string; email: string; exists: boolean }[] | null> {
+    const response = await fetch(`${BASE}/dev/test-users`, { credentials: 'same-origin' }).catch(() => null)
+    if (!response?.ok) return null
+    return (await parse<{ role: string; email: string; exists: boolean }[]>(response))?.data ?? null
+  },
+
+  /** Development helper: signs in as the test user for a role without a password. Only works on the same computer as the server. */
+  async devQuickLogin(role: string): Promise<Session> {
+    const response = await fetch(`${BASE}/dev/quick-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role }),
+      credentials: 'same-origin',
+    }).catch(() => {
+      throw new ApiError(0, 'NETWORK', 'Network error')
+    })
+    const body = await parse<Session>(response)
+    if (!response.ok || !body?.data) {
+      const first = body?.errors?.[0]
+      throw new ApiError(response.status, first?.code ?? 'UNKNOWN', first?.message ?? response.statusText, body?.errors ?? [])
+    }
+    useAuth.getState().setSession(body.data.access_token, body.data.me)
+    return body.data
+  },
+
   async logout(): Promise<void> {
     await fetch(`${BASE}/auth/logout`, { method: 'POST', headers: CSRF_HEADER, credentials: 'same-origin' }).catch(() => undefined)
     useAuth.getState().clear()

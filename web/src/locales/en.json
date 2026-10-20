@@ -126,6 +126,10 @@
       "doneTitle": "Your centre is ready",
       "doneBody": "You can now sign in with the administrator account you just created.",
       "goToLogin": "Go to sign in"
+    },
+    "dev": {
+      "title": "Test users (this computer only)",
+      "note": "For development. Pick a role to enter as a test user. Use your own account for the Super administrator."
     }
   },
   "dashboard": {

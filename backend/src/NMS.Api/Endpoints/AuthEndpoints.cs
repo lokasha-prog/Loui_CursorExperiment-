@@ -102,7 +102,7 @@ public static class AuthEndpoints
     }
 
     /// <summary>The refresh token travels only in an HttpOnly cookie; the body carries just the short-lived access token.</summary>
-    private static IResult Respond(HttpContext http, AuthSession session)
+    internal static IResult Respond(HttpContext http, AuthSession session)
     {
         http.Response.Cookies.Append(RefreshCookie, session.RefreshToken, CookieOptions(http, session.RefreshTokenExpiresAt));
         return ApiResults.Ok(http, new SessionResponse(session.AccessToken, session.AccessTokenExpiresAt, session.Me));
