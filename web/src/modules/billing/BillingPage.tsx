@@ -12,9 +12,12 @@ import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { formatAed, formatDate } from '@/lib/format'
 import { cn, localized } from '@/lib/utils'
 import { can, isParentOnly, useAuth } from '@/stores/auth'
+import { ExpensesTab } from './ExpensesTab'
 import { FeePlanDialog } from './FeePlanDialog'
 import { InvoiceDialog, statusTone } from './InvoiceDialog'
 import { NewInvoiceDialog } from './NewInvoiceDialog'
+import { ReportsTab } from './ReportsTab'
+import { SettingsTab } from './SettingsTab'
 
 const STATUSES = ['', 'issued', 'partially_paid', 'overdue', 'paid', 'draft', 'cancelled']
 
@@ -43,6 +46,8 @@ function Overview() {
         <Kpi label={t('billing.kpi.collected')} value={money(s.collected_fils)} tone="success" />
         <Kpi label={t('billing.kpi.overdue')} value={money(s.overdue_fils)} tone={s.overdue_fils > 0 ? 'danger' : undefined} />
         <Kpi label={t('billing.kpi.outstanding')} value={money(s.outstanding_fils)} />
+        <Kpi label={t('billing.kpi.expenses')} value={money(s.expenses_fils)} />
+        <Kpi label={t('billing.kpi.net')} value={money(s.net_fils)} tone={s.net_fils < 0 ? 'danger' : 'success'} />
       </div>
       <Card className="p-4">
         <div className="mb-3 flex items-center justify-between">
@@ -206,7 +211,7 @@ export default function BillingPage() {
   const [invoice, setInvoice] = useState<string | null>(null)
   const [plan, setPlan] = useState<{ id: string | null } | null>(null)
 
-  const tabs = [...(canWrite ? ['overview'] : []), 'invoices', ...(canWrite ? ['plans'] : [])]
+  const tabs = [...(canWrite ? ['overview'] : []), 'invoices', ...(canWrite ? ['plans', 'expenses', 'reports', 'settings'] : [])]
 
   return (
     <>
@@ -228,6 +233,9 @@ export default function BillingPage() {
         {canWrite && <TabsPrimitive.Content value="overview"><Overview /></TabsPrimitive.Content>}
         <TabsPrimitive.Content value="invoices"><Invoices canWrite={canWrite} onOpen={setInvoice} /></TabsPrimitive.Content>
         {canWrite && <TabsPrimitive.Content value="plans"><Plans onOpen={(id) => setPlan({ id })} /></TabsPrimitive.Content>}
+        {canWrite && <TabsPrimitive.Content value="expenses"><ExpensesTab /></TabsPrimitive.Content>}
+        {canWrite && <TabsPrimitive.Content value="reports"><ReportsTab /></TabsPrimitive.Content>}
+        {canWrite && <TabsPrimitive.Content value="settings"><SettingsTab /></TabsPrimitive.Content>}
       </TabsPrimitive.Root>
       <InvoiceDialog id={invoice} onClose={() => setInvoice(null)} />
       {canWrite && <FeePlanDialog open={!!plan} planId={plan?.id ?? null} onClose={() => setPlan(null)} />}

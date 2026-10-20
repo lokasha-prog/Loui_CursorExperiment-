@@ -1,6 +1,12 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  BillingSettings,
+  Expense,
+  ExpenseReport,
+  OverdueReport,
+  ReminderLogItem,
+  RevenueReport,
   BillingSnapshot,
   ComponentInput,
   FeePlan,
@@ -467,3 +473,59 @@ export const useRecordPayment = () =>
     api.post<InvoiceDetail>(`/invoices/${id}/payments`, body))
 
 export const useGenerateInvoices = () => useBillingMutation(() => api.post<{ created: number }>('/invoices/actions/generate', {}))
+
+// ── Expenses, reports and billing settings ──────────────────────────────────
+
+export const useExpenses = (month: string) => useInfiniteList<Expense>(['expenses'], '/expenses', { month: month || undefined })
+
+export const useExpenseReport = (month: string) =>
+  useQuery({ queryKey: ['expense-report', month], queryFn: () => api.get<ExpenseReport>(`/expenses/report${month ? `?month=${month}` : ''}`) })
+
+export interface ExpenseInput {
+  expense_date: string
+  amount_fils: number
+  category: string
+  description: string
+  receipt_media_id: string | null
+}
+
+export function useSaveExpense(id?: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: ExpenseInput) => (id ? api.patch<Expense>(`/expenses/${id}`, body) : api.post<Expense>('/expenses', body)),
+    onSuccess: () => Promise.all(['expenses', 'expense-report', 'billing-snapshot', 'revenue-report'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export function useDeleteExpense() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/expenses/${id}`),
+    onSuccess: () => Promise.all(['expenses', 'expense-report', 'billing-snapshot', 'revenue-report'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const useRevenueReport = (month: string) =>
+  useQuery({ queryKey: ['revenue-report', month], queryFn: () => api.get<RevenueReport>(`/reports/billing/revenue${month ? `?month=${month}` : ''}`) })
+
+export const useOverdueReport = () => useQuery({ queryKey: ['overdue-report'], queryFn: () => api.get<OverdueReport>('/reports/billing/overdue') })
+
+export const useBillingSettings = () => useQuery({ queryKey: ['billing-settings'], queryFn: () => api.get<BillingSettings>('/billing/settings') })
+
+export function useSaveBillingSettings() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: BillingSettings) => api.put<BillingSettings>('/billing/settings', body),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['billing-settings'] }),
+  })
+}
+
+export const useReminderLog = () => useInfiniteList<ReminderLogItem>(['reminders'], '/billing/reminders', {})
+
+export function useRunReminders() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<{ sent: number }>('/billing/reminders/actions/run', {}),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['reminders'] }),
+  })
+}

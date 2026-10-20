@@ -20,6 +20,7 @@ const detail = (overrides = {}) => ({
 
 const snapshot = envelope({
   month: '2026-10', billed_fils: 840_000, collected_fils: 210_000, overdue_fils: 50_000, outstanding_fils: 580_000, new_invoices_today: 1, new_invoices_today_fils: 210_000,
+  expenses_fils: 120_000, net_fils: 90_000,
   recent_payments: [{ invoice_id: 'i1', invoice_number: 'INV-2026-00001', student_name: 'Layla Hassan', amount_fils: 210_000, payment_date: '2026-10-05', method: 'cash' }],
   top_overdue: [{ student_id: 's2', student_name: 'Omar Haddad', outstanding_fils: 50_000, invoices: 1 }],
   trend: Array.from({ length: 6 }, (_, i) => ({ month: `2026-0${i + 5}`, billed_fils: 100_000 * (i + 1), collected_fils: 50_000 * (i + 1) })),
@@ -120,6 +121,71 @@ describe('BillingPage', () => {
       name: { en: 'Full day monthly' }, period: 'monthly', status: 'active',
       components: [{ name: { en: 'Tuition' }, component_type: 'tuition', amount_fils: 200_000, tax_rate_percent: 5 }],
     })
+  })
+
+  it('records an expense and shows the month total split by category', async () => {
+    signIn(makeMe({ permissions: ['billing.read', 'billing.write'] }))
+    const calls = mockApi(fetchMock, {
+      'POST /expenses': envelope({ id: 'e1' }, { status: 201 }),
+      'GET /expenses/report': envelope({ month: '2026-10', total_fils: 150_000, by_category: [{ category: 'rent', total_fils: 150_000, count: 1 }], items: [] }),
+      'GET /expenses': envelope([], { pagination: onePage }),
+      'GET /dashboard/billing-snapshot': snapshot,
+      'GET /invoices': envelope([], { pagination: onePage }),
+    })
+    renderWithProviders(<BillingPage />)
+
+    await userEvent.click(await screen.findByRole('tab', { name: 'Expenses' }))
+    expect((await screen.findAllByText(/1,500\.00/)).length).toBeGreaterThan(0)
+    await userEvent.click(await screen.findByRole('button', { name: /Add expense/ }))
+    const dialog = await screen.findByRole('dialog')
+    await userEvent.type(within(dialog).getByLabelText(/Amount/), '1500')
+    await userEvent.type(within(dialog).getByLabelText(/What was it for/), 'October rent')
+    await userEvent.selectOptions(within(dialog).getByLabelText('Category'), 'rent')
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save expense' }))
+
+    await waitFor(() => expect(calls.some((c) => c.method === 'POST' && c.url.includes('/expenses'))).toBe(true))
+    expect(calls.find((c) => c.method === 'POST')!.body).toMatchObject({ amount_fils: 150_000, category: 'rent', description: 'October rent' })
+  })
+
+  it('lists who is overdue and by how many days in the reports tab', async () => {
+    signIn(makeMe({ permissions: ['billing.read', 'billing.write'] }))
+    mockApi(fetchMock, {
+      'GET /reports/billing/revenue': envelope({ month: '2026-10', billed_fils: 100_000, collected_fils: 60_000, expenses_fils: 20_000, net_fils: 40_000, by_method: [{ method: 'cash', total_fils: 60_000, count: 2 }], trend: [] }),
+      'GET /reports/billing/overdue': envelope({ total_fils: 50_000, rows: [{ invoice_id: 'i9', invoice_number: 'INV-2026-00009', student_id: 's2', student_name: 'Omar Haddad', contact: '+971501234567', due_date: '2026-09-20', days_late: 30, outstanding_fils: 50_000 }] }),
+      'GET /dashboard/billing-snapshot': snapshot,
+      'GET /invoices': envelope([], { pagination: onePage }),
+    })
+    renderWithProviders(<BillingPage />)
+
+    await userEvent.click(await screen.findByRole('tab', { name: 'Reports' }))
+    expect(await screen.findByText('Omar Haddad')).toBeInTheDocument()
+    expect(screen.getByText('30')).toBeInTheDocument()
+    expect(screen.getByText('Cash')).toBeInTheDocument()
+  })
+
+  it('saves the reminder schedule as day numbers', async () => {
+    signIn(makeMe({ permissions: ['billing.read', 'billing.write', 'invoices.generate'] }))
+    const settings = {
+      due_days: 14, reminders_enabled: true, before_due_days: [3, 1], after_due_days: [1, 7],
+      before_subject: { en: 'Due soon' }, before_body: { en: 'Please pay' }, overdue_subject: { en: 'Overdue' }, overdue_body: { en: 'Please pay now' },
+    }
+    const calls = mockApi(fetchMock, {
+      'PUT /billing/settings': envelope(settings),
+      'GET /billing/settings': envelope(settings),
+      'GET /billing/reminders': envelope([], { pagination: onePage }),
+      'GET /dashboard/billing-snapshot': snapshot,
+      'GET /invoices': envelope([], { pagination: onePage }),
+    })
+    renderWithProviders(<BillingPage />)
+
+    await userEvent.click(await screen.findByRole('tab', { name: 'Settings' }))
+    const before = await screen.findByLabelText(/Remind before the due date/)
+    await userEvent.clear(before)
+    await userEvent.type(before, '5, 2, 2')
+    await userEvent.click(screen.getByRole('button', { name: 'Save settings' }))
+
+    await waitFor(() => expect(calls.some((c) => c.method === 'PUT')).toBe(true))
+    expect(calls.find((c) => c.method === 'PUT')!.body).toMatchObject({ before_due_days: [5, 2], after_due_days: [7, 1], due_days: 14 })
   })
 
   it('works in Arabic', async () => {

@@ -484,9 +484,66 @@ export interface BillingSnapshot {
   collected_fils: number
   overdue_fils: number
   outstanding_fils: number
+  expenses_fils: number
+  net_fils: number
   new_invoices_today: number
   new_invoices_today_fils: number
   recent_payments: { invoice_id: string; invoice_number: string; student_name: string | null; amount_fils: number; payment_date: string; method: string }[]
   top_overdue: { student_id: string; student_name: string | null; outstanding_fils: number; invoices: number }[]
   trend: { month: string; billed_fils: number; collected_fils: number }[]
+}
+
+export interface Expense {
+  id: string
+  expense_date: string
+  amount_fils: number
+  category: string
+  description: string
+  receipt_media_id: string | null
+  created_at: string
+}
+
+export interface ExpenseReport {
+  month: string
+  total_fils: number
+  by_category: { category: string; total_fils: number; count: number }[]
+  items: Expense[]
+}
+
+export interface RevenueReport {
+  month: string
+  billed_fils: number
+  collected_fils: number
+  expenses_fils: number
+  net_fils: number
+  by_method: { method: string; total_fils: number; count: number }[]
+  trend: { month: string; billed_fils: number; collected_fils: number }[]
+}
+
+export interface OverdueReport {
+  total_fils: number
+  rows: { invoice_id: string; invoice_number: string; student_id: string; student_name: string | null; contact: string | null; due_date: string; days_late: number; outstanding_fils: number }[]
+}
+
+export interface BillingSettings {
+  due_days: number
+  reminders_enabled: boolean
+  before_due_days: number[]
+  after_due_days: number[]
+  before_subject: Record<string, string>
+  before_body: Record<string, string>
+  overdue_subject: Record<string, string>
+  overdue_body: Record<string, string>
+}
+
+export interface ReminderLogItem {
+  id: string
+  invoice_id: string
+  invoice_number: string
+  student_name: string | null
+  kind: 'before_due' | 'overdue'
+  offset_days: number
+  recipients: number
+  status: string
+  created_at: string
 }

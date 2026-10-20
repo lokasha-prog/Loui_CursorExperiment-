@@ -854,14 +854,19 @@
     "tabs": {
       "overview": "Overview",
       "invoices": "Invoices",
-      "plans": "Fee plans"
+      "plans": "Fee plans",
+      "expenses": "Expenses",
+      "reports": "Reports",
+      "settings": "Settings"
     },
     "kpi": {
       "billed": "Billed this month",
       "collected": "Collected this month",
       "overdue": "Overdue",
       "outstanding": "Waiting to be paid",
-      "today": "New invoices today"
+      "today": "New invoices today",
+      "expenses": "Expenses this month",
+      "net": "Net (collected minus expenses)"
     },
     "trend": "Last 6 months",
     "billedLegend": "Billed",
@@ -990,6 +995,66 @@
         "activity": "Activity",
         "discount": "Discount",
         "other": "Other"
+      }
+    },
+    "expenses": {
+      "add": "Add expense",
+      "edit": "Edit expense",
+      "month": "Month",
+      "date": "Date",
+      "amount": "Amount (AED)",
+      "category": "Category",
+      "description": "What was it for",
+      "save": "Save expense",
+      "saved": "Expense saved",
+      "total": "Spent this month",
+      "empty": "No expenses this month",
+      "emptyBody": "Add rent, supplies, salaries and other costs to see the net result.",
+      "confirmDelete": "Remove this expense?",
+      "categories": {
+        "rent": "Rent",
+        "utilities": "Utilities",
+        "salaries": "Salaries",
+        "supplies": "Supplies",
+        "food": "Food",
+        "other": "Other"
+      }
+    },
+    "reports": {
+      "revenue": "Monthly revenue",
+      "byMethod": "Collected by payment method",
+      "overdue": "Overdue invoices",
+      "noneOverdue": "Nothing is overdue",
+      "noneOverdueBody": "Every invoice past its due date has been paid.",
+      "contact": "Phone",
+      "daysLate": "Days late",
+      "owed": "Still owed"
+    },
+    "settings": {
+      "dueDays": "Days to pay an invoice",
+      "dueDaysHint": "Counted from the issue date.",
+      "enabled": "Send fee reminders automatically",
+      "before": "Remind before the due date (days)",
+      "after": "Chase after the due date (days)",
+      "daysHint": "Separate with commas, for example 3, 1",
+      "variables": "You can use these in the wording:",
+      "beforeWording": "Reminder before the due date",
+      "overdueWording": "Overdue notice",
+      "subject": "Subject",
+      "body": "Message",
+      "save": "Save settings",
+      "saved": "Settings saved",
+      "log": "Reminder log",
+      "logEmpty": "No reminders sent yet.",
+      "runNow": "Send due reminders now",
+      "ran": "Reminders sent: {{count}}",
+      "kind": "Reminder",
+      "recipients": "Sent to",
+      "sentOn": "Date",
+      "noRecipients": "No parent account",
+      "kinds": {
+        "before_due": "{{days}} days before due",
+        "overdue": "{{days}} days overdue"
       }
     }
   }
