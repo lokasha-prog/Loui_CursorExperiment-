@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using NMS.Api.Http;
 using NMS.Application.Abstractions;
 using NMS.Application.Auth;
@@ -28,8 +29,14 @@ public static class AuthEndpoints
     {
         var group = routes.MapGroup("/api/v1/auth").WithTags("Auth");
 
-        group.MapGet("/setup-status", async (HttpContext http, IAppDbContext db, CancellationToken ct) =>
-            ApiResults.Ok(http, new { setup_required = !await db.Tenants.AnyAsync(ct) }))
+        // Public: tells the sign-in screens whether first-time setup is needed and which password rule applies (from configuration).
+        group.MapGet("/setup-status", async (
+            HttpContext http, IAppDbContext db, IOptions<AuthOptions> auth, CancellationToken ct) =>
+            ApiResults.Ok(http, new
+            {
+                setup_required = !await db.Tenants.AnyAsync(ct),
+                password_min_length = auth.Value.MinPasswordLength,
+            }))
             .AllowAnonymous();
 
         group.MapPost("/bootstrap-super-admin", async (BootstrapRequest body, HttpContext http, ISender sender, CancellationToken ct) =>

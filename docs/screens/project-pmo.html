@@ -182,7 +182,7 @@
       </div>
       <div class="text-right">
         <div class="text-[10px] font-mono text-slate-400 uppercase">Last Updated</div>
-        <div class="font-mono text-sm font-bold text-slate-700" id="lastUpdated">2026-10-20 16:30 GST</div>
+        <div class="font-mono text-sm font-bold text-slate-700" id="lastUpdated">2026-10-20 17:45 GST</div>
         <div class="text-[10px] font-mono text-slate-400 mt-1">by: Claude Code</div>
       </div>
     </div>
@@ -273,31 +273,32 @@
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2">
           <i data-lucide="target" class="w-5 h-5 text-amber-600"></i>
-          <h3 class="font-heading text-base font-bold text-slate-900">Current Focus · Sprint 0</h3>
+          <h3 class="font-heading text-base font-bold text-slate-900">Current Focus · Sprint 1</h3>
         </div>
         <span class="pill pill-amber">IN PROGRESS</span>
       </div>
-      <h4 class="font-heading text-lg font-bold text-slate-900 mb-2">Project Bootstrap &amp; Environment Setup</h4>
-      <p class="text-sm text-slate-600 mb-4">Scaffold the monorepo, set up Docker Compose for local dev, configure Keycloak realm, run initial EF Core migration, create first commit on main branch.</p>
+      <h4 class="font-heading text-lg font-bold text-slate-900 mb-2">Centre Management + Sign-in</h4>
+      <p class="text-sm text-slate-600 mb-4">Students, staff, guardians, rooms, programs and user accounts, with sign-in, role-based access, strict separation between centres and a permanent change history. Everything in English and Arabic (left-to-right and right-to-left), stored only in the local Microsoft SQL Server.</p>
 
       <div class="space-y-2 mb-4">
-        <div class="text-[10px] font-mono text-slate-500 uppercase font-bold">Sprint 0 Checklist</div>
-        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Monorepo scaffolded: backend/ web/ mobile/ infra/ docs/</span></label>
-        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Docker Compose: PostgreSQL 16, Redis 7, RabbitMQ 3.13, Keycloak 24, MinIO, MailHog</span></label>
-        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>.cursorrules in repo root (from spec-18-cursor-rules.html)</span></label>
-        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Initial EF Core migration (tenant + app_user + role tables)</span></label>
-        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>CI/CD pipeline skeleton in GitHub Actions</span></label>
-        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Pilot nursery #1 signed (LOI or pilot agreement)</span></label>
-        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Legal counsel engaged for PDPL review</span></label>
-        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Cloud provider selected (AWS ME Central recommended)</span></label>
+        <div class="text-[10px] font-mono text-slate-500 uppercase font-bold">Sprint 1 Checklist (✔ = built and verified)</div>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Local SQL Server database, migrations, no seeded data</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Strict separation between centres (database-enforced) + append-only change history</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Built-in sign-in: roles, lockout, rotating sessions, first-administrator setup</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Students, guardians, staff, rooms, programs, groups, labels, user accounts (service layer)</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Parents see only their own children; teachers only their own rooms</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Automated tests: 72 unit/architecture + 55 integration, all passing</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Web app: setup, sign-in, dashboard, students, staff, rooms &amp; programs, user accounts</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>English and Arabic with right-to-left layout on every screen</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Web automated tests (in progress)</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Owner decision: AI Brain provider, data location and first features</span></label>
       </div>
 
       <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-200">
-        <span class="text-[10px] font-mono text-slate-500 uppercase">Read First:</span>
-        <a href="spec-00-master-brief.html" class="pill pill-info">📖 Master Brief</a>
-        <a href="spec-05-tech-stack.html" class="pill pill-info">📖 Tech Stack</a>
-        <a href="spec-11-devops.html" class="pill pill-info">📖 DevOps</a>
-        <a href="spec-18-cursor-rules.html" class="pill pill-info">📖 Cursor Rules</a>
+        <span class="text-[10px] font-mono text-slate-500 uppercase">Decisions:</span>
+        <a href="spec-20-adrs.html" class="pill pill-info">📖 Original ADRs</a>
+        <span class="pill pill-neutral">ADR-0004 SQL Server only</span>
+        <span class="pill pill-neutral">ADR-0005 Built-in sign-in</span>
         <a href="spec-19-roadmap-sprints.html" class="pill pill-info">📖 Roadmap</a>
       </div>
     </div>
@@ -310,19 +311,19 @@
       </div>
       <div class="space-y-3">
         <div class="p-3 rounded-xl bg-white/5 border border-white/10">
-          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">IMMEDIATE · THIS WEEK</div>
-          <div class="font-bold text-sm">Run Sprint 0 scaffolding commands</div>
-          <div class="text-[11px] text-slate-300 mt-1">See spec-05-tech-stack.html §11 — `dotnet new sln`, `pnpm create vite`, `npx create-expo-app`</div>
+          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">NOW</div>
+          <div class="font-bold text-sm">Finish Sprint 1</div>
+          <div class="text-[11px] text-slate-300 mt-1">Automated tests for the web screens, full English/Arabic review, handoff notes</div>
+        </div>
+        <div class="p-3 rounded-xl bg-amber-400/15 border border-amber-300/40">
+          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">OWNER DECISION NEEDED</div>
+          <div class="font-bold text-sm">AI Brain — the heart of the product</div>
+          <div class="text-[11px] text-slate-300 mt-1">Which AI provider, where child data is processed, and what it should do first</div>
         </div>
         <div class="p-3 rounded-xl bg-white/5 border border-white/10">
-          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">SPRINT 1 · WEEKS 3-4</div>
-          <div class="font-bold text-sm">Centre Management + Auth</div>
-          <div class="text-[11px] text-slate-300 mt-1">Student, Staff, Room, Program, Group, Label, Guardian entities + Keycloak RBAC</div>
-        </div>
-        <div class="p-3 rounded-xl bg-white/5 border border-white/10">
-          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">SPRINT 2 · WEEKS 5-6</div>
+          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">SPRINT 2</div>
           <div class="font-bold text-sm">Attendance + Dashboard</div>
-          <div class="text-[11px] text-slate-300 mt-1">Barcode check-in, live ratio monitor, SignalR real-time</div>
+          <div class="text-[11px] text-slate-300 mt-1">Barcode check-in, live staff-to-child ratio, real-time updates</div>
         </div>
       </div>
       <a href="spec-19-roadmap-sprints.html" class="btn btn-primary w-full mt-4 btn-sm">View Full Roadmap →</a>
@@ -563,7 +564,7 @@
 <span class="comment">// After each sprint, update the corresponding entry. The page recalculates on load.</span>
 
 <span class="key">const</span> PROJECT_STATE = {
-  lastUpdated: <span class="string">"2026-10-20 16:30 GST"</span>,
+  lastUpdated: <span class="string">"2026-10-20 17:45 GST"</span>,
   updatedBy: <span class="string">"Claude Code"</span>,
   overallPct: <span class="string">3</span>,            <span class="comment">// 0-100 — overall project completion</span>
 
@@ -655,14 +656,14 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-20 16:30 GST",
+    lastUpdated: "2026-10-20 17:45 GST",
     updatedBy: "Claude Code",
     overallPct: 3,
 
     sprints: {
       // MVP Pilot (0-5)
-      0:  { status: "done",    pct: 100, title: "Setup & Planning",            notes: "Monorepo + Docker + Keycloak + first commit", deliverables: "Repo, .cursorrules, CI skeleton" },
-      1:  { status: "active",  pct: 5,  title: "Centre Management + Auth",    notes: "Student, Staff, Room, Program, Group, Guardian entities + Keycloak RBAC", deliverables: "CRUD endpoints, login, RBAC" },
+      0:  { status: "done",    pct: 100, title: "Setup & Planning",            notes: "Monorepo, local services, first commit (database: local SQL Server)", deliverables: "Repo, .cursorrules, CI skeleton" },
+      1:  { status: "active",  pct: 85, title: "Centre Management + Auth",    notes: "Student, Staff, Room, Program, Group, Guardian + built-in sign-in and role-based access", deliverables: "CRUD endpoints, login, RBAC" },
       2:  { status: "pending", pct: 0,  title: "Attendance + Dashboard",      notes: "Barcode check-in, live ratio via SignalR, KPI widgets", deliverables: "Attendance module, dashboard" },
       3:  { status: "pending", pct: 0,  title: "Parent Comms + Messaging",    notes: "Activity feed (8 types), approval workflow, shared inbox", deliverables: "Activity posts, messaging" },
       4:  { status: "pending", pct: 0,  title: "Notifications + Audit + Emergency", notes: "3-tier notifications, audit log viewer, one-click emergency PDF", deliverables: "Notifications, audit, emergency report" },
@@ -700,7 +701,9 @@
     risks: [
       { severity: "critical", title: "Pilot nursery not yet signed", mitigation: "2 candidates identified, LOI template ready. Owner: Sponsor." },
       { severity: "warning",  title: "Arabic RTL quality in production", mitigation: "Mandatory RTL QA every sprint + Arabic tester on team from Sprint 1." },
-      { severity: "warning",  title: "PDPL legal review not started", mitigation: "Legal counsel identified. Required before go-live (Sprint 17)." }
+      { severity: "warning",  title: "PDPL legal review not started", mitigation: "Legal counsel identified. Required before go-live (Sprint 17)." },
+      { severity: "critical", title: "AI Brain scope and provider undecided", mitigation: "Owner decision needed: provider, where child data is processed (UAE data law), first features. Blocks AI design from Sprint 2." },
+      { severity: "warning",  title: "Free MinIO storage images discontinued", mitigation: "Local development uses a compatible store; confirm production file storage before Sprint 5." }
     ],
 
     pilotNurseries: 0,

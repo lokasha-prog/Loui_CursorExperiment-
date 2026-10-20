@@ -1,3 +1,60 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Design tokens taken from the approved mock-ups (screen-login.html): terracotta, sage, amber, soft surfaces. */
+@layer base {
+  :root {
+    --background: 210 17% 98%;
+    --foreground: 217 33% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 217 33% 17%;
+    --primary: 12 66% 63%;
+    --primary-dark: 12 55% 54%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 217 33% 17%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 12 66% 95%;
+    --accent-foreground: 12 55% 40%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 12 66% 63%;
+    --sage: 154 25% 59%;
+    --amber: 43 74% 66%;
+    --success: 142 76% 36%;
+    --warning: 38 92% 50%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    line-height: 1.6;
+  }
+
+  html[dir='rtl'] body {
+    font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .nursery-card {
+    @apply rounded-lg border bg-card shadow-sm;
+  }
+
+  .pill {
+    @apply inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] font-bold;
+  }
+}
