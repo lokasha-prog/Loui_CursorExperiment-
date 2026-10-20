@@ -3,6 +3,7 @@ using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using NMS.Application.Billing;
 using NMS.Application.Notifications;
 using NMS.Application.Reporting;
 using NMS.Shared.Results;
@@ -156,4 +157,111 @@ public sealed class QuestEmergencyReportRenderer : IEmergencyReportRenderer
             b.Item().Text(title).Bold().FontSize(10);
             b.Item().Text(text);
         });
+}
+
+/// <summary>QuestPDF drawing of an invoice in English or Arabic (right to left), amounts shown in AED.</summary>
+public sealed class QuestInvoiceRenderer : IInvoiceRenderer
+{
+    private static readonly Dictionary<string, Dictionary<string, string>> Labels = new()
+    {
+        ["en"] = new()
+        {
+            ["invoice"] = "Invoice", ["number"] = "Invoice number", ["child"] = "Child", ["parent"] = "Parent / guardian", ["issued"] = "Issue date", ["due"] = "Due date",
+            ["period"] = "Period", ["description"] = "Description", ["qty"] = "Qty", ["unit"] = "Unit price", ["tax"] = "Tax", ["total"] = "Total", ["subtotal"] = "Subtotal",
+            ["discount"] = "Discount", ["vat"] = "Tax", ["grand"] = "Total due", ["paid"] = "Paid", ["balance"] = "Balance", ["notes"] = "Notes", ["status"] = "Status",
+            ["draft"] = "Draft", ["issued_s"] = "Issued", ["partially_paid"] = "Partially paid", ["paid_s"] = "Paid", ["overdue"] = "Overdue", ["cancelled"] = "Cancelled", ["aed"] = "AED",
+        },
+        ["ar"] = new()
+        {
+            ["invoice"] = "فاتورة", ["number"] = "رقم الفاتورة", ["child"] = "الطفل", ["parent"] = "ولي الأمر", ["issued"] = "تاريخ الإصدار", ["due"] = "تاريخ الاستحقاق",
+            ["period"] = "الفترة", ["description"] = "البيان", ["qty"] = "الكمية", ["unit"] = "سعر الوحدة", ["tax"] = "الضريبة", ["total"] = "الإجمالي", ["subtotal"] = "المجموع الفرعي",
+            ["discount"] = "الخصم", ["vat"] = "الضريبة", ["grand"] = "الإجمالي المستحق", ["paid"] = "المدفوع", ["balance"] = "المتبقي", ["notes"] = "ملاحظات", ["status"] = "الحالة",
+            ["draft"] = "مسودة", ["issued_s"] = "صادرة", ["partially_paid"] = "مدفوعة جزئياً", ["paid_s"] = "مدفوعة", ["overdue"] = "متأخرة", ["cancelled"] = "ملغاة", ["aed"] = "درهم",
+        },
+    };
+
+    static QuestInvoiceRenderer() => QuestPDF.Settings.License = LicenseType.Community;
+
+    private static string Money(long fils) => (fils / 100m).ToString("N2", System.Globalization.CultureInfo.InvariantCulture);
+
+    public byte[] Render(InvoicePdfData data)
+    {
+        var l = Labels[data.Language];
+        var status = data.Status switch { "paid" => l["paid_s"], "issued" => l["issued_s"], var s => l.GetValueOrDefault(s, s) };
+        return Document.Create(document => document.Page(page =>
+        {
+            page.Size(PageSizes.A4);
+            page.Margin(32);
+            page.DefaultTextStyle(t => t.FontFamily("Arial").FontSize(10.5f));
+            if (data.Language == "ar")
+            {
+                page.ContentFromRightToLeft();
+            }
+
+            page.Header().Row(r =>
+            {
+                r.RelativeItem().Column(c =>
+                {
+                    c.Item().Text(data.CentreName).Bold().FontSize(15);
+                    c.Item().Text($"{l["invoice"]} {data.InvoiceNumber}").FontSize(12).FontColor(Colors.Grey.Darken2);
+                });
+                r.ConstantItem(110).AlignRight().Text(status).Bold().FontSize(13).FontColor(data.Status == "paid" ? Colors.Green.Darken2 : data.Status == "overdue" ? Colors.Red.Darken2 : Colors.Orange.Darken2);
+            });
+            page.Content().PaddingVertical(14).Column(c =>
+            {
+                c.Spacing(8);
+                c.Item().Text($"{l["child"]}: {data.StudentName}").Bold();
+                if (data.Guardians.Count > 0)
+                {
+                    c.Item().Text($"{l["parent"]}: {string.Join(", ", data.Guardians)}");
+                }
+
+                c.Item().Text($"{l["issued"]}: {data.IssueDate:yyyy-MM-dd}    {l["due"]}: {data.DueDate:yyyy-MM-dd}    {l["period"]}: {data.PeriodStart:yyyy-MM-dd} - {data.PeriodEnd:yyyy-MM-dd}");
+                c.Item().PaddingTop(6).Table(t =>
+                {
+                    t.ColumnsDefinition(cols =>
+                    {
+                        cols.RelativeColumn(5);
+                        cols.RelativeColumn(1);
+                        cols.RelativeColumn(2);
+                        cols.RelativeColumn(2);
+                        cols.RelativeColumn(2);
+                    });
+                    t.Header(h =>
+                    {
+                        foreach (var title in new[] { l["description"], l["qty"], l["unit"], l["tax"], l["total"] })
+                        {
+                            h.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text(title).Bold();
+                        }
+                    });
+                    foreach (var line in data.Lines)
+                    {
+                        t.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).Text(line.Description);
+                        t.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).Text(line.Quantity.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture));
+                        t.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).Text(Money(line.UnitPriceFils));
+                        t.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).Text(Money(line.TaxFils));
+                        t.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).Text(Money(line.TotalFils));
+                    }
+                });
+                c.Item().AlignRight().Width(220).Column(s =>
+                {
+                    s.Item().Row(r => { r.RelativeItem().Text(l["subtotal"]); r.ConstantItem(90).AlignRight().Text($"{l["aed"]} {Money(data.SubtotalFils)}"); });
+                    if (data.DiscountFils > 0)
+                    {
+                        s.Item().Row(r => { r.RelativeItem().Text(l["discount"]); r.ConstantItem(90).AlignRight().Text($"- {Money(data.DiscountFils)}"); });
+                    }
+
+                    s.Item().Row(r => { r.RelativeItem().Text(l["vat"]); r.ConstantItem(90).AlignRight().Text(Money(data.TaxFils)); });
+                    s.Item().BorderTop(1).PaddingTop(3).Row(r => { r.RelativeItem().Text(l["grand"]).Bold(); r.ConstantItem(90).AlignRight().Text($"{l["aed"]} {Money(data.TotalFils)}").Bold(); });
+                    s.Item().Row(r => { r.RelativeItem().Text(l["paid"]); r.ConstantItem(90).AlignRight().Text(Money(data.PaidFils)); });
+                    s.Item().Row(r => { r.RelativeItem().Text(l["balance"]).Bold(); r.ConstantItem(90).AlignRight().Text($"{l["aed"]} {Money(data.TotalFils - data.PaidFils)}").Bold(); });
+                });
+                if (!string.IsNullOrWhiteSpace(data.Notes))
+                {
+                    c.Item().PaddingTop(8).Text($"{l["notes"]}: {data.Notes}");
+                }
+            });
+            page.Footer().AlignCenter().Text(data.CentreName).FontSize(8).FontColor(Colors.Grey.Darken1);
+        })).GeneratePdf();
+    }
 }

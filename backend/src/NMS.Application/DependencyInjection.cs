@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddScoped<NMS.Application.Notifications.Notifier>();
+        services.AddScoped<NMS.Application.Billing.InvoiceGenerator>();
         return services;
     }
 }

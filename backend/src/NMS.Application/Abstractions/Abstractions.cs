@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NMS.Domain.Attendance;
 using NMS.Domain.Auditing;
+using NMS.Domain.Billing;
 using NMS.Domain.Notifications;
 using NMS.Domain.Communication;
 using NMS.Domain.CentreManagement;
@@ -114,6 +115,18 @@ public interface IAppDbContext
     DbSet<NMS.Application.Reporting.AuditRetentionSetting> AuditRetentionSettings { get; }
 
     DbSet<NMS.Application.Reporting.AuditRetentionRun> AuditRetentionRuns { get; }
+
+    DbSet<FeePlan> FeePlans { get; }
+
+    DbSet<FeeComponent> FeeComponents { get; }
+
+    DbSet<StudentFeePlan> StudentFeePlans { get; }
+
+    DbSet<Invoice> Invoices { get; }
+
+    DbSet<InvoiceLine> InvoiceLines { get; }
+
+    DbSet<InvoicePayment> InvoicePayments { get; }
 
     DbSet<AuditLog> AuditLogs { get; }
 

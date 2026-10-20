@@ -46,6 +46,10 @@ public static class DependencyInjection
         services.AddOptions<NMS.Application.Reporting.AuditOptions>().Bind(configuration.GetSection(NMS.Application.Reporting.AuditOptions.Section))
             .Validate(o => o.MinRetentionDays >= 365 && o.DefaultRetentionDays >= o.MinRetentionDays, "Audit retention must keep at least 365 days and the default must not be lower than the minimum.")
             .ValidateOnStart();
+        services.AddOptions<NMS.Application.Billing.BillingOptions>().Bind(configuration.GetSection(NMS.Application.Billing.BillingOptions.Section))
+            .Validate(o => o.DefaultDueDays is >= 0 and <= 365, "Billing:DefaultDueDays must be between 0 and 365.")
+            .ValidateOnStart();
+        services.AddSingleton<NMS.Application.Billing.IInvoiceRenderer, QuestInvoiceRenderer>();
         services.AddSingleton<CentreCalendar>();
 
         services.AddOptions<AiOptions>().Bind(configuration.GetSection(AiOptions.SectionName));
