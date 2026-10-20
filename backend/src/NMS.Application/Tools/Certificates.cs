@@ -109,7 +109,7 @@ public sealed class GenerateCertificatesHandler(IAppDbContext db, ITenantContext
         var title = string.IsNullOrWhiteSpace(r.Title) ? Pick(template.DefaultTitle) : r.Title.Trim();
         var bodyTemplate = string.IsNullOrWhiteSpace(r.Body) ? Pick(template.DefaultBody) : r.Body.Trim();
         var date = r.Date ?? calendar.Today;
-        var dateText = date.ToString("d MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+        var dateText = date.ToString("d MMMM yyyy", language == "ar" ? new System.Globalization.CultureInfo("ar-AE") { NumberFormat = { DigitSubstitution = System.Globalization.DigitShapes.None } } : System.Globalization.CultureInfo.InvariantCulture);
 
         // Take the next numbers for this design. Two people printing at once could pick the same number, so a clash is retried.
         List<CertificateIssued> issued = [];

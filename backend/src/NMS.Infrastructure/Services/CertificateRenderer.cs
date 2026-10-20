@@ -74,7 +74,7 @@ public sealed class QuestCertificateRenderer : ICertificateRenderer
 
     private static void Header(IContainer c, CertificateStyle s, bool onColour)
     {
-        c.Row(row =>
+        c.AlignCenter().Row(row =>
         {
             row.Spacing(10);
             if (s.Logo is { Length: > 0 })
@@ -82,7 +82,7 @@ public sealed class QuestCertificateRenderer : ICertificateRenderer
                 row.ConstantItem(46).Image(s.Logo).FitArea();
             }
 
-            row.RelativeItem().AlignMiddle().Text(s.CentreName).Bold().FontSize(16).FontColor(onColour ? Colors.White : s.Primary);
+            row.AutoItem().AlignMiddle().Text(s.CentreName).Bold().FontSize(16).FontColor(onColour ? Colors.White : s.Primary);
         });
     }
 
@@ -90,16 +90,16 @@ public sealed class QuestCertificateRenderer : ICertificateRenderer
     {
         c.PaddingHorizontal(46).PaddingVertical(22).Column(col =>
         {
-            col.Spacing(10);
+            col.Spacing(16);
             if (showHeader)
             {
-                col.Item().AlignCenter().Element(h => Header(h, s, false));
+                col.Item().Element(h => Header(h, s, false));
             }
 
-            col.Item().PaddingTop(8).AlignCenter().Text(item.Title).Bold().FontSize(34).FontColor(s.Primary);
-            col.Item().AlignCenter().Text(s.Language == "ar" ? "تُمنح إلى" : "Presented to").FontSize(14).FontColor(Colors.Grey.Darken1);
-            col.Item().AlignCenter().BorderBottom(1.5f).BorderColor(s.Accent).PaddingHorizontal(30).PaddingBottom(4).Text(item.Recipient).Bold().FontSize(30).FontColor(Colors.Black);
-            col.Item().PaddingHorizontal(40).AlignCenter().Text(item.Body).FontSize(15).LineHeight(1.4f).AlignCenter();
+            col.Item().PaddingTop(showHeader ? 18 : 40).AlignCenter().Text(item.Title).Bold().FontSize(38).FontColor(s.Primary);
+            col.Item().AlignCenter().Text(s.Language == "ar" ? "تُمنح إلى" : "Presented to").FontSize(15).FontColor(Colors.Grey.Darken1);
+            col.Item().AlignCenter().BorderBottom(1.5f).BorderColor(s.Accent).PaddingHorizontal(34).PaddingBottom(4).Text(item.Recipient).Bold().FontSize(34).FontColor(Colors.Black);
+            col.Item().PaddingHorizontal(50).PaddingTop(8).AlignCenter().Text(item.Body).FontSize(17).LineHeight(1.5f).AlignCenter();
             col.Item().ExtendVertical().AlignBottom().Row(row =>
             {
                 row.RelativeItem().AlignBottom().Column(d =>
