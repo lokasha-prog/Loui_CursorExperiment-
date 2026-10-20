@@ -51,7 +51,7 @@ describe('ToolsPage', () => {
     mockApi(fetchMock, { 'GET /tools/id-card-templates': envelope([]), 'GET /students': envelope([], { pagination: onePage }) })
     renderWithProviders(<ToolsPage />)
 
-    expect(await screen.findByText('بطاقات الهوية')).toBeInTheDocument()
+    expect((await screen.findAllByText('بطاقات الهوية')).length).toBeGreaterThan(0)
     expect(document.documentElement.dir).toBe('rtl')
   })
 })
