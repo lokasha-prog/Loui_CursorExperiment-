@@ -1,4 +1,4 @@
-<#
+﻿<#
   Fills a LOCAL development system with realistic test data, by calling the same API the screens use (as if a person typed it).
 
   - Nothing here is part of the application or its database migrations: the app ships empty.
@@ -16,8 +16,14 @@ $headers = @{}
 function Call($method, $path, $body = $null) {
     $args = @{ Uri = "$Api/api/v1$path"; Method = $method; WebSession = $session; Headers = $headers; ContentType = 'application/json'; UseBasicParsing = $true }
     if ($null -ne $body) { $args.Body = ($body | ConvertTo-Json -Depth 8 -Compress) }
-    try { $r = Invoke-WebRequest @args } catch {
-        $detail = if ($_.ErrorDetails) { $_.ErrorDetails.Message } else { $_.Exception.Message }
+    for ($try = 0; $try -lt 6; $try++) {
+        try { $r = Invoke-WebRequest @args; break } catch {
+            if ($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 429 -and $try -lt 5) { Start-Sleep -Seconds 15; continue }
+            $failure = $_; break
+        }
+    }
+    if (-not $r) {
+        $detail = if ($failure.ErrorDetails) { $failure.ErrorDetails.Message } else { $failure.Exception.Message }
         throw "$method $path failed: $detail"
     }
     ($r.Content | ConvertFrom-Json).data
@@ -25,10 +31,10 @@ function Call($method, $path, $body = $null) {
 function Try-Call($method, $path, $body = $null) { try { Call $method $path $body } catch { Write-Host "  (skipped: $($_.Exception.Message.Substring(0, [Math]::Min(120, $_.Exception.Message.Length))))" -ForegroundColor DarkYellow; $null } }
 function Password { -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 22 | ForEach-Object { [char]$_ }) + 'aA1' }
 
-# Sign in as a centre administrator through the local-only test-user helper.
-$login = Call 'POST' '/dev/quick-login' @{ role = 'centre_admin' }
+# Sign in through the local-only test-user helper. The IT role may create user accounts as well as everything else.
+$login = Call 'POST' '/dev/quick-login' @{ role = 'it' }
 $headers['Authorization'] = "Bearer $($login.access_token)"
-Write-Host 'Signed in as the local test administrator.'
+Write-Host 'Signed in as the local test IT administrator.'
 
 $existing = Call 'GET' '/rooms?limit=100'
 if (($existing | Where-Object { $_.name.en -like 'Little Stars*' }) -and -not $Force) { throw 'Demo data already loaded (use -Force to add another batch).' }
@@ -136,5 +142,5 @@ Try-Call 'POST' '/messages/threads' @{ subject = 'Eid holiday dates'; body = 'Th
 Write-Host ''
 Write-Host 'Done. Test data loaded through the API:' -ForegroundColor Green
 Write-Host "  3 rooms, 2 programmes, $($staff.Count) staff, $($children.Count) children with guardians, 2 leave types, today's attendance, feed posts, messages."
-Write-Host '  Use the test-user buttons on the login screen (Teacher, Parent, Receptionist, Centre administrator).'
+Write-Host '  Use the test-user buttons on the login screen (Teacher, Parent, Receptionist, Centre administrator, IT).'
 Write-Host '  To remove it all: drop the NMS database and restart the API.'
