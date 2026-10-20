@@ -22,6 +22,16 @@ PATHS = [
     "/api/v1/messages/threads",
     "/api/v1/notifications/unread-count",
     "/api/v1/attendance/report/monthly?month={month}",
+    "/api/v1/dashboard/billing-snapshot",
+    "/api/v1/invoices?limit=25",
+    "/api/v1/enquiries?limit=25",
+    "/api/v1/enquiries/summary",
+    "/api/v1/calendar/events?from={first}&to={last}",
+    "/api/v1/calendar/agenda?from={first}&to={last}",
+    "/api/v1/forms?limit=25",
+    "/api/v1/reports/analytics?from={first}&to={last}",
+    "/api/v1/newsletters?limit=25",
+    "/api/v1/resources/documents?limit=25",
 ]
 
 
@@ -50,11 +60,12 @@ def main():
     )
     token = json.load(urllib.request.urlopen(login, timeout=30))["data"]["access_token"]
     month = time.strftime("%Y-%m")
+    first, last = month + "-01", month + "-28"
 
     failed_gate = False
     print(f"{'screen data':58} {'p50':>7} {'p95':>7} {'max':>7}  errors")
     for template in PATHS:
-        path = template.format(month=month)
+        path = template.format(month=month, first=first, last=last)
         with ThreadPoolExecutor(max_workers=args.users) as pool:
             results = list(pool.map(lambda _: call(args.api, path, token), range(args.requests)))
         times = sorted(t for t, _ in results)

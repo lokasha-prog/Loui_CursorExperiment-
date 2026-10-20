@@ -186,7 +186,7 @@ export default function ResourcesPage() {
   return (
     <>
       <PageHeader title={t('resources.title')} subtitle={t(canWrite ? 'resources.subtitle' : 'resources.parentSubtitle')} action={canWrite ? <Button onClick={() => setUploading(true)}><Upload className="h-4 w-4" aria-hidden="true" />{t('resources.upload')}</Button> : undefined} />
-      <div className="grid gap-4 lg:grid-cols-[16rem_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[16rem_1fr] [&>*]:min-w-0">
         <Card className="h-fit p-2">
           <ul className="space-y-1" aria-label={t('resources.folders')}>
             <li><button type="button" aria-pressed={folder === ''} onClick={() => setFolder('')} className={cn('w-full rounded-md px-3 py-2 text-start text-sm font-semibold hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', folder === '' && 'bg-accent')}>{t('resources.allFolders')}</button></li>
