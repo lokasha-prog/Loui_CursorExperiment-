@@ -148,6 +148,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<SecurityHeadersMiddleware>();
+
+// A packaged pilot install ships the built web app in wwwroot, so one service serves both the screens and the API.
+var serveWeb = Directory.Exists(Path.Combine(app.Environment.ContentRootPath, "wwwroot"));
+if (serveWeb)
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
 app.UseAuthentication();
 app.UseMiddleware<TenantContextMiddleware>();
 app.UseRateLimiter();
@@ -183,6 +191,11 @@ app.MapHub<CentreHub>("/hubs/centre");
 if (DevToolsEndpoints.IsAvailable(app.Environment, app.Configuration))
 {
     app.MapDevToolsEndpoints();
+}
+
+if (serveWeb)
+{
+    app.MapFallbackToFile("{*path:regex(^(?!api/|hubs/|health/).*$)}", "index.html").AllowAnonymous();
 }
 
 app.Run();

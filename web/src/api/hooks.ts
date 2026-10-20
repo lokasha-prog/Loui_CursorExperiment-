@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  FeedbackItem,
   RetentionPolicy,
   AppNotification,
   AuditEntry,
@@ -367,5 +368,22 @@ export function usePurgeAudit() {
   return useMutation({
     mutationFn: () => api.post<{ run_at: string; mode: string; cutoff: string; rows_deleted: number }>('/audit-logs/retention/actions/purge', { confirm: true }),
     onSuccess: () => Promise.all(['audit-retention', 'audit'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+// ── Feedback ────────────────────────────────────────────────────────────────
+
+export const useSendFeedback = () =>
+  useMutation({
+    mutationFn: (body: { kind: string; message: string; page: string; rating: number | null }) => api.post<FeedbackItem>('/feedback', body),
+  })
+
+export const useFeedbackList = (status: string) => useInfiniteList<FeedbackItem>(['feedback'], '/feedback', { status: status || undefined })
+
+export function useSetFeedbackStatus() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => api.patch<FeedbackItem>(`/feedback/${id}`, { status }),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['feedback'] }),
   })
 }

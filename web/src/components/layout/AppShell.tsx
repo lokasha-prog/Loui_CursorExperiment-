@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Baby, BarChart3, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
+import { Baby, BarChart3, MessageCircleHeart, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
@@ -11,6 +11,7 @@ import { can, isParentOnly, useAuth } from '@/stores/auth'
 import { useLiveUpdates } from '@/hooks/use-live-updates'
 import { ShortageBanner } from '@/modules/attendance/ShortageBanner'
 import { useUnreadCount } from '@/api/hooks'
+import { FeedbackButton } from '@/modules/feedback/FeedbackButton'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
 interface NavItem {
@@ -34,6 +35,7 @@ export function useNavItems(): NavItem[] {
     { to: '/reports', label: t('nav.reports'), icon: BarChart3, permission: 'attendance.override' },
     { to: '/leave', label: t('nav.leave'), icon: CalendarOff, permission: 'attendance.read' },
     { to: '/rooms', label: t('nav.rooms'), icon: School, permission: 'centre_structure.read' },
+    { to: '/feedback', label: t('nav.feedback'), icon: MessageCircleHeart, permission: 'settings.read' },
     { to: '/audit', label: t('nav.audit'), icon: History, permission: 'audit_log.view' },
     { to: '/users', label: t('nav.users'), icon: ShieldCheck, permission: 'user_management.manage' },
   ]
@@ -171,6 +173,7 @@ export function AppShell() {
           </div>
         </header>
         <ShortageBanner />
+        <FeedbackButton />
         <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 focus:outline-none lg:px-8 lg:py-8">
           <Outlet />
         </main>

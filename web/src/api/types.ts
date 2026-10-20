@@ -399,3 +399,15 @@ export interface RetentionPolicy {
   cutoff: string
   recent_runs: { run_at: string; mode: 'auto' | 'manual'; cutoff: string; rows_deleted: number }[]
 }
+
+export interface FeedbackItem {
+  id: string
+  user_id: string
+  user_name: string | null
+  kind: 'problem' | 'idea' | 'praise'
+  message: string
+  page: string | null
+  rating: number | null
+  status: 'new' | 'seen' | 'done'
+  created_at: string
+}

@@ -51,7 +51,8 @@
     "reports": "Reports",
     "feed": "Daily feed",
     "messages": "Messages",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "feedback": "Feedback"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -793,5 +794,37 @@
     "failed": "Could not create the sheet",
     "title": "Emergency sheet",
     "description": "A printable page per child with medical notes, allergies and who may collect them."
+  },
+  "feedback": {
+    "button": "Feedback",
+    "title": "Tell us what you think",
+    "description": "A problem, an idea or something you liked. The team reads every note.",
+    "kind": "This is a",
+    "message": "Your message",
+    "rating": "How is it going? (1 to 5, optional)",
+    "send": "Send",
+    "thanks": "Thank you, we got it",
+    "kinds": {
+      "problem": "Problem",
+      "idea": "Idea",
+      "praise": "Something I like"
+    },
+    "pageTitle": "Feedback",
+    "pageSubtitle": "Notes from staff and families during the pilot.",
+    "filter": "Filter by status",
+    "empty": "No feedback yet",
+    "status": {
+      "all": "All",
+      "new": "New",
+      "seen": "Seen",
+      "done": "Done"
+    },
+    "columns": {
+      "when": "When",
+      "who": "From",
+      "kind": "Kind",
+      "message": "Message",
+      "status": "Status"
+    }
   }
 }
