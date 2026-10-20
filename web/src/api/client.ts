@@ -117,8 +117,9 @@ async function send<T>(method: string, path: string, options: { body?: unknown; 
 }
 
 /** Uploads one file (multipart). Files are checked again by the server, which decides what they really are. */
-async function upload<T>(path: string, file: File): Promise<T> {
+async function upload<T>(path: string, file: File, fields: Record<string, string> = {}): Promise<T> {
   const form = new FormData()
+  for (const [key, value] of Object.entries(fields)) form.append(key, value)
   form.append('file', file)
   const token = useAuth.getState().accessToken
   const response = await fetch(`${BASE}${path}`, {

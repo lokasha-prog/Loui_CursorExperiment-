@@ -60,7 +60,9 @@
     "settings": "Settings",
     "calendar": "Calendar",
     "tools": "Tools",
-    "forms": "Forms"
+    "forms": "Forms",
+    "newsletters": "Newsletters",
+    "resources": "Resources"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -1644,5 +1646,111 @@
         "skipped": "Skipped"
       }
     }
+  },
+  "newsletters": {
+    "title": "Newsletters",
+    "subtitle": "Write to parents in English and Arabic, send now or later, and see who read it.",
+    "parentSubtitle": "News from the nursery.",
+    "new": "New newsletter",
+    "edit": "Newsletter",
+    "empty": "No newsletters yet",
+    "emptyBody": "Write the first one and choose who should get it.",
+    "emptyParent": "No newsletters yet",
+    "emptyParentBody": "News from the nursery will appear here.",
+    "new_": "New",
+    "titleEn": "Title (English)",
+    "titleAr": "Title (Arabic)",
+    "bodyEn": "Newsletter text (English)",
+    "bodyAr": "Newsletter text (Arabic)",
+    "language": "Language being edited",
+    "draft": "Write a draft for me",
+    "draftAi": "Draft written by the AI from this week's totals and coming events",
+    "draftTemplate": "Draft made from this week's totals and coming events",
+    "audience": "Send to",
+    "audiences": {
+      "all": "All parents",
+      "room": "Parents of children in these rooms",
+      "program": "Parents of children in these programmes",
+      "group": "Groups",
+      "label": "Labels"
+    },
+    "sendAt": "Send at (optional)",
+    "sendAtHint": "Leave empty to send now. A time must be in the future.",
+    "saveDraft": "Save draft",
+    "saved": "Draft saved",
+    "schedule": "Schedule",
+    "scheduled": "Newsletter scheduled",
+    "sendNow": "Send now",
+    "sent": "Newsletter sent",
+    "confirmSend": "Send this newsletter to parents now? It cannot be changed afterwards.",
+    "archive": "Archive",
+    "unschedule": "Take back",
+    "confirmDelete": "Remove this newsletter?",
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "published": "Sent",
+      "archived": "Archived"
+    },
+    "sentOn": "Sent {{date}}",
+    "openedOf": "{{opened}} of {{total}} read it",
+    "stats": {
+      "title": "Results",
+      "sent": "Sent to",
+      "opened": "Opened ({{count}})",
+      "clicks": "Link clicks"
+    }
+  },
+  "resources": {
+    "title": "Resource centre",
+    "subtitle": "Share documents with parents or keep them for staff. New versions keep the old ones.",
+    "parentSubtitle": "Documents shared by the nursery.",
+    "folders": "Folders",
+    "allFolders": "All documents",
+    "newFolder": "New folder",
+    "folderSaved": "Folder saved",
+    "saveFolder": "Save folder",
+    "nameEn": "Folder name (English)",
+    "nameAr": "Folder name (Arabic)",
+    "audience": "Who can see it",
+    "audiences": {
+      "parents": "Parents and staff",
+      "staff": "Staff only"
+    },
+    "inside": "Inside folder",
+    "confirmFolder": "Remove this empty folder?",
+    "upload": "Upload document",
+    "uploaded": "Document uploaded",
+    "folder": "Folder",
+    "docTitle": "Title",
+    "description": "Description",
+    "tags": "Search words",
+    "tagsHint": "Separate with commas, for example fees, 2027",
+    "file": "File",
+    "fileHint": "PDF, Word, Excel, photo or MP4, up to 30 MB.",
+    "search": "Search by title, words or description",
+    "empty": "No documents here",
+    "emptyBody": "Upload the first one.",
+    "emptyParent": "The nursery has not shared any documents yet.",
+    "download": "Download",
+    "newVersion": "New version",
+    "versionAdded": "New version added",
+    "history": "Versions and downloads",
+    "versions": "Versions",
+    "downloadLog": "Who downloaded it",
+    "noDownloads": "Nobody has downloaded it yet.",
+    "confirmDelete": "Remove this document and all its versions from the list?"
+  },
+  "richText": {
+    "toolbar": "Formatting",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "heading": "Heading",
+    "bullets": "Bullet list",
+    "numbers": "Numbered list",
+    "link": "Add link",
+    "linkPrompt": "Web address (https://...)"
   }
 }

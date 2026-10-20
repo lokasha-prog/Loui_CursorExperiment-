@@ -847,3 +847,84 @@ export interface Analytics {
   enrolled_by_month: { label: string; count: number }[] | null
   enquiries_by_source: { label: string; count: number }[] | null
 }
+
+export interface NewsletterItem {
+  id: string
+  title: Record<string, string>
+  audience_type: string
+  audience_ids: string[]
+  status: string
+  scheduled_for: string | null
+  published_at: string | null
+  recipients: number
+  opened: number
+  created_at: string
+}
+
+export interface NewsletterDetail {
+  newsletter: NewsletterItem
+  body: Record<string, string>
+}
+
+export interface MyNewsletter {
+  id: string
+  title: Record<string, string>
+  published_at: string | null
+  opened: boolean
+  created_at: string
+}
+
+export interface ReadNewsletter {
+  id: string
+  title: Record<string, string>
+  body: string
+  language: string
+  published_at: string | null
+}
+
+export interface NewsletterStats {
+  recipients: number
+  opened: number
+  open_rate: number
+  clicks: number
+  links: { index: number; url: string; clicks: number }[]
+}
+
+export interface ResourceFolder {
+  id: string
+  name: Record<string, string>
+  audience: string
+  parent_folder_id: string | null
+  documents: number
+}
+
+export interface ResourceDocument {
+  id: string
+  folder_id: string
+  title: string
+  description: string | null
+  tags: string | null
+  current_version: number
+  file_name: string
+  content_type: string
+  size_bytes: number
+  updated_at: string
+  downloads: number
+  created_at: string
+}
+
+export interface ResourceVersionItem {
+  id: string
+  version: number
+  file_name: string
+  content_type: string
+  size_bytes: number
+  uploaded_by: string | null
+  created_at: string
+}
+
+export interface ResourceDownloadItem {
+  user: string | null
+  version: number
+  at: string
+}

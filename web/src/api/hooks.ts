@@ -1,6 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  MyNewsletter,
+  NewsletterDetail,
+  NewsletterItem,
+  NewsletterStats,
+  ReadNewsletter,
+  ResourceDocument,
+  ResourceDownloadItem,
+  ResourceFolder,
+  ResourceVersionItem,
   Analytics,
   ReportDefinition,
   ReportRun,
@@ -824,3 +833,77 @@ export function useRequestReport() {
 
 export const useAnalytics = (from: string, to: string) =>
   useQuery({ queryKey: ['analytics', from, to], queryFn: () => api.get<Analytics>('/reports/analytics', { from, to }) })
+
+// ── Newsletters and resources ───────────────────────────────────────────────
+
+export const useNewsletters = (status: string, search: string) =>
+  useInfiniteList<NewsletterItem>(['newsletters'], '/newsletters', { status: status || undefined, search: search || undefined })
+
+export const useNewsletter = (id: string | null) =>
+  useQuery({ queryKey: ['newsletter', id], enabled: !!id, queryFn: () => api.get<NewsletterDetail>(`/newsletters/${id}`) })
+
+export const useNewsletterStats = (id: string | null) =>
+  useQuery({ queryKey: ['newsletter-stats', id], enabled: !!id, queryFn: () => api.get<NewsletterStats>(`/newsletters/${id}/stats`) })
+
+export const useMyNewsletters = (enabled = true) => useInfiniteList<MyNewsletter>(['my-newsletters'], '/newsletters/mine', {}, enabled)
+
+export const useReadNewsletter = (id: string | null, language: string) =>
+  useQuery({ queryKey: ['read-newsletter', id, language], enabled: !!id, queryFn: () => api.get<ReadNewsletter>(`/newsletters/${id}/read`, { language }) })
+
+export interface NewsletterInput {
+  title: Record<string, string>
+  body: Record<string, string>
+  audience_type: string
+  audience_ids: string[]
+}
+
+function useNewsletterMutation<TBody>(run: (body: TBody) => Promise<unknown>) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: run,
+    onSuccess: () => Promise.all(['newsletters', 'newsletter', 'newsletter-stats', 'my-newsletters'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const useSaveNewsletter = (id?: string) =>
+  useNewsletterMutation((body: NewsletterInput) => (id ? api.patch<NewsletterDetail>(`/newsletters/${id}`, body) : api.post<NewsletterDetail>('/newsletters', body)))
+
+export const useNewsletterAction = () =>
+  useNewsletterMutation(({ id, action, at }: { id: string; action: 'publish' | 'unschedule' | 'archive' | 'schedule'; at?: string }) =>
+    api.post<NewsletterDetail>(`/newsletters/${id}/actions/${action}`, action === 'schedule' ? { at } : undefined))
+
+export const useDeleteNewsletter = () => useNewsletterMutation((id: string) => api.delete(`/newsletters/${id}`))
+
+export const useDraftNewsletter = () => useMutation({ mutationFn: (language: string) => api.post<{ title: string; body: string; used_ai: boolean }>(`/newsletters/actions/draft?language=${language}`) })
+
+export const useResourceFolders = () => useQuery({ queryKey: ['resource-folders'], queryFn: () => api.get<ResourceFolder[]>('/resources/folders') })
+
+function useResourceMutation<TBody>(run: (body: TBody) => Promise<unknown>) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: run,
+    onSuccess: () => Promise.all(['resource-folders', 'resource-documents', 'resource-versions', 'resource-downloads'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const useSaveFolder = (id?: string) =>
+  useResourceMutation((body: { name: Record<string, string>; audience: string; parent_folder_id: string | null }) => (id ? api.patch<ResourceFolder[]>(`/resources/folders/${id}`, body) : api.post<ResourceFolder[]>('/resources/folders', body)))
+
+export const useDeleteFolder = () => useResourceMutation((id: string) => api.delete(`/resources/folders/${id}`))
+
+export const useResourceDocuments = (folderId: string, search: string) =>
+  useInfiniteList<ResourceDocument>(['resource-documents'], '/resources/documents', { folder_id: folderId || undefined, search: search || undefined })
+
+export const useUploadDocument = () =>
+  useResourceMutation(({ file, ...fields }: { file: File; folder_id: string; title: string; description: string; tags: string }) => api.upload<ResourceDocument>('/resources/documents', file, fields))
+
+export const useUploadVersion = () => useResourceMutation(({ id, file }: { id: string; file: File }) => api.upload<ResourceDocument>(`/resources/documents/${id}/versions`, file))
+
+export const useUpdateDocument = (id: string) =>
+  useResourceMutation((body: { title: string; description: string | null; tags: string | null; folder_id: string | null }) => api.patch<ResourceDocument>(`/resources/documents/${id}`, body))
+
+export const useDeleteDocument = () => useResourceMutation((id: string) => api.delete(`/resources/documents/${id}`))
+
+export const useResourceVersions = (id: string | null) => useQuery({ queryKey: ['resource-versions', id], enabled: !!id, queryFn: () => api.get<ResourceVersionItem[]>(`/resources/documents/${id}/versions`) })
+
+export const useResourceDownloads = (id: string | null) => useQuery({ queryKey: ['resource-downloads', id], enabled: !!id, queryFn: () => api.get<ResourceDownloadItem[]>(`/resources/documents/${id}/downloads`) })
