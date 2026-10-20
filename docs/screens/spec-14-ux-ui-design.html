@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UX/UI Design — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class="active"><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-design-vision" class="toc-link" data-target="1-design-vision">1. Design Vision</a><a href="#11-the-bar" class="toc-link toc-h3" data-target="11-the-bar">1.1 The Bar</a><a href="#12-design-principles" class="toc-link toc-h3" data-target="12-design-principles">1.2 Design Principles</a><a href="#13-tone-of-voice" class="toc-link toc-h3" data-target="13-tone-of-voice">1.3 Tone of Voice</a><a href="#2-brand-identity" class="toc-link" data-target="2-brand-identity">2. Brand Identity</a><a href="#21-logo" class="toc-link toc-h3" data-target="21-logo">2.1 Logo</a><a href="#22-brand-personality" class="toc-link toc-h3" data-target="22-brand-personality">2.2 Brand Personality</a><a href="#3-color-system" class="toc-link" data-target="3-color-system">3. Color System</a><a href="#31-primary-palette" class="toc-link toc-h3" data-target="31-primary-palette">3.1 Primary Palette</a><a href="#32-color-usage-rules" class="toc-link toc-h3" data-target="32-color-usage-rules">3.2 Color Usage Rules</a><a href="#33-accessibility-contrast" class="toc-link toc-h3" data-target="33-accessibility-contrast">3.3 Accessibility (Contrast)</a><a href="#4-typography" class="toc-link" data-target="4-typography">4. Typography</a><a href="#41-font-stack" class="toc-link toc-h3" data-target="41-font-stack">4.1 Font Stack</a><a href="#42-type-scale" class="toc-link toc-h3" data-target="42-type-scale">4.2 Type Scale</a><a href="#43-usage" class="toc-link toc-h3" data-target="43-usage">4.3 Usage</a><a href="#44-line-height" class="toc-link toc-h3" data-target="44-line-height">4.4 Line Height</a><a href="#45-arabic-typography-notes" class="toc-link toc-h3" data-target="45-arabic-typography-notes">4.5 Arabic Typography Notes</a><a href="#5-spacing-layout" class="toc-link" data-target="5-spacing-layout">5. Spacing &amp; Layout</a><a href="#51-spacing-scale-tailwind-defaults-extensions" class="toc-link toc-h3" data-target="51-spacing-scale-tailwind-defaults-extensions">5.1 Spacing Scale (Tailwind defaults + extensio...</a><a href="#52-container" class="toc-link toc-h3" data-target="52-container">5.2 Container</a><a href="#53-grid" class="toc-link toc-h3" data-target="53-grid">5.3 Grid</a><a href="#54-page-padding" class="toc-link toc-h3" data-target="54-page-padding">5.4 Page Padding</a><a href="#55-card-spacing" class="toc-link toc-h3" data-target="55-card-spacing">5.5 Card Spacing</a><a href="#6-component-specifications" class="toc-link" data-target="6-component-specifications">6. Component Specifications</a><a href="#61-buttons" class="toc-link toc-h3" data-target="61-buttons">6.1 Buttons</a><a href="#62-form-inputs" class="toc-link toc-h3" data-target="62-form-inputs">6.2 Form Inputs</a><a href="#63-cards" class="toc-link toc-h3" data-target="63-cards">6.3 Cards</a><a href="#64-tables" class="toc-link toc-h3" data-target="64-tables">6.4 Tables</a><a href="#65-badges" class="toc-link toc-h3" data-target="65-badges">6.5 Badges</a><a href="#66-modalsdialogs" class="toc-link toc-h3" data-target="66-modalsdialogs">6.6 Modals/Dialogs</a><a href="#67-toastsnotifications" class="toc-link toc-h3" data-target="67-toastsnotifications">6.7 Toasts/Notifications</a><a href="#68-avatar" class="toc-link toc-h3" data-target="68-avatar">6.8 Avatar</a><a href="#69-empty-states" class="toc-link toc-h3" data-target="69-empty-states">6.9 Empty States</a><a href="#610-loading-states" class="toc-link toc-h3" data-target="610-loading-states">6.10 Loading States</a><a href="#7-layout-patterns" class="toc-link" data-target="7-layout-patterns">7. Layout Patterns</a><a href="#71-app-shell-staff-web" class="toc-link toc-h3" data-target="71-app-shell-staff-web">7.1 App Shell (Staff Web)</a><a href="#72-parent-layout-web-mobile" class="toc-link toc-h3" data-target="72-parent-layout-web-mobile">7.2 Parent Layout (Web + Mobile)</a><a href="#73-dashboard-layout" class="toc-link toc-h3" data-target="73-dashboard-layout">7.3 Dashboard Layout</a><a href="#74-list-view-layout" class="toc-link toc-h3" data-target="74-list-view-layout">7.4 List View Layout</a><a href="#75-detail-view-layout" class="toc-link toc-h3" data-target="75-detail-view-layout">7.5 Detail View Layout</a><a href="#8-iconography" class="toc-link" data-target="8-iconography">8. Iconography</a><a href="#81-icon-library" class="toc-link toc-h3" data-target="81-icon-library">8.1 Icon Library</a><a href="#82-icon-sizing" class="toc-link toc-h3" data-target="82-icon-sizing">8.2 Icon Sizing</a><a href="#83-directional-icons-in-rtl" class="toc-link toc-h3" data-target="83-directional-icons-in-rtl">8.3 Directional Icons in RTL</a><a href="#9-animation-micro-interactions" class="toc-link" data-target="9-animation-micro-interactions">9. Animation &amp; Micro-interactions</a><a href="#91-principles" class="toc-link toc-h3" data-target="91-principles">9.1 Principles</a><a href="#92-standard-transitions" class="toc-link toc-h3" data-target="92-standard-transitions">9.2 Standard Transitions</a><a href="#93-reduced-motion" class="toc-link toc-h3" data-target="93-reduced-motion">9.3 Reduced Motion</a><a href="#10-rtl-right-to-left-patterns" class="toc-link" data-target="10-rtl-right-to-left-patterns">10. RTL (Right-to-Left) Patterns</a><a href="#101-the-cardinal-rules" class="toc-link toc-h3" data-target="101-the-cardinal-rules">10.1 The Cardinal Rules</a><a href="#102-rtl-testing" class="toc-link toc-h3" data-target="102-rtl-testing">10.2 RTL Testing</a><a href="#103-common-rtl-pitfalls" class="toc-link toc-h3" data-target="103-common-rtl-pitfalls">10.3 Common RTL Pitfalls</a><a href="#11-accessibility-wcag-21-aa" class="toc-link" data-target="11-accessibility-wcag-21-aa">11. Accessibility (WCAG 2.1 AA)</a><a href="#111-color-contrast" class="toc-link toc-h3" data-target="111-color-contrast">11.1 Color Contrast</a><a href="#112-keyboard-navigation" class="toc-link toc-h3" data-target="112-keyboard-navigation">11.2 Keyboard Navigation</a><a href="#113-screen-reader-support" class="toc-link toc-h3" data-target="113-screen-reader-support">11.3 Screen Reader Support</a><a href="#114-reduced-motion" class="toc-link toc-h3" data-target="114-reduced-motion">11.4 Reduced Motion</a><a href="#115-other" class="toc-link toc-h3" data-target="115-other">11.5 Other</a><a href="#12-mobile-specific-patterns" class="toc-link" data-target="12-mobile-specific-patterns">12. Mobile-Specific Patterns</a><a href="#121-touch-targets" class="toc-link toc-h3" data-target="121-touch-targets">12.1 Touch Targets</a><a href="#122-gestures" class="toc-link toc-h3" data-target="122-gestures">12.2 Gestures</a><a href="#123-native-ios-patterns-via-react-native-paper" class="toc-link toc-h3" data-target="123-native-ios-patterns-via-react-native-paper">12.3 Native iOS Patterns (via React Native Paper)</a><a href="#124-native-android-patterns" class="toc-link toc-h3" data-target="124-native-android-patterns">12.4 Native Android Patterns</a><a href="#13-illustrations-empty-states" class="toc-link" data-target="13-illustrations-empty-states">13. Illustrations &amp; Empty States</a><a href="#131-illustration-style" class="toc-link toc-h3" data-target="131-illustration-style">13.1 Illustration Style</a><a href="#132-empty-state-examples" class="toc-link toc-h3" data-target="132-empty-state-examples">13.2 Empty State Examples</a><a href="#14-parentapp-baseline-comparison" class="toc-link" data-target="14-parentapp-baseline-comparison">14. parent.app Baseline Comparison</a><a href="#141-where-parentapp-meets-the-bar" class="toc-link toc-h3" data-target="141-where-parentapp-meets-the-bar">14.1 Where parent.app Meets the Bar</a><a href="#142-where-we-exceed-parentapp" class="toc-link toc-h3" data-target="142-where-we-exceed-parentapp">14.2 Where We Exceed parent.app</a><a href="#143-where-we-learn-from-parentapp" class="toc-link toc-h3" data-target="143-where-we-learn-from-parentapp">14.3 Where We Learn From parent.app</a><a href="#15-design-system-governance" class="toc-link" data-target="15-design-system-governance">15. Design System Governance</a><a href="#151-storybook" class="toc-link toc-h3" data-target="151-storybook">15.1 Storybook</a><a href="#152-design-tokens" class="toc-link toc-h3" data-target="152-design-tokens">15.2 Design Tokens</a><a href="#153-design-review" class="toc-link toc-h3" data-target="153-design-review">15.3 Design Review</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="palette" class="w-4 h-4 text-amber-600"></i><span>UX/UI Design</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-14-ux-ui-design.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 14</span>
+          <span class="text-[10px] font-mono text-slate-400">~4,405 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">UX/UI Design</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-13-mobile-app.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Mobile App</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-15-notifications.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Notifications</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="14-uxui-design-system">14 — UX/UI Design System</h1>
+<blockquote>
+<p>The design vision, principles, color system, typography, components, and patterns that elevate NMS beyond parent.app's baseline.</p>
+</blockquote>
+<hr />
+<h2 id="1-design-vision">1. Design Vision</h2>
+<h3 id="11-the-bar">1.1 The Bar</h3>
+<p><strong>parent.app</strong> is the minimum acceptable baseline. We must match them on features and <strong>exceed them on UX/UI quality</strong>.</p>
+<p>parent.app's UX is functional but feels dated — enterprise SaaS aesthetic from 2015: cluttered tables, dense forms, inconsistent spacing, generic Material Design echoes, weak Arabic RTL.</p>
+<p>NMS UX must feel like a <strong>2026 product</strong>: calm, confident, warm, modern. Reference quality: Linear, Notion, Stripe, Vercel, Arc Browser. NOT Salesforce, NOT Workday, NOT 2010s enterprise.</p>
+<h3 id="12-design-principles">1.2 Design Principles</h3>
+<ol>
+<li><strong>Calm</strong> — Generous whitespace, soft colors, no clutter. The product feels restful even in busy moments.</li>
+<li><strong>Confident</strong> — Strong typography, clear hierarchy, decisive interactions. Every screen knows what it's about.</li>
+<li><strong>Warm</strong> — This is for children. Soft pastels, friendly iconography, approachable tone. Never sterile.</li>
+<li><strong>Trustworthy</strong> — Professional, secure-feeling. No dark patterns. No surprise modals. Clear state changes.</li>
+<li><strong>Fast</strong> — Interactions under 200ms perceived. Dashboard under 2s load. Loading states everywhere.</li>
+<li><strong>Bilingual-first</strong> — Arabic and English are first-class. RTL is not an afterthought. Both languages feel native.</li>
+<li><strong>Accessible</strong> — WCAG 2.1 AA. Keyboard-navigable. Screen-reader-friendly. Color-contrast-compliant.</li>
+<li><strong>Mobile-grade on web</strong> — Even the web app feels touch-friendly. Big tap targets. No hover-dependent UI.</li>
+</ol>
+<h3 id="13-tone-of-voice">1.3 Tone of Voice</h3>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>What it means</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Clear</td>
+<td>Plain language, no jargon</td>
+<td>"Check in Ahmed" not "Execute attendance recordation for entity: Ahmed"</td>
+</tr>
+<tr>
+<td>Warm</td>
+<td>Friendly, not corporate</td>
+<td>"Ahmed checked in at 8:32 AM" not "Attendance record created: timestamp=08:32:00, entity=Ahmed"</td>
+</tr>
+<tr>
+<td>Concise</td>
+<td>Short, scannable</td>
+<td>"3 students pending" not "There are currently 3 students whose attendance status is pending"</td>
+</tr>
+<tr>
+<td>Active</td>
+<td>Verb-first, decisive</td>
+<td>"Save changes" not "Changes should be saved"</td>
+</tr>
+<tr>
+<td>Inclusive</td>
+<td>Addresses user as "you"</td>
+<td>"You have 5 unread messages" not "5 unread messages exist"</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-brand-identity">2. Brand Identity</h2>
+<h3 id="21-logo">2.1 Logo</h3>
+<ul>
+<li>Custom wordmark: "NMS" in a modern geometric sans (Inter or similar).</li>
+<li>Optional: small icon (leaf, building, abstract shape) — TBD with brand designer.</li>
+<li>Used in: app header, login screen, email templates, invoices.</li>
+</ul>
+<h3 id="22-brand-personality">2.2 Brand Personality</h3>
+<table>
+<thead>
+<tr>
+<th>Trait</th>
+<th>Expression</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trustworthy (parents trust us with their children)</td>
+<td>Solid typography, restrained color palette, no flashy animations</td>
+</tr>
+<tr>
+<td>Warm (children are involved)</td>
+<td>Soft pastels, rounded corners, friendly illustrations</td>
+</tr>
+<tr>
+<td>Modern (we're a 2026 product)</td>
+<td>Generous whitespace, micro-interactions, fast feedback</td>
+</tr>
+<tr>
+<td>Professional (this is enterprise software)</td>
+<td>Consistent grid, predictable patterns, no decorative noise</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-color-system">3. Color System</h2>
+<h3 id="31-primary-palette">3.1 Primary Palette</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">/* globals.css — CSS variables (work in both LTR and RTL) */</span>
+<span style="color: #F8F8F2">:</span><span style="color: #A6E22E">root</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #959077">/* Brand */</span>
+<span style="color: #F8F8F2">  --color-primary: </span><span style="color: #AE81FF">#0066CC</span><span style="color: #F8F8F2">;          </span><span style="color: #959077">/* Trust blue */</span>
+<span style="color: #F8F8F2">  --color-primary-hover: </span><span style="color: #AE81FF">#0052A3</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-primary-active: </span><span style="color: #AE81FF">#003D7A</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-primary-soft: </span><span style="color: #AE81FF">#E6F0FF</span><span style="color: #F8F8F2">;     </span><span style="color: #959077">/* Background tint */</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077">/* Accent (warm contrast — for highlights, badges) */</span>
+<span style="color: #F8F8F2">  --color-accent: </span><span style="color: #AE81FF">#FF6B35</span><span style="color: #F8F8F2">;           </span><span style="color: #959077">/* Warm orange — energy */</span>
+<span style="color: #F8F8F2">  --color-accent-hover: </span><span style="color: #AE81FF">#E55A2B</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-accent-soft: </span><span style="color: #AE81FF">#FFF0E6</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077">/* Semantic */</span>
+<span style="color: #F8F8F2">  --color-success: </span><span style="color: #AE81FF">#16A34A</span><span style="color: #F8F8F2">;          </span><span style="color: #959077">/* Green */</span>
+<span style="color: #F8F8F2">  --color-success-soft: </span><span style="color: #AE81FF">#DCFCE7</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-warning: </span><span style="color: #AE81FF">#F59E0B</span><span style="color: #F8F8F2">;          </span><span style="color: #959077">/* Amber */</span>
+<span style="color: #F8F8F2">  --color-warning-soft: </span><span style="color: #AE81FF">#FEF3C7</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-danger: </span><span style="color: #AE81FF">#DC2626</span><span style="color: #F8F8F2">;           </span><span style="color: #959077">/* Red */</span>
+<span style="color: #F8F8F2">  --color-danger-soft: </span><span style="color: #AE81FF">#FEE2E2</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-info: </span><span style="color: #AE81FF">#0EA5E9</span><span style="color: #F8F8F2">;             </span><span style="color: #959077">/* Sky blue */</span>
+<span style="color: #F8F8F2">  --color-info-soft: </span><span style="color: #AE81FF">#E0F2FE</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077">/* Neutrals (warm gray, not cold) */</span>
+<span style="color: #F8F8F2">  --color-background: </span><span style="color: #AE81FF">#FAFAF9</span><span style="color: #F8F8F2">;       </span><span style="color: #959077">/* Warm white */</span>
+<span style="color: #F8F8F2">  --color-surface: </span><span style="color: #AE81FF">#FFFFFF</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-surface-2: </span><span style="color: #AE81FF">#F5F5F4</span><span style="color: #F8F8F2">;        </span><span style="color: #959077">/* Subtle gray */</span>
+<span style="color: #F8F8F2">  --color-border: </span><span style="color: #AE81FF">#E7E5E4</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-border-strong: </span><span style="color: #AE81FF">#D6D3D1</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077">/* Text */</span>
+<span style="color: #F8F8F2">  --color-text: </span><span style="color: #AE81FF">#1C1917</span><span style="color: #F8F8F2">;             </span><span style="color: #959077">/* Stone-900 */</span>
+<span style="color: #F8F8F2">  --color-text-secondary: </span><span style="color: #AE81FF">#57534E</span><span style="color: #F8F8F2">;   </span><span style="color: #959077">/* Stone-600 */</span>
+<span style="color: #F8F8F2">  --color-text-tertiary: </span><span style="color: #AE81FF">#A8A29E</span><span style="color: #F8F8F2">;    </span><span style="color: #959077">/* Stone-400 */</span>
+<span style="color: #F8F8F2">  --color-text-on-primary: </span><span style="color: #AE81FF">#FFFFFF</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-text-on-accent: </span><span style="color: #AE81FF">#FFFFFF</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077">/* Status (for attendance) */</span>
+<span style="color: #F8F8F2">  --color-status-present: </span><span style="color: #AE81FF">#16A34A</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-status-absent: </span><span style="color: #AE81FF">#DC2626</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-status-pending: </span><span style="color: #AE81FF">#F59E0B</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-status-late: </span><span style="color: #AE81FF">#8B5CF6</span><span style="color: #F8F8F2">;      </span><span style="color: #959077">/* Violet */</span>
+<span style="color: #F8F8F2">  --color-status-checked-in: </span><span style="color: #AE81FF">#16A34A</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-status-checked-out: </span><span style="color: #AE81FF">#6B7280</span><span style="color: #F8F8F2">;  </span><span style="color: #959077">/* Gray */</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077">/* Tiers (for notifications) */</span>
+<span style="color: #F8F8F2">  --color-tier-critical: </span><span style="color: #AE81FF">#DC2626</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-tier-operational: </span><span style="color: #AE81FF">#F59E0B</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-tier-informational: </span><span style="color: #AE81FF">#0EA5E9</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #959077">/* Dark theme (optional, Phase 2) */</span>
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">dark</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  --color-primary: </span><span style="color: #AE81FF">#3B82F6</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-background: </span><span style="color: #AE81FF">#0C0A09</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-surface: </span><span style="color: #AE81FF">#1C1917</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-surface-2: </span><span style="color: #AE81FF">#292524</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-border: </span><span style="color: #AE81FF">#44403C</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-text: </span><span style="color: #AE81FF">#FAFAF9</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-text-secondary: </span><span style="color: #AE81FF">#D6D3D1</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  --color-text-tertiary: </span><span style="color: #AE81FF">#78716C</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="32-color-usage-rules">3.2 Color Usage Rules</h3>
+<ul>
+<li><strong>Primary</strong> — main actions (Save, Submit, primary CTAs), active nav item, links.</li>
+<li><strong>Accent</strong> — sparingly, for warm highlights (badges, "new" indicators, AI feature accents).</li>
+<li><strong>Success</strong> — completed state, approved, paid.</li>
+<li><strong>Warning</strong> — pending, overdue, attention needed.</li>
+<li><strong>Danger</strong> — destructive actions, errors, ratio breach.</li>
+<li><strong>Info</strong> — informational badges, neutral highlights.</li>
+<li><strong>Neutrals</strong> — backgrounds, borders, secondary text.</li>
+</ul>
+<p><strong>Never</strong>:
+- More than 2 semantic colors in one component.
+- Primary color for non-interactive elements.
+- Red for non-danger elements.
+- Pure black (#000) or pure white (#FFF) for text/bg — use the warm neutrals.</p>
+<h3 id="33-accessibility-contrast">3.3 Accessibility (Contrast)</h3>
+<p>All color combinations meet WCAG 2.1 AA:
+- Body text on background: #1C1917 on #FAFAF9 → 16.5:1 (AAA).
+- Secondary text: #57534E on #FAFAF9 → 6.5:1 (AA).
+- Tertiary text: #A8A29E on #FAFAF9 → 2.7:1 — <strong>only for large text or non-essential info</strong>.
+- Primary button: #FFFFFF on #0066CC → 5.3:1 (AA).
+- Danger button: #FFFFFF on #DC2626 → 5.0:1 (AA).</p>
+<p>Tested with <code>axe-core</code> in CI.</p>
+<hr />
+<h2 id="4-typography">4. Typography</h2>
+<h3 id="41-font-stack">4.1 Font Stack</h3>
+<p><strong>Latin (English)</strong>:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">--font-sans:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;Inter&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">system-ui,</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">-apple-system,</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;Segoe UI&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">sans-serif;</span>
+<span style="color: #FF4689">--font-mono:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;JetBrains Mono&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;Cascadia Code&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">monospace;</span>
+</code></pre></div>
+
+<p><strong>Arabic</strong>:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">--font-sans-ar:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;IBM Plex Sans Arabic&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;Tajawal&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;Noto Sans Arabic&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">sans-serif;</span>
+</code></pre></div>
+
+<p>Why:
+- <strong>Inter</strong> — modern, neutral, excellent legibility at small sizes, free, supports Latin + Cyrillic + Greek.
+- <strong>IBM Plex Sans Arabic</strong> — designed alongside IBM Plex (consistent visual language), excellent Arabic legibility, supports Arabic + Latin.
+- <strong>Tajawal</strong> — fallback Arabic (open source, clean, modern).</p>
+<p><strong>Both fonts loaded via <code>@fontsource/inter</code> and <code>@fontsource/ibm-plex-sans-arabic</code></strong> (self-hosted, no Google Fonts privacy issue).</p>
+<h3 id="42-type-scale">4.2 Type Scale</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">/* Tailwind config */</span>
+<span style="color: #FF4689">fontSize:</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">&#39;xs&#39;:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">[&#39;0.75rem&#39;,</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">{</span><span style="color: #F8F8F2"> lineHeight: </span><span style="color: #E6DB74">&#39;1rem&#39;</span><span style="color: #F8F8F2"> }</span><span style="color: #FF4689">],</span><span style="color: #F8F8F2">     </span><span style="color: #959077">/* 12px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #E6DB74">&#39;sm&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span><span style="color: #E6DB74">&#39;0.875rem&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> { lineHeight: </span><span style="color: #E6DB74">&#39;1.25rem&#39;</span><span style="color: #F8F8F2"> }</span><span style="color: #FF4689">],</span><span style="color: #F8F8F2"> </span><span style="color: #959077">/* 14px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #E6DB74">&#39;base&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span><span style="color: #E6DB74">&#39;1rem&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> { lineHeight: </span><span style="color: #E6DB74">&#39;1.5rem&#39;</span><span style="color: #F8F8F2"> }</span><span style="color: #FF4689">],</span><span style="color: #F8F8F2">    </span><span style="color: #959077">/* 16px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #E6DB74">&#39;lg&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span><span style="color: #E6DB74">&#39;1.125rem&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> { lineHeight: </span><span style="color: #E6DB74">&#39;1.75rem&#39;</span><span style="color: #F8F8F2"> }</span><span style="color: #FF4689">],</span><span style="color: #F8F8F2"> </span><span style="color: #959077">/* 18px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #E6DB74">&#39;xl&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span><span style="color: #E6DB74">&#39;1.25rem&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> { lineHeight: </span><span style="color: #E6DB74">&#39;1.75rem&#39;</span><span style="color: #F8F8F2"> }</span><span style="color: #FF4689">],</span><span style="color: #F8F8F2">  </span><span style="color: #959077">/* 20px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #E6DB74">&#39;2xl&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span><span style="color: #E6DB74">&#39;1.5rem&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> { lineHeight: </span><span style="color: #E6DB74">&#39;2rem&#39;</span><span style="color: #F8F8F2"> }</span><span style="color: #FF4689">],</span><span style="color: #F8F8F2">     </span><span style="color: #959077">/* 24px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #E6DB74">&#39;3xl&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span><span style="color: #E6DB74">&#39;1.875rem&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> { lineHeight: </span><span style="color: #E6DB74">&#39;2.25rem&#39;</span><span style="color: #F8F8F2"> }</span><span style="color: #FF4689">],</span><span style="color: #959077">/* 30px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #E6DB74">&#39;4xl&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span><span style="color: #E6DB74">&#39;2.25rem&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> { lineHeight: </span><span style="color: #E6DB74">&#39;2.5rem&#39;</span><span style="color: #F8F8F2"> }</span><span style="color: #FF4689">],</span><span style="color: #F8F8F2">  </span><span style="color: #959077">/* 36px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #E6DB74">&#39;5xl&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span><span style="color: #E6DB74">&#39;3rem&#39;</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> { lineHeight: </span><span style="color: #E6DB74">&#39;1&#39;</span><span style="color: #F8F8F2"> }</span><span style="color: #FF4689">],</span><span style="color: #F8F8F2">          </span><span style="color: #959077">/* 48px */</span>
+<span style="color: #ED007E; background-color: #1E0010">}</span>
+
+<span style="color: #FF4689">fontWeight:</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  regular: </span><span style="color: #AE81FF">400</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">medium</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">500</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  semibold</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">600</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">bold</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">700</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="43-usage">4.3 Usage</h3>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Size</th>
+<th>Weight</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Page title (H1)</td>
+<td>text-3xl (30px)</td>
+<td>semibold</td>
+<td>One per page</td>
+</tr>
+<tr>
+<td>Section title (H2)</td>
+<td>text-xl (20px)</td>
+<td>semibold</td>
+<td></td>
+</tr>
+<tr>
+<td>Card title (H3)</td>
+<td>text-lg (18px)</td>
+<td>semibold</td>
+<td></td>
+</tr>
+<tr>
+<td>Body text</td>
+<td>text-base (16px)</td>
+<td>regular</td>
+<td>Default for paragraphs</td>
+</tr>
+<tr>
+<td>Secondary text</td>
+<td>text-sm (14px)</td>
+<td>regular</td>
+<td>Helper text, metadata</td>
+</tr>
+<tr>
+<td>Caption</td>
+<td>text-xs (12px)</td>
+<td>regular</td>
+<td>Timestamps, badge labels</td>
+</tr>
+<tr>
+<td>Button label</td>
+<td>text-sm (14px)</td>
+<td>semibold</td>
+<td></td>
+</tr>
+<tr>
+<td>Form label</td>
+<td>text-sm (14px)</td>
+<td>medium</td>
+<td></td>
+</tr>
+<tr>
+<td>Form input</td>
+<td>text-base (16px)</td>
+<td>regular</td>
+<td>Never smaller (iOS zoom)</td>
+</tr>
+<tr>
+<td>Table header</td>
+<td>text-xs (12px)</td>
+<td>medium</td>
+<td>uppercase, tracking-wide</td>
+</tr>
+<tr>
+<td>Table cell</td>
+<td>text-sm (14px)</td>
+<td>regular</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="44-line-height">4.4 Line Height</h3>
+<ul>
+<li>Body text: 1.5x font size (Tailwind <code>leading-6</code> for <code>text-base</code>).</li>
+<li>Headings: 1.25-1.4x font size.</li>
+<li>Buttons/labels: 1x (single line).</li>
+</ul>
+<h3 id="45-arabic-typography-notes">4.5 Arabic Typography Notes</h3>
+<ul>
+<li>Arabic script is denser — slightly larger font size (102-105%) sometimes needed for legibility.</li>
+<li>Use <code>font-feature-settings: "kern"</code> for proper Arabic kerning.</li>
+<li>Numbers: use Western Arabic numerals (1, 2, 3) by default for consistency with billing/attendance. Eastern Arabic numerals (١, ٢, ٣) optional per user preference.</li>
+<li>Dates: use Gregorian calendar by default. Hijri calendar optional display.</li>
+</ul>
+<hr />
+<h2 id="5-spacing-layout">5. Spacing &amp; Layout</h2>
+<h3 id="51-spacing-scale-tailwind-defaults-extensions">5.1 Spacing Scale (Tailwind defaults + extensions)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">spacing:</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">0:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;0&#39;,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">1:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;0.25rem&#39;,</span><span style="color: #F8F8F2">    </span><span style="color: #959077">/* 4px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">2:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;0.5rem&#39;,</span><span style="color: #F8F8F2">     </span><span style="color: #959077">/* 8px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">3:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;0.75rem&#39;,</span><span style="color: #F8F8F2">    </span><span style="color: #959077">/* 12px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">4:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;1rem&#39;,</span><span style="color: #F8F8F2">       </span><span style="color: #959077">/* 16px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">5:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;1.25rem&#39;,</span><span style="color: #F8F8F2">    </span><span style="color: #959077">/* 20px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">6:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;1.5rem&#39;,</span><span style="color: #F8F8F2">     </span><span style="color: #959077">/* 24px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">8:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;2rem&#39;,</span><span style="color: #F8F8F2">       </span><span style="color: #959077">/* 32px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">10:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;2.5rem&#39;,</span><span style="color: #F8F8F2">    </span><span style="color: #959077">/* 40px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">12:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;3rem&#39;,</span><span style="color: #F8F8F2">      </span><span style="color: #959077">/* 48px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">16:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;4rem&#39;,</span><span style="color: #F8F8F2">      </span><span style="color: #959077">/* 64px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">20:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;5rem&#39;,</span><span style="color: #F8F8F2">      </span><span style="color: #959077">/* 80px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">24:</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">&#39;6rem&#39;,</span><span style="color: #F8F8F2">      </span><span style="color: #959077">/* 96px */</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="52-container">5.2 Container</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">--container-page:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">1280px;</span><span style="color: #F8F8F2">   </span><span style="color: #959077">/* Max page width */</span>
+<span style="color: #FF4689">--container-narrow:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">768px;</span><span style="color: #F8F8F2">  </span><span style="color: #959077">/* Forms, single column */</span>
+<span style="color: #FF4689">--container-wide:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">1536px;</span><span style="color: #F8F8F2">   </span><span style="color: #959077">/* Dashboards, tables */</span>
+</code></pre></div>
+
+<h3 id="53-grid">5.3 Grid</h3>
+<ul>
+<li>12-column grid for complex layouts (dashboards).</li>
+<li>8px base unit (Tailwind default).</li>
+<li>Use <code>gap-4</code> (16px) for grid gaps.</li>
+</ul>
+<h3 id="54-page-padding">5.4 Page Padding</h3>
+<ul>
+<li>Desktop: <code>p-6</code> (24px) on all sides.</li>
+<li>Tablet: <code>p-4</code> (16px).</li>
+<li>Mobile: <code>p-3</code> (12px).</li>
+</ul>
+<h3 id="55-card-spacing">5.5 Card Spacing</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">--card-padding:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">1</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">5rem</span><span style="color: #FF4689">;</span><span style="color: #F8F8F2">       </span><span style="color: #959077">/* 24px */</span>
+<span style="color: #FF4689">--card-padding-sm:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">1rem;</span><span style="color: #F8F8F2">      </span><span style="color: #959077">/* 16px */</span>
+<span style="color: #FF4689">--card-gap:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">1</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">5rem</span><span style="color: #FF4689">;</span><span style="color: #F8F8F2">           </span><span style="color: #959077">/* 24px between cards */</span>
+<span style="color: #FF4689">--card-radius:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">75rem</span><span style="color: #FF4689">;</span><span style="color: #F8F8F2">       </span><span style="color: #959077">/* 12px — generous rounding */</span>
+<span style="color: #FF4689">--card-border:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">1px</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">solid</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">var(--color-border);</span>
+<span style="color: #FF4689">--card-shadow:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">1px</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">3px</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">rgb(0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">/</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">1</span><span style="color: #FF4689">),</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">1px</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">2px</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">-1px</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">rgb(0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">/</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">0</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">1</span><span style="color: #FF4689">);</span>
+</code></pre></div>
+
+<hr />
+<h2 id="6-component-specifications">6. Component Specifications</h2>
+<h3 id="61-buttons">6.1 Buttons</h3>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>Use case</th>
+<th>Style</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primary</td>
+<td>Main action (one per view)</td>
+<td>bg-primary text-white hover:bg-primary-hover</td>
+</tr>
+<tr>
+<td>Secondary</td>
+<td>Alternative action</td>
+<td>bg-surface text-primary border border-primary</td>
+</tr>
+<tr>
+<td>Outline</td>
+<td>Cancel, dismiss</td>
+<td>bg-transparent border border-border-strong text-text</td>
+</tr>
+<tr>
+<td>Ghost</td>
+<td>Tertiary actions</td>
+<td>bg-transparent text-primary hover:bg-primary-soft</td>
+</tr>
+<tr>
+<td>Destructive</td>
+<td>Delete, remove</td>
+<td>bg-danger text-white hover:bg-danger/90</td>
+</tr>
+<tr>
+<td>Subtle</td>
+<td>In-table actions</td>
+<td>bg-transparent text-text-secondary hover:bg-surface-2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sizes</strong>:
+- <code>sm</code>: h-8 px-3 text-sm (32px height)
+- <code>md</code>: h-10 px-4 text-sm (40px height) — default
+- <code>lg</code>: h-12 px-6 text-base (48px height) — primary CTA on key pages</p>
+<p><strong>Rules</strong>:
+- One primary button per view (the main action).
+- Icon + label: icon on inline-start, label after.
+- Loading state: spinner replaces icon, button disabled.
+- Disabled: opacity-50, cursor-not-allowed.</p>
+<h3 id="62-form-inputs">6.2 Form Inputs</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">input</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">height</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">2.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;          </span><span style="color: #959077">/* 40px — tap target */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">padding</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0.75</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">solid</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-border-strong);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-radius</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;   </span><span style="color: #959077">/* 8px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-surface);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">color</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-text);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">font-size</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;         </span><span style="color: #959077">/* 16px — never smaller, prevents iOS zoom */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">transition</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">border-color</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">150</span><span style="color: #66D9EF">ms</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">input</span><span style="color: #F8F8F2">:</span><span style="color: #A6E22E">focus</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">outline</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">none</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-color</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-primary);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">box-shadow</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">3</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-primary-soft);</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">input</span><span style="color: #F8F8F2">:</span><span style="color: #A6E22E">disabled</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-surface-</span><span style="color: #AE81FF">2</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">color</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-text-tertiary);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">cursor</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">not-allowed</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">input</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">error</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-color</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-danger);</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p><strong>Labels</strong>: above inputs, <code>text-sm font-medium text-text</code>, 4px gap to input.
+<strong>Helper text</strong>: below input, <code>text-xs text-text-secondary</code>.
+<strong>Error text</strong>: below input, <code>text-xs text-danger</code>, replaces helper text when error.</p>
+<h3 id="63-cards">6.3 Cards</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">card</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-surface);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">solid</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-border);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-radius</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.75</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;   </span><span style="color: #959077">/* 12px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">padding</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;          </span><span style="color: #959077">/* 24px */</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">card-header</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">display</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">flex</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">justify-content</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">space-between</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">align-items</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">center</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">margin-bottom</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">card-title</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">font-size</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1.125</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;      </span><span style="color: #959077">/* 18px */</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">font-weight</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">600</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">card-description</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">font-size</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.875</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">color</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-text-secondary);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">margin-top</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.25</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="64-tables">6.4 Tables</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">table</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">width</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">100</span><span style="color: #66D9EF">%</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-collapse</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">collapse</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">table-header</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-surface-</span><span style="color: #AE81FF">2</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-bottom</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">solid</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-border);</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">table-header-cell</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">padding</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.75</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">text-align</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">start</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">font-size</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.75</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">font-weight</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">500</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">color</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-text-secondary);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">text-transform</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">uppercase</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">letter-spacing</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.05</span><span style="color: #66D9EF">em</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">table-row</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-bottom</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">solid</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-border);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">transition</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">150</span><span style="color: #66D9EF">ms</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">table-row</span><span style="color: #F8F8F2">:</span><span style="color: #A6E22E">hover</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-surface-</span><span style="color: #AE81FF">2</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">table-cell</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">padding</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.75</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">font-size</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.875</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">color</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-text);</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p><strong>Patterns</strong>:
+- Sticky header (stays visible on scroll).
+- Sortable columns (click to sort, arrow indicator).
+- Row hover: subtle background change.
+- Row click: navigate to detail.
+- Empty state: full-width row with icon + message.
+- Loading: skeleton rows.</p>
+<h3 id="65-badges">6.5 Badges</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Use case</th>
+<th>Style</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Status (Present/Absent)</td>
+<td>Attendance status</td>
+<td>Colored bg + text (e.g., bg-success-soft text-success)</td>
+</tr>
+<tr>
+<td>Count</td>
+<td>Unread count, pending count</td>
+<td>bg-primary text-white rounded-full</td>
+</tr>
+<tr>
+<td>New</td>
+<td>Recently added</td>
+<td>bg-accent text-white</td>
+</tr>
+<tr>
+<td>Tier</td>
+<td>Notification tier</td>
+<td>Colored dot + label</td>
+</tr>
+</tbody>
+</table>
+<h3 id="66-modalsdialogs">6.6 Modals/Dialogs</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">dialog-overlay</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2">: rgb(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">/</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0.5</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  backdrop-filter: blur(</span><span style="color: #AE81FF">2</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">dialog-content</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-surface);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-radius</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.75</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">padding</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">max-width</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">90</span><span style="color: #66D9EF">vw</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">max-height</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">85</span><span style="color: #66D9EF">vh</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">overflow-y</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">auto</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">box-shadow</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">25</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">50</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">-12</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> rgb(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">/</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0.25</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">dialog-sizes</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  sm: </span><span style="color: #E6DB74">&#39;max-w-sm&#39;</span><span style="color: #F8F8F2">,   </span><span style="color: #959077">/* 400px — confirm dialogs */</span>
+<span style="color: #F8F8F2">  md</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;max-w-md&#39;</span><span style="color: #F8F8F2">,   </span><span style="color: #959077">/* 450px — simple forms */</span>
+<span style="color: #F8F8F2">  lg</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;max-w-2xl&#39;</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">/* 672px — complex forms */</span>
+<span style="color: #F8F8F2">  xl</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;max-w-4xl&#39;</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">/* 896px — multi-step wizards */</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p><strong>Rules</strong>:
+- Always have a clear title.
+- Always have a close button (X) in top-end corner.
+- Footer with action buttons (Cancel + primary).
+- Trap focus inside modal.
+- Close on Esc + overlay click.
+- Return focus to trigger element on close.</p>
+<h3 id="67-toastsnotifications">6.7 Toasts/Notifications</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">toast</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-surface);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">solid</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-border);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-radius</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">padding</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.75</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">1</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">box-shadow</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">10</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">15</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">-3</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> rgb(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">/</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0.1</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">min-width</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">300</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">max-width</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">400</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">toast-success</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">border-inline-start</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">4</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">solid</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-success); }</span>
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">toast-error</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">border-inline-start</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">4</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">solid</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-danger); }</span>
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">toast-warning</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">border-inline-start</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">4</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">solid</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-warning); }</span>
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">toast-info</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">border-inline-start</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">4</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">solid</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-info); }</span>
+</code></pre></div>
+
+<p>Position: top-end of viewport, stacked vertically with gap-2.
+Auto-dismiss: 5s (success), 10s (info/warning), persistent (error — user must dismiss).</p>
+<h3 id="68-avatar">6.8 Avatar</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">avatar</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">border-radius</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">9999</span><span style="color: #66D9EF">px</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">background</span><span style="color: #F8F8F2">: </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--color-surface-</span><span style="color: #AE81FF">2</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">display</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">flex</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">align-items</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">center</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">justify-content</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">center</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">overflow</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">hidden</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">avatar-sm</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">width</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">height</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">; }   </span><span style="color: #959077">/* 24px */</span>
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">avatar-md</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">width</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">2.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">height</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">2.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">; }   </span><span style="color: #959077">/* 40px — default */</span>
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">avatar-lg</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">width</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">3.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">height</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">3.5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">; }   </span><span style="color: #959077">/* 56px */</span>
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">avatar-xl</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">width</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">height</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">5</span><span style="color: #66D9EF">rem</span><span style="color: #F8F8F2">; }       </span><span style="color: #959077">/* 80px — profile */</span>
+</code></pre></div>
+
+<p>If no photo: show initials (first letter of first + last name) on primary-soft background.</p>
+<h3 id="69-empty-states">6.9 Empty States</h3>
+<p>Every list view has a designed empty state:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>[Icon (large, muted)]
+[Title (medium weight)]
+[Description (small, secondary)]
+[Optional action button]
+</code></pre></div>
+
+<p>Example: "No students yet. Add your first student to get started." + [Add Student] button.</p>
+<h3 id="610-loading-states">6.10 Loading States</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full-screen spinner</td>
+<td>Initial page load</td>
+</tr>
+<tr>
+<td>Skeleton loaders</td>
+<td>Content area loading (table, card grid)</td>
+</tr>
+<tr>
+<td>Inline spinner</td>
+<td>Button submit, async action</td>
+</tr>
+<tr>
+<td>Progress bar</td>
+<td>Long-running operation (file upload, report generation)</td>
+</tr>
+<tr>
+<td>Pulse animation</td>
+<td>Background refresh</td>
+</tr>
+</tbody>
+</table>
+<p>Never block UI without feedback.</p>
+<hr />
+<h2 id="7-layout-patterns">7. Layout Patterns</h2>
+<h3 id="71-app-shell-staff-web">7.1 App Shell (Staff Web)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>┌──────────────────────────────────────────────────────────────┐
+│ [Logo]  [Search...]              [Lang]  [Notif]  [Avatar]   │  ← Header (h-14)
+├────────────┬─────────────────────────────────────────────────┤
+│            │                                                 │
+│ Dashboard  │                                                 │
+│ Students   │                                                 │
+│ Attendance │                                                 │
+│ Activities │           [Page Content]                        │
+│ Messaging  │                                                 │
+│ Billing    │                                                 │
+│ Enquiries  │                                                 │
+│ ...        │                                                 │
+│            │                                                 │
+└────────────┴─────────────────────────────────────────────────┘
+   Sidebar           Main content area
+   (w-60 or w-72)    (flex-1, p-6)
+</code></pre></div>
+
+<p><strong>Responsive</strong>:
+- Desktop (&gt;1024px): full sidebar visible.
+- Tablet (768-1024px): sidebar collapses to icons only (w-16).
+- Mobile (&lt;768px): sidebar hidden, hamburger menu.</p>
+<h3 id="72-parent-layout-web-mobile">7.2 Parent Layout (Web + Mobile)</h3>
+<p>Simpler — parents don't need the full sidebar. Tab-based navigation:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>┌──────────────────────────────────────────────────────────────┐
+│ [Logo]  [Child Selector ▼]            [Lang]  [Avatar]       │  ← Header
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│                                                              │
+│                    [Page Content]                            │
+│                                                              │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│   [Feed]    [Messages]    [Reports]    [Profile]             │  ← Bottom tab bar (mobile)
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p>On mobile: bottom tab bar (native iOS/Android pattern).
+On web: top tab bar or sidebar (depending on breakpoint).</p>
+<h3 id="73-dashboard-layout">7.3 Dashboard Layout</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>┌──────────────────────────────────────────────────────────────┐
+│ Dashboard                                                     │
+├──────────────────────────────────────────────────────────────┤
+│ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐              │
+│ │ Rooms 8 │ │Staff 24 │ │Stud 142 │ │ Prog 6  │  ← KPI cards │
+│ └─────────┘ └─────────┘ └─────────┘ └─────────┘              │
+├──────────────────────────────────────────────────────────────┤
+│ ┌─────────────────────────────┐ ┌─────────────────────────┐  │
+│ │ Live Ratio Monitor          │ │ Pending Actions         │  │
+│ │                             │ │                         │  │
+│ │ Room A  4:1  ✓              │ │ • 3 unapproved photos   │  │
+│ │ Room B  3:1  ⚠ BREACH       │ │ • 2 leave requests      │  │
+│ │ Room C  5:1  ✓              │ │ • 5 unread messages     │  │
+│ │                             │ │                         │  │
+│ └─────────────────────────────┘ └─────────────────────────┘  │
+├──────────────────────────────────────────────────────────────┤
+│ ┌─────────────────────────────────────────────────────────┐  │
+│ │ Today&#39;s Attendance Summary                              │  │
+│ │ [Staff: 22/24 checked in] [Students: 138/142]          │  │
+│ └─────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p>Grid: 4 columns for KPIs, 2 columns for widgets (1 column on mobile).</p>
+<h3 id="74-list-view-layout">7.4 List View Layout</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>┌──────────────────────────────────────────────────────────────┐
+│ Students                                          [+ Add]     │
+├──────────────────────────────────────────────────────────────┤
+│ [Search...]  [Room ▼]  [Status ▼]  [More filters]            │
+├──────────────────────────────────────────────────────────────┤
+│ Name              Room      Program     Status   Actions     │
+│ ─────────────────────────────────────────────────────────── │
+│ Ahmed Ali         Toddlers  Full Day    Active   [⋯]         │
+│ Layla Hassan      Babies    Half Day    Active   [⋯]         │
+│ Omar Khalid       Pre-K     Full Day    On Hold  [⋯]         │
+│ ...                                                          │
+├──────────────────────────────────────────────────────────────┤
+│                          [Load more]                         │
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="75-detail-view-layout">7.5 Detail View Layout</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>┌──────────────────────────────────────────────────────────────┐
+│ ← Back   Ahmed Ali                              [Edit] [...] │
+├──────────────────────────────────────────────────────────────┤
+│ ┌─────────────────────────────────┐ ┌──────────────────────┐ │
+│ │ [Photo]                         │ │ Quick Actions         │ │
+│ │ Ahmed Ali                       │ │ • Check In            │ │
+│ │ Age 3y 2m                       │ │ • Mark Absent         │ │
+│ │ Room: Toddlers                  │ │ • Post Activity       │ │
+│ │ Program: Full Day               │ │ • Send Message        │ │
+│ │ Status: Active                  │ │ • Emergency Report    │ │
+│ │                                 │ │                       │ │
+│ │ Key Person: Mariam              │ │                       │ │
+│ │ Start Date: Sep 1, 2025         │ │                       │ │
+│ └─────────────────────────────────┘ └──────────────────────┘ │
+├──────────────────────────────────────────────────────────────┤
+│ [Attendance] [Activities] [Guardians] [Billing] [Medical]    │ ← Tabs
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│                   [Tab content]                              │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<hr />
+<h2 id="8-iconography">8. Iconography</h2>
+<h3 id="81-icon-library">8.1 Icon Library</h3>
+<p><strong>Lucide React</strong> (https://lucide.dev/) — clean, consistent, MIT-licensed, tree-shakeable.</p>
+<p>Used for:
+- Nav items (sidebar, tab bar).
+- Action buttons (save, edit, delete).
+- Status indicators (check, alert, info).
+- Feature icons (dashboard, attendance, billing).</p>
+<h3 id="82-icon-sizing">8.2 Icon Sizing</h3>
+<table>
+<thead>
+<tr>
+<th>Use</th>
+<th>Size</th>
+<th>Stroke</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nav (sidebar)</td>
+<td>20px</td>
+<td>1.5 (default)</td>
+</tr>
+<tr>
+<td>Button icon</td>
+<td>16px</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Inline (form)</td>
+<td>16px</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Status badge</td>
+<td>12px</td>
+<td>2.5</td>
+</tr>
+<tr>
+<td>Empty state hero</td>
+<td>48px</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>Page hero</td>
+<td>64px</td>
+<td>1.5</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-directional-icons-in-rtl">8.3 Directional Icons in RTL</h3>
+<p>Directional icons (chevron-left, arrow-right) must flip in RTL:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">ChevronRight</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;lucide-react&#39;</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #959077">// Auto-flips via CSS</span>
+<span style="color: #F8F8F2">&lt;</span><span style="color: #FF4689">ChevronRight</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">className</span><span style="color: #FF4689">=</span><span style="color: #E6DB74">&quot;rtl:rotate-180&quot;</span><span style="color: #F8F8F2"> /&gt;</span>
+
+<span style="color: #959077">// Or use direction-aware component</span>
+<span style="color: #F8F8F2">&lt;</span><span style="color: #FF4689">DirectionalIcon</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">name</span><span style="color: #FF4689">=</span><span style="color: #E6DB74">&quot;chevron-right&quot;</span><span style="color: #F8F8F2"> /&gt;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="9-animation-micro-interactions">9. Animation &amp; Micro-interactions</h2>
+<h3 id="91-principles">9.1 Principles</h3>
+<ul>
+<li><strong>Subtle</strong> — animation enhances, never distracts.</li>
+<li><strong>Fast</strong> — 150-200ms duration. Anything longer feels sluggish.</li>
+<li><strong>Purposeful</strong> — every animation explains a state change.</li>
+<li><strong>Eased</strong> — use <code>ease-out</code> for entrances, <code>ease-in</code> for exits.</li>
+</ul>
+<h3 id="92-standard-transitions">9.2 Standard Transitions</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">--transition-fast:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">100ms</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">ease-out;</span>
+<span style="color: #FF4689">--transition-default:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">150ms</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">ease-out;</span>
+<span style="color: #FF4689">--transition-slow:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">250ms</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">ease-out;</span>
+
+<span style="color: #959077">/* Hover states */</span>
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">button</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">transition</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">background-color</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--transition-fast); }</span>
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">card</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">transition</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">box-shadow</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">var</span><span style="color: #F8F8F2">(--transition-default); }</span>
+
+<span style="color: #959077">/* Modal entrance */</span>
+<span style="color: #F8F8F2">@</span><span style="color: #66D9EF">keyframes</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">dialog-in</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">from</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">opacity</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">transform</span><span style="color: #F8F8F2">: scale(</span><span style="color: #AE81FF">0.95</span><span style="color: #F8F8F2">); }</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">to</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">opacity</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">transform</span><span style="color: #F8F8F2">: scale(</span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">); }</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #F8F8F2">.</span><span style="color: #A6E22E">dialog-content</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">animation</span><span style="color: #F8F8F2">: dialog-in </span><span style="color: #AE81FF">150</span><span style="color: #66D9EF">ms</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ease-out</span><span style="color: #F8F8F2">; }</span>
+
+<span style="color: #959077">/* Toast entrance */</span>
+<span style="color: #F8F8F2">@</span><span style="color: #66D9EF">keyframes</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">toast-in</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">from</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">opacity</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">transform</span><span style="color: #F8F8F2">: translateX(</span><span style="color: #AE81FF">100</span><span style="color: #66D9EF">%</span><span style="color: #F8F8F2">); }</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">to</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">opacity</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">transform</span><span style="color: #F8F8F2">: translateX(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">); }</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #959077">/* RTL: toast slides in from inline-start, not right */</span>
+<span style="color: #FF4689">[dir=</span><span style="color: #E6DB74">&#39;rtl&#39;</span><span style="color: #FF4689">]</span><span style="color: #F8F8F2"> .</span><span style="color: #A6E22E">toast</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">animation-name</span><span style="color: #F8F8F2">: toast-in-rtl; }</span>
+<span style="color: #F8F8F2">@</span><span style="color: #66D9EF">keyframes</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">toast-in-rtl</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">from</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">opacity</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">transform</span><span style="color: #F8F8F2">: translateX(</span><span style="color: #AE81FF">-100</span><span style="color: #66D9EF">%</span><span style="color: #F8F8F2">); }</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">to</span><span style="color: #F8F8F2"> { </span><span style="color: #66D9EF">opacity</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">transform</span><span style="color: #F8F8F2">: translateX(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">); }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="93-reduced-motion">9.3 Reduced Motion</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">@</span><span style="color: #66D9EF">media</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">(prefers-reduced-motion:</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">reduce)</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">*,</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">*</span><span style="color: #F8F8F2">::</span><span style="color: #A6E22E">before</span><span style="color: #FF4689">,</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">*</span><span style="color: #F8F8F2">::</span><span style="color: #A6E22E">after</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">animation-duration</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.01</span><span style="color: #66D9EF">ms</span><span style="color: #F8F8F2"> </span><span style="color: #959077">!important</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">animation-iteration-count</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2"> </span><span style="color: #959077">!important</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">transition-duration</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">0.01</span><span style="color: #66D9EF">ms</span><span style="color: #F8F8F2"> </span><span style="color: #959077">!important</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p>Always respected — some users get motion sickness.</p>
+<hr />
+<h2 id="10-rtl-right-to-left-patterns">10. RTL (Right-to-Left) Patterns</h2>
+<h3 id="101-the-cardinal-rules">10.1 The Cardinal Rules</h3>
+<ol>
+<li>
+<p><strong>CSS logical properties only</strong> — <code>margin-inline-start</code>, <code>padding-inline-end</code>, <code>text-align: start</code>, <code>border-inline-start</code>. Never <code>margin-left</code>, <code>padding-right</code>, etc.</p>
+</li>
+<li>
+<p><strong>Tailwind logical utilities</strong> — <code>ms-*</code> (margin-inline-start), <code>me-*</code> (margin-inline-end), <code>ps-*</code>, <code>pe-*</code>, <code>text-start</code>, <code>text-end</code>. Tailwind 3.3+ handles the RTL flip automatically when <code>dir="rtl"</code> is set.</p>
+</li>
+<li>
+<p><strong>Flexbox auto-flips</strong> — <code>flex-row</code> in LTR becomes effectively <code>flex-row-reverse</code> in RTL automatically. Don't manually reverse.</p>
+</li>
+<li>
+<p><strong>Directional icons flip</strong> — <code>ChevronRight</code> becomes <code>ChevronLeft</code> in RTL. Use <code>rtl:rotate-180</code> Tailwind utility.</p>
+</li>
+<li>
+<p><strong>Absolute positioning</strong> — <code>left-0</code> becomes <code>right-0</code> in RTL. Use <code>inset-inline-start-0</code> instead.</p>
+</li>
+<li>
+<p><strong>Numbers + dates</strong> — Same format in both LTR and RTL. Numbers don't flip. Use <code>Intl.NumberFormat</code> and <code>Intl.DateTimeFormat</code> with locale.</p>
+</li>
+</ol>
+<h3 id="102-rtl-testing">10.2 RTL Testing</h3>
+<ul>
+<li>ESLint rule forbids physical properties (see <code>12-WEB-FRONTEND.md</code> §6.4).</li>
+<li>Playwright visual regression tests in both LTR + RTL.</li>
+<li>Storybook stories render in both directions.</li>
+<li>Every screen manually QA'd in Arabic by an Arabic-speaking tester before sign-off.</li>
+</ul>
+<h3 id="103-common-rtl-pitfalls">10.3 Common RTL Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Wrong</th>
+<th>Right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Icon position in button</td>
+<td><code>mr-2</code> (always right of text)</td>
+<td><code>me-2</code> (inline-end of text, flips in RTL)</td>
+</tr>
+<tr>
+<td>Dropdown menu position</td>
+<td><code>left-0</code></td>
+<td><code>inset-inline-start-0</code></td>
+</tr>
+<tr>
+<td>Tooltip arrow</td>
+<td>hardcoded left arrow</td>
+<td>direction-aware arrow</td>
+</tr>
+<tr>
+<td>Modal close button</td>
+<td><code>top-3 right-3</code></td>
+<td><code>top-3 inset-inline-end-3</code></td>
+</tr>
+<tr>
+<td>Progress bar fill</td>
+<td><code>left to right</code></td>
+<td><code>inline-start to inline-end</code></td>
+</tr>
+<tr>
+<td>Avatar next to name</td>
+<td><code>mr-3</code></td>
+<td><code>me-3</code></td>
+</tr>
+<tr>
+<td>Breadcrumb separator</td>
+<td><code>ChevronRight</code> (always right-pointing)</td>
+<td><code>ChevronRight</code> with <code>rtl:rotate-180</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="11-accessibility-wcag-21-aa">11. Accessibility (WCAG 2.1 AA)</h2>
+<h3 id="111-color-contrast">11.1 Color Contrast</h3>
+<ul>
+<li>Normal text: 4.5:1 minimum.</li>
+<li>Large text (18px+ regular, 14px+ bold): 3:1 minimum.</li>
+<li>UI components (button bg, input border): 3:1 minimum.</li>
+<li>Tested with <code>axe-core</code> in CI.</li>
+</ul>
+<h3 id="112-keyboard-navigation">11.2 Keyboard Navigation</h3>
+<ul>
+<li>All interactive elements reachable via Tab.</li>
+<li>Logical tab order (matches visual order).</li>
+<li>Visible focus indicator (2px outline, never <code>outline: none</code>).</li>
+<li>Skip-to-content link at top of every page.</li>
+<li>Modal: focus trap, focus first element on open, return focus on close.</li>
+<li>Dropdown: arrow keys to navigate, Enter to select, Esc to close.</li>
+</ul>
+<h3 id="113-screen-reader-support">11.3 Screen Reader Support</h3>
+<ul>
+<li>Semantic HTML (<code>nav</code>, <code>main</code>, <code>section</code>, <code>article</code>, <code>header</code>, <code>footer</code>).</li>
+<li>ARIA labels on icon-only buttons (<code>aria-label="Close"</code>).</li>
+<li><code>aria-live="polite"</code> for toasts, <code>aria-live="assertive"</code> for errors.</li>
+<li><code>aria-busy="true"</code> on loading containers.</li>
+<li>Form labels: <code>&lt;label&gt;</code> associated with <code>&lt;input&gt;</code> via <code>htmlFor</code>/<code>id</code>, never just placeholder text.</li>
+<li>Tables: <code>&lt;th scope="col"&gt;</code> and <code>&lt;th scope="row"&gt;</code>.</li>
+<li>Images: meaningful <code>alt</code>, decorative images <code>alt=""</code>.</li>
+<li>Dynamic content: <code>aria-live</code> regions announce updates.</li>
+</ul>
+<h3 id="114-reduced-motion">11.4 Reduced Motion</h3>
+<p>See §9.3 above.</p>
+<h3 id="115-other">11.5 Other</h3>
+<ul>
+<li>No color-only meaning (always include icon or text).</li>
+<li>Touch targets: minimum 44×44px (iOS HIG) / 48×48dp (Material).</li>
+<li>Form errors: never rely on color alone — include icon + text.</li>
+<li>Headings: hierarchical (don't skip levels).</li>
+<li>Language: <code>&lt;html lang="en"&gt;</code> or <code>&lt;html lang="ar" dir="rtl"&gt;</code>.</li>
+</ul>
+<hr />
+<h2 id="12-mobile-specific-patterns">12. Mobile-Specific Patterns</h2>
+<h3 id="121-touch-targets">12.1 Touch Targets</h3>
+<ul>
+<li>Minimum 44×44px tap target.</li>
+<li>8px minimum spacing between targets.</li>
+<li>Buttons full-width on mobile (stretch to viewport edges with 16px margin).</li>
+</ul>
+<h3 id="122-gestures">12.2 Gestures</h3>
+<ul>
+<li>Swipe right/left on list items: reveal actions (archive, delete).</li>
+<li>Pull down to refresh (with native-feeling spinner).</li>
+<li>Pinch to zoom on photos.</li>
+<li>Long-press for context menu (mobile equivalent of right-click).</li>
+</ul>
+<h3 id="123-native-ios-patterns-via-react-native-paper">12.3 Native iOS Patterns (via React Native Paper)</h3>
+<ul>
+<li>Bottom sheet modals (not centered dialogs).</li>
+<li>Tab bar at bottom (not sidebar).</li>
+<li>Large title navigation bar (collapses on scroll).</li>
+<li>Swipe-back gesture (iOS edge swipe to go back).</li>
+</ul>
+<h3 id="124-native-android-patterns">12.4 Native Android Patterns</h3>
+<ul>
+<li>Material Design 3 app bar.</li>
+<li>Floating Action Button (FAB) for primary action.</li>
+<li>Bottom sheet modals.</li>
+<li>Ripple effect on tap.</li>
+<li>Snackbars (not toasts) for transient messages.</li>
+</ul>
+<hr />
+<h2 id="13-illustrations-empty-states">13. Illustrations &amp; Empty States</h2>
+<h3 id="131-illustration-style">13.1 Illustration Style</h3>
+<ul>
+<li>Custom illustrations (not stock): simple, warm, geometric.</li>
+<li>Used for: empty states, onboarding, error pages.</li>
+<li>Style: flat with soft shadows, muted palette, friendly characters (children, parents, teachers).</li>
+<li>commissioned from illustrator (one-time investment, ~$3-5k).</li>
+</ul>
+<h3 id="132-empty-state-examples">13.2 Empty State Examples</h3>
+<p><strong>No students yet:</strong></p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>[Illustration: parent + child walking]
+&quot;No students yet&quot;
+&quot;Add your first student to start tracking attendance, activities, and parent communication.&quot;
+[Add Student]
+</code></pre></div>
+
+<p><strong>No messages:</strong></p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>[Icon: chat bubble, large]
+&quot;No messages&quot;
+&quot;Start a conversation with parents or staff.&quot;
+</code></pre></div>
+
+<p><strong>No activities today:</strong></p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>[Icon: photo, large]
+&quot;No activities posted today&quot;
+&quot;Share a moment from class to brighten a parent&#39;s day.&quot;
+[Post Activity]
+</code></pre></div>
+
+<hr />
+<h2 id="14-parentapp-baseline-comparison">14. parent.app Baseline Comparison</h2>
+<h3 id="141-where-parentapp-meets-the-bar">14.1 Where parent.app Meets the Bar</h3>
+<p>We must match them on:
+- Activity feed (chronological posts with photos/videos).
+- Daily reports.
+- Secure messaging.
+- Attendance tracking with ratio compliance.
+- Billing with online payments (Phase 3).
+- Multi-centre management (Phase 3).
+- Multi-language (their 198 auto-translation is impressive; we deliver EN+AR natively with proper RTL — which is what UAE market actually needs).
+- AI-powered observation capture (Phase 2).
+- Multi-language auto-translation (Phase 2 consideration).</p>
+<h3 id="142-where-we-exceed-parentapp">14.2 Where We Exceed parent.app</h3>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>parent.app</th>
+<th>NMS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Design quality</td>
+<td>Functional, dated enterprise feel</td>
+<td>Modern 2026 aesthetic (Linear/Notion-grade)</td>
+</tr>
+<tr>
+<td>RTL support</td>
+<td>Likely partial/auto-translation crutch</td>
+<td>Native Arabic-first, RTL as first-class, all components RTL-tested</td>
+</tr>
+<tr>
+<td>Real-time updates</td>
+<td>Periodic refresh implied</td>
+<td>WebSocket/SignalR real-time (sub-5s updates)</td>
+</tr>
+<tr>
+<td>Ratio enforcement</td>
+<td>Tracked but alerts may be slow</td>
+<td>Live WebSocket-driven, &lt;30s breach → push</td>
+</tr>
+<tr>
+<td>Dual deployment</td>
+<td>SaaS only</td>
+<td>On-prem + SaaS, same codebase</td>
+</tr>
+<tr>
+<td>Audit trail</td>
+<td>Implied but UI unclear</td>
+<td>Append-only audit log with Super Admin filterable viewer</td>
+</tr>
+<tr>
+<td>Emergency reports</td>
+<td>Likely exists</td>
+<td>One-click PDF + offline cache on mobile</td>
+</tr>
+<tr>
+<td>UAE-specific depth</td>
+<td>Generic</td>
+<td>KHDA reporting, AED billing, UAE weekend awareness, emirates_id field</td>
+</tr>
+<tr>
+<td>Parent UX</td>
+<td>Adequate</td>
+<td>Premium, mobile-first, magic-link login</td>
+</tr>
+<tr>
+<td>Onboarding</td>
+<td>"Under 2 weeks" claim</td>
+<td>Guided wizard, first pilot user active in &lt;1 hour</td>
+</tr>
+<tr>
+<td>Custom branding</td>
+<td>Per-branch</td>
+<td>Per-tenant + white-label enterprise option</td>
+</tr>
+</tbody>
+</table>
+<h3 id="143-where-we-learn-from-parentapp">14.3 Where We Learn From parent.app</h3>
+<ul>
+<li>198-language auto-translation is impressive UX (we should evaluate in Phase 2 for parents who don't speak EN/AR).</li>
+<li>"Built by Educators, for Educators" tone is good — we should adopt similar warmth.</li>
+<li>"Measurable ROI within 30 days" promise is good marketing — we should measure + publish similar metrics.</li>
+<li>Their support rating (4.8) suggests investment in customer support — we should match this from day 1.</li>
+</ul>
+<hr />
+<h2 id="15-design-system-governance">15. Design System Governance</h2>
+<h3 id="151-storybook">15.1 Storybook</h3>
+<p>All components documented in Storybook with:
+- Visual examples (all variants, all sizes, all states).
+- Props table (auto-generated from TypeScript types).
+- Usage guidelines.
+- Accessibility notes.
+- RTL variant (every story renders in both LTR + RTL).</p>
+<h3 id="152-design-tokens">15.2 Design Tokens</h3>
+<p>All design tokens (colors, typography, spacing) defined as CSS variables in <code>globals.css</code> and mirrored in:
+- <code>tailwind.config.ts</code> (for Tailwind utility classes).
+- Figma library (for designer-developer sync).
+- React Native theme (for mobile).</p>
+<p>Single source of truth: <code>tailwind.config.ts</code>. Changes here propagate everywhere.</p>
+<h3 id="153-design-review">15.3 Design Review</h3>
+<p>Every PR that touches UI requires:
+- Screenshots in both LTR + RTL.
+- Storybook story for new/changed components.
+- Accessibility check (axe in test).
+- Visual regression test (Playwright + Percy/Chromatic).
+- Design review by Tech Lead or designated design reviewer.</p>
+<hr />
+<p><strong>Next file to read</strong>: <code>15-NOTIFICATIONS.md</code> for the 3-tier notification system, channels, and fallback logic.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-13-mobile-app.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Mobile App</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-15-notifications.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Notifications</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture Decisions — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class="active"><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#adr-template" class="toc-link" data-target="adr-template">ADR Template</a><a href="#adr-001-use-net-8-aspnet-core-for-backend" class="toc-link" data-target="adr-001-use-net-8-aspnet-core-for-backend">ADR-001: Use .NET 8 (ASP.NET Core) for Backend</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#adr-002-use-postgresql-16-with-rls-for-multi-tenancy" class="toc-link" data-target="adr-002-use-postgresql-16-with-rls-for-multi-tenancy">ADR-002: Use PostgreSQL 16 with RLS for Multi-T...</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#adr-003-shared-schema-tenantid-rls-multi-tenancy-model" class="toc-link" data-target="adr-003-shared-schema-tenantid-rls-multi-tenancy-model">ADR-003: Shared Schema + tenantid + RLS (Multi-...</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#adr-004-use-keycloak-as-identity-provider" class="toc-link" data-target="adr-004-use-keycloak-as-identity-provider">ADR-004: Use Keycloak as Identity Provider</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#adr-005-modular-monolith-for-phases-12-extraction-ready-for-phase-3" class="toc-link" data-target="adr-005-modular-monolith-for-phases-12-extraction-ready-for-phase-3">ADR-005: Modular Monolith for Phases 1–2, Extra...</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#modular-monolith-principles" class="toc-link toc-h3" data-target="modular-monolith-principles">Modular Monolith Principles</a><a href="#extraction-ready-modules" class="toc-link toc-h3" data-target="extraction-ready-modules">Extraction-Ready Modules</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#adr-006-use-signalr-with-redis-backplane-for-real-time" class="toc-link" data-target="adr-006-use-signalr-with-redis-backplane-for-real-time">ADR-006: Use SignalR with Redis Backplane for R...</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#adr-007-rest-openapi-30-cursor-pagination" class="toc-link" data-target="adr-007-rest-openapi-30-cursor-pagination">ADR-007: REST + OpenAPI 3.0, Cursor Pagination</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#adr-008-react-native-expo-bare-workflow-for-mobile" class="toc-link" data-target="adr-008-react-native-expo-bare-workflow-for-mobile">ADR-008: React Native + Expo Bare Workflow for ...</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#adr-009-store-money-as-integer-aed-fils-never-floating-point" class="toc-link" data-target="adr-009-store-money-as-integer-aed-fils-never-floating-point">ADR-009: Store Money as Integer AED Fils (Never...</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#adr-010-jsonb-for-i18n-fields-react-i18next-for-ui-strings" class="toc-link" data-target="adr-010-jsonb-for-i18n-fields-react-i18next-for-ui-strings">ADR-010: JSONB for i18n Fields + react-i18next ...</a><a href="#status" class="toc-link toc-h3" data-target="status">Status</a><a href="#context" class="toc-link toc-h3" data-target="context">Context</a><a href="#decision" class="toc-link toc-h3" data-target="decision">Decision</a><a href="#db-i18n-implementation" class="toc-link toc-h3" data-target="db-i18n-implementation">DB i18n Implementation</a><a href="#ui-string-implementation" class="toc-link toc-h3" data-target="ui-string-implementation">UI String Implementation</a><a href="#alternatives-considered" class="toc-link toc-h3" data-target="alternatives-considered">Alternatives Considered</a><a href="#consequences" class="toc-link toc-h3" data-target="consequences">Consequences</a><a href="#compliance" class="toc-link toc-h3" data-target="compliance">Compliance</a><a href="#future-adrs" class="toc-link" data-target="future-adrs">Future ADRs</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="git-commit" class="w-4 h-4 text-amber-600"></i><span>Architecture Decisions</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Workflow · spec-20-adrs.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Workflow</span>
+          <span class="pill pill-done">DOC 20</span>
+          <span class="text-[10px] font-mono text-slate-400">~4,345 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Architecture Decisions</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-19-roadmap-sprints.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Roadmap & Sprints</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-21-delivery-checklist.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Delivery Checklist</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="20-architecture-decision-records-adrs">20 — Architecture Decision Records (ADRs)</h1>
+<blockquote>
+<p>Nygard-format ADRs for the 10 most significant technical decisions in NMS. Future ADRs go in <code>/docs/adr/</code> in the repo.</p>
+</blockquote>
+<hr />
+<h2 id="adr-template">ADR Template</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2"># ADR-XXX: [Decision Title]</span>
+
+<span style="color: #959077">## Status</span>
+[Proposed | Accepted | Deprecated | Superseded by ADR-YYY]
+
+<span style="color: #959077">## Context</span>
+[Why is this decision needed? What problem are we solving? What constraints?]
+
+<span style="color: #959077">## Decision</span>
+[What did we decide? Be specific.]
+
+<span style="color: #959077">## Alternatives Considered</span>
+[What else did we consider? Why didn&#39;t we choose them?]
+
+<span style="color: #959077">## Consequences</span>
+[Positive: ...]
+[Negative: ...]
+[Neutral: ...]
+
+<span style="color: #959077">## Compliance</span>
+[How do we verify the decision is followed?]
+</code></pre></div>
+
+<hr />
+<h2 id="adr-001-use-net-8-aspnet-core-for-backend">ADR-001: Use .NET 8 (ASP.NET Core) for Backend</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>The source NMS Pre-Development Planning v1.1 left the backend technology open. We need to select a concrete stack before Sprint 0 begins. The backend must support:
+- Real-time WebSocket communication (SignalR).
+- Background jobs (Hangfire).
+- Message queue integration (RabbitMQ via MassTransit).
+- Multi-tenancy with PostgreSQL RLS.
+- OAuth 2.0 / OIDC via Keycloak.
+- PDF generation, Excel export, email sending.
+- High performance (p99 &lt; 500ms).
+- Long-term support (3+ years).
+- Strong AI-coding tool support (Cursor, Copilot).</p>
+<h3 id="decision">Decision</h3>
+<p>Use <strong>.NET 8 (ASP.NET Core)</strong> with C# 12 as the backend framework.</p>
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong>Spring Boot (Java)</strong> — Source planning doc's first choice.
+   - Pros: Mature, huge ecosystem, source planning doc aligns.
+   - Cons: Verbose, slower dev loop, JVM startup time, less AI-coding-friendly, more boilerplate.
+   - Rejected: Productivity loss outweighs ecosystem maturity for our team size.</p>
+</li>
+<li>
+<p><strong>Node.js + NestJS</strong> — JavaScript everywhere.
+   - Pros: Same language as frontend, fast dev loop.
+   - Cons: Type system weaker than C#, ORM (Prisma/TypeORM) less mature than EF Core, less enterprise-ready.
+   - Rejected: EF Core + C# type system + LINQ is more productive for transactional CRUD app.</p>
+</li>
+<li>
+<p><strong>Python + FastAPI</strong> — Fast dev, great for AI features.
+   - Pros: Fast development, excellent for AI (we have AI features in Phase 2).
+   - Cons: Slower runtime, weaker typing, not ideal for transactional systems with complex business logic.
+   - Rejected: AI features are isolated (we'll call OpenAI via HTTP from any backend). Don't pick backend based on AI features.</p>
+</li>
+<li>
+<p><strong>Go + standard library</strong> — Maximum performance.
+   - Pros: Fastest runtime, smallest footprint, simplest deployment.
+   - Cons: ORM ecosystem weak, less productive for CRUD-heavy app, less AI-coding-friendly.
+   - Rejected: We don't have extreme performance needs. Productivity &gt; raw performance for our use case.</p>
+</li>
+<li>
+<p><strong>Laravel (PHP)</strong> — Fast dev, cheap hosting.
+   - Pros: Rapid development, huge community.
+   - Cons: PHP language limitations, weaker type system, less enterprise adoption in UAE market.
+   - Rejected: UAE enterprise customers expect .NET or Java.</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- Top-tier performance (consistently top of TechEmpower benchmarks).
+- Excellent tooling (Visual Studio, Rider, VS Code with C# Dev Kit).
+- 3-year LTS support (until November 2026 — covers Phase 1 + Phase 2).
+- AI tools (Cursor, Copilot) very familiar with .NET.
+- EF Core is the best mainstream ORM.
+- Native SignalR support for real-time.
+- Strong type system catches bugs at compile time.</p>
+<p><strong>Negative</strong>:
+- Historically Microsoft-ecosystem reputation (though truly cross-platform now).
+- Smaller community than Node.js for some niche libraries.
+- Some UAE enterprises have more Java expertise than .NET (rare).</p>
+<p><strong>Neutral</strong>:
+- Need to train team on .NET 8 specific features (minimal APIs, primary constructors, etc.).</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li>Verified: all backend code in <code>backend/</code> uses .NET 8 features.</li>
+<li><code>backend/Directory.Packages.props</code> pins .NET 8 versions.</li>
+<li>CI checks target framework is <code>net8.0</code>.</li>
+</ul>
+<hr />
+<h2 id="adr-002-use-postgresql-16-with-rls-for-multi-tenancy">ADR-002: Use PostgreSQL 16 with RLS for Multi-Tenancy</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>NMS must support multi-tenancy (one DB, multiple tenants) for SaaS mode, AND single-tenancy for on-prem. The same codebase must serve both. Database choice affects:
+- Multi-tenancy isolation strategy.
+- JSON support for i18n fields.
+- Partitioning for high-volume tables (attendance, audit log).
+- Full-text search (for messaging, resource centre).
+- Connection pooling.
+- Backup + restore.
+- Cost (SaaS) + on-prem deployability.</p>
+<h3 id="decision">Decision</h3>
+<p>Use <strong>PostgreSQL 16</strong> with shared schema + <code>tenant_id</code> column + Row Level Security (RLS) policies for multi-tenancy.</p>
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong>MySQL 8</strong> — Familiar, cheaper.
+   - Pros: Familiar, broad hosting support.
+   - Cons: No RLS, weaker JSON support, Oracle ownership concerns.
+   - Rejected: No RLS is a dealbreaker for our multi-tenancy model.</p>
+</li>
+<li>
+<p><strong>SQL Server</strong> — Excellent .NET integration.
+   - Pros: First-class EF Core support, RLS support.
+   - Cons: Expensive licensing (even on Linux), lock-in to Microsoft ecosystem.
+   - Rejected: Cost + lock-in. PostgreSQL is free + open-source + equally capable.</p>
+</li>
+<li>
+<p><strong>MongoDB</strong> — Schema flexibility.
+   - Pros: Schema flexibility great for evolving entities.
+   - Cons: No transactions across collections (kills billing accuracy), weak relational queries.
+   - Rejected: Billing + attendance need ACID transactions. MongoDB is wrong fit.</p>
+</li>
+<li>
+<p><strong>CockroachDB</strong> — Multi-region by default.
+   - Pros: Multi-region native, PostgreSQL-compatible.
+   - Cons: Newer, smaller ecosystem, overkill for Phase 1-2 (we're single-region UAE).
+   - Rejected: Revisit in Phase 4+ when multi-region is needed.</p>
+</li>
+<li>
+<p><strong>Schema-per-tenant in PostgreSQL</strong> — Stronger isolation.
+   - Pros: Stronger isolation per tenant.
+   - Cons: N× migrations, complex operations, hard cross-tenant reporting, expensive (N× connections).
+   - Rejected: Operational complexity too high. RLS provides adequate isolation with simpler ops.</p>
+</li>
+<li>
+<p><strong>Database-per-tenant</strong> — Strongest isolation.
+   - Pros: Strongest possible isolation.
+   - Cons: Most expensive, hardest to operate, doesn't fit on-prem single-tenant model.
+   - Rejected: Overkill. RLS + app-layer filtering is sufficient.</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- RLS provides defense-in-depth at DB layer (app bug can't leak data).
+- JSONB enables clean i18n field storage (<code>{"en": "...", "ar": "..."}</code>).
+- Declarative partitioning for <code>attendance_record</code> + <code>audit_log</code>.
+- Mature ecosystem (EF Core provider, PgBouncer, pg_stat_statements).
+- Free + open-source.
+- Same DB works for on-prem (single tenant) + SaaS (multi-tenant).</p>
+<p><strong>Negative</strong>:
+- RLS policies add complexity to schema management.
+- Need to remember <code>set_config('app.tenant_id', ...)</code> per request (mitigated by middleware).
+- Some PostgreSQL features (e.g., certain index types) less mature than Oracle/SQL Server.</p>
+<p><strong>Neutral</strong>:
+- Team needs PostgreSQL expertise (most common in any case).</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li>All tenant tables have RLS enabled.</li>
+<li>Migration runner verifies RLS policies after each migration.</li>
+<li>Integration tests verify cross-tenant isolation.</li>
+<li>Documented in <code>10-MULTI-TENANCY.md</code>.</li>
+</ul>
+<hr />
+<h2 id="adr-003-shared-schema-tenantid-rls-multi-tenancy-model">ADR-003: Shared Schema + tenant_id + RLS (Multi-Tenancy Model)</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>The source SRS Open Question #1 asks: single-tenancy or multi-tenancy? The source planning doc §3.4 recommends "shared schema with tenant_id + RLS" but notes it should be validated via PoC. Loui Okasha's comment on the SRS explicitly states: "We would [want] to ensure that application is designed from the beginning with Multi-tenancy in mind."</p>
+<p>The decision must:
+- Support SaaS (many tenants per deployment).
+- Support on-prem (one tenant per deployment).
+- Use the same codebase for both.
+- Provide strong isolation guarantees.
+- Allow cross-tenant reporting (for Phase 3 MCG).</p>
+<h3 id="decision">Decision</h3>
+<p>Use <strong>shared schema with <code>tenant_id</code> column + PostgreSQL Row Level Security (RLS)</strong>, with EF Core global query filter as defense-in-depth.</p>
+<p>Every entity has <code>tenant_id</code> (UUID, foreign key to <code>tenant</code> table). Every query is scoped by <code>tenant_id</code> via:
+1. EF Core global query filter: <code>HasQueryFilter(e =&gt; e.TenantId == _tenantContext.TenantId)</code>.
+2. PostgreSQL RLS policy: <code>USING (tenant_id = current_setting('app.tenant_id')::uuid)</code>.</p>
+<p>The application sets <code>app.tenant_id</code> per request via middleware. Background jobs set it explicitly before DB queries.</p>
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong>Schema-per-tenant</strong> — Separate schema per tenant in same DB.
+   - Pros: Stronger isolation, easier to reason about.
+   - Cons: N× migrations (one per tenant per migration), complex cross-tenant reporting, more connection pool pressure.
+   - Rejected: Operational complexity.</p>
+</li>
+<li>
+<p><strong>Database-per-tenant</strong> — Separate DB per tenant.
+   - Pros: Strongest isolation.
+   - Cons: Most expensive, doesn't fit on-prem model, hardest to operate.
+   - Rejected: Overkill.</p>
+</li>
+<li>
+<p><strong>Application-layer filtering only</strong> (no RLS).
+   - Pros: Simplest.
+   - Cons: A bug in EF Core filter (e.g., <code>AsNoTracking()</code> edge case) leaks data. No safety net.
+   - Rejected: Insufficient security for child data.</p>
+</li>
+<li>
+<p><strong>Multi-tenant by separate deployment</strong> (one deployment per tenant).
+   - Pros: Strong isolation, simple model.
+   - Cons: Expensive (N deployments), defeats SaaS economics, doesn't scale to 20+ centres.
+   - Rejected: Doesn't fit SaaS commercial model.</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- One codebase, both deployment modes.
+- Defense-in-depth: app filter + DB RLS = bugs don't leak data.
+- Cross-tenant reporting possible (using <code>service</code> role for MCG consolidated views in Phase 3).
+- Simple operations: one DB, one migration, one backup.
+- Scales to many tenants without schema overhead.</p>
+<p><strong>Negative</strong>:
+- <code>tenant_id</code> column on every table (storage overhead — minimal, ~16 bytes/row).
+- RLS policies add DB query overhead (~5-10% per query, acceptable).
+- Need to remember tenant context in background jobs (mitigated by Hangfire filter).
+- Need <code>service</code> role for cross-tenant ops (careful access control).</p>
+<p><strong>Neutral</strong>:
+- All developers must understand the model (training in Sprint 0).</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li>All entities implement <code>ITenantEntity</code> interface.</li>
+<li>EF Core <code>OnModelCreating</code> enforces global query filter.</li>
+<li>Migration post-deploy script verifies RLS policies.</li>
+<li>Integration tests verify cross-tenant denial.</li>
+<li>Documented in <code>10-MULTI-TENANCY.md</code>.</li>
+</ul>
+<hr />
+<h2 id="adr-004-use-keycloak-as-identity-provider">ADR-004: Use Keycloak as Identity Provider</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>NMS needs an identity provider that supports:
+- OAuth 2.0 / OIDC for web + mobile + Open API.
+- Multi-realm support (one realm per tenant in Phase 1, multi-realm per MCG in Phase 3).
+- Role-based access control.
+- MFA (TOTP).
+- User federation (LDAP/AD for on-prem customers with existing IdP).
+- Social login (optional, configurable per tenant).
+- Self-hostable (for on-prem).
+- Audit logging.</p>
+<h3 id="decision">Decision</h3>
+<p>Use <strong>Keycloak 24</strong> as the identity provider.</p>
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong>Auth0</strong> — Best DX, beautiful UI.
+   - Pros: Best developer experience, excellent docs.
+   - Cons: Per-user pricing gets expensive at scale, SaaS-only (data residency concern for on-prem customers).
+   - Rejected: Cost + on-prem data residency.</p>
+</li>
+<li>
+<p><strong>AWS Cognito</strong> — Cheap, integrates with AWS.
+   - Pros: Cheap, AWS-native.
+   - Cons: Poor DX, limited customization, dated UI, weak federation.
+   - Rejected: DX is too poor; we'd spend weeks customizing.</p>
+</li>
+<li>
+<p><strong>Azure AD B2C</strong> — Cheap, integrates with Azure.
+   - Pros: Cheap, Azure-native.
+   - Cons: Complex config, poor DX, UI customization painful.
+   - Rejected: DX issues similar to Cognito.</p>
+</li>
+<li>
+<p><strong>IdentityServer (Duende)</strong> — .NET-native.
+   - Pros: .NET-native, OIDC standard.
+   - Cons: Licensing cost for commercial use, smaller community than Keycloak.
+   - Rejected: Cost + smaller ecosystem.</p>
+</li>
+<li>
+<p><strong>Custom (rolling our own)</strong> — Full control.
+   - Pros: Full control.
+   - Cons: Most expensive, security risk, don't roll your own auth.
+   - Rejected: Standard advice — never roll your own auth.</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- Open-source, free, no per-user cost.
+- Multi-realm support fits our tenant model.
+- MFA built-in (TOTP).
+- User federation (LDAP/AD) for on-prem customers.
+- Self-hostable (runs in our K8s cluster).
+- Industry-standard OIDC/OAuth 2.0.
+- Mature (10+ years of development).</p>
+<p><strong>Negative</strong>:
+- Java app, more resource-heavy than alternatives (~1 GB RAM per replica).
+- UI is dated (we use our own login pages via JS adapter, so users don't see it).
+- More ops overhead than managed services (Cognito, Auth0).</p>
+<p><strong>Neutral</strong>:
+- Need to manage Keycloak upgrades (quarterly).</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li>Keycloak deployed via Helm chart in <code>keycloak</code> namespace.</li>
+<li>One realm per tenant (Phase 1), multi-realm per MCG (Phase 3).</li>
+<li>Custom login UI (we don't use Keycloak's built-in themes).</li>
+<li>JWT validated in .NET via <code>Keycloak.AuthServices.Authentication</code> package.</li>
+<li>Documented in <code>09-AUTH-SECURITY.md</code>.</li>
+</ul>
+<hr />
+<h2 id="adr-005-modular-monolith-for-phases-12-extraction-ready-for-phase-3">ADR-005: Modular Monolith for Phases 1–2, Extraction-Ready for Phase 3</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>NMS has 14 functional modules with significant cross-module communication. Team size is 4–6 engineers in Phase 1, growing to 8–10 in Phase 2. We need to balance:
+- Development speed (microservices add distributed systems complexity).
+- Transactional integrity (billing + attendance need cross-module transactions).
+- Future scalability (Notification + Media Processing may need independent scaling).
+- Team size (microservices require larger teams for ops overhead).</p>
+<h3 id="decision">Decision</h3>
+<p>Build NMS as a <strong>modular monolith</strong> for Phases 1–2, with <strong>Notification</strong> and <strong>Media Processing</strong> modules designed for extraction to separate services in Phase 3 (decision gate at Sprint 25/30).</p>
+<h3 id="modular-monolith-principles">Modular Monolith Principles</h3>
+<ol>
+<li><strong>Explicit module boundaries</strong> — each module has a public interface (CQRS handlers + events).</li>
+<li><strong>No direct cross-module DB access</strong> — modules access only their own tables.</li>
+<li><strong>Shared kernel</strong> — minimal: <code>Result&lt;T&gt;</code>, <code>Pagination</code>, <code>TenantContext</code>, <code>ICurrentUser</code>, base entity.</li>
+<li><strong>Module communication</strong> — in-process MediatR for queries/commands; in-process event bus for events. Both abstractions swap to RabbitMQ when extracted.</li>
+<li><strong>Module deployment</strong> — single deployable for now. When extracted, the module's project becomes its own service.</li>
+</ol>
+<h3 id="extraction-ready-modules">Extraction-Ready Modules</h3>
+<p><strong>Notifications</strong>:
+- All triggers via RabbitMQ events (not direct MediatR calls) — same event contracts work cross-service when extracted.
+- Owns <code>notification</code> + <code>notification_delivery</code> tables.
+- Has its own connection pool to external services (FCM, SES, Twilio).
+- Stateless — easy to scale horizontally.</p>
+<p><strong>Media Processing</strong>:
+- All triggers via RabbitMQ events.
+- Owns scan_result data.
+- Can be extracted without touching other modules.</p>
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong>Microservices from day 1</strong>.
+   - Pros: Independent scaling, independent deployment, clear boundaries enforced.
+   - Cons: Distributed transactions (sagas) for billing + attendance, distributed tracing overhead, service mesh complexity, network failure modes, larger team required.
+   - Rejected: Team too small. Distributed systems overhead kills productivity.</p>
+</li>
+<li>
+<p><strong>Single monolith (no modules)</strong>.
+   - Pros: Simplest, fastest dev.
+   - Cons: No boundaries, hard to extract later, becomes unmaintainable.
+   - Rejected: We know we'll need to extract Notifications + Media Processing. Start with modules.</p>
+</li>
+<li>
+<p><strong>Microservices for Notifications + Media only, monolith for rest</strong>.
+   - Pros: Independent scaling for the two modules that need it most.
+   - Cons: Still need distributed transactions for billing/attendance; premature distribution.
+   - Rejected: Start with all-in-one, extract only when justified (Phase 3 decision gate).</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- Fast development (in-process calls, no network).
+- ACID transactions across modules (billing + attendance).
+- Single deployable (simple CI/CD).
+- Clear module boundaries (tested via NetArchTest).
+- Extraction path is clear (RabbitMQ + clean interfaces).</p>
+<p><strong>Negative</strong>:
+- Single point of failure (mitigated by K8s HA + multi-AZ).
+- All modules scale together (mitigated by HPA + extraction when needed).
+- Need discipline to maintain module boundaries.</p>
+<p><strong>Neutral</strong>:
+- NetArchTest enforces module boundaries in CI.</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li>Architecture tests (NetArchTest) in <code>NMS.ArchitectureTests</code> project.</li>
+<li>CI gate: PR fails if module boundary violated.</li>
+<li>Documented in <code>06-ARCHITECTURE.md</code> §1 + §4.</li>
+</ul>
+<hr />
+<h2 id="adr-006-use-signalr-with-redis-backplane-for-real-time">ADR-006: Use SignalR with Redis Backplane for Real-Time</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>NMS needs real-time updates for:
+- Dashboard (live ratios, attendance summary, pending actions).
+- Messaging (new message notifications).
+- Activity feed (new activity posts visible to parents).
+- Notifications (in-app banner for Critical tier).</p>
+<p>The transport must:
+- Work in .NET (native integration preferred).
+- Auto-negotiate transport (WebSocket → SSE → long-polling fallback).
+- Scale horizontally (multiple API pods).
+- Work on mobile (React Native).</p>
+<h3 id="decision">Decision</h3>
+<p>Use <strong>ASP.NET Core SignalR</strong> with <strong>Redis backplane</strong> (StackExchange.Redis).</p>
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong>Raw WebSockets</strong>.
+   - Pros: Maximum control, no abstraction overhead.
+   - Cons: Re-implement everything SignalR gives us (reconnection, fallback, message types, auth).
+   - Rejected: Too much custom code to maintain.</p>
+</li>
+<li>
+<p><strong>Server-Sent Events (SSE) only</strong>.
+   - Pros: Simpler than WebSockets, works over HTTP.
+   - Cons: One-way only (server → client), no native .NET support, mobile support patchy.
+   - Rejected: We need bidirectional (client subscribes to specific rooms).</p>
+</li>
+<li>
+<p><strong>GraphQL Subscriptions</strong>.
+   - Pros: Type-safe, integrates with GraphQL API.
+   - Cons: We're not using GraphQL for the rest of the API (REST). Adds complexity.
+   - Rejected: Inconsistent with REST API approach.</p>
+</li>
+<li>
+<p><strong>Third-party real-time service (Pusher, Ably)</strong>.
+   - Pros: Managed, no infra to run.
+   - Cons: Cost, data residency (some don't have UAE region), vendor lock-in.
+   - Rejected: Cost + data residency.</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- Native .NET integration (no extra libraries).
+- Auto-negotiate transport (WebSocket → SSE → long-polling).
+- Redis backplane enables multi-pod scaling.
+- <code>@microsoft/signalr</code> client works in both web (React) and mobile (React Native).
+- Built-in auth (JWT in query string on connect).
+- Built-in reconnection (exponential backoff).</p>
+<p><strong>Negative</strong>:
+- Sticky sessions required for SSE/long-polling fallback (configured at load balancer).
+- Redis adds dependency (mitigated by HA Redis).
+- WebSocket connection limit per pod (~5000 concurrent, mitigated by HPA).</p>
+<p><strong>Neutral</strong>:
+- Team needs to learn SignalR patterns (groups, methods, hub).</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li>Single hub: <code>/hubs/tenant</code>.</li>
+<li>Groups per tenant + role + user + room.</li>
+<li>Redis backplane configured in <code>Program.cs</code>.</li>
+<li>SignalR client shared between web + mobile (same npm package).</li>
+<li>Documented in <code>06-ARCHITECTURE.md</code> §5 + <code>08-API-SPEC.md</code> §13.</li>
+</ul>
+<hr />
+<h2 id="adr-007-rest-openapi-30-cursor-pagination">ADR-007: REST + OpenAPI 3.0, Cursor Pagination</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>NMS needs an API style that:
+- Works for web, mobile, and third-party (Phase 3 Open API).
+- Is AI-coding-friendly (Cursor can generate clients from spec).
+- Scales to many entities + endpoints.
+- Supports pagination efficiently (no OFFSET performance issues).
+- Has good tooling (code generation, docs UI, testing).</p>
+<h3 id="decision">Decision</h3>
+<p>Use <strong>REST + OpenAPI 3.0</strong> with <strong>cursor-based pagination</strong>. GraphQL evaluated for Phase 2 mobile only if REST payload size becomes a problem on slow mobile networks.</p>
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong>GraphQL</strong>.
+   - Pros: Client fetches exactly what it needs, single endpoint.
+   - Cons: Complexity (schema design, N+1 queries, authz per field), different from REST conventions, AI tools less mature with GraphQL.
+   - Rejected: Overkill for our use case. We have well-defined entities, not complex graph queries.</p>
+</li>
+<li>
+<p><strong>gRPC</strong>.
+   - Pros: Best performance, type-safe.
+   - Cons: Binary protocol (hard to debug), no browser support without gRPC-Web, less ecosystem.
+   - Rejected: Overkill. We don't have extreme performance needs.</p>
+</li>
+<li>
+<p><strong>OFFSET pagination</strong>.
+   - Pros: Simple.
+   - Cons: Performance degrades on deep pages (<code>OFFSET 100000</code> scans 100000 rows).
+   - Rejected: Doesn't scale.</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- OpenAPI 3.0 spec auto-generated from .NET annotations.
+- Frontend + mobile clients auto-generated via <code>openapi-typescript-codegen</code>.
+- Cursor pagination scales to millions of records.
+- Standard REST conventions (resources, verbs, status codes).
+- AI tools (Cursor) very familiar with REST + OpenAPI.</p>
+<p><strong>Negative</strong>:
+- Multiple round-trips for related data (mitigated by <code>?include=</code> parameter for common cases).
+- Over-fetching for mobile (mitigated by mobile-specific endpoints if needed; GraphQL evaluated Phase 2).</p>
+<p><strong>Neutral</strong>:
+- Need to maintain OpenAPI spec (auto-generated, so low overhead).</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li>All endpoints under <code>/api/v1/</code>.</li>
+<li>OpenAPI spec at <code>/openapi.json</code> (dev/staging) — not exposed in production.</li>
+<li>Scalar API docs UI at <code>/api-docs</code> (dev/staging).</li>
+<li>Frontend + mobile clients regenerated on API change.</li>
+<li>Documented in <code>08-API-SPEC.md</code>.</li>
+</ul>
+<hr />
+<h2 id="adr-008-react-native-expo-bare-workflow-for-mobile">ADR-008: React Native + Expo Bare Workflow for Mobile</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>NMS needs mobile apps for staff + parents. Requirements:
+- iOS + Android from one codebase.
+- Offline support (emergency report cache, attendance queue).
+- Push notifications (FCM + APNs).
+- Camera for barcode scanning.
+- Secure storage for tokens.
+- Code sharing with web (TypeScript, i18n, API client, types).
+- AI-coding-friendly.
+- OTA updates for fast iteration.</p>
+<h3 id="decision">Decision</h3>
+<p>Use <strong>React Native 0.74 + Expo SDK 51 (Bare Workflow)</strong>.</p>
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong>React Native (Bare, no Expo)</strong>.
+   - Pros: Maximum native control.
+   - Cons: Lose Expo tooling (EAS Build, OTA updates, config plugins).
+   - Rejected: Expo's tooling is too valuable to give up.</p>
+</li>
+<li>
+<p><strong>Flutter</strong>.
+   - Pros: Excellent performance, beautiful UIs, single codebase.
+   - Cons: Dart is niche language, no code sharing with web (React), smaller ecosystem in UAE.
+   - Rejected: No code sharing with web is a dealbreaker for our team size.</p>
+</li>
+<li>
+<p><strong>Native (Swift + Kotlin)</strong>.
+   - Pros: Best performance + UX, full platform access.
+   - Cons: Two codebases, double the dev cost, slower iteration.
+   - Rejected: Cost. We can achieve 90% of native UX with React Native.</p>
+</li>
+<li>
+<p><strong>PWA only</strong>.
+   - Pros: One codebase with web.
+   - Cons: No offline cache (critical for emergency reports), no push on iOS (until recently, still patchy), can't access some native APIs.
+   - Rejected: Emergency report offline cache is mandatory. PWA can't deliver.</p>
+</li>
+<li>
+<p><strong>Expo Managed Workflow</strong>.
+   - Pros: Simplest, no native code.
+   - Cons: Can't use custom native modules (we need vision-camera for barcode, WatermelonDB for offline, expo-secure-store for tokens).
+   - Rejected: Need native modules. Bare workflow gives us Expo's productivity + native flexibility.</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- iOS + Android from one codebase.
+- Code sharing with web (TypeScript types, i18n strings, Zod schemas, API client).
+- Expo tooling: EAS Build (cloud builds), OTA updates (fast iteration), config plugins.
+- React Native is well-documented in AI training data.
+- NativeWind (Tailwind for RN) gives consistent styling with web.
+- Large ecosystem (most RN libraries work in Expo Bare).</p>
+<p><strong>Negative</strong>:
+- Some native modules require config plugins (managed by Expo).
+- Performance slightly below native for complex animations (mitigated by Reanimated 3).
+- iOS App Store review adds 1-3 days per native code update (mitigated by OTA for JS-only changes).</p>
+<p><strong>Neutral</strong>:
+- Team needs React Native expertise.</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li><code>mobile/</code> project uses Expo SDK 51 Bare Workflow.</li>
+<li>EAS Build for cloud builds.</li>
+<li>OTA updates for JS-only changes.</li>
+<li>Native modules: <code>react-native-vision-camera</code>, <code>watermelondb</code>, <code>expo-secure-store</code>, <code>expo-notifications</code>.</li>
+<li>Documented in <code>13-MOBILE-APP.md</code>.</li>
+</ul>
+<hr />
+<h2 id="adr-009-store-money-as-integer-aed-fils-never-floating-point">ADR-009: Store Money as Integer AED Fils (Never Floating-Point)</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>NMS handles financial data (invoices, payments, expenses, fee plans). Floating-point arithmetic introduces precision errors:
+- <code>0.1 + 0.2 = 0.30000000000000004</code> in floating-point.
+- Over thousands of invoices, these errors accumulate.
+- Accounting discrepancies are unacceptable.</p>
+<h3 id="decision">Decision</h3>
+<p>Store all monetary amounts as <strong>integer AED fils</strong> (1 AED = 100 fils) using <code>bigint</code> in PostgreSQL.</p>
+<p>Examples:
+- 250.00 AED → <code>25000</code> fils.
+- 0.05 AED → <code>5</code> fils.
+- 1,234.56 AED → <code>123456</code> fils.</p>
+<p>Display layer formats to decimal: <code>25000 / 100 = 250.00 AED</code>.</p>
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong><code>numeric(10, 2)</code> (decimal)</strong>.
+   - Pros: Direct representation of decimal numbers.
+   - Cons: Slower arithmetic than integer, still susceptible to rounding in division operations.
+   - Rejected: Integer is simpler + faster.</p>
+</li>
+<li>
+<p><strong><code>float</code> / <code>double precision</code></strong>.
+   - Pros: Native, fast.
+   - Cons: Precision errors (the original problem).
+   - Rejected: Unacceptable for financial data.</p>
+</li>
+<li>
+<p><strong><code>money</code> type</strong> (PostgreSQL-specific).
+   - Pros: Designed for money.
+   - Cons: Limited operator support, locale-dependent output formatting.
+   - Rejected: Limited ecosystem support.</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- No precision errors (integer arithmetic is exact).
+- Fast arithmetic.
+- Simple mental model.
+- Easy to verify totals (sum of line items = invoice total).</p>
+<p><strong>Negative</strong>:
+- Need to convert for display (<code>amount_fils / 100</code>).
+- Need to convert for external APIs (payment gateways expect decimal).
+- Currency conversion (multi-currency in Phase 4+) needs care.</p>
+<p><strong>Neutral</strong>:
+- All developers must follow the convention.</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li>All monetary columns use <code>bigint</code> with <code>_fils</code> suffix (e.g., <code>amount_fils</code>, <code>total_fils</code>).</li>
+<li>Display layer formats via <code>Intl.NumberFormat('en-AE', { style: 'currency', currency: 'AED' })</code>.</li>
+<li>Unit tests verify arithmetic: <code>20000 + 5000 == 25000</code> (exact).</li>
+<li>Documented in <code>07-DATABASE-SCHEMA.md</code> §1.5.</li>
+</ul>
+<hr />
+<h2 id="adr-010-jsonb-for-i18n-fields-react-i18next-for-ui-strings">ADR-010: JSONB for i18n Fields + react-i18next for UI Strings</h2>
+<h3 id="status">Status</h3>
+<p>Accepted</p>
+<h3 id="context">Context</h3>
+<p>NMS must support English + Arabic as first-class languages. The i18n strategy must handle:
+- <strong>DB-stored user content</strong> (room names, program names, activity captions, newsletter content, email templates, notification titles/bodies).
+- <strong>UI strings</strong> (button labels, form labels, validation messages, error messages).
+- <strong>RTL layout</strong> (Arabic is right-to-left).
+- <strong>Per-user locale preference</strong> (each user picks their language).
+- <strong>Fallback</strong> (default to English if Arabic missing).</p>
+<h3 id="decision">Decision</h3>
+<p>Use <strong>two complementary approaches</strong>:</p>
+<ol>
+<li><strong>DB-stored user content</strong>: JSONB columns with <code>{ "en": "...", "ar": "..." }</code> structure.</li>
+<li><strong>UI strings</strong>: <code>react-i18next</code> + <code>i18next</code> with JSON translation files per locale.</li>
+</ol>
+<h3 id="db-i18n-implementation">DB i18n Implementation</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">-- Table column</span>
+<span style="color: #F8F8F2">display_name JSONB </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;{&quot;en&quot;: &quot;&quot;, &quot;ar&quot;: &quot;&quot;}&#39;</span>
+
+<span style="color: #959077">-- Read in user&#39;s locale</span>
+<span style="color: #66D9EF">SELECT</span><span style="color: #F8F8F2"> display_name</span><span style="color: #FF4689">-&gt;&gt;</span><span style="color: #E6DB74">&#39;ar&#39;</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">as</span><span style="color: #F8F8F2"> display_name </span><span style="color: #66D9EF">FROM</span><span style="color: #F8F8F2"> room </span><span style="color: #66D9EF">WHERE</span><span style="color: #F8F8F2"> id </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">$</span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #959077">-- Read both</span>
+<span style="color: #66D9EF">SELECT</span><span style="color: #F8F8F2"> display_name</span><span style="color: #FF4689">-&gt;&gt;</span><span style="color: #E6DB74">&#39;en&#39;</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">as</span><span style="color: #F8F8F2"> display_name_en,</span>
+<span style="color: #F8F8F2">       display_name</span><span style="color: #FF4689">-&gt;&gt;</span><span style="color: #E6DB74">&#39;ar&#39;</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">as</span><span style="color: #F8F8F2"> display_name_ar</span>
+<span style="color: #66D9EF">FROM</span><span style="color: #F8F8F2"> room </span><span style="color: #66D9EF">WHERE</span><span style="color: #F8F8F2"> id </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">$</span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">;</span>
+</code></pre></div>
+
+<h3 id="ui-string-implementation">UI String Implementation</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// public/locales/en/translation.json</span>
+<span style="color: #F8F8F2">{ </span><span style="color: #E6DB74">&quot;students&quot;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> { </span><span style="color: #E6DB74">&quot;title&quot;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Students&quot;</span><span style="color: #F8F8F2"> } }</span>
+
+<span style="color: #959077">// public/locales/ar/translation.json</span>
+<span style="color: #F8F8F2">{ </span><span style="color: #E6DB74">&quot;students&quot;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> { </span><span style="color: #E6DB74">&quot;title&quot;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;الطلاب&quot;</span><span style="color: #F8F8F2"> } }</span>
+
+<span style="color: #959077">// Component</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">useTranslation</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;react-i18next&#39;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">function</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">StudentsPage</span><span style="color: #F8F8F2">() {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">t</span><span style="color: #F8F8F2"> } </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">useTranslation</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> &lt;</span><span style="color: #FF4689">h1</span><span style="color: #F8F8F2">&gt;{</span><span style="color: #A6E22E">t</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;students.title&#39;</span><span style="color: #F8F8F2">)}&lt;/</span><span style="color: #FF4689">h1</span><span style="color: #F8F8F2">&gt;;</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="alternatives-considered">Alternatives Considered</h3>
+<ol>
+<li>
+<p><strong>Separate translation tables</strong> (e.g., <code>room_translation</code> with <code>room_id</code>, <code>locale</code>, <code>name</code>).
+   - Pros: Normalized.
+   - Cons: Extra JOINs, complex queries, harder to maintain.
+   - Rejected: JSONB is simpler + faster.</p>
+</li>
+<li>
+<p><strong>One column per locale</strong> (<code>name_en</code>, <code>name_ar</code>).
+   - Pros: Simple queries.
+   - Cons: Schema changes when adding languages, inflexible.
+   - Rejected: JSONB is more flexible.</p>
+</li>
+<li>
+<p><strong>Auto-translation service</strong> (like parent.app's 198 languages).
+   - Pros: No manual translation needed.
+   - Cons: Quality issues, doesn't handle RTL well, doesn't handle domain-specific terms, privacy concerns (sending content to translation API).
+   - Rejected for Phase 1: EN + AR natively is sufficient for UAE. Evaluate in Phase 2 for non-Arabic, non-English parents.</p>
+</li>
+<li>
+<p><strong>Single-language DB + UI translation only</strong>.
+   - Pros: Simplest DB.
+   - Cons: Room names, program names need to be in user's language. Can't translate "Toddlers Room" to "غرفة الأطفال" via UI strings (it's user-entered content).
+   - Rejected: Doesn't meet requirement.</p>
+</li>
+</ol>
+<h3 id="consequences">Consequences</h3>
+<p><strong>Positive</strong>:
+- DB-stored content is natively bilingual.
+- UI strings are cleanly separated (no hardcoded English in components).
+- Adding a third language (Phase 4+) is straightforward (add JSONB key, add translation file).
+- Both EN + AR work natively, no auto-translation crutch.</p>
+<p><strong>Negative</strong>:
+- JSONB columns slightly more complex queries (vs. flat columns).
+- Need to handle missing translations (fallback to English).
+- Slightly more storage (JSONB overhead, minimal).</p>
+<p><strong>Neutral</strong>:
+- All developers must follow the convention.</p>
+<h3 id="compliance">Compliance</h3>
+<ul>
+<li>All translatable DB columns use JSONB with <code>en</code> + <code>ar</code> keys.</li>
+<li>All UI strings via <code>t('key')</code> in react-i18next.</li>
+<li>ESLint rule forbids hardcoded English in components.</li>
+<li>RTL is first-class (CSS logical properties only, see <code>14-UX-UI-DESIGN.md</code> §10).</li>
+<li>Visual regression tests in both LTR + RTL.</li>
+<li>Documented in <code>07-DATABASE-SCHEMA.md</code> §1.4 + <code>12-WEB-FRONTEND.md</code> §6.</li>
+</ul>
+<hr />
+<h2 id="future-adrs">Future ADRs</h2>
+<p>As the project evolves, new ADRs will be added in <code>/docs/adr/</code> in the repo. Likely future ADRs:</p>
+<ul>
+<li>ADR-011: Payment gateway selection (Phase 3).</li>
+<li>ADR-012: ERP integration adapter pattern (Phase 3).</li>
+<li>ADR-013: Multi-region deployment strategy (Phase 4+).</li>
+<li>ADR-014: Elasticsearch adoption (if PostgreSQL FTS insufficient).</li>
+<li>ADR-015: Service extraction — Notifications (if Sprint 25 decision is "yes").</li>
+<li>ADR-016: Service extraction — Media Processing (if Sprint 25 decision is "yes").</li>
+</ul>
+<p>Each new ADR follows the Nygard template at the top of this file.</p>
+<hr />
+<p><strong>Next file to read</strong>: <code>21-DELIVERY-CHECKLIST.md</code> — go-live readiness + handover checklist.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-19-roadmap-sprints.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Roadmap & Sprints</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-21-delivery-checklist.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Delivery Checklist</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

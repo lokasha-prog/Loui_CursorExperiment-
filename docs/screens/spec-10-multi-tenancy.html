@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Tenancy — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class="active"><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-tenancy-models-overview" class="toc-link" data-target="1-tenancy-models-overview">1. Tenancy Models Overview</a><a href="#11-why-same-codebase" class="toc-link toc-h3" data-target="11-why-same-codebase">1.1 Why Same Codebase</a><a href="#12-the-key-insight" class="toc-link toc-h3" data-target="12-the-key-insight">1.2 The Key Insight</a><a href="#2-multi-tenancy-strategy-shared-schema-rls" class="toc-link" data-target="2-multi-tenancy-strategy-shared-schema-rls">2. Multi-Tenancy Strategy: Shared Schema + RLS</a><a href="#21-approach" class="toc-link toc-h3" data-target="21-approach">2.1 Approach</a><a href="#22-why-not-schema-per-tenant" class="toc-link toc-h3" data-target="22-why-not-schema-per-tenant">2.2 Why Not Schema-per-Tenant</a><a href="#23-why-not-application-layer-only" class="toc-link toc-h3" data-target="23-why-not-application-layer-only">2.3 Why Not Application-Layer-Only</a><a href="#3-tenant-lifecycle" class="toc-link" data-target="3-tenant-lifecycle">3. Tenant Lifecycle</a><a href="#31-saas-tenant-lifecycle" class="toc-link toc-h3" data-target="31-saas-tenant-lifecycle">3.1 SaaS Tenant Lifecycle</a><a href="#32-on-prem-tenant-lifecycle" class="toc-link toc-h3" data-target="32-on-prem-tenant-lifecycle">3.2 On-Prem Tenant Lifecycle</a><a href="#4-tenant-context-propagation" class="toc-link" data-target="4-tenant-context-propagation">4. Tenant Context Propagation</a><a href="#41-request-flow" class="toc-link toc-h3" data-target="41-request-flow">4.1 Request Flow</a><a href="#42-implementation" class="toc-link toc-h3" data-target="42-implementation">4.2 Implementation</a><a href="#43-background-jobs-hangfire" class="toc-link toc-h3" data-target="43-background-jobs-hangfire">4.3 Background Jobs (Hangfire)</a><a href="#44-rabbitmq-consumers" class="toc-link toc-h3" data-target="44-rabbitmq-consumers">4.4 RabbitMQ Consumers</a><a href="#5-database-rls-setup" class="toc-link" data-target="5-database-rls-setup">5. Database RLS Setup</a><a href="#51-enable-rls-on-all-tenant-tables" class="toc-link toc-h3" data-target="51-enable-rls-on-all-tenant-tables">5.1 Enable RLS on All Tenant Tables</a><a href="#52-service-role-bypass-rls" class="toc-link toc-h3" data-target="52-service-role-bypass-rls">5.2 Service Role (Bypass RLS)</a><a href="#53-migration-runner" class="toc-link toc-h3" data-target="53-migration-runner">5.3 Migration Runner</a><a href="#6-on-prem-single-tenant-deployment" class="toc-link" data-target="6-on-prem-single-tenant-deployment">6. On-Prem Single-Tenant Deployment</a><a href="#61-configuration" class="toc-link toc-h3" data-target="61-configuration">6.1 Configuration</a><a href="#62-bootstrap-process" class="toc-link toc-h3" data-target="62-bootstrap-process">6.2 Bootstrap Process</a><a href="#63-single-tenant-optimizations" class="toc-link toc-h3" data-target="63-single-tenant-optimizations">6.3 Single-Tenant Optimizations</a><a href="#64-updating" class="toc-link toc-h3" data-target="64-updating">6.4 Updating</a><a href="#65-customer-identity-federation" class="toc-link toc-h3" data-target="65-customer-identity-federation">6.5 Customer Identity Federation</a><a href="#7-saas-multi-tenant-deployment" class="toc-link" data-target="7-saas-multi-tenant-deployment">7. SaaS Multi-Tenant Deployment</a><a href="#71-configuration" class="toc-link toc-h3" data-target="71-configuration">7.1 Configuration</a><a href="#72-tenant-provisioning-flow-self-service-signup" class="toc-link toc-h3" data-target="72-tenant-provisioning-flow-self-service-signup">7.2 Tenant Provisioning Flow (Self-Service Sign...</a><a href="#73-tenant-provisioning-ui-phase-3-mcg" class="toc-link toc-h3" data-target="73-tenant-provisioning-ui-phase-3-mcg">7.3 Tenant Provisioning UI (Phase 3 MCG)</a><a href="#74-tenant-isolation-verification" class="toc-link toc-h3" data-target="74-tenant-isolation-verification">7.4 Tenant Isolation Verification</a><a href="#75-cross-tenant-operations-mcg-only" class="toc-link toc-h3" data-target="75-cross-tenant-operations-mcg-only">7.5 Cross-Tenant Operations (MCG Only)</a><a href="#8-keycloak-realm-strategy" class="toc-link" data-target="8-keycloak-realm-strategy">8. Keycloak Realm Strategy</a><a href="#81-phase-1-one-realm-per-deployment" class="toc-link toc-h3" data-target="81-phase-1-one-realm-per-deployment">8.1 Phase 1: One Realm per Deployment</a><a href="#82-phase-3-multi-realm-for-mcg" class="toc-link toc-h3" data-target="82-phase-3-multi-realm-for-mcg">8.2 Phase 3: Multi-Realm for MCG</a><a href="#83-realm-configuration-per-tenant" class="toc-link toc-h3" data-target="83-realm-configuration-per-tenant">8.3 Realm Configuration per Tenant</a><a href="#9-per-tenant-configuration" class="toc-link" data-target="9-per-tenant-configuration">9. Per-Tenant Configuration</a><a href="#91-configuration-storage" class="toc-link toc-h3" data-target="91-configuration-storage">9.1 Configuration Storage</a><a href="#92-configuration-hierarchy" class="toc-link toc-h3" data-target="92-configuration-hierarchy">9.2 Configuration Hierarchy</a><a href="#93-configuration-categories" class="toc-link toc-h3" data-target="93-configuration-categories">9.3 Configuration Categories</a><a href="#94-configuration-ui" class="toc-link toc-h3" data-target="94-configuration-ui">9.4 Configuration UI</a><a href="#10-data-migration-between-modes" class="toc-link" data-target="10-data-migration-between-modes">10. Data Migration Between Modes</a><a href="#101-on-prem-saas-migration" class="toc-link toc-h3" data-target="101-on-prem-saas-migration">10.1 On-Prem → SaaS Migration</a><a href="#102-saas-on-prem-migration" class="toc-link toc-h3" data-target="102-saas-on-prem-migration">10.2 SaaS → On-Prem Migration</a><a href="#103-cross-saas-tenant-migration" class="toc-link toc-h3" data-target="103-cross-saas-tenant-migration">10.3 Cross-SaaS-Tenant Migration</a><a href="#11-tenant-monitoring-operations" class="toc-link" data-target="11-tenant-monitoring-operations">11. Tenant Monitoring &amp; Operations</a><a href="#111-per-tenant-metrics" class="toc-link toc-h3" data-target="111-per-tenant-metrics">11.1 Per-Tenant Metrics</a><a href="#112-platform-level-monitoring" class="toc-link toc-h3" data-target="112-platform-level-monitoring">11.2 Platform-Level Monitoring</a><a href="#113-noisy-neighbor-prevention" class="toc-link toc-h3" data-target="113-noisy-neighbor-prevention">11.3 Noisy Neighbor Prevention</a><a href="#12-backup-restore-per-tenant" class="toc-link" data-target="12-backup-restore-per-tenant">12. Backup &amp; Restore Per Tenant</a><a href="#121-saas-backups" class="toc-link toc-h3" data-target="121-saas-backups">12.1 SaaS Backups</a><a href="#122-on-prem-backups" class="toc-link toc-h3" data-target="122-on-prem-backups">12.2 On-Prem Backups</a><a href="#123-backup-encryption" class="toc-link toc-h3" data-target="123-backup-encryption">12.3 Backup Encryption</a><a href="#13-tenant-delete-right-to-erasure" class="toc-link" data-target="13-tenant-delete-right-to-erasure">13. Tenant Delete / Right to Erasure</a><a href="#131-soft-delete-default" class="toc-link toc-h3" data-target="131-soft-delete-default">13.1 Soft Delete (Default)</a><a href="#132-hard-delete-after-retention" class="toc-link toc-h3" data-target="132-hard-delete-after-retention">13.2 Hard Delete (After Retention)</a><a href="#133-right-to-erasure-pdplgdpr" class="toc-link toc-h3" data-target="133-right-to-erasure-pdplgdpr">13.3 Right to Erasure (PDPL/GDPR)</a><a href="#14-multi-tenancy-testing-strategy" class="toc-link" data-target="14-multi-tenancy-testing-strategy">14. Multi-Tenancy Testing Strategy</a><a href="#141-automated-tests" class="toc-link toc-h3" data-target="141-automated-tests">14.1 Automated Tests</a><a href="#142-test-matrix" class="toc-link toc-h3" data-target="142-test-matrix">14.2 Test Matrix</a><a href="#143-load-testing-per-tenant" class="toc-link toc-h3" data-target="143-load-testing-per-tenant">14.3 Load Testing Per-Tenant</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4 text-amber-600"></i><span>Multi-Tenancy</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-10-multi-tenancy.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 10</span>
+          <span class="text-[10px] font-mono text-slate-400">~3,732 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Multi-Tenancy</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-09-auth-security.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Auth & Security</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-11-devops.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">DevOps & Infrastructure</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="10-multi-tenancy-architecture">10 — Multi-Tenancy Architecture</h1>
+<blockquote>
+<p>How NMS supports both <strong>on-prem single-tenant</strong> and <strong>SaaS multi-tenant</strong> deployments from a single codebase.</p>
+</blockquote>
+<hr />
+<h2 id="1-tenancy-models-overview">1. Tenancy Models Overview</h2>
+<p>NMS supports two deployment modes from one codebase:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Tenant count per deployment</th>
+<th>Use case</th>
+<th>Commercial model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>On-prem</strong></td>
+<td>1 (single-tenant)</td>
+<td>Customer requires data sovereignty, has own infra, or wants full control</td>
+<td>One-time license + annual maintenance</td>
+</tr>
+<tr>
+<td><strong>SaaS</strong></td>
+<td>Many (multi-tenant, shared schema + RLS)</td>
+<td>Customer wants low-capex, fast onboarding, hands-off ops</td>
+<td>Monthly/annual subscription per centre</td>
+</tr>
+</tbody>
+</table>
+<h3 id="11-why-same-codebase">1.1 Why Same Codebase</h3>
+<p>Building two codebases (one for on-prem, one for SaaS) is unacceptable:
+- 2× development cost.
+- Feature parity drift.
+- Bug fixes applied twice.
+- Customer migration between modes impossible.</p>
+<p>Instead, NMS is built <strong>multi-tenant-ready</strong> from day one. On-prem deployment is simply a multi-tenant deployment with one tenant.</p>
+<h3 id="12-the-key-insight">1.2 The Key Insight</h3>
+<blockquote>
+<p>An on-prem single-tenant deployment IS a multi-tenant deployment with <code>tenant_count = 1</code>.</p>
+</blockquote>
+<p>Every entity has a <code>tenant_id</code> column. Every query is scoped by <code>tenant_id</code>. Every RLS policy enforces <code>tenant_id</code> match. In on-prem, there's one <code>tenant_id</code> value throughout the deployment. In SaaS, there are many.</p>
+<p>This means:
+- No conditional code paths for "single-tenant vs multi-tenant".
+- No schema differences.
+- No API differences.
+- Only configuration + deployment topology differs.</p>
+<hr />
+<h2 id="2-multi-tenancy-strategy-shared-schema-rls">2. Multi-Tenancy Strategy: Shared Schema + RLS</h2>
+<h3 id="21-approach">2.1 Approach</h3>
+<p>We use <strong>shared schema with <code>tenant_id</code> column discrimination</strong>, enforced by:
+1. <strong>Application layer</strong>: EF Core global query filter (<code>HasQueryFilter(e =&gt; e.TenantId == _tenantContext.TenantId)</code>).
+2. <strong>Database layer</strong>: PostgreSQL Row Level Security (RLS) policies.</p>
+<p>This is defense-in-depth: even if a bug in EF Core's filter allows a row to leak, RLS rejects it at the DB layer.</p>
+<h3 id="22-why-not-schema-per-tenant">2.2 Why Not Schema-per-Tenant</h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Shared schema + RLS</strong> ✅</td>
+<td>Simple operations, single migration, easy reporting across tenants, lowest cost</td>
+<td>One bad query can leak (mitigated by RLS)</td>
+</tr>
+<tr>
+<td>Schema-per-tenant</td>
+<td>Strong isolation</td>
+<td>N× migrations, complex operations, hard cross-tenant reporting, expensive (N× connections)</td>
+</tr>
+<tr>
+<td>Database-per-tenant</td>
+<td>Strongest isolation</td>
+<td>Most expensive, hardest to operate, doesn't fit on-prem model</td>
+</tr>
+</tbody>
+</table>
+<p>We chose shared schema + RLS because:
+- It's the best fit for both SaaS (many tenants, low cost) and on-prem (one tenant, simple ops).
+- RLS provides strong isolation guarantees at the DB layer.
+- Cross-tenant reporting (for MCG consolidated views in Phase 3) is easy.
+- Migrations run once per deployment (not N times).</p>
+<h3 id="23-why-not-application-layer-only">2.3 Why Not Application-Layer-Only</h3>
+<p>Some frameworks rely only on application-layer filtering (e.g., EF Core's <code>HasQueryFilter</code>). This is risky:
+- A bug in the filter (e.g., <code>AsNoTracking()</code> bypasses it in some versions) → cross-tenant data leak.
+- Raw SQL queries (for performance) bypass the filter.
+- Background jobs (Hangfire) need to remember to set tenant context.</p>
+<p>RLS at the DB layer is non-bypassable (except via <code>service</code> role, which is restricted). It's the safety net.</p>
+<hr />
+<h2 id="3-tenant-lifecycle">3. Tenant Lifecycle</h2>
+<h3 id="31-saas-tenant-lifecycle">3.1 SaaS Tenant Lifecycle</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Provisioning (Super Admin / self-service signup)
+   ├── Create tenant record
+   ├── Create Keycloak realm (or use shared realm with tenant claim)
+   ├── Create database schema (no action — shared schema)
+   ├── Run seed data (default roles, default settings, default ratio rules)
+   ├── Create Super Admin user (customer&#39;s first admin)
+   ├── Send welcome email with onboarding link
+   └── Start billing (Stripe subscription or manual invoice)
+
+2. Onboarding (Super Admin)
+   ├── Complete centre profile (name, logo, address, branding)
+   ├── Configure ratio rules per age band
+   ├── Configure weekend days, holidays, working hours
+   ├── Create rooms, programs, groups
+   ├── Create staff accounts (with role assignments)
+   ├── Create students (with guardians)
+   ├── Configure billing (fee plans, invoice schedule)
+   └── Go live (start using with real data)
+
+3. Active
+   ├── Daily operations
+   ├── Billing (monthly SaaS fee + per-student fees)
+   ├── Support (in-app, email)
+   └── Monitoring (uptime, performance, errors)
+
+4. Suspension (rare)
+   ├── Triggers: non-payment, abuse, customer request
+   ├── Tenant status → &#39;suspended&#39;
+   ├── All logins blocked (refresh tokens revoked)
+   ├── Data retained for 90 days (recovery window)
+   └── Reactivation possible within 90 days
+
+5. Archival / Cancellation
+   ├── Triggers: customer request after suspension, legal hold release
+   ├── Tenant status → &#39;archived&#39;
+   ├── Data retained per compliance (proposed: 7 years for attendance, 10 for medical)
+   ├── Soft-deleted (is_deleted = true) but data preserved
+   ├── Backups retained per policy
+   └── Eventually hard-deleted after retention period (with legal sign-off)
+</code></pre></div>
+
+<h3 id="32-on-prem-tenant-lifecycle">3.2 On-Prem Tenant Lifecycle</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Sales + Contract
+   ├── Customer signs license agreement
+   ├── Implementation services scoped
+   └── Deployment target identified (customer cloud or on-prem servers)
+
+2. Deployment
+   ├── Provision infrastructure (Terraform)
+   ├── Deploy NMS (Helm install)
+   ├── Configure Keycloak realm
+   ├── Configure customer&#39;s SMTP, storage, identity federation (if any)
+   ├── Run seed data
+   └── Create Super Admin (customer&#39;s designated admin)
+
+3. Onboarding (same as SaaS)
+
+4. Active
+   ├── Customer operates the system
+   ├── We provide support per SLA
+   ├── Updates: customer controls cadence (we notify, they apply)
+   └── Monitoring: customer&#39;s responsibility (we provide tooling)
+
+5. License Expiry / Termination
+   ├── Customer continues to use existing version (no support)
+   ├── OR customer migrates to SaaS (data migration services)
+   ├── OR customer decommissions (data exported, deleted per contract)
+   └── Source code escrow (if contractual) released to customer
+</code></pre></div>
+
+<hr />
+<h2 id="4-tenant-context-propagation">4. Tenant Context Propagation</h2>
+<h3 id="41-request-flow">4.1 Request Flow</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Client makes API request with JWT in Authorization header
+2. ASP.NET Core auth middleware validates JWT (via Keycloak public key)
+3. JWT contains &#39;tenant_id&#39; claim (set by Keycloak mapper based on user&#39;s realm)
+4. TenantContextMiddleware extracts tenant_id, stores in ITenantContext (scoped service)
+5. EF Core DbContext uses ITenantContext.TenantId in global query filter
+6. Before any DB query, middleware executes: SELECT set_config(&#39;app.tenant_id&#39;, &#39;&lt;uuid&gt;&#39;, true)
+7. PostgreSQL RLS policies enforce tenant_id = current_setting(&#39;app.tenant_id&#39;)::uuid
+8. Query results are guaranteed tenant-scoped
+</code></pre></div>
+
+<h3 id="42-implementation">4.2 Implementation</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// ITenantContext.cs</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">interface</span><span style="color: #F8F8F2"> ITenantContext</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    Guid TenantId { </span><span style="color: #66D9EF">get</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">set</span><span style="color: #F8F8F2">; }</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2"> TenantSlug { </span><span style="color: #66D9EF">get</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">set</span><span style="color: #F8F8F2">; }</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">bool</span><span style="color: #F8F8F2"> IsInitialized { </span><span style="color: #66D9EF">get</span><span style="color: #F8F8F2">; }</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #959077">// TenantContext.cs (Scoped)</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">TenantContext</span><span style="color: #F8F8F2"> : ITenantContext</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> Guid TenantId { </span><span style="color: #66D9EF">get</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">set</span><span style="color: #F8F8F2">; }</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2"> TenantSlug { </span><span style="color: #66D9EF">get</span><span style="color: #F8F8F2">; </span><span style="color: #66D9EF">set</span><span style="color: #F8F8F2">; }</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">bool</span><span style="color: #F8F8F2"> IsInitialized </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> TenantId </span><span style="color: #FF4689">!=</span><span style="color: #F8F8F2"> Guid.Empty;</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #959077">// TenantContextMiddleware.cs</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">TenantContextMiddleware</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> RequestDelegate _next;</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">TenantContextMiddleware</span><span style="color: #F8F8F2">(RequestDelegate next) </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> _next </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> next;</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">InvokeAsync</span><span style="color: #F8F8F2">(</span>
+<span style="color: #F8F8F2">        HttpContext context,</span>
+<span style="color: #F8F8F2">        ITenantContext tenantContext,</span>
+<span style="color: #F8F8F2">        NmsDbContext db,</span>
+<span style="color: #F8F8F2">        ICurrentUser currentUser)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Skip for unauthenticated endpoints</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> path </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> context.Request.Path.Value </span><span style="color: #FF4689">??</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (IsUnauthenticatedPath(path))</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">_next</span><span style="color: #F8F8F2">(context);</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        }</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Extract tenant_id from JWT</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> tenantIdClaim </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> context.User.FindFirst(</span><span style="color: #E6DB74">&quot;tenant_id&quot;</span><span style="color: #F8F8F2">)</span><span style="color: #FF4689">?.</span><span style="color: #F8F8F2">Value;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (</span><span style="color: #FF4689">!</span><span style="color: #F8F8F2">Guid.TryParse(tenantIdClaim, </span><span style="color: #66D9EF">out</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> tenantId))</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            context.Response.StatusCode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">401</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        }</span>
+
+<span style="color: #F8F8F2">        tenantContext.TenantId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> tenantId;</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Set RLS context (transaction-scoped)</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> db.Database.ExecuteSqlInterpolatedAsync(</span>
+<span style="color: #F8F8F2">            </span><span style="color: #E6DB74">$&quot;SELECT set_config(&#39;app.tenant_id&#39;, {tenantId.ToString()}, true)&quot;</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">_next</span><span style="color: #F8F8F2">(context);</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">static</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">bool</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">IsUnauthenticatedPath</span><span style="color: #F8F8F2">(</span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2"> path) </span><span style="color: #FF4689">=&gt;</span>
+<span style="color: #F8F8F2">        path.StartsWith(</span><span style="color: #E6DB74">&quot;/api/v1/auth/login&quot;</span><span style="color: #F8F8F2">) </span><span style="color: #FF4689">||</span>
+<span style="color: #F8F8F2">        path.StartsWith(</span><span style="color: #E6DB74">&quot;/api/v1/auth/refresh&quot;</span><span style="color: #F8F8F2">) </span><span style="color: #FF4689">||</span>
+<span style="color: #F8F8F2">        path.StartsWith(</span><span style="color: #E6DB74">&quot;/api/v1/auth/forgot-password&quot;</span><span style="color: #F8F8F2">) </span><span style="color: #FF4689">||</span>
+<span style="color: #F8F8F2">        path.StartsWith(</span><span style="color: #E6DB74">&quot;/api/v1/auth/reset-password&quot;</span><span style="color: #F8F8F2">) </span><span style="color: #FF4689">||</span>
+<span style="color: #F8F8F2">        path.StartsWith(</span><span style="color: #E6DB74">&quot;/api/v1/auth/bootstrap&quot;</span><span style="color: #F8F8F2">) </span><span style="color: #FF4689">||</span>
+<span style="color: #F8F8F2">        path.StartsWith(</span><span style="color: #E6DB74">&quot;/api/v1/auth/accept-invitation&quot;</span><span style="color: #F8F8F2">) </span><span style="color: #FF4689">||</span>
+<span style="color: #F8F8F2">        path.StartsWith(</span><span style="color: #E6DB74">&quot;/api/v1/public/&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="43-background-jobs-hangfire">4.3 Background Jobs (Hangfire)</h3>
+<p>Background jobs run outside the HTTP request pipeline, so tenant context must be set explicitly:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// TenantAwareJobFilter.cs (Hangfire filter)</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">TenantAwareJobFilter</span><span style="color: #F8F8F2"> : IClientFilter, IServerFilter</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">void</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">OnPerforming</span><span style="color: #F8F8F2">(PerformingContext context)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> tenantId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> context.GetJobParameter</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">Guid</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&quot;TenantId&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (tenantId </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> Guid.Empty) </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Set tenant context for this job</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> tenantContext </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> context.Items[</span><span style="color: #E6DB74">&quot;ServiceProvider&quot;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">            .GetRequiredService</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">ITenantContext</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">        tenantContext.TenantId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> tenantId;</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Set RLS context</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> db </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> context.Items[</span><span style="color: #E6DB74">&quot;ServiceProvider&quot;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">            .GetRequiredService</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">NmsDbContext</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">        db.Database.ExecuteSqlInterpolated(</span>
+<span style="color: #F8F8F2">            </span><span style="color: #E6DB74">$&quot;SELECT set_config(&#39;app.tenant_id&#39;, {tenantId.ToString()}, true)&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #959077">// When enqueuing a job:</span>
+<span style="color: #F8F8F2">_backgroundJobClient.Enqueue</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">GenerateInvoicesJob</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">(job </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> </span>
+<span style="color: #F8F8F2">    job.ExecuteAsync(tenantId, CancellationToken.None));</span>
+<span style="color: #959077">// Job parameters include TenantId automatically via filter</span>
+</code></pre></div>
+
+<h3 id="44-rabbitmq-consumers">4.4 RabbitMQ Consumers</h3>
+<p>Same pattern — consumer sets tenant context before processing message:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">MediaUploadedConsumer</span><span style="color: #F8F8F2"> : IConsumer</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">MediaUploadedEvent</span><span style="color: #FF4689">&gt;</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> ITenantContext _tenantContext;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> NmsDbContext _db;</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">Consume</span><span style="color: #F8F8F2">(ConsumeContext</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">MediaUploadedEvent</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> context)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        _tenantContext.TenantId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> context.Message.TenantId;</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _db.Database.ExecuteSqlInterpolatedAsync(</span>
+<span style="color: #F8F8F2">            </span><span style="color: #E6DB74">$&quot;SELECT set_config(&#39;app.tenant_id&#39;, {context.Message.TenantId.ToString()}, true)&quot;</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Process message...</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p>All events published to RabbitMQ include <code>TenantId</code> in the message envelope.</p>
+<hr />
+<h2 id="5-database-rls-setup">5. Database RLS Setup</h2>
+<h3 id="51-enable-rls-on-all-tenant-tables">5.1 Enable RLS on All Tenant Tables</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">-- Function to set tenant context</span>
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">OR</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">REPLACE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">FUNCTION</span><span style="color: #F8F8F2"> set_tenant_context(p_tenant_id UUID)</span>
+<span style="color: #66D9EF">RETURNS</span><span style="color: #F8F8F2"> void </span><span style="color: #66D9EF">AS</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">$$</span>
+<span style="color: #66D9EF">BEGIN</span>
+<span style="color: #F8F8F2">  PERFORM set_config(</span><span style="color: #E6DB74">&#39;app.tenant_id&#39;</span><span style="color: #F8F8F2">, p_tenant_id::text, </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">);</span>
+<span style="color: #66D9EF">END</span><span style="color: #F8F8F2">;</span>
+<span style="color: #ED007E; background-color: #1E0010">$$</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">LANGUAGE</span><span style="color: #F8F8F2"> plpgsql;</span>
+
+<span style="color: #959077">-- Function to get current tenant (returns sentinel if not set, matches nothing)</span>
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">OR</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">REPLACE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">FUNCTION</span><span style="color: #F8F8F2"> current_tenant_id()</span>
+<span style="color: #66D9EF">RETURNS</span><span style="color: #F8F8F2"> UUID </span><span style="color: #66D9EF">AS</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">$$</span>
+<span style="color: #66D9EF">BEGIN</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">RETURN</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">COALESCE</span><span style="color: #F8F8F2">(</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">NULLIF</span><span style="color: #F8F8F2">(current_setting(</span><span style="color: #E6DB74">&#39;app.tenant_id&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">), </span><span style="color: #E6DB74">&#39;&#39;</span><span style="color: #F8F8F2">)::UUID,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #E6DB74">&#39;00000000-0000-0000-0000-000000000000&#39;</span><span style="color: #F8F8F2">::UUID</span>
+<span style="color: #F8F8F2">  );</span>
+<span style="color: #66D9EF">END</span><span style="color: #F8F8F2">;</span>
+<span style="color: #ED007E; background-color: #1E0010">$$</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">LANGUAGE</span><span style="color: #F8F8F2"> plpgsql </span><span style="color: #66D9EF">STABLE</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #959077">-- Apply RLS to every table with tenant_id column</span>
+<span style="color: #66D9EF">DO</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">$$</span>
+<span style="color: #66D9EF">DECLARE</span>
+<span style="color: #F8F8F2">  t RECORD;</span>
+<span style="color: #66D9EF">BEGIN</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">FOR</span><span style="color: #F8F8F2"> t </span><span style="color: #66D9EF">IN</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">SELECT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">table_name</span><span style="color: #F8F8F2"> </span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">FROM</span><span style="color: #F8F8F2"> information_schema.columns</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">WHERE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">column_name</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;tenant_id&#39;</span>
+<span style="color: #F8F8F2">      </span><span style="color: #66D9EF">AND</span><span style="color: #F8F8F2"> table_schema </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;public&#39;</span>
+<span style="color: #F8F8F2">      </span><span style="color: #66D9EF">AND</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">table_name</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">IN</span><span style="color: #F8F8F2"> (</span><span style="color: #E6DB74">&#39;tenant&#39;</span><span style="color: #F8F8F2">)  </span><span style="color: #959077">-- tenant table itself</span>
+<span style="color: #F8F8F2">  LOOP</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">EXECUTE</span><span style="color: #F8F8F2"> format(</span><span style="color: #E6DB74">&#39;ALTER TABLE %I ENABLE ROW LEVEL SECURITY;&#39;</span><span style="color: #F8F8F2">, t.</span><span style="color: #66D9EF">table_name</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">EXECUTE</span><span style="color: #F8F8F2"> format(</span><span style="color: #E6DB74">&#39;ALTER TABLE %I FORCE ROW LEVEL SECURITY;&#39;</span><span style="color: #F8F8F2">, t.</span><span style="color: #66D9EF">table_name</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">EXECUTE</span><span style="color: #F8F8F2"> format(</span><span style="color: #E6DB74">&#39;DROP POLICY IF EXISTS tenant_isolation ON %I;&#39;</span><span style="color: #F8F8F2">, t.</span><span style="color: #66D9EF">table_name</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">EXECUTE</span><span style="color: #F8F8F2"> format(</span><span style="color: #E6DB74">&#39;</span>
+<span style="color: #E6DB74">      CREATE POLICY tenant_isolation ON %I</span>
+<span style="color: #E6DB74">        USING (tenant_id = current_tenant_id())</span>
+<span style="color: #E6DB74">        WITH CHECK (tenant_id = current_tenant_id());</span>
+<span style="color: #E6DB74">    &#39;</span><span style="color: #F8F8F2">, t.</span><span style="color: #66D9EF">table_name</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">END</span><span style="color: #F8F8F2"> LOOP;</span>
+<span style="color: #66D9EF">END</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">$$</span><span style="color: #F8F8F2">;</span>
+</code></pre></div>
+
+<h3 id="52-service-role-bypass-rls">5.2 Service Role (Bypass RLS)</h3>
+<p>For migrations, Hangfire jobs that span tenants, and platform ops team:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">-- Service role bypasses RLS (used by migrations, cross-tenant jobs, ops team)</span>
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ROLE</span><span style="color: #F8F8F2"> service LOGIN BYPASSRLS PASSWORD </span><span style="color: #E6DB74">&#39;&lt;from secrets manager&gt;&#39;</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #959077">-- Application role (RLS enforced)</span>
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ROLE</span><span style="color: #F8F8F2"> app LOGIN PASSWORD </span><span style="color: #E6DB74">&#39;&lt;from secrets manager&gt;&#39;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">GRANT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">USAGE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">SCHEMA</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TO</span><span style="color: #F8F8F2"> app;</span>
+<span style="color: #66D9EF">GRANT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">SELECT</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">INSERT</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">UPDATE</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">DELETE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ALL</span><span style="color: #F8F8F2"> TABLES </span><span style="color: #66D9EF">IN</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">SCHEMA</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TO</span><span style="color: #F8F8F2"> app;</span>
+<span style="color: #66D9EF">GRANT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">USAGE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ALL</span><span style="color: #F8F8F2"> SEQUENCES </span><span style="color: #66D9EF">IN</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">SCHEMA</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TO</span><span style="color: #F8F8F2"> app;</span>
+
+<span style="color: #959077">-- Default privileges for future tables</span>
+<span style="color: #66D9EF">ALTER</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">PRIVILEGES</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">IN</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">SCHEMA</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">GRANT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">SELECT</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">INSERT</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">UPDATE</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">DELETE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> TABLES </span><span style="color: #66D9EF">TO</span><span style="color: #F8F8F2"> app;</span>
+<span style="color: #66D9EF">ALTER</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">PRIVILEGES</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">IN</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">SCHEMA</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">GRANT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">USAGE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> SEQUENCES </span><span style="color: #66D9EF">TO</span><span style="color: #F8F8F2"> app;</span>
+</code></pre></div>
+
+<p><strong>Connection string in production</strong>:
+- App uses <code>app</code> role (RLS enforced).
+- Migrations use <code>service</code> role (BYPASSRLS).
+- Hangfire cross-tenant jobs use <code>service</code> role.
+- Platform ops team uses <code>service</code> role for forensic queries (audited at infra level).</p>
+<h3 id="53-migration-runner">5.3 Migration Runner</h3>
+<p>EF Core migrations use <code>service</code> role:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// MigrationRunner.cs (separate console app or init container)</span>
+<span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> connectionString </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">$&quot;Host=...;Database=...;Username=service;Password={servicePassword};...&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> options </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> DbContextOptionsBuilder</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">NmsDbContext</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    .UseNpgsql(connectionString)</span>
+<span style="color: #F8F8F2">    .Options;</span>
+<span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> db </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> NmsDbContext(options);</span>
+<span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> db.Database.MigrateAsync();</span>
+</code></pre></div>
+
+<hr />
+<h2 id="6-on-prem-single-tenant-deployment">6. On-Prem Single-Tenant Deployment</h2>
+<h3 id="61-configuration">6.1 Configuration</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>// appsettings.json (on-prem)
+{
+  &quot;Deployment&quot;: {
+    &quot;Mode&quot;: &quot;OnPrem&quot;,
+    &quot;SingleTenantMode&quot;: true
+  },
+  &quot;MultiTenancy&quot;: {
+    &quot;Enabled&quot;: true,  // Still enabled — just one tenant
+    &quot;DefaultTenantId&quot;: &quot;&lt;fixed-uuid-set-at-install&gt;&quot;  // Pre-provisioned
+  },
+  &quot;Database&quot;: {
+    &quot;Provider&quot;: &quot;PostgreSQL&quot;,
+    &quot;ConnectionString&quot;: &quot;...&quot;  // From customer&#39;s secrets
+  },
+  // ...
+}
+</code></pre></div>
+
+<h3 id="62-bootstrap-process">6.2 Bootstrap Process</h3>
+<ol>
+<li>Customer installs NMS via Helm chart on their K8s cluster (or docker-compose for smaller deployments).</li>
+<li>Helm chart runs init container that:
+   - Creates database if not exists.
+   - Runs migrations.
+   - Provisions the single tenant (with fixed UUID, configurable in values.yaml).
+   - Creates Keycloak realm for the tenant.
+   - Generates bootstrap Super Admin invitation token.</li>
+<li>Customer's designated Super Admin opens bootstrap URL, sets up account.</li>
+<li>Onboarding wizard starts.</li>
+</ol>
+<h3 id="63-single-tenant-optimizations">6.3 Single-Tenant Optimizations</h3>
+<p>Even though the codebase is multi-tenant, on-prem deployments benefit from:
+- <strong>No tenant context overhead</strong>: <code>tenant_id</code> is always the same value. RLS policies always match. No performance impact.
+- <strong>Simpler backups</strong>: One database, one backup job.
+- <strong>Simpler monitoring</strong>: No need for per-tenant dashboards (only one tenant).
+- <strong>Custom branding</strong>: Customer's branding applied at tenant level (same as SaaS).</p>
+<h3 id="64-updating">6.4 Updating</h3>
+<ul>
+<li>Customer pulls new Docker image from our registry (or air-gapped registry mirror).</li>
+<li>Helm upgrade runs migrations + restarts pods.</li>
+<li>Zero downtime (blue/green deployment).</li>
+<li>Customer controls cadence (we notify of new releases; customer applies when ready).</li>
+<li>LTS branches: we maintain 2 LTS versions (e.g., 1.x and 2.x) for customers who don't want bleeding edge.</li>
+</ul>
+<h3 id="65-customer-identity-federation">6.5 Customer Identity Federation</h3>
+<p>On-prem customers may have existing Active Directory / LDAP:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Keycloak (our instance, on customer&#39;s infra)
+  ↓ User Federation
+Customer&#39;s Active Directory / LDAP
+</code></pre></div>
+
+<ul>
+<li>Staff authenticate via AD credentials (no separate password).</li>
+<li>Parents still use Keycloak local accounts (no AD account).</li>
+<li>Optional: SSO via SAML for staff (if customer has SAML IdP).</li>
+</ul>
+<p>Configuration in Keycloak:
+- User Federation → LDAP → Configure connection (URL, bind DN, bind password).
+- Mappers: map AD <code>sAMAccountName</code> to Keycloak <code>username</code>, AD <code>memberOf</code> to Keycloak roles.</p>
+<hr />
+<h2 id="7-saas-multi-tenant-deployment">7. SaaS Multi-Tenant Deployment</h2>
+<h3 id="71-configuration">7.1 Configuration</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>// appsettings.json (SaaS)
+{
+  &quot;Deployment&quot;: {
+    &quot;Mode&quot;: &quot;SaaS&quot;,
+    &quot;MultiTenantMode&quot;: true
+  },
+  &quot;MultiTenancy&quot;: {
+    &quot;Enabled&quot;: true,
+    &quot;DefaultTenantId&quot;: null  // Resolved per-request from JWT
+  },
+  &quot;Database&quot;: {
+    &quot;Provider&quot;: &quot;PostgreSQL&quot;,
+    &quot;ConnectionString&quot;: &quot;...&quot;  // From AWS Secrets Manager
+  },
+  // ...
+}
+</code></pre></div>
+
+<h3 id="72-tenant-provisioning-flow-self-service-signup">7.2 Tenant Provisioning Flow (Self-Service Signup)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Nursery owner visits https://nms.ae, clicks &quot;Start Free Trial&quot;
+2. Signs up with email + nursery name + phone
+3. Backend:
+   a. Creates tenant record (status=&#39;active&#39;, subscription_tier=&#39;trial&#39;, subscription_ends_at=now+30d)
+   b. Creates Keycloak realm (e.g., &#39;bright-futures-nursery&#39;)
+   c. Creates Keycloak client (nms-web, nms-mobile) in realm
+   d. Creates Super Admin user in Keycloak
+   e. Sends welcome email with onboarding link
+   f. Creates Stripe customer + starts trial subscription
+4. Super Admin clicks onboarding link → sets password → goes through onboarding wizard
+5. Trial expires in 30 days:
+   - If converted to paid: subscription_tier updated, billing starts
+   - If not: tenant status → &#39;suspended&#39; (90-day recovery window)
+</code></pre></div>
+
+<h3 id="73-tenant-provisioning-ui-phase-3-mcg">7.3 Tenant Provisioning UI (Phase 3 MCG)</h3>
+<p>For Multi-Centre Groups, the Group Owner can provision new centres:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Group Owner logs in to MCG admin portal
+2. Navigates to &quot;Centres&quot; → &quot;Add Centre&quot;
+3. Fills form: centre name, address, branding, default programs, fee plans
+4. Backend:
+   a. Creates new tenant with parent_tenant_id = MCG&#39;s tenant_id
+   b. Creates Keycloak realm (or sub-realm)
+   c. Assigns Group Owner as Super Admin of new centre
+   d. Provisions default settings (inherited from MCG where configured)
+5. New centre appears in MCG dashboard
+6. Group Owner can assign staff to new centre
+</code></pre></div>
+
+<h3 id="74-tenant-isolation-verification">7.4 Tenant Isolation Verification</h3>
+<p>Automated tests verify isolation:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">[Test]</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">ParentFromTenantA_CannotAccessStudentFromTenantB</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Arrange</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> tenantA </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> CreateTestTenantAsync();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> tenantB </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> CreateTestTenantAsync();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> studentInB </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> CreateTestStudentAsync(tenantB.Id);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> parentInA </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> CreateTestParentAsync(tenantA.Id);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Set tenant context to A</span>
+<span style="color: #F8F8F2">    _tenantContext.TenantId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> tenantA.Id;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">SetRlsContextAsync</span><span style="color: #F8F8F2">(tenantA.Id);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Act</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> result </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _getStudentHandler.Handle(</span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> GetStudentByIdQuery(studentInB.Id), </span><span style="color: #66D9EF">default</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Assert</span>
+<span style="color: #F8F8F2">    Assert.IsFalse(result.IsSuccess);</span>
+<span style="color: #F8F8F2">    Assert.AreEqual(</span><span style="color: #AE81FF">404</span><span style="color: #F8F8F2">, result.Error.StatusCode);  </span><span style="color: #959077">// 404, not 403</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p>These tests run in CI on every PR.</p>
+<h3 id="75-cross-tenant-operations-mcg-only">7.5 Cross-Tenant Operations (MCG Only)</h3>
+<p>Phase 3 MCG features require cross-tenant queries:
+- Consolidated dashboard (sum across centres).
+- Cross-centre reports.
+- Group Owner viewing any centre's data (with explicit authorization).</p>
+<p><strong>Implementation:</strong>
+- Group Owner JWT has <code>tenant_roles: [{centre_id, role: 'group_owner'}, ...]</code>.
+- Backend endpoint <code>/api/v1/mcg/dashboard</code> uses <code>service</code> role (BYPASSRLS) to query across tenants.
+- Authorization layer verifies user has <code>group_owner</code> role on each requested centre.
+- All cross-tenant access audited at higher level.
+- Never expose cross-tenant data via standard per-tenant endpoints.</p>
+<hr />
+<h2 id="8-keycloak-realm-strategy">8. Keycloak Realm Strategy</h2>
+<h3 id="81-phase-1-one-realm-per-deployment">8.1 Phase 1: One Realm per Deployment</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>SaaS Deployment:
+  Keycloak instance
+    ├── Realm: tenant-a (Bright Futures Nursery)
+    │   ├── Client: nms-web
+    │   ├── Client: nms-mobile
+    │   └── Users: staff + parents of Bright Futures
+    ├── Realm: tenant-b (Happy Kids Nursery)
+    │   └── ...
+    └── Realm: tenant-c (...)
+
+On-Prem Deployment:
+  Keycloak instance (customer&#39;s infra)
+    └── Realm: bright-futures (single tenant)
+        └── ...
+</code></pre></div>
+
+<p><strong>Why one realm per tenant (not one shared realm):</strong>
+- Complete isolation: realm-level user lists, sessions, role definitions.
+- Per-tenant Keycloak configuration (e.g., custom login theme, MFA policy).
+- Per-tenant user federation (some tenants may have AD, others not).
+- Easier to delete a tenant (delete the realm).</p>
+<h3 id="82-phase-3-multi-realm-for-mcg">8.2 Phase 3: Multi-Realm for MCG</h3>
+<p>For Multi-Centre Groups (one MCG, multiple centres):</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>MCG: Bright Futures Group (5 centres)
+  Keycloak realm: bright-futures-group
+    ├── Users: group owner, group director, group IT
+    ├── Group-level roles: group_owner, group_director
+    └── Centre-level roles (per user, per centre):
+        ├── Layla: centre_admin at Centre 1, parent at Centre 3
+        ├── Ahmed: teacher at Centre 1 + Centre 2
+        └── ...
+</code></pre></div>
+
+<p>Cross-centre SSO: User logs in once to realm, JWT contains <code>tenant_roles</code> array with roles per centre. User can switch between centres without re-auth.</p>
+<h3 id="83-realm-configuration-per-tenant">8.3 Realm Configuration per Tenant</h3>
+<p>Each realm has:
+- Login theme: NMS default or custom (white-label for enterprise).
+- MFA policy: configurable per tenant (mandatory for Super Admin + IT, optional for others).
+- Password policy: min 12 chars, complexity, history (5), expiry (90 days optional).
+- Session settings: access token 15 min, refresh token 7 days, max 5 sessions.
+- Brute force protection: 5 fails → 15-min lockout.
+- Social login: optional (Google, Microsoft) — disabled by default, configurable per tenant.</p>
+<hr />
+<h2 id="9-per-tenant-configuration">9. Per-Tenant Configuration</h2>
+<h3 id="91-configuration-storage">9.1 Configuration Storage</h3>
+<p>Per-tenant configuration stored in <code>tenant</code> table + <code>setting</code> table:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TABLE</span><span style="color: #F8F8F2"> setting (</span>
+<span style="color: #F8F8F2">  id UUID </span><span style="color: #66D9EF">PRIMARY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">KEY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> gen_random_uuid(),</span>
+<span style="color: #F8F8F2">  tenant_id UUID </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">key</span><span style="color: #F8F8F2"> TEXT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- e.g., &#39;attendance.barcode_enabled&#39;, &#39;billing.default_due_days&#39;</span>
+<span style="color: #F8F8F2">  value JSONB </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #959077">-- Universal columns...</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">UNIQUE</span><span style="color: #F8F8F2"> (tenant_id, </span><span style="color: #66D9EF">key</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">);</span>
+</code></pre></div>
+
+<h3 id="92-configuration-hierarchy">9.2 Configuration Hierarchy</h3>
+<p>Settings resolved in order (later wins):
+1. <strong>Default</strong> (in code, <code>SettingDefaults.cs</code>)
+2. <strong>Tenant-level</strong> (in <code>setting</code> table)
+3. <strong>User-level</strong> (in <code>user_setting</code> table, for personal preferences like language, notification prefs)</p>
+<h3 id="93-configuration-categories">9.3 Configuration Categories</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Example keys</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Centre Profile</td>
+<td><code>centre.name</code>, <code>centre.logo_media_id</code>, <code>centre.branding_primary_color</code></td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Attendance</td>
+<td><code>attendance.barcode_enabled</code>, <code>attendance.grace_period_minutes</code>, <code>attendance.auto_absent_time</code>, <code>attendance.supervisor_override_threshold_hours</code></td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Ratio Rules</td>
+<td><code>ratio.rules</code> (JSONB: per age band per room)</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Notifications</td>
+<td><code>notifications.critical.sms_enabled</code>, <code>notifications.operational.push_default</code></td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Billing</td>
+<td><code>billing.default_due_days</code>, <code>billing.reminder_schedule</code>, <code>billing.currency</code>, <code>billing.tax_rate_percent</code></td>
+<td>Phase 1 Sprint 7</td>
+</tr>
+<tr>
+<td>Calendar</td>
+<td><code>calendar.weekend_days</code>, <code>calendar.working_hours_start</code>, <code>calendar.working_hours_end</code>, <code>calendar.holidays_ics_url</code></td>
+<td>Phase 1 Sprint 11</td>
+</tr>
+<tr>
+<td>Parent Portal</td>
+<td><code>parent_portal.daily_report_time</code>, <code>parent_portal.allowed_activity_types</code>, <code>parent_portal.photo_watermark_enabled</code></td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Data Retention</td>
+<td><code>retention.attendance_years</code>, <code>retention.medical_years</code>, <code>retention.assessment_years</code></td>
+<td>MVP (configurable within legal min)</td>
+</tr>
+<tr>
+<td>Branding</td>
+<td><code>branding.login_screen_image</code>, <code>branding.email_template_header_image</code></td>
+<td>MVP</td>
+</tr>
+<tr>
+<td>Integrations</td>
+<td><code>integrations.smtp.*</code>, <code>integrations.fcm.*</code>, <code>integrations.payment_gateway.*</code> (Phase 3)</td>
+<td>Phase 1 + Phase 3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="94-configuration-ui">9.4 Configuration UI</h3>
+<p>Centre Admin → Settings → per-category pages. Changes audited.</p>
+<p>Super Admin → Settings → can edit all categories.
+Other roles → limited settings access (e.g., parent can only edit own notification preferences).</p>
+<hr />
+<h2 id="10-data-migration-between-modes">10. Data Migration Between Modes</h2>
+<h3 id="101-on-prem-saas-migration">10.1 On-Prem → SaaS Migration</h3>
+<p>Customer starts on-prem, later wants to move to SaaS:
+1. Provision new SaaS tenant.
+2. Export on-prem database (per-tenant dump).
+3. Transform dump (UUID remapping if needed, tenant_id update to new SaaS tenant_id).
+4. Import into SaaS database.
+5. Migrate Keycloak users (export from on-prem realm, import to SaaS realm).
+6. Re-issue parent invitations (new SaaS realm = new credentials).
+7. Cutover: DNS change, customer starts using SaaS URL.</p>
+<p>Tooling: <code>infra/scripts/migrate-onprem-to-saas.sh</code> (built in Phase 2).</p>
+<h3 id="102-saas-on-prem-migration">10.2 SaaS → On-Prem Migration</h3>
+<p>Customer moves from SaaS to on-prem (rare, but possible):
+1. Provision on-prem deployment at customer's infra.
+2. Export SaaS tenant data (per-tenant dump).
+3. Import into on-prem database.
+4. Migrate Keycloak users.
+5. Cutover.</p>
+<h3 id="103-cross-saas-tenant-migration">10.3 Cross-SaaS-Tenant Migration</h3>
+<p>Customer merges two SaaS tenants (e.g., two nurseries merge into one):
+1. Choose surviving tenant.
+2. Export other tenant's data.
+3. Transform (re-assign tenant_id to surviving tenant, handle ID conflicts).
+4. Import.
+5. Archive non-surviving tenant.</p>
+<p>This is a professional services engagement, not self-service.</p>
+<hr />
+<h2 id="11-tenant-monitoring-operations">11. Tenant Monitoring &amp; Operations</h2>
+<h3 id="111-per-tenant-metrics">11.1 Per-Tenant Metrics</h3>
+<p>Grafana dashboard per tenant:
+- Active users (staff + parents) per day.
+- API call count per day.
+- Storage usage.
+- Billing status.
+- Error rate (4xx + 5xx).
+- Notification delivery rate.</p>
+<h3 id="112-platform-level-monitoring">11.2 Platform-Level Monitoring</h3>
+<p>Grafana dashboard for platform ops:
+- Total tenants, active/suspended/archived.
+- Total users across all tenants.
+- Database connection pool usage.
+- K8s pod count + resource usage.
+- API latency p50/p95/p99 across all tenants.
+- Cross-tenant error rate.
+- Backup status.</p>
+<h3 id="113-noisy-neighbor-prevention">11.3 Noisy Neighbor Prevention</h3>
+<p>In SaaS, one tenant's heavy usage shouldn't impact others:
+- Per-tenant rate limiting (100 req/min/user, configurable per-tier).
+- Per-tenant API quota (Tier 1: 10k/day, Tier 4: 100k/day).
+- Database connection pool: shared, but PgBouncer transaction mode prevents one tenant from exhausting.
+- Background jobs: per-tenant queue priority. Large tenants don't block small tenants' jobs.
+- Storage quota per tenant (50GB default, configurable per tier).</p>
+<hr />
+<h2 id="12-backup-restore-per-tenant">12. Backup &amp; Restore Per Tenant</h2>
+<h3 id="121-saas-backups">12.1 SaaS Backups</h3>
+<ul>
+<li><strong>Database</strong>: Daily snapshot of full database + WAL archiving (5-min RPO).</li>
+<li><strong>Tenant-specific restore</strong>: For accidental data deletion by one tenant, use PITR (Point-In-Time Recovery) to a temporary restored DB, extract tenant data, import back. <strong>Complex operation, professional services only.</strong></li>
+<li><strong>Object storage</strong>: S3 versioning + cross-region replication. Per-object restore.</li>
+</ul>
+<h3 id="122-on-prem-backups">12.2 On-Prem Backups</h3>
+<ul>
+<li><strong>Database</strong>: Customer's responsibility (we provide pgBackRest config + runbook).</li>
+<li><strong>Object storage</strong>: Customer's responsibility (MinIO replication or backup tool).</li>
+<li><strong>Recovery</strong>: Customer's responsibility (we provide runbook).</li>
+</ul>
+<h3 id="123-backup-encryption">12.3 Backup Encryption</h3>
+<p>All backups encrypted at rest (AWS KMS for SaaS, customer-managed keys for on-prem). Backup decryption keys stored separately from backups (secrets manager).</p>
+<hr />
+<h2 id="13-tenant-delete-right-to-erasure">13. Tenant Delete / Right to Erasure</h2>
+<h3 id="131-soft-delete-default">13.1 Soft Delete (Default)</h3>
+<p>Tenant cancellation → <code>tenant.status = 'archived'</code>, all data soft-deleted (<code>is_deleted = true</code>). Data retained per compliance (7+ years for attendance, 10+ for medical).</p>
+<h3 id="132-hard-delete-after-retention">13.2 Hard Delete (After Retention)</h3>
+<p>After retention period + legal sign-off:
+- Hard delete all tenant's rows from all tables (cascading).
+- Delete Keycloak realm.
+- Delete S3 objects with tenant's prefix.
+- Delete from backups (next backup cycle).</p>
+<p>This is irreversible. Logged at infrastructure level (CloudTrail) for audit.</p>
+<h3 id="133-right-to-erasure-pdplgdpr">13.3 Right to Erasure (PDPL/GDPR)</h3>
+<p>Parent requests erasure of their child's data:
+- Soft-delete student record (already supported).
+- After retention period (or with legal sign-off), hard-delete.
+- Some records exempt: safeguarding records (legal hold), financial records (tax law).
+- Erasure request logged in audit, processed within 30 days.
+- Parent notified when complete.</p>
+<hr />
+<h2 id="14-multi-tenancy-testing-strategy">14. Multi-Tenancy Testing Strategy</h2>
+<h3 id="141-automated-tests">14.1 Automated Tests</h3>
+<ul>
+<li><strong>Unit tests</strong>: Tenant context mocked, verify business logic.</li>
+<li><strong>Integration tests</strong>: Real PostgreSQL with RLS enabled, verify isolation.</li>
+<li><strong>E2E tests</strong>: Two browser sessions (different tenants) in parallel, verify no cross-contamination.</li>
+<li><strong>Pen tests</strong>: Attempt cross-tenant access with crafted JWTs, ID enumeration.</li>
+</ul>
+<h3 id="142-test-matrix">14.2 Test Matrix</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>What it verifies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ParentTenantA_access_StudentTenantB → 404</td>
+<td>Cross-tenant isolation</td>
+</tr>
+<tr>
+<td>ParentA_access_StudentA_NotOwned → 404</td>
+<td>Parent-child ownership</td>
+</tr>
+<tr>
+<td>StaffTenantA_access_StaffTenantB → 404</td>
+<td>Cross-tenant staff isolation</td>
+</tr>
+<tr>
+<td>BackgroundJob_with_TenantId → only processes that tenant</td>
+<td>Tenant context in jobs</td>
+</tr>
+<tr>
+<td>RabbitMQConsumer_with_TenantId → only processes that tenant</td>
+<td>Tenant context in consumers</td>
+</tr>
+<tr>
+<td>RLSpolicy_blocks_raw_SQL</td>
+<td>RLS at DB layer works</td>
+</tr>
+<tr>
+<td>ServiceRole_bypasses_RLS</td>
+<td>Service role works for migrations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="143-load-testing-per-tenant">14.3 Load Testing Per-Tenant</h3>
+<p>k6 load tests simulate 500 concurrent users across 20 tenants (Phase 3 target). Verify:
+- Per-tenant latency stays under 2s.
+- No tenant's performance degrades due to another tenant's load.
+- Database connection pool doesn't exhaust.</p>
+<hr />
+<p><strong>Next file to read</strong>: <code>11-DEVOPS-INFRASTRUCTURE.md</code> for K8s, Terraform, CI/CD, and observability.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-09-auth-security.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Auth & Security</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-11-devops.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">DevOps & Infrastructure</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

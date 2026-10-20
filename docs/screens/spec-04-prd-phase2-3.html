@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRD: Phase 2 & 3 — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class="active"><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-phase-2-scope-summary" class="toc-link" data-target="1-phase-2-scope-summary">1. Phase 2 Scope Summary</a><a href="#11-phase-2-deliverables" class="toc-link toc-h3" data-target="11-phase-2-deliverables">1.1 Phase 2 Deliverables</a><a href="#12-phase-2-exit-criteria" class="toc-link toc-h3" data-target="12-phase-2-exit-criteria">1.2 Phase 2 Exit Criteria</a><a href="#2-module-14-learning-assessment-phase-2" class="toc-link" data-target="2-module-14-learning-assessment-phase-2">2. Module 14: Learning &amp; Assessment (Phase 2)</a><a href="#21-supported-frameworks" class="toc-link toc-h3" data-target="21-supported-frameworks">2.1 Supported Frameworks</a><a href="#22-lessons" class="toc-link toc-h3" data-target="22-lessons">2.2 Lessons</a><a href="#23-observation-records" class="toc-link toc-h3" data-target="23-observation-records">2.3 Observation Records</a><a href="#24-assessments" class="toc-link toc-h3" data-target="24-assessments">2.4 Assessments</a><a href="#25-learning-journey" class="toc-link toc-h3" data-target="25-learning-journey">2.5 Learning Journey</a><a href="#26-assessment-reports" class="toc-link toc-h3" data-target="26-assessment-reports">2.6 Assessment Reports</a><a href="#27-report-view-variants-staff-vs-parent" class="toc-link toc-h3" data-target="27-report-view-variants-staff-vs-parent">2.7 Report View Variants — Staff vs. Parent</a><a href="#28-eyfs-development-areas-reference" class="toc-link toc-h3" data-target="28-eyfs-development-areas-reference">2.8 EYFS Development Areas Reference</a><a href="#29-eyfs-age-bands-reference" class="toc-link toc-h3" data-target="29-eyfs-age-bands-reference">2.9 EYFS Age Bands Reference</a><a href="#3-phase-2-mobile-app-maturity" class="toc-link" data-target="3-phase-2-mobile-app-maturity">3. Phase 2 Mobile App Maturity</a><a href="#31-mobile-app-scope-phase-2-full" class="toc-link toc-h3" data-target="31-mobile-app-scope-phase-2-full">3.1 Mobile App Scope (Phase 2 Full)</a><a href="#32-offline-capabilities-phase-2" class="toc-link toc-h3" data-target="32-offline-capabilities-phase-2">3.2 Offline Capabilities (Phase 2)</a><a href="#33-push-notification-handling-phase-2-full" class="toc-link toc-h3" data-target="33-push-notification-handling-phase-2-full">3.3 Push Notification Handling (Phase 2 Full)</a><a href="#4-phase-3-scope-summary" class="toc-link" data-target="4-phase-3-scope-summary">4. Phase 3 Scope Summary</a><a href="#41-phase-3-deliverables" class="toc-link toc-h3" data-target="41-phase-3-deliverables">4.1 Phase 3 Deliverables</a><a href="#42-phase-3-exit-criteria" class="toc-link toc-h3" data-target="42-phase-3-exit-criteria">4.2 Phase 3 Exit Criteria</a><a href="#5-phase-3-multi-centre-support" class="toc-link" data-target="5-phase-3-multi-centre-support">5. Phase 3: Multi-Centre Support</a><a href="#51-multi-centre-group-concept" class="toc-link toc-h3" data-target="51-multi-centre-group-concept">5.1 Multi-Centre Group Concept</a><a href="#52-multi-realm-keycloak" class="toc-link toc-h3" data-target="52-multi-realm-keycloak">5.2 Multi-Realm Keycloak</a><a href="#53-tenant-provisioning-ui" class="toc-link toc-h3" data-target="53-tenant-provisioning-ui">5.3 Tenant Provisioning UI</a><a href="#54-multi-centre-group-dashboard" class="toc-link toc-h3" data-target="54-multi-centre-group-dashboard">5.4 Multi-Centre Group Dashboard</a><a href="#55-cross-centre-data-considerations" class="toc-link toc-h3" data-target="55-cross-centre-data-considerations">5.5 Cross-Centre Data Considerations</a><a href="#6-phase-3-payment-gateway-integration" class="toc-link" data-target="6-phase-3-payment-gateway-integration">6. Phase 3: Payment Gateway Integration</a><a href="#61-gateway-selection-phase-3-kickoff-decision" class="toc-link toc-h3" data-target="61-gateway-selection-phase-3-kickoff-decision">6.1 Gateway Selection (Phase 3 Kickoff Decision)</a><a href="#62-payment-flow" class="toc-link toc-h3" data-target="62-payment-flow">6.2 Payment Flow</a><a href="#63-payment-features" class="toc-link toc-h3" data-target="63-payment-features">6.3 Payment Features</a><a href="#64-reconciliation" class="toc-link toc-h3" data-target="64-reconciliation">6.4 Reconciliation</a><a href="#65-security" class="toc-link toc-h3" data-target="65-security">6.5 Security</a><a href="#7-phase-3-erp-accounting-integration" class="toc-link" data-target="7-phase-3-erp-accounting-integration">7. Phase 3: ERP / Accounting Integration</a><a href="#71-integration-targets" class="toc-link toc-h3" data-target="71-integration-targets">7.1 Integration Targets</a><a href="#72-integration-scope" class="toc-link toc-h3" data-target="72-integration-scope">7.2 Integration Scope</a><a href="#73-integration-architecture" class="toc-link toc-h3" data-target="73-integration-architecture">7.3 Integration Architecture</a><a href="#74-chart-of-accounts-mapping" class="toc-link toc-h3" data-target="74-chart-of-accounts-mapping">7.4 Chart of Accounts Mapping</a><a href="#8-phase-3-open-api" class="toc-link" data-target="8-phase-3-open-api">8. Phase 3: Open API</a><a href="#81-open-api-scope" class="toc-link toc-h3" data-target="81-open-api-scope">8.1 Open API Scope</a><a href="#82-available-endpoints-phase-3" class="toc-link toc-h3" data-target="82-available-endpoints-phase-3">8.2 Available Endpoints (Phase 3)</a><a href="#83-webhooks" class="toc-link toc-h3" data-target="83-webhooks">8.3 Webhooks</a><a href="#9-phase-3-elasticsearch-conditional" class="toc-link" data-target="9-phase-3-elasticsearch-conditional">9. Phase 3: Elasticsearch (Conditional)</a><a href="#91-trigger-to-implement" class="toc-link toc-h3" data-target="91-trigger-to-implement">9.1 Trigger to Implement</a><a href="#92-elasticsearch-scope-if-implemented" class="toc-link toc-h3" data-target="92-elasticsearch-scope-if-implemented">9.2 Elasticsearch Scope (if implemented)</a><a href="#10-phase-3-service-extraction-conditional" class="toc-link" data-target="10-phase-3-service-extraction-conditional">10. Phase 3: Service Extraction (Conditional)</a><a href="#101-notification-service-extraction" class="toc-link toc-h3" data-target="101-notification-service-extraction">10.1 Notification Service Extraction</a><a href="#102-media-processing-service-extraction" class="toc-link toc-h3" data-target="102-media-processing-service-extraction">10.2 Media Processing Service Extraction</a><a href="#11-phase-2-3-non-functional-requirements" class="toc-link" data-target="11-phase-2-3-non-functional-requirements">11. Phase 2 &amp; 3 Non-Functional Requirements</a><a href="#12-post-phase-3-roadmap-indicative-only" class="toc-link" data-target="12-post-phase-3-roadmap-indicative-only">12. Post-Phase 3 Roadmap (Indicative Only)</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4 text-amber-600"></i><span>PRD: Phase 2 & 3</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Product · spec-04-prd-phase2-3.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Product</span>
+          <span class="pill pill-done">DOC 04</span>
+          <span class="text-[10px] font-mono text-slate-400">~3,414 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">PRD: Phase 2 & 3</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-03-prd-phase1.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: Phase 1 Full</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-05-tech-stack.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Tech Stack</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="04-prd-phase-2-phase-3">04 — PRD: Phase 2 &amp; Phase 3</h1>
+<blockquote>
+<p>Future scope beyond Phase 1. Read this for forward visibility — do NOT build any of this until Phase 1 is live and stable.</p>
+<p>Phase 2 = Sprints 19–26 (~16 weeks). Phase 3 = Sprints 27–30 (~8 weeks).</p>
+</blockquote>
+<hr />
+<h2 id="1-phase-2-scope-summary">1. Phase 2 Scope Summary</h2>
+<p>Phase 2 adds the <strong>Learning &amp; Assessment module</strong> (the only major functional gap from Phase 1) and brings the <strong>mobile app to full maturity</strong> (offline cache, full notification support, learning journey view, push for all 3 tiers).</p>
+<h3 id="11-phase-2-deliverables">1.1 Phase 2 Deliverables</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Deliverable</th>
+<th>Sprint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Learning &amp; Assessment module — EYFS framework full implementation</td>
+<td>19–22</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Learning &amp; Assessment module — Montessori framework full implementation</td>
+<td>23–24</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Assessment report generation (staff view + parent view, transformation layer)</td>
+<td>23–24</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Mobile app maturity — offline emergency cache (SQLite)</td>
+<td>25</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Mobile app maturity — full notification support (all 3 tiers, push + in-app + SMS)</td>
+<td>25</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Mobile app maturity — learning journey view (parent + staff)</td>
+<td>26</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Mobile app maturity — push notification handling with FCM + APNs</td>
+<td>26</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Performance optimization under production load (load test, optimize, re-test)</td>
+<td>25–26</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Extract Notification Service if scale justifies (decision gate at Sprint 25)</td>
+<td>26 (optional)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-phase-2-exit-criteria">1.2 Phase 2 Exit Criteria</h3>
+<ul>
+<li>Learning &amp; Assessment module live in ≥3 pilot nurseries.</li>
+<li>80%+ of pilot teachers using digital observations weekly.</li>
+<li>Mobile app: 4.5+ star rating on iOS App Store + Google Play.</li>
+<li>p99 API latency &lt; 500ms under 500 concurrent users.</li>
+<li>99.5% uptime over 3-month measurement window.</li>
+</ul>
+<hr />
+<h2 id="2-module-14-learning-assessment-phase-2">2. Module 14: Learning &amp; Assessment (Phase 2)</h2>
+<h3 id="21-supported-frameworks">2.1 Supported Frameworks</h3>
+<ul>
+<li><strong>EYFS</strong> (Early Years Foundation Stage) — UK statutory framework, used in most UAE nurseries.</li>
+<li>All development areas: CAL, PD, PSED, L, M, UL (Untagged Lessons), Expressive Arts &amp; Design (EAD).</li>
+<li>All statutory age bands: 8–20, 16–26, 22–36, 30–50, 40–60 months.</li>
+<li>All milestones per area per age band.</li>
+<li><strong>Montessori</strong> — full curriculum with areas: Practical Life, Sensorial, Language, Mathematics, Cultural.</li>
+<li><strong>Extensible</strong> — additional frameworks via configuration (e.g., Reggio Emilia, IB PYP Early Years) added in Phase 3.</li>
+</ul>
+<h3 id="22-lessons">2.2 Lessons</h3>
+<ul>
+<li>Create lessons tagged to: development area, age group, room.</li>
+<li>Fields: Title (i18n), Description (i18n), Development Area, Age Band, Room scoping, Duration, Materials list, Learning objectives, Linked resources (files, links, images).</li>
+<li>Search and filter by room, category, age band, framework.</li>
+<li>Link lessons to circle time activities and observation records.</li>
+<li>Lesson plan templates per age group (Infants, Toddlers, Preschool, FS1, Children's House).</li>
+</ul>
+<h3 id="23-observation-records">2.3 Observation Records</h3>
+<ul>
+<li>Create observation records linked to a student and development area.</li>
+<li>Fields: Student, Observer (staff), Date/Time, Type (formal/informal/concern), Development Area, Age Band, Milestones observed (multi-select), Notes (i18n), Media attachments (photos/videos via presigned URL), Concern flag.</li>
+<li>Filter by: Type, Date Range, Student, Room, Development Area. Sort by date or student.</li>
+<li>Concern flag triggers in-app notification to Centre Admin (Operational tier) — escalation workflow.</li>
+<li>Links to: Learning Journey (auto-added), Assessment (manual link if used as evidence).</li>
+<li>AI-assisted observation capture (per parent.app baseline): voice-to-text dictation, suggested milestones based on transcript, photo auto-tagging. (Use OpenAI Whisper + GPT-4 via internal proxy — never expose keys to client.)</li>
+</ul>
+<h3 id="24-assessments">2.4 Assessments</h3>
+<ul>
+<li>Template-based assessments per age group: Infants, Toddlers, Preschool, FS1, Children's House (Montessori).</li>
+<li>Each template defines: development areas covered, milestones per area, scoring approach (binary achieved / not-yet / 3-point scale / narrative).</li>
+<li>Assessment run: per student, per term (or per centre's assessment cadence).</li>
+<li>Filter by: Student, Time Range, Template, Room.</li>
+<li>Dual output: staff view (full clinical detail) + parent view (sanitized transformation).</li>
+</ul>
+<h3 id="25-learning-journey">2.5 Learning Journey</h3>
+<ul>
+<li>Chronological portfolio per student linking observations, assessments, activities, photos.</li>
+<li>Created by staff; linked to student profile.</li>
+<li>Viewable by parents via parent portal (Phase 1 web) + mobile app (Phase 2).</li>
+<li>Timeline view (chronological) + category view (by development area).</li>
+<li>Exportable as PDF (parent-friendly version) for transitions to school.</li>
+</ul>
+<h3 id="26-assessment-reports">2.6 Assessment Reports</h3>
+<table>
+<thead>
+<tr>
+<th>Report Type</th>
+<th>Description</th>
+<th>Audience</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Assessment Progress Report</td>
+<td>Individual student progress over time across development areas</td>
+<td>Staff + Parent (dual view)</td>
+</tr>
+<tr>
+<td>Assessment Report</td>
+<td>Point-in-time snapshot per student</td>
+<td>Staff + Parent (dual view)</td>
+</tr>
+<tr>
+<td>Comparison Report</td>
+<td>Compare student or cohort performance across periods</td>
+<td>Staff only</td>
+</tr>
+<tr>
+<td>Class Milestone Report</td>
+<td>Milestone achievement summary across a room or group</td>
+<td>Staff only</td>
+</tr>
+<tr>
+<td>Student Milestone Report</td>
+<td>Per-student milestone completion status</td>
+<td>Staff + Parent (dual view)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="27-report-view-variants-staff-vs-parent">2.7 Report View Variants — Staff vs. Parent</h3>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>Audience</th>
+<th>Content</th>
+<th>Technical Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Staff View</strong></td>
+<td>Teachers, Key Persons, Admins</td>
+<td>Full clinical detail: all development areas, milestone codes, observation links, concern flags, comparison data, raw scores</td>
+<td>High — complex aggregation, cross-entity joins, detailed data grid rendering</td>
+</tr>
+<tr>
+<td><strong>Parent View</strong></td>
+<td>Parent / Guardian via parent portal / mobile app</td>
+<td>Simplified, plain-language summary: progress highlights, age band placement, positive framing, no clinical codes or internal flags</td>
+<td>Medium — requires sanitisation + transformation layer; must not expose internal staff notes or safeguarding flags</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Implementation:</strong>
+- Same underlying data (single storage, no duplication).
+- Transformation layer produces parent view from staff view.
+- Parent-facing reports reviewed + explicitly approved by staff member before parent visibility.
+- Approval workflow: Staff generates → reviews parent variant → approves → parent receives notification.
+- Approval logged in audit trail.</p>
+<h3 id="28-eyfs-development-areas-reference">2.8 EYFS Development Areas Reference</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Development Area</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UL</td>
+<td>Untagged Lessons</td>
+</tr>
+<tr>
+<td>CAL</td>
+<td>Communication and Language</td>
+</tr>
+<tr>
+<td>PD</td>
+<td>Physical Development</td>
+</tr>
+<tr>
+<td>PSED</td>
+<td>Personal, Social and Emotional Development</td>
+</tr>
+<tr>
+<td>L</td>
+<td>Literacy</td>
+</tr>
+<tr>
+<td>M</td>
+<td>Mathematics</td>
+</tr>
+<tr>
+<td>EAD</td>
+<td>Expressive Arts and Design (added in Phase 2 — extends source SRS)</td>
+</tr>
+<tr>
+<td>UW</td>
+<td>Understanding the World (added in Phase 2 — extends source SRS)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note: The source SRS lists only 6 areas. EYFS statutory framework has 7 areas (3 prime + 4 specific). We implement all 7 for compliance.</p>
+</blockquote>
+<h3 id="29-eyfs-age-bands-reference">2.9 EYFS Age Bands Reference</h3>
+<table>
+<thead>
+<tr>
+<th>Age Band</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0–11 months</td>
+<td>Added for completeness (source SRS starts at 8 months)</td>
+</tr>
+<tr>
+<td>8–20 months</td>
+<td>Per source SRS</td>
+</tr>
+<tr>
+<td>16–26 months</td>
+<td>Per source SRS</td>
+</tr>
+<tr>
+<td>22–36 months</td>
+<td>Per source SRS</td>
+</tr>
+<tr>
+<td>30–50 months</td>
+<td>Per source SRS</td>
+</tr>
+<tr>
+<td>40–60 months</td>
+<td>Per source SRS</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note: EYFS uses overlapping bands (children move between bands based on development, not strict chronological age). The system must support flexible band assignment per child per area.</p>
+</blockquote>
+<hr />
+<h2 id="3-phase-2-mobile-app-maturity">3. Phase 2 Mobile App Maturity</h2>
+<h3 id="31-mobile-app-scope-phase-2-full">3.1 Mobile App Scope (Phase 2 Full)</h3>
+<p><strong>Staff mobile app:</strong>
+- Full dashboard (live ratio, attendance summary, pending actions).
+- Attendance check-in/out with barcode scan (camera-based).
+- Parent Communication activity feed (post photos, videos, diary entries).
+- Messaging inbox (staff + parent threads, broadcast).
+- Notifications (all 3 tiers — push, in-app, SMS for Critical).
+- Emergency report offline cache (SQLite local DB, refreshed daily + on-demand).
+- Learning &amp; Assessment — observation capture (photo + voice dictation + milestone tagging).
+- Learning Journey view.
+- Profile + settings.</p>
+<p><strong>Parent mobile app:</strong>
+- Child activity feed (real-time via push + SignalR).
+- Daily report (PDF + in-app view).
+- Messaging with staff.
+- Notifications (all 3 tiers).
+- Learning Journey view (Phase 2 — when L&amp;A module is live).
+- Invoice view + payment (Phase 3 — when payment gateway is integrated).
+- Profile + settings + notification preferences + language toggle.</p>
+<h3 id="32-offline-capabilities-phase-2">3.2 Offline Capabilities (Phase 2)</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Offline capability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Emergency Child Report</td>
+<td>Full offline — SQLite cache refreshed daily + on-demand. Critical for evacuation during network outage.</td>
+</tr>
+<tr>
+<td>Attendance check-in/out</td>
+<td>Limited offline — last 24h of student roster cached; check-ins queued locally and synced when back online. Conflict resolution: server timestamp wins.</td>
+</tr>
+<tr>
+<td>Activity feed viewing</td>
+<td>Cached last 7 days of activities for assigned children. New posts queued locally and uploaded when online.</td>
+</tr>
+<tr>
+<td>Messaging</td>
+<td>Read-only offline (cached last 50 messages per thread). New messages queued and sent when online.</td>
+</tr>
+<tr>
+<td>Learning Journey</td>
+<td>Cached last 30 days.</td>
+</tr>
+<tr>
+<td>Dashboard</td>
+<td>No offline — requires real-time data. Show "offline" banner if no connection.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-push-notification-handling-phase-2-full">3.3 Push Notification Handling (Phase 2 Full)</h3>
+<ul>
+<li><strong>iOS</strong>: APNs via FCM bridge (Phase 1) → direct APNs (Phase 2 if needed for reliability).</li>
+<li><strong>Android</strong>: FCM.</li>
+<li>Notification channels: per-tier (Critical, Operational, Informational) + per-module (Attendance, Messaging, Billing, L&amp;A).</li>
+<li>Silent push for data refresh (e.g., new activity posted → silent push → app fetches in background).</li>
+<li>Notification actions: e.g., "Approve" / "Reject" on pending activity notifications (Phase 2).</li>
+<li>Deep linking: tapping a notification opens the relevant screen.</li>
+</ul>
+<hr />
+<h2 id="4-phase-3-scope-summary">4. Phase 3 Scope Summary</h2>
+<p>Phase 3 brings <strong>multi-centre SaaS scale</strong>, <strong>payment gateway</strong>, <strong>ERP/accounting integration</strong>, and <strong>open API</strong>.</p>
+<h3 id="41-phase-3-deliverables">4.1 Phase 3 Deliverables</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Deliverable</th>
+<th>Sprint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Multi-centre support — multi-realm Keycloak, tenant provisioning UI</td>
+<td>27</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Multi-centre group dashboard — consolidated view across centres</td>
+<td>27</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Payment gateway integration (UAE-capable: Telr / PayTabs / Network International — final selection in Phase 3 kickoff)</td>
+<td>28</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Online payment flow for parents (hosted payment page / inline)</td>
+<td>28</td>
+</tr>
+<tr>
+<td>5</td>
+<td>External accounting ERP API integration (target: Xero / QuickBooks / Zoho Books — final selection with customer)</td>
+<td>29</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Open API for third-party integrations (REST + OAuth 2.0 client credentials)</td>
+<td>29</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Elasticsearch for complex search (if PostgreSQL FTS insufficient at scale)</td>
+<td>30 (conditional)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Extract Notification Service (if Phase 2 load justified)</td>
+<td>30 (conditional)</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Extract Media Processing Service (if Phase 2 load justified)</td>
+<td>30 (conditional)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-phase-3-exit-criteria">4.2 Phase 3 Exit Criteria</h3>
+<ul>
+<li>Multi-centre group: ≥1 customer with 5+ centres live.</li>
+<li>Payment gateway: ≥100 online payments processed.</li>
+<li>ERP integration: ≥1 customer with active sync.</li>
+<li>Open API: ≥1 third-party integration built by external developer.</li>
+<li>99.9% uptime over 3-month measurement window.</li>
+<li>20 centres, 500 concurrent users, p99 &lt; 3s.</li>
+</ul>
+<hr />
+<h2 id="5-phase-3-multi-centre-support">5. Phase 3: Multi-Centre Support</h2>
+<h3 id="51-multi-centre-group-concept">5.1 Multi-Centre Group Concept</h3>
+<p>A <strong>Multi-Centre Group</strong> (MCG) is an organization that owns multiple nurseries (e.g., "Bright Futures Nursery Group" with 5 centres across Dubai + Sharjah).</p>
+<p><strong>Hierarchy:</strong></p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>MCG (Multi-Centre Group)
+├── Centre 1 (tenant_id: uuid-1)
+├── Centre 2 (tenant_id: uuid-2)
+├── Centre 3 (tenant_id: uuid-3)
+└── ...
+</code></pre></div>
+
+<p><strong>Roles at MCG level:</strong>
+- <strong>Group Owner</strong> — owns the MCG, billing across all centres, master admin.
+- <strong>Group Director</strong> — strategic oversight, consolidated reporting.
+- <strong>Group IT</strong> — manages users across centres, integrations.
+- <strong>Group Marketing</strong> — cross-centre campaigns.</p>
+<p><strong>Roles at Centre level:</strong> (same as Phase 1) Super Admin, Centre Admin, Teacher, Parent, etc.</p>
+<h3 id="52-multi-realm-keycloak">5.2 Multi-Realm Keycloak</h3>
+<ul>
+<li>Phase 1: One realm per deployment (single-centre).</li>
+<li>Phase 3: One realm per MCG (or per centre if MCG opts for isolation).</li>
+<li>Cross-realm SSO: a Group Owner logs in once, can switch between centres without re-auth.</li>
+<li>User can be assigned roles in multiple centres within MCG.</li>
+</ul>
+<h3 id="53-tenant-provisioning-ui">5.3 Tenant Provisioning UI</h3>
+<ul>
+<li>Self-service tenant creation for Group Owners (within their MCG).</li>
+<li>New centre onboarding wizard: centre name, location, branding, default programs, fee plans, staff import.</li>
+<li>Tenant suspension (group owner can pause a centre temporarily).</li>
+<li>Tenant archival (soft delete — data retained per compliance, access revoked).</li>
+</ul>
+<h3 id="54-multi-centre-group-dashboard">5.4 Multi-Centre Group Dashboard</h3>
+<ul>
+<li>Consolidated KPIs across all centres in MCG: total students, total staff, total revenue, attendance rate average.</li>
+<li>Per-centre comparison: which centres are over/underperforming.</li>
+<li>Drill-down: click a centre → see that centre's dashboard (Phase 1 dashboard).</li>
+<li>Cross-centre reports: consolidated attendance, revenue, enrolment.</li>
+</ul>
+<h3 id="55-cross-centre-data-considerations">5.5 Cross-Centre Data Considerations</h3>
+<ul>
+<li><strong>Data isolation</strong>: Each centre's data is strictly isolated via <code>tenant_id</code> + RLS. Group Owner can see aggregated/consolidated views but not raw individual records from centres (configurable per MCG policy).</li>
+<li><strong>Cross-centre students</strong>: When a student transfers between centres within MCG, data is migrated (not duplicated) with full audit trail.</li>
+<li><strong>Cross-centre staff</strong>: Staff can be assigned to multiple centres with different roles per centre.</li>
+<li><strong>Consolidated billing</strong>: Group Owner sees one invoice for all centres (SaaS subscription) — separate from per-centre parent billing.</li>
+</ul>
+<hr />
+<h2 id="6-phase-3-payment-gateway-integration">6. Phase 3: Payment Gateway Integration</h2>
+<h3 id="61-gateway-selection-phase-3-kickoff-decision">6.1 Gateway Selection (Phase 3 Kickoff Decision)</h3>
+<p>UAE-capable gateways to evaluate:</p>
+<table>
+<thead>
+<tr>
+<th>Gateway</th>
+<th>Pros</th>
+<th>Cons</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Telr</strong></td>
+<td>UAE-focused, multi-currency, easy integration</td>
+<td>Smaller ecosystem</td>
+<td>Recommended default</td>
+</tr>
+<tr>
+<td><strong>PayTabs</strong></td>
+<td>Strong UAE presence, multi-currency, good docs</td>
+<td>Higher fees</td>
+<td>Alternative</td>
+</tr>
+<tr>
+<td><strong>Network International</strong></td>
+<td>Largest UAE acquirer, bank-grade</td>
+<td>Heavier integration</td>
+<td>Enterprise option</td>
+</tr>
+<tr>
+<td><strong>Stripe</strong></td>
+<td>Best DX, but UAE support limited</td>
+<td>Limited UAE local payment methods</td>
+<td>Not recommended for UAE-primary</td>
+</tr>
+<tr>
+<td><strong>Checkout.com</strong></td>
+<td>Strong MENA presence</td>
+<td>Enterprise sales cycle</td>
+<td>Enterprise option</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Recommended for Phase 3</strong>: <strong>Telr</strong> as default (easiest integration, UAE-focused) with <strong>PayTabs</strong> as alternative based on customer preference.</p>
+<h3 id="62-payment-flow">6.2 Payment Flow</h3>
+<ol>
+<li>Parent receives invoice (via email + in-app notification).</li>
+<li>Parent clicks "Pay Now" → redirected to hosted payment page (Telr-hosted) OR inline payment modal (if gateway supports).</li>
+<li>Parent enters card details (never touches NMS servers — gateway tokenizes).</li>
+<li>Gateway processes payment, returns success/failure to NMS via webhook.</li>
+<li>NMS updates invoice status to "Paid" (or "Partially Paid" if partial).</li>
+<li>NMS sends payment receipt to parent via email + in-app notification.</li>
+<li>NMS records payment in <code>invoice_payment</code> table with: amount, method, gateway reference, timestamp.</li>
+<li>NMS updates billing dashboard.</li>
+</ol>
+<h3 id="63-payment-features">6.3 Payment Features</h3>
+<ul>
+<li>Full payment: parent pays full invoice amount.</li>
+<li>Partial payment: parent pays part of invoice; remaining balance stays as "Outstanding".</li>
+<li>Overpayment: parent pays more than invoice → credit balance created, usable against future invoices.</li>
+<li>Refunds: Centre Admin / Accounts role can initiate refund via gateway; recorded in audit log.</li>
+<li>Payment retries: failed payments can be retried by parent.</li>
+<li>Saved cards: gateway-side tokenization (parent opts in to save card for future payments).</li>
+<li>Apple Pay / Google Pay: supported via gateway (Telr supports both).</li>
+</ul>
+<h3 id="64-reconciliation">6.4 Reconciliation</h3>
+<ul>
+<li>Daily reconciliation job: fetch all gateway transactions for the day, match against <code>invoice_payment</code> records.</li>
+<li>Discrepancies flagged for Accounts review.</li>
+<li>Monthly reconciliation report exportable.</li>
+</ul>
+<h3 id="65-security">6.5 Security</h3>
+<ul>
+<li>NMS NEVER stores card numbers, CVVs, or sensitive cardholder data.</li>
+<li>All card data handled by gateway — NMS only stores gateway transaction references + tokens (for saved cards).</li>
+<li>PCI DSS compliance: NMS is SAQ-A scope (cardholder data never touches our servers).</li>
+<li>Webhooks signed by gateway; NMS verifies signature before processing.</li>
+<li>Idempotency: webhook handler is idempotent (duplicate webhook doesn't double-credit invoice).</li>
+</ul>
+<hr />
+<h2 id="7-phase-3-erp-accounting-integration">7. Phase 3: ERP / Accounting Integration</h2>
+<h3 id="71-integration-targets">7.1 Integration Targets</h3>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Phase 3 status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Xero</strong></td>
+<td>Implement if ≥1 customer requests</td>
+<td>Popular with SME nurseries</td>
+</tr>
+<tr>
+<td><strong>QuickBooks Online</strong></td>
+<td>Implement if ≥1 customer requests</td>
+<td>Popular with accountants</td>
+</tr>
+<tr>
+<td><strong>Zoho Books</strong></td>
+<td>Implement if ≥1 customer requests</td>
+<td>Popular in UAE SMB</td>
+</tr>
+<tr>
+<td><strong>Sage 50 / Sage Intacct</strong></td>
+<td>Defer to Phase 4 unless enterprise customer</td>
+<td>Heavier integration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-integration-scope">7.2 Integration Scope</h3>
+<ul>
+<li><strong>Push</strong>: NMS → ERP — invoices, payments, expenses, customer (parent) records.</li>
+<li><strong>Pull</strong>: ERP → NMS — payment status updates (e.g., bank reconciliation marks invoice as paid).</li>
+<li><strong>Sync frequency</strong>: real-time for invoice/payment creation; hourly for reconciliation; daily for full sync.</li>
+</ul>
+<h3 id="73-integration-architecture">7.3 Integration Architecture</h3>
+<ul>
+<li>Each ERP target is a separate adapter (plugin pattern).</li>
+<li>Adapter implements standard interface: <code>IErpAdapter</code> with methods: <code>PushInvoice</code>, <code>PushPayment</code>, <code>PushExpense</code>, <code>SyncPaymentStatus</code>.</li>
+<li>Adapter configured per tenant (tenant's chosen ERP + credentials stored in secrets manager).</li>
+<li>Background job (Hangfire / RabbitMQ consumer) processes sync queue.</li>
+<li>Errors logged + retried with exponential backoff; persistent failures surfaced to Accounts role.</li>
+</ul>
+<h3 id="74-chart-of-accounts-mapping">7.4 Chart of Accounts Mapping</h3>
+<ul>
+<li>Each nursery maps NMS fee components to ERP chart of accounts (e.g., Tuition → Account 4000, Meal → Account 4100, Discounts → Account 5000).</li>
+<li>Mapping UI in Settings → Integrations → ERP.</li>
+<li>Per-tenant configuration.</li>
+</ul>
+<hr />
+<h2 id="8-phase-3-open-api">8. Phase 3: Open API</h2>
+<h3 id="81-open-api-scope">8.1 Open API Scope</h3>
+<ul>
+<li>REST API for third-party developers (e.g., parent payroll providers, government reporting tools, custom dashboards).</li>
+<li>OAuth 2.0 client credentials flow (no user context — application-to-application).</li>
+<li>Rate limited: 1000 requests/hour per application per tenant.</li>
+<li>Versioned: <code>/api/v1/</code> (same as internal API).</li>
+<li>OpenAPI 3.0 spec published at <code>api.nms.example.com/openapi.json</code>.</li>
+<li>Developer portal with docs, code samples, sandbox environment.</li>
+</ul>
+<h3 id="82-available-endpoints-phase-3">8.2 Available Endpoints (Phase 3)</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/students</code></td>
+<td>GET, POST, PATCH</td>
+<td>students:read, students:write</td>
+</tr>
+<tr>
+<td><code>/api/v1/students/{id}</code></td>
+<td>GET</td>
+<td>students:read</td>
+</tr>
+<tr>
+<td><code>/api/v1/attendance</code></td>
+<td>GET, POST</td>
+<td>attendance:read, attendance:write</td>
+</tr>
+<tr>
+<td><code>/api/v1/invoices</code></td>
+<td>GET, POST</td>
+<td>invoices:read, invoices:write</td>
+</tr>
+<tr>
+<td><code>/api/v1/payments</code></td>
+<td>GET, POST</td>
+<td>payments:read, payments:write</td>
+</tr>
+<tr>
+<td><code>/api/v1/reports/attendance/monthly</code></td>
+<td>GET</td>
+<td>reports:read</td>
+</tr>
+<tr>
+<td><code>/api/v1/reports/billing/summary</code></td>
+<td>GET</td>
+<td>reports:read</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-webhooks">8.3 Webhooks</h3>
+<p>NMS publishes events to registered webhook URLs:
+- <code>student.created</code>, <code>student.updated</code>, <code>student.withdrawn</code>
+- <code>attendance.checked_in</code>, <code>attendance.checked_out</code>
+- <code>invoice.created</code>, <code>invoice.paid</code>, <code>invoice.overdue</code>
+- <code>payment.received</code></p>
+<p>Webhooks signed with HMAC-SHA256. Retries with exponential backoff (max 5 attempts over 24h).</p>
+<hr />
+<h2 id="9-phase-3-elasticsearch-conditional">9. Phase 3: Elasticsearch (Conditional)</h2>
+<h3 id="91-trigger-to-implement">9.1 Trigger to Implement</h3>
+<p>Implement Elasticsearch only if PostgreSQL full-text search proves insufficient at scale, specifically:
+- Search across &gt;1M records takes &gt;500ms p95.
+- Complex multi-entity search (e.g., "find all students named Ahmed who started in 2024 in Dubai Marina centre with allergy to peanuts") becomes too slow.</p>
+<h3 id="92-elasticsearch-scope-if-implemented">9.2 Elasticsearch Scope (if implemented)</h3>
+<ul>
+<li>Index: students, staff, activities, messages, enquiries, observations.</li>
+<li>Real-time sync via Postgres logical replication → Logstash → Elasticsearch.</li>
+<li>Search API: <code>/api/v1/search?q=&lt;query&gt;&amp;types=&lt;types&gt;&amp;filters=...</code></li>
+<li>Replaces PostgreSQL FTS in web UI global search.</li>
+<li>Per-tenant index isolation (alias-based or document-level security).</li>
+</ul>
+<hr />
+<h2 id="10-phase-3-service-extraction-conditional">10. Phase 3: Service Extraction (Conditional)</h2>
+<h3 id="101-notification-service-extraction">10.1 Notification Service Extraction</h3>
+<p><strong>Trigger</strong>: Notification queue depth consistently &gt; 1000 messages, OR notification processing latency &gt; 5s p95, OR Critical notification delivery time &gt; 30s.</p>
+<p><strong>Implementation</strong>:
+- Extract Notification module into standalone .NET service.
+- Communicates with main app via RabbitMQ events.
+- Independently scalable (K8s HPA on queue depth).
+- Same database (initially) → extracted database (if write contention).</p>
+<h3 id="102-media-processing-service-extraction">10.2 Media Processing Service Extraction</h3>
+<p><strong>Trigger</strong>: Media upload scan latency &gt; 30s p95, OR content moderation false-positive rate &gt; 5%, OR ClamAV CPU usage consistently &gt; 70%.</p>
+<p><strong>Implementation</strong>:
+- Extract Media Processing module into standalone .NET service.
+- Consumes upload events from RabbitMQ.
+- Calls ClamAV + Rekognition.
+- Updates <code>media.scan_status</code> directly.
+- Independently scalable.</p>
+<hr />
+<h2 id="11-phase-2-3-non-functional-requirements">11. Phase 2 &amp; 3 Non-Functional Requirements</h2>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Phase 2</th>
+<th>Phase 3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Performance</td>
+<td>Dashboard p95 &lt; 2s, API p99 &lt; 500ms at 500 concurrent</td>
+<td>Dashboard p95 &lt; 2s, API p99 &lt; 500ms at 500 concurrent, 20 centres</td>
+</tr>
+<tr>
+<td>Availability</td>
+<td>99.5%</td>
+<td>99.9%</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>10 centres, 1000 concurrent users</td>
+<td>20 centres, 500 concurrent users (peak), 10,000 total users</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>+ mTLS between services (when extracted)</td>
+<td>+ Open API security, webhook signing</td>
+</tr>
+<tr>
+<td>Compliance</td>
+<td>+ EYFS reporting alignment</td>
+<td>+ Multi-jurisdiction (GCC expansion readiness)</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>+ Distributed tracing (OpenTelemetry) across services</td>
+<td>+ Custom dashboards per extracted service</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-post-phase-3-roadmap-indicative-only">12. Post-Phase 3 Roadmap (Indicative Only)</h2>
+<p>Not committed. For discussion only.</p>
+<ul>
+<li><strong>Phase 4 (Year 2+)</strong>: GCC expansion (Saudi Arabia, Qatar, Kuwait). Localization for Saudi (Arabic Saudi dialect + VAT 15%). Bahrain, Oman.</li>
+<li><strong>Phase 5</strong>: AI features — predictive attendance, early intervention recommendations, automated lesson planning.</li>
+<li><strong>Phase 6</strong>: Marketplace — third-party app integrations (e.g., meal planning, transport tracking, parent payroll).</li>
+<li><strong>Phase 7</strong>: White-label — sell NMS as white-label to other EdTech providers in MENA.</li>
+</ul>
+<hr />
+<p><strong>Next file to read</strong>: <code>05-TECH-STACK.md</code> for the concrete .NET 8 + React + React Native stack details.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-03-prd-phase1.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: Phase 1 Full</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-05-tech-stack.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Tech Stack</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

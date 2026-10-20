@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tech Stack — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class="active"><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-stack-summary" class="toc-link" data-target="1-stack-summary">1. Stack Summary</a><a href="#2-stack-alternatives-considered" class="toc-link" data-target="2-stack-alternatives-considered">2. Stack Alternatives Considered</a><a href="#21-backend-framework" class="toc-link toc-h3" data-target="21-backend-framework">2.1 Backend Framework</a><a href="#22-database" class="toc-link toc-h3" data-target="22-database">2.2 Database</a><a href="#23-web-frontend-framework" class="toc-link toc-h3" data-target="23-web-frontend-framework">2.3 Web Frontend Framework</a><a href="#24-mobile-framework" class="toc-link toc-h3" data-target="24-mobile-framework">2.4 Mobile Framework</a><a href="#25-identity-provider" class="toc-link toc-h3" data-target="25-identity-provider">2.5 Identity Provider</a><a href="#3-version-pinning-strategy" class="toc-link" data-target="3-version-pinning-strategy">3. Version Pinning Strategy</a><a href="#4-backend-project-structure" class="toc-link" data-target="4-backend-project-structure">4. Backend Project Structure</a><a href="#5-web-frontend-project-structure" class="toc-link" data-target="5-web-frontend-project-structure">5. Web Frontend Project Structure</a><a href="#6-mobile-app-project-structure" class="toc-link" data-target="6-mobile-app-project-structure">6. Mobile App Project Structure</a><a href="#7-infrastructure-project-structure" class="toc-link" data-target="7-infrastructure-project-structure">7. Infrastructure Project Structure</a><a href="#8-tooling-developer-experience" class="toc-link" data-target="8-tooling-developer-experience">8. Tooling &amp; Developer Experience</a><a href="#81-required-local-tools" class="toc-link toc-h3" data-target="81-required-local-tools">8.1 Required Local Tools</a><a href="#82-recommended-ide-setup" class="toc-link toc-h3" data-target="82-recommended-ide-setup">8.2 Recommended IDE Setup</a><a href="#83-local-dev-environment" class="toc-link toc-h3" data-target="83-local-dev-environment">8.3 Local Dev Environment</a><a href="#84-code-generation" class="toc-link toc-h3" data-target="84-code-generation">8.4 Code Generation</a><a href="#85-pre-commit-hooks" class="toc-link toc-h3" data-target="85-pre-commit-hooks">8.5 Pre-commit Hooks</a><a href="#9-observability-stack-details" class="toc-link" data-target="9-observability-stack-details">9. Observability Stack Details</a><a href="#91-metrics-prometheus-grafana" class="toc-link toc-h3" data-target="91-metrics-prometheus-grafana">9.1 Metrics (Prometheus + Grafana)</a><a href="#92-logs-loki-grafana-or-elk" class="toc-link toc-h3" data-target="92-logs-loki-grafana-or-elk">9.2 Logs (Loki + Grafana, or ELK)</a><a href="#93-tracing-opentelemetry-tempo" class="toc-link toc-h3" data-target="93-tracing-opentelemetry-tempo">9.3 Tracing (OpenTelemetry + Tempo)</a><a href="#94-synthetics" class="toc-link toc-h3" data-target="94-synthetics">9.4 Synthetics</a><a href="#10-security-tooling" class="toc-link" data-target="10-security-tooling">10. Security Tooling</a><a href="#11-scaffolding-commands-sprint-0-setup" class="toc-link" data-target="11-scaffolding-commands-sprint-0-setup">11. Scaffolding Commands (Sprint 0 Setup)</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="cpu" class="w-4 h-4 text-amber-600"></i><span>Tech Stack</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-05-tech-stack.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 05</span>
+          <span class="text-[10px] font-mono text-slate-400">~4,193 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Tech Stack</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-04-prd-phase2-3.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: Phase 2 & 3</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-06-architecture.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Architecture</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="05-tech-stack">05 — Tech Stack</h1>
+<blockquote>
+<p>Concrete technology selection for NMS. Replaces the "open" technology choices in the upstream planning doc with a specific, modern, AI-coding-friendly stack.</p>
+</blockquote>
+<hr />
+<h2 id="1-stack-summary">1. Stack Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Version</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend</td>
+<td>.NET (ASP.NET Core)</td>
+<td>8.0 LTS</td>
+<td>High performance, strong typing, EF Core, native DI, excellent tooling, 3-year LTS support</td>
+</tr>
+<tr>
+<td>Backend language</td>
+<td>C#</td>
+<td>12</td>
+<td>Modern features (records, primary constructors, source generators)</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td>EF Core</td>
+<td>8.0</td>
+<td>Code-first migrations, Postgres-specific features (RLS, JSONB), LINQ</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>PostgreSQL</td>
+<td>16</td>
+<td>RLS for multi-tenancy, JSONB for i18n, declarative partitioning, mature</td>
+</tr>
+<tr>
+<td>Cache + Real-time backplane</td>
+<td>Redis</td>
+<td>7.2</td>
+<td>Caching, SignalR backplane, rate limiting counters, pub/sub</td>
+</tr>
+<tr>
+<td>Real-time transport</td>
+<td>ASP.NET Core SignalR</td>
+<td>8.0</td>
+<td>Native .NET, auto-negotiate, fallback to long-polling, Redis backplane for scale</td>
+</tr>
+<tr>
+<td>Message queue</td>
+<td>RabbitMQ</td>
+<td>3.13</td>
+<td>Background jobs, retries, DLQs, sagas for billing</td>
+</tr>
+<tr>
+<td>Message bus abstraction</td>
+<td>MassTransit</td>
+<td>8.2</td>
+<td>Saga support, sagas for billing workflow, clean abstraction over RabbitMQ</td>
+</tr>
+<tr>
+<td>Object storage</td>
+<td>S3-compatible (AWS S3 for SaaS, MinIO for on-prem)</td>
+<td>latest</td>
+<td>Media, documents, signed URLs, versioning</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>Keycloak</td>
+<td>24.0</td>
+<td>Multi-realm, RBAC, MFA, social login, OIDC/OAuth 2.0</td>
+</tr>
+<tr>
+<td>Web frontend</td>
+<td>React</td>
+<td>18.3</td>
+<td>Mature, huge ecosystem, AI-coding-friendly</td>
+</tr>
+<tr>
+<td>Web framework</td>
+<td>Vite</td>
+<td>5.4</td>
+<td>Fast dev server, modern build, no Create React App cruft</td>
+</tr>
+<tr>
+<td>Web language</td>
+<td>TypeScript</td>
+<td>5.5</td>
+<td>Type safety, refactor confidence, AI-friendly</td>
+</tr>
+<tr>
+<td>Web UI library</td>
+<td>shadcn/ui + Radix UI + Tailwind CSS</td>
+<td>latest</td>
+<td>Copy-paste components, fully accessible, RTL-ready</td>
+</tr>
+<tr>
+<td>Web state</td>
+<td>TanStack Query v5 + Zustand</td>
+<td>latest</td>
+<td>Server state (TanStack) + client state (Zustand) — pragmatic, no Redux</td>
+</tr>
+<tr>
+<td>Web forms</td>
+<td>React Hook Form + Zod</td>
+<td>latest</td>
+<td>Type-safe, performant, schema-first</td>
+</tr>
+<tr>
+<td>Web i18n</td>
+<td>react-i18next + i18next</td>
+<td>latest</td>
+<td>Mature, RTL-ready, lazy loading</td>
+</tr>
+<tr>
+<td>Web routing</td>
+<td>React Router v6.4+ (or TanStack Router)</td>
+<td>latest</td>
+<td>Mature, type-safe with data loaders</td>
+</tr>
+<tr>
+<td>Web charts</td>
+<td>Recharts + Visx</td>
+<td>latest</td>
+<td>Recharts for standard, Visx for custom</td>
+</tr>
+<tr>
+<td>Web PDF</td>
+<td>@react-pdf/renderer</td>
+<td>latest</td>
+<td>Client-side PDF generation for parent-facing reports</td>
+</tr>
+<tr>
+<td>Mobile framework</td>
+<td>React Native</td>
+<td>0.74</td>
+<td>Cross-platform iOS + Android, mature</td>
+</tr>
+<tr>
+<td>Mobile toolchain</td>
+<td>Expo SDK 51 (Bare Workflow)</td>
+<td>51</td>
+<td>EAS Build, OTA updates, native modules when needed</td>
+</tr>
+<tr>
+<td>Mobile language</td>
+<td>TypeScript</td>
+<td>5.5</td>
+<td>Same as web</td>
+</tr>
+<tr>
+<td>Mobile UI</td>
+<td>NativeWind (Tailwind for RN) + React Native Paper</td>
+<td>latest</td>
+<td>Consistent styling with web, accessible primitives</td>
+</tr>
+<tr>
+<td>Mobile state</td>
+<td>TanStack Query v5 + Zustand</td>
+<td>latest</td>
+<td>Same as web</td>
+</tr>
+<tr>
+<td>Mobile forms</td>
+<td>react-hook-form + zod</td>
+<td>latest</td>
+<td>Same as web</td>
+</tr>
+<tr>
+<td>Mobile i18n</td>
+<td>i18next + react-i18next</td>
+<td>latest</td>
+<td>Same as web</td>
+</tr>
+<tr>
+<td>Mobile navigation</td>
+<td>Expo Router v3</td>
+<td>latest</td>
+<td>File-based routing, deep linking</td>
+</tr>
+<tr>
+<td>Mobile offline</td>
+<td>WatermelonDB / SQLite</td>
+<td>latest</td>
+<td>Offline-first local DB for emergency cache + offline attendance</td>
+</tr>
+<tr>
+<td>Mobile push</td>
+<td>Expo Notifications + FCM + APNs</td>
+<td>latest</td>
+<td>Unified API for iOS + Android</td>
+</tr>
+<tr>
+<td>Mobile barcode</td>
+<td>react-native-vision-camera + MLKit</td>
+<td>latest</td>
+<td>Camera scanning with MLKit barcode detection</td>
+</tr>
+<tr>
+<td>Backend PDF</td>
+<td>QuestPDF</td>
+<td>2024.3.0</td>
+<td>Fluent C# DSL, no iText licensing, MIT-licensed</td>
+</tr>
+<tr>
+<td>Backend Excel</td>
+<td>ClosedXML</td>
+<td>0.104.2</td>
+<td>XLSX generation, MIT-licensed, no Excel dependency</td>
+</tr>
+<tr>
+<td>Backend email</td>
+<td>FluentEmail + MailKit</td>
+<td>latest</td>
+<td>Templated emails, multi-provider (SES / SMTP / Azure Communication)</td>
+</tr>
+<tr>
+<td>Backend scheduling</td>
+<td>Hangfire</td>
+<td>1.8.x</td>
+<td>Recurring jobs (daily report, invoice generation), dashboard UI</td>
+</tr>
+<tr>
+<td>Backend validation</td>
+<td>FluentValidation</td>
+<td>11.x</td>
+<td>Complex validation rules, async, i18n error messages</td>
+</tr>
+<tr>
+<td>Backend mapping</td>
+<td>Mapster</td>
+<td>7.4</td>
+<td>Faster than AutoMapper, simpler API</td>
+</tr>
+<tr>
+<td>Backend logging</td>
+<td>Serilog</td>
+<td>4.0</td>
+<td>Structured JSON logging, sinks for Loki + Console + File</td>
+</tr>
+<tr>
+<td>Backend OpenTelemetry</td>
+<td>OpenTelemetry.Instrumentation.*</td>
+<td>1.10.x</td>
+<td>Vendor-neutral observability</td>
+</tr>
+<tr>
+<td>Backend auth</td>
+<td>Keycloak.AuthServices.Authentication</td>
+<td>latest</td>
+<td>Keycloak JWT validation, role-based authorization</td>
+</tr>
+<tr>
+<td>Backend testing</td>
+<td>xUnit + FluentAssertions + Moq + Testcontainers</td>
+<td>latest</td>
+<td>Standard .NET testing stack</td>
+</tr>
+<tr>
+<td>Backend API doc</td>
+<td>Scalar / Swashbuckle (OpenAPI 3.0)</td>
+<td>latest</td>
+<td>OpenAPI generation + beautiful docs UI</td>
+</tr>
+<tr>
+<td>Containerization</td>
+<td>Docker</td>
+<td>24+</td>
+<td>Standardized packaging</td>
+</tr>
+<tr>
+<td>Orchestration</td>
+<td>Kubernetes</td>
+<td>1.30+</td>
+<td>Auto-scaling, rolling deploys, namespace isolation</td>
+</tr>
+<tr>
+<td>IaC</td>
+<td>Terraform</td>
+<td>1.9+</td>
+<td>Multi-cloud (AWS for SaaS, customer infra for on-prem)</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions + Helm</td>
+<td>latest</td>
+<td>Familiar, ecosystem-rich</td>
+</tr>
+<tr>
+<td>Monitoring</td>
+<td>Prometheus + Grafana + Loki</td>
+<td>latest</td>
+<td>Vendor-neutral observability stack</td>
+</tr>
+<tr>
+<td>Tracing</td>
+<td>OpenTelemetry Collector + Tempo</td>
+<td>latest</td>
+<td>Distributed tracing (critical when services extract in Phase 3)</td>
+</tr>
+<tr>
+<td>Secrets</td>
+<td>AWS Secrets Manager (SaaS) / HashiCorp Vault (on-prem)</td>
+<td>latest</td>
+<td>Never in env vars or code</td>
+</tr>
+<tr>
+<td>Container registry</td>
+<td>GitHub Container Registry (ghcr.io) / customer registry</td>
+<td>latest</td>
+<td>Integrated with GitHub Actions</td>
+</tr>
+<tr>
+<td>DNS</td>
+<td>AWS Route 53 (SaaS) / customer DNS</td>
+<td>latest</td>
+<td>Latency routing, health-check failover</td>
+</tr>
+<tr>
+<td>CDN</td>
+<td>AWS CloudFront (SaaS) / Cloudflare (on-prem option)</td>
+<td>latest</td>
+<td>UAE edge PoPs, signed URLs, WAF</td>
+</tr>
+<tr>
+<td>Load testing</td>
+<td>k6</td>
+<td>latest</td>
+<td>Modern, scriptable, CI-integratable</td>
+</tr>
+<tr>
+<td>E2E testing</td>
+<td>Playwright</td>
+<td>latest</td>
+<td>Multi-browser, fast, modern API</td>
+</tr>
+<tr>
+<td>Static analysis</td>
+<td>SonarCloud / SonarQube</td>
+<td>latest</td>
+<td>Quality gate, coverage gate</td>
+</tr>
+<tr>
+<td>Dependency scanning</td>
+<td>OWASP Dependency Check + GitHub Dependabot</td>
+<td>latest</td>
+<td>CVE monitoring, PR-level alerts</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-stack-alternatives-considered">2. Stack Alternatives Considered</h2>
+<p>For each layer, here's what we considered and why we chose what we chose. Full ADRs in <code>20-ADRs.md</code>.</p>
+<h3 id="21-backend-framework">2.1 Backend Framework</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Pros</th>
+<th>Cons</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>.NET 8 (ASP.NET Core)</strong> ✅</td>
+<td>Best performance of any web framework; C# 12 is modern; EF Core is excellent; LTS 3 years; AI tools very familiar with it</td>
+<td>Historically Microsoft-ecosystem, but now truly cross-platform</td>
+<td><strong>Selected</strong></td>
+</tr>
+<tr>
+<td>Spring Boot (Java)</td>
+<td>Source planning doc's first choice; mature; huge ecosystem</td>
+<td>Verbose; JVM startup time; slower dev loop; less AI-coding-friendly</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Node.js + NestJS</td>
+<td>JS everywhere; fast dev loop; great for small services</td>
+<td>Type safety weaker than C#; ORM (Prisma/TypeORM) less mature than EF Core</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Python + Django/FastAPI</td>
+<td>Fast dev; great for AI features</td>
+<td>Slower runtime; weaker typing; not ideal for transactional systems</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Go + standard library</td>
+<td>Fastest; simplest; smallest footprint</td>
+<td>ORM ecosystem weak; less productive for CRUD-heavy app; less AI-coding-friendly</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Laravel (PHP)</td>
+<td>Fast dev; huge community; cheap hosting</td>
+<td>PHP language limitations; weaker type system; less enterprise adoption in UAE</td>
+<td>Rejected</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rationale</strong>: .NET 8 wins on performance (consistently top of TechEmpower benchmarks), developer productivity (C# 12 is concise), type safety, EF Core is the best mainstream ORM, and Cursor/Copilot work exceptionally well with it. LTS until November 2026 gives us Phase 1 + Phase 2 coverage.</p>
+<h3 id="22-database">2.2 Database</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Pros</th>
+<th>Cons</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PostgreSQL 16</strong> ✅</td>
+<td>RLS for multi-tenancy (defense-in-depth); JSONB for i18n fields; declarative partitioning; mature; great .NET support</td>
+<td>Slightly more setup than MySQL</td>
+<td><strong>Selected</strong></td>
+</tr>
+<tr>
+<td>MySQL 8</td>
+<td>Familiar; cheaper managed options</td>
+<td>No RLS; weaker JSON support; Oracle ownership concerns</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>SQL Server</td>
+<td>Excellent .NET integration; RLS support</td>
+<td>Expensive licensing; lock-in</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>MongoDB</td>
+<td>Schema flexibility; great for content</td>
+<td>No transactions across collections; weak relational queries; not suitable for billing</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>CockroachDB</td>
+<td>Multi-region by default</td>
+<td>Newer; smaller ecosystem; overkill for Phase 1–2</td>
+<td>Rejected (revisit Phase 3+)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rationale</strong>: PostgreSQL's RLS is the killer feature for multi-tenant SaaS — defense-in-depth at the database layer means even a bug in EF Core's tenant filter can't leak data across tenants. JSONB enables clean i18n field storage without separate translation tables. Partitioning scales audit_log and attendance tables.</p>
+<h3 id="23-web-frontend-framework">2.3 Web Frontend Framework</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Pros</th>
+<th>Cons</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>React 18 + Vite</strong> ✅</td>
+<td>Huge ecosystem; AI tools excellent; shadcn/ui is React-only; TanStack Query is best-in-class</td>
+<td>More boilerplate than Svelte</td>
+<td><strong>Selected</strong></td>
+</tr>
+<tr>
+<td>Next.js 14</td>
+<td>SSR/SSG; great for marketing pages; React Server Components</td>
+<td>Overkill for an authenticated dashboard app; RSC adds complexity; not needed for SPA-style admin</td>
+<td>Rejected (could be used for marketing site, separate from app)</td>
+</tr>
+<tr>
+<td>Vue 3 + Nuxt</td>
+<td>Approachable; great DX</td>
+<td>Smaller ecosystem; fewer component libraries; less AI-coding-friendly</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>SvelteKit</td>
+<td>Smallest bundle; great DX</td>
+<td>Smallest ecosystem; shadcn/ui not available; fewer AI training examples</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Angular</td>
+<td>Full framework; opinionated</td>
+<td>Heaviest; steepest learning curve; less AI-coding-friendly</td>
+<td>Rejected</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rationale</strong>: For an authenticated dashboard SPA (which NMS is), Vite + React is the most productive, AI-friendly choice. shadcn/ui gives us accessible, beautiful, copy-paste components without library lock-in. We don't need SSR for an admin app.</p>
+<h3 id="24-mobile-framework">2.4 Mobile Framework</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Pros</th>
+<th>Cons</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>React Native 0.74 + Expo SDK 51 (Bare)</strong> ✅</td>
+<td>Cross-platform; huge ecosystem; code sharing with web (TypeScript, i18n, state); Expo tools (EAS Build, OTA updates)</td>
+<td>Some native modules still required (barcode, SQLite) — manageable with Expo Bare</td>
+<td><strong>Selected</strong></td>
+</tr>
+<tr>
+<td>React Native (Bare, no Expo)</td>
+<td>Maximum native control</td>
+<td>More boilerplate; lose Expo tooling</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Flutter</td>
+<td>Excellent performance; beautiful UIs; single codebase</td>
+<td>Dart is a niche language; no code sharing with web; smaller ecosystem in UAE</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Native (Swift + Kotlin)</td>
+<td>Best performance + UX; full platform access</td>
+<td>Two codebases; double the dev cost; slower iteration</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>PWA only</td>
+<td>One codebase with web</td>
+<td>No offline cache; no push on iOS; can't access some native APIs</td>
+<td>Rejected (we need offline emergency cache)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rationale</strong>: Expo Bare Workflow gives us 90% of Expo's productivity (EAS Build, OTA updates, config plugins) while allowing native modules when needed (react-native-vision-camera for barcode, WatermelonDB for offline). Code sharing with web (TypeScript types, i18n strings, Zod schemas, some hooks) is a massive productivity win.</p>
+<h3 id="25-identity-provider">2.5 Identity Provider</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Pros</th>
+<th>Cons</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Keycloak 24</strong> ✅</td>
+<td>Open source; multi-realm; MFA built-in; OIDC/OAuth 2.0 standard; SSO; user federation (LDAP/AD)</td>
+<td>Java app, more resource-heavy than alternatives; UI dated</td>
+<td><strong>Selected</strong></td>
+</tr>
+<tr>
+<td>Auth0</td>
+<td>Best DX; beautiful UI; excellent docs</td>
+<td>Per-user pricing gets expensive at scale; SaaS-only (data residency concern)</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>AWS Cognito</td>
+<td>Cheap; integrates with AWS</td>
+<td>Poor DX; limited customization; dated UI; weak federation</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Azure AD B2C</td>
+<td>Cheap; integrates with Azure</td>
+<td>Complex config; poor DX; UI customization painful</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>IdentityServer (Duende)</td>
+<td>.NET native; OIDC standard</td>
+<td>Licensing cost for commercial use; smaller community than Keycloak</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Custom (rolling our own)</td>
+<td>Full control</td>
+<td>Most expensive; security risk; don't roll your own auth</td>
+<td>Rejected</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rationale</strong>: Keycloak is the best open-source identity provider. Multi-realm support is essential for our SaaS model (one realm per centre in Phase 1, multi-realm for MCG in Phase 3). On-prem customers can federate with their existing AD via LDAP. The UI is dated but we use our own login pages (Keycloak JS adapter) so users never see Keycloak's UI.</p>
+<hr />
+<h2 id="3-version-pinning-strategy">3. Version Pinning Strategy</h2>
+<p>All versions pinned in:
+- <code>backend/Directory.Packages.props</code> (central package management)
+- <code>web/package.json</code> (exact versions, no <code>^</code>)
+- <code>mobile/package.json</code> (exact versions)
+- <code>infra/terraform/versions.tf</code> (provider versions)
+- <code>infra/docker-compose.yml</code> (image tags)</p>
+<p><strong>Update policy</strong>:
+- Patch versions: auto-update via Dependabot PRs (auto-merge if tests pass).
+- Minor versions: manual review monthly, update in batch.
+- Major versions: spike + ADR before upgrade. Never upgrade a major version mid-sprint.</p>
+<hr />
+<h2 id="4-backend-project-structure">4. Backend Project Structure</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>backend/
+├── src/
+│   ├── NMS.Api/                  # ASP.NET Core API entry point
+│   │   ├── Program.cs            # App bootstrap, DI, middleware
+│   │   ├── Controllers/          # Thin controllers (or use minimal APIs)
+│   │   └── appsettings.json
+│   ├── NMS.Domain/               # Domain entities, no dependencies
+│   │   ├── Students/
+│   │   ├── Attendance/
+│   │   ├── Billing/
+│   │   └── ...                   # One folder per module
+│   ├── NMS.Application/          # Use cases, CQRS handlers, DTOs
+│   │   ├── Students/
+│   │   │   ├── Commands/
+│   │   │   ├── Queries/
+│   │   │   └── DTOs/
+│   │   └── ...
+│   ├── NMS.Infrastructure/       # EF Core, RabbitMQ, S3, external services
+│   │   ├── Persistence/
+│   │   │   ├── NmsDbContext.cs
+│   │   │   ├── Configurations/   # EF Core IEntityTypeConfiguration
+│   │   │   └── Migrations/
+│   │   ├── Messaging/
+│   │   ├── Storage/
+│   │   ├── Identity/
+│   │   └── External/
+│   ├── NMS.Modules/              # Module-specific code (modular monolith)
+│   │   ├── Dashboard/
+│   │   ├── CentreManagement/
+│   │   ├── Attendance/
+│   │   ├── ParentCommunication/
+│   │   ├── Messaging/
+│   │   ├── Billing/
+│   │   ├── Enquiry/
+│   │   ├── Tours/
+│   │   ├── Calendar/
+│   │   ├── Forms/
+│   │   ├── Tools/
+│   │   ├── Reports/
+│   │   ├── Settings/
+│   │   ├── Notifications/
+│   │   ├── Learning/             # Phase 2
+│   │   └── Payments/             # Phase 3
+│   └── NMS.Shared/               # Shared kernel (Result, Pagination, etc.)
+├── tests/
+│   ├── NMS.UnitTests/
+│   ├── NMS.IntegrationTests/
+│   └── NMS.ArchitectureTests/    # NetArchTest rules
+├── Directory.Packages.props      # Central package management
+├── Directory.Build.props         # Common build settings
+└── NMS.sln
+</code></pre></div>
+
+<p><strong>Conventions:</strong>
+- Clean Architecture / Modular Monolith hybrid.
+- Each module is a project under <code>NMS.Modules/</code> (or a folder if too small).
+- Modules communicate via in-process MediatR (CQRS) in Phase 1–2, extracted to RabbitMQ events in Phase 3 if needed.
+- No direct DB access from controllers — always via Application layer.
+- All DB entities have <code>tenant_id</code>, EF Core global query filter enforces tenant isolation.</p>
+<hr />
+<h2 id="5-web-frontend-project-structure">5. Web Frontend Project Structure</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>web/
+├── public/
+│   ├── locales/
+│   │   ├── en/translation.json
+│   │   └── ar/translation.json
+│   └── favicon.ico
+├── src/
+│   ├── main.tsx                  # App entry
+│   ├── App.tsx                   # Root component, router
+│   ├── router/                   # React Router config
+│   │   ├── index.tsx
+│   │   └── routes.tsx
+│   ├── api/                      # API client (axios + TanStack Query hooks)
+│   │   ├── client.ts
+│   │   ├── hooks/
+│   │   │   ├── useStudents.ts
+│   │   │   └── ...
+│   │   └── types/                # Generated from OpenAPI
+│   ├── modules/                  # One folder per business module
+│   │   ├── dashboard/
+│   │   ├── centre-management/
+│   │   ├── attendance/
+│   │   ├── parent-communication/
+│   │   ├── messaging/
+│   │   ├── billing/
+│   │   ├── enquiry/
+│   │   ├── tours/
+│   │   ├── calendar/
+│   │   ├── forms/
+│   │   ├── tools/
+│   │   ├── reports/
+│   │   ├── settings/
+│   │   ├── learning/             # Phase 2
+│   │   └── payments/             # Phase 3
+│   ├── components/               # Shared components
+│   │   ├── ui/                   # shadcn/ui primitives (Button, Input, etc.)
+│   │   ├── layout/               # AppShell, Sidebar, Header
+│   │   ├── shared/               # EntityTable, FormDialog, etc.
+│   │   └── charts/
+│   ├── hooks/                    # Shared hooks
+│   ├── stores/                   # Zustand stores
+│   ├── lib/                      # Utilities
+│   │   ├── i18n.ts
+│   │   ├── api-client.ts
+│   │   ├── auth.ts               # Keycloak JS adapter
+│   │   ├── signalr.ts
+│   │   └── utils.ts
+│   ├── types/                    # Shared TS types
+│   └── styles/
+│       └── globals.css           # Tailwind directives
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── tailwind.config.ts
+├── postcss.config.js
+└── index.html
+</code></pre></div>
+
+<p><strong>Conventions:</strong>
+- Feature folders (<code>src/modules/*</code>) are self-contained — components, hooks, types, routes all live in the module folder.
+- Shared components in <code>src/components/</code>.
+- API hooks generated from OpenAPI spec via <code>openapi-typescript-codegen</code> — never hand-write API client.
+- All API calls go through TanStack Query — no direct fetch in components.
+- Global state in Zustand only when truly global (auth, theme, locale); per-page state stays in TanStack Query cache.</p>
+<hr />
+<h2 id="6-mobile-app-project-structure">6. Mobile App Project Structure</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>mobile/
+├── app/                          # Expo Router file-based routing
+│   ├── (auth)/
+│   │   ├── login.tsx
+│   │   └── forgot-password.tsx
+│   ├── (staff)/
+│   │   ├── dashboard.tsx
+│   │   ├── attendance/
+│   │   │   ├── index.tsx
+│   │   │   └── [roomId].tsx
+│   │   ├── activities/
+│   │   ├── messaging/
+│   │   ├── learning/             # Phase 2
+│   │   └── profile.tsx
+│   ├── (parent)/
+│   │   ├── feed.tsx
+│   │   ├── messaging.tsx
+│   │   ├── daily-report.tsx
+│   │   ├── learning-journey.tsx  # Phase 2
+│   │   ├── invoices.tsx          # Phase 3
+│   │   └── profile.tsx
+│   └── _layout.tsx
+├── src/
+│   ├── api/                      # Same as web (shared types)
+│   ├── modules/                  # Same modules as web (RN components)
+│   ├── components/
+│   │   ├── ui/                   # RN equivalents of shadcn/ui
+│   │   └── shared/
+│   ├── hooks/
+│   ├── stores/
+│   ├── lib/
+│   │   ├── i18n.ts              # Shared with web
+│   │   ├── auth.ts              # Keycloak RN adapter (expo-auth-session)
+│   │   ├── signalr.ts           # @microsoft/signalr client
+│   │   ├── offline.ts           # WatermelonDB / SQLite setup
+│   │   └── utils.ts
+│   └── types/
+├── assets/
+│   ├── images/
+│   └── fonts/
+├── app.config.ts                 # Expo config (dynamic per env)
+├── package.json
+├── tsconfig.json
+├── tailwind.config.ts            # NativeWind
+└── eas.json                      # EAS Build config
+</code></pre></div>
+
+<p><strong>Shared code with web:</strong>
+- <code>src/types/</code> — all TypeScript types (Zod schemas too).
+- <code>src/lib/i18n.ts</code> — i18n setup (uses same translation JSON files).
+- <code>src/api/types/</code> — OpenAPI-generated types.
+- <code>src/stores/</code> — Zustand stores (where UI-agnostic).</p>
+<p><strong>Not shared (UI code):</strong>
+- <code>src/components/</code> — different primitives for web (DOM) vs RN (View/Text).
+- <code>src/modules/*/</code> — UI implementations differ but use shared types + state.</p>
+<hr />
+<h2 id="7-infrastructure-project-structure">7. Infrastructure Project Structure</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>infra/
+├── terraform/
+│   ├── modules/
+│   │   ├── vpc/
+│   │   ├── eks/
+│   │   ├── rds/
+│   │   ├── elasticache/
+│   │   ├── s3/
+│   │   ├── keycloak/
+│   │   ├── cloudfront/
+│   │   ├── route53/
+│   │   └── secrets/
+│   ├── environments/
+│   │   ├── dev/
+│   │   │   ├── main.tf
+│   │   │   ├── variables.tf
+│   │   │   └── terraform.tfvars
+│   │   ├── staging/
+│   │   └── production/
+│   └── shared/                   # Shared state backend config
+├── helm/
+│   ├── nms-api/                  # Backend Helm chart
+│   ├── nms-web/                  # Web frontend Helm chart
+│   ├── nms-mobile-api/           # Mobile-specific API (if extracted)
+│   └── keycloak/                 # Keycloak Helm chart values
+├── k8s/
+│   ├── base/                     # Kustomize base manifests
+│   └── overlays/
+│       ├── dev/
+│       ├── staging/
+│       └── production/
+├── docker/
+│   ├── backend.Dockerfile
+│   ├── web.Dockerfile
+│   ├── keycloak.Dockerfile       # Custom Keycloak with our theme + providers
+│   └── docker-compose.yml        # Local dev environment
+└── scripts/
+    ├── bootstrap.sh              # First-time setup
+    ├── seed-dev-data.sh          # Seed dev DB
+    └── backup.sh                 # Manual backup trigger
+</code></pre></div>
+
+<hr />
+<h2 id="8-tooling-developer-experience">8. Tooling &amp; Developer Experience</h2>
+<h3 id="81-required-local-tools">8.1 Required Local Tools</h3>
+<ul>
+<li>.NET 8 SDK</li>
+<li>Node.js 20 LTS</li>
+<li>pnpm 9+ (web + mobile package manager)</li>
+<li>Docker Desktop (or colima on macOS)</li>
+<li>kubectl + helm</li>
+<li>Terraform 1.9+</li>
+<li>AWS CLI v2 (for SaaS) / customer cloud CLI (for on-prem)</li>
+<li>Expo CLI (<code>npm install -g expo-cli</code>)</li>
+<li>Git 2.40+</li>
+</ul>
+<h3 id="82-recommended-ide-setup">8.2 Recommended IDE Setup</h3>
+<ul>
+<li><strong>Cursor</strong> (primary) with settings synced via <code>.cursorrules</code> (see <code>18-CURSOR-RULES.md</code>).</li>
+<li>VS Code as fallback (Cursor is VS Code-based, so all settings port).</li>
+<li>Extensions (auto-recommended by <code>.vscode/extensions.json</code>):</li>
+<li>C# Dev Kit</li>
+<li>Tailwind CSS IntelliSense</li>
+<li>ESLint</li>
+<li>Prettier</li>
+<li>i18n Ally</li>
+<li>Prisma (if using Prisma — we're not, but useful for schema visualization)</li>
+<li>REST Client</li>
+<li>GitLens</li>
+</ul>
+<h3 id="83-local-dev-environment">8.3 Local Dev Environment</h3>
+<p><code>docker compose up</code> from <code>infra/docker/</code> starts:
+- PostgreSQL 16 (port 5432)
+- Redis 7 (port 6379)
+- RabbitMQ 3.13 (ports 5672 + 15672 management UI)
+- Keycloak 24 (port 8080, admin/admin)
+- MinIO (S3-compatible, ports 9000 + 9001 console)
+- MailHog (port 1025 SMTP + 8025 UI) for email testing</p>
+<p>Then:
+- <code>dotnet watch run --project backend/src/NMS.Api</code> — backend hot reload
+- <code>pnpm dev</code> in <code>web/</code> — Vite dev server (port 5173)
+- <code>pnpm start</code> in <code>mobile/</code> — Expo dev server (port 8081)</p>
+<p>Full local dev URL: <code>http://localhost:5173</code> (web), <code>http://localhost:8081</code> (mobile via Expo Go).</p>
+<h3 id="84-code-generation">8.4 Code Generation</h3>
+<table>
+<thead>
+<tr>
+<th>Generator</th>
+<th>Source</th>
+<th>Output</th>
+<th>When to run</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>openapi-typescript-codegen</code></td>
+<td><code>backend/openapi.json</code></td>
+<td><code>web/src/api/</code> + <code>mobile/src/api/</code></td>
+<td>On every PR that changes API</td>
+</tr>
+<tr>
+<td>EF Core migrations</td>
+<td>C# entity changes</td>
+<td><code>backend/src/NMS.Infrastructure/Persistence/Migrations/</code></td>
+<td>When entities change</td>
+</tr>
+<tr>
+<td>TypeScript types from Zod</td>
+<td>Zod schemas</td>
+<td>Inline TS types</td>
+<td>Automatic (Zod inference)</td>
+</tr>
+<tr>
+<td>Helm values schema</td>
+<td><code>values.yaml</code></td>
+<td>JSON schema for IDE validation</td>
+<td>On chart changes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="85-pre-commit-hooks">8.5 Pre-commit Hooks</h3>
+<p><code>.husky/pre-commit</code> runs:
+- <code>dotnet format</code> (backend)
+- <code>dotnet build</code> (backend, fails fast on compile errors)
+- <code>pnpm lint</code> (web + mobile)
+- <code>pnpm typecheck</code> (web + mobile)
+- <code>pnpm test:unit</code> (web + mobile, fast unit tests only)</p>
+<p><code>.husky/pre-push</code> runs:
+- All pre-commit checks
+- <code>dotnet test</code> (full backend test suite)
+- <code>pnpm test</code> (full web + mobile test suite)</p>
+<hr />
+<h2 id="9-observability-stack-details">9. Observability Stack Details</h2>
+<h3 id="91-metrics-prometheus-grafana">9.1 Metrics (Prometheus + Grafana)</h3>
+<ul>
+<li>Backend exposes <code>/metrics</code> endpoint via <code>prometheus-net.AspNetCore</code>.</li>
+<li>Metrics: HTTP request rate, latency histogram (p50/p95/p99), error rate, DB pool usage, RabbitMQ queue depth, Redis hit rate, JVM (Keycloak), K8s pod metrics.</li>
+<li>Grafana dashboards: Infrastructure overview, Application performance, Business KPIs (daily attendance, active users, overdue invoices, ratio breaches).</li>
+<li>Alerts via Alertmanager → PagerDuty (critical), Slack #ops-alerts (warning), email (informational).</li>
+</ul>
+<h3 id="92-logs-loki-grafana-or-elk">9.2 Logs (Loki + Grafana, or ELK)</h3>
+<ul>
+<li>Backend: Serilog with JSON sink → Promtail → Loki → Grafana.</li>
+<li>Frontend: structured console logs in dev, Sentry in production (error + performance monitoring).</li>
+<li>Mobile: Sentry for crash reporting + performance.</li>
+<li>Log retention: 90 days hot (Loki), 365 days cold (S3).</li>
+<li>Log level configurable per module without restart (Spring Boot Actuator equivalent in .NET: <code>IOptionsMonitor&lt;LoggerFilterOptions&gt;</code>).</li>
+</ul>
+<h3 id="93-tracing-opentelemetry-tempo">9.3 Tracing (OpenTelemetry + Tempo)</h3>
+<ul>
+<li>OpenTelemetry.Instrumentation for ASP.NET Core, EF Core, HttpClient, StackExchange.Redis.</li>
+<li>Traces exported to OpenTelemetry Collector → Tempo.</li>
+<li>Trace sampling: 100% for errors, 10% for normal requests in prod (100% in dev/staging).</li>
+<li>Cross-service tracing critical when services extract in Phase 3.</li>
+</ul>
+<h3 id="94-synthetics">9.4 Synthetics</h3>
+<ul>
+<li>Heartbeat endpoint <code>/health/live</code> and <code>/health/ready</code> (Kubernetes probes).</li>
+<li>Synthetic checks (Grafana Synthetics or AWS CloudWatch Synthetics):</li>
+<li>Login flow every 5 min from UAE region.</li>
+<li>Dashboard load every 5 min.</li>
+<li>Parent portal load every 5 min.</li>
+<li>API health every 1 min.</li>
+<li>Alert if any synthetic fails 3x in a row.</li>
+</ul>
+<hr />
+<h2 id="10-security-tooling">10. Security Tooling</h2>
+<ul>
+<li><strong>SAST</strong>: SonarCloud on every PR.</li>
+<li><strong>SCA</strong>: OWASP Dependency Check + GitHub Dependabot on every PR.</li>
+<li><strong>DAST</strong>: OWASP ZAP scan weekly against staging.</li>
+<li><strong>Container scanning</strong>: Trivy on every container image push.</li>
+<li><strong>IaC scanning</strong>: tfsec on every Terraform PR.</li>
+<li><strong>Secrets scanning</strong>: GitGuardian or GitHub Secret Scanning on every push.</li>
+<li><strong>Penetration testing</strong>: External pen test before each phase go-live (Sprint 17 for Phase 1, Sprint 26 for Phase 2, Sprint 30 for Phase 3).</li>
+<li><strong>Bug bounty</strong>: Phase 3+ consideration (HackerOne or Intigriti).</li>
+</ul>
+<hr />
+<h2 id="11-scaffolding-commands-sprint-0-setup">11. Scaffolding Commands (Sprint 0 Setup)</h2>
+<p>Run these once to bootstrap the project:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># 1. Create monorepo structure</span>
+mkdir<span style="color: #F8F8F2"> </span>nms<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> cd </span>nms
+git<span style="color: #F8F8F2"> </span>init
+mkdir<span style="color: #F8F8F2"> </span>-p<span style="color: #F8F8F2"> </span>backend<span style="color: #F8F8F2"> </span>web<span style="color: #F8F8F2"> </span>mobile<span style="color: #F8F8F2"> </span>infra<span style="color: #F8F8F2"> </span>docs
+
+<span style="color: #959077"># 2. Backend: .NET 8 solution</span>
+dotnet<span style="color: #F8F8F2"> </span>new<span style="color: #F8F8F2"> </span>sln<span style="color: #F8F8F2"> </span>-n<span style="color: #F8F8F2"> </span>NMS
+dotnet<span style="color: #F8F8F2"> </span>new<span style="color: #F8F8F2"> </span>webapi<span style="color: #F8F8F2"> </span>-n<span style="color: #F8F8F2"> </span>NMS.Api<span style="color: #F8F8F2"> </span>-o<span style="color: #F8F8F2"> </span>backend/src/NMS.Api<span style="color: #F8F8F2"> </span>--use-controllers<span style="color: #F8F8F2"> false</span>
+dotnet<span style="color: #F8F8F2"> </span>new<span style="color: #F8F8F2"> </span>classlib<span style="color: #F8F8F2"> </span>-n<span style="color: #F8F8F2"> </span>NMS.Domain<span style="color: #F8F8F2"> </span>-o<span style="color: #F8F8F2"> </span>backend/src/NMS.Domain
+dotnet<span style="color: #F8F8F2"> </span>new<span style="color: #F8F8F2"> </span>classlib<span style="color: #F8F8F2"> </span>-n<span style="color: #F8F8F2"> </span>NMS.Application<span style="color: #F8F8F2"> </span>-o<span style="color: #F8F8F2"> </span>backend/src/NMS.Application
+dotnet<span style="color: #F8F8F2"> </span>new<span style="color: #F8F8F2"> </span>classlib<span style="color: #F8F8F2"> </span>-n<span style="color: #F8F8F2"> </span>NMS.Infrastructure<span style="color: #F8F8F2"> </span>-o<span style="color: #F8F8F2"> </span>backend/src/NMS.Infrastructure
+dotnet<span style="color: #F8F8F2"> </span>new<span style="color: #F8F8F2"> </span>classlib<span style="color: #F8F8F2"> </span>-n<span style="color: #F8F8F2"> </span>NMS.Shared<span style="color: #F8F8F2"> </span>-o<span style="color: #F8F8F2"> </span>backend/src/NMS.Shared
+dotnet<span style="color: #F8F8F2"> </span>sln<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>backend/src/**/*.csproj
+
+<span style="color: #959077"># Add reference chain</span>
+dotnet<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>backend/src/NMS.Api<span style="color: #F8F8F2"> </span>reference<span style="color: #F8F8F2"> </span>backend/src/NMS.Application<span style="color: #F8F8F2"> </span>backend/src/NMS.Infrastructure
+dotnet<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>backend/src/NMS.Application<span style="color: #F8F8F2"> </span>reference<span style="color: #F8F8F2"> </span>backend/src/NMS.Domain<span style="color: #F8F8F2"> </span>backend/src/NMS.Shared
+dotnet<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>backend/src/NMS.Infrastructure<span style="color: #F8F8F2"> </span>reference<span style="color: #F8F8F2"> </span>backend/src/NMS.Domain<span style="color: #F8F8F2"> </span>backend/src/NMS.Application
+dotnet<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>backend/src/NMS.Domain<span style="color: #F8F8F2"> </span>reference<span style="color: #F8F8F2"> </span>backend/src/NMS.Shared
+
+<span style="color: #959077"># Central package management</span>
+dotnet<span style="color: #F8F8F2"> </span>new<span style="color: #F8F8F2"> </span>packages-props<span style="color: #F8F8F2"> </span>-o<span style="color: #F8F8F2"> </span>backend/
+
+<span style="color: #959077"># 3. Web: Vite + React + TypeScript</span>
+pnpm<span style="color: #F8F8F2"> </span>create<span style="color: #F8F8F2"> </span>vite@latest<span style="color: #F8F8F2"> </span>web<span style="color: #F8F8F2"> </span>--<span style="color: #F8F8F2"> </span>--template<span style="color: #F8F8F2"> </span>react-ts
+<span style="color: #F8F8F2">cd </span>web
+pnpm<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>@tanstack/react-query<span style="color: #F8F8F2"> </span>zustand<span style="color: #F8F8F2"> </span>react-hook-form<span style="color: #F8F8F2"> </span>zod<span style="color: #F8F8F2"> </span>@hookform/resolvers<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\</span>
+<span style="color: #F8F8F2">  </span>react-router-dom<span style="color: #F8F8F2"> </span>react-i18next<span style="color: #F8F8F2"> </span>i18next<span style="color: #F8F8F2"> </span>i18next-browser-languagedetector<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\</span>
+<span style="color: #F8F8F2">  </span>@tanstack/react-table<span style="color: #F8F8F2"> </span>@radix-ui/react-*<span style="color: #F8F8F2"> </span>tailwindcss<span style="color: #F8F8F2"> </span>class-variance-authority<span style="color: #F8F8F2"> </span>clsx<span style="color: #F8F8F2"> </span>tailwind-merge
+pnpm<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>-D<span style="color: #F8F8F2"> </span>@types/node<span style="color: #F8F8F2"> </span>typescript<span style="color: #F8F8F2"> </span>@typescript-eslint/eslint-plugin<span style="color: #F8F8F2"> </span>@typescript-eslint/parser<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\</span>
+<span style="color: #F8F8F2">  </span>eslint<span style="color: #F8F8F2"> </span>eslint-plugin-react<span style="color: #F8F8F2"> </span>eslint-plugin-react-hooks<span style="color: #F8F8F2"> </span>prettier<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\</span>
+<span style="color: #F8F8F2">  </span>eslint-config-prettier<span style="color: #F8F8F2"> </span>eslint-plugin-prettier<span style="color: #F8F8F2"> </span>vite<span style="color: #F8F8F2"> </span>@vitejs/plugin-react
+npx<span style="color: #F8F8F2"> </span>shadcn@latest<span style="color: #F8F8F2"> </span>init
+<span style="color: #F8F8F2">cd </span>..
+
+<span style="color: #959077"># 4. Mobile: Expo + React Native + TypeScript</span>
+npx<span style="color: #F8F8F2"> </span>create-expo-app@latest<span style="color: #F8F8F2"> </span>mobile<span style="color: #F8F8F2"> </span>--template<span style="color: #F8F8F2"> </span>typescript
+<span style="color: #F8F8F2">cd </span>mobile
+pnpm<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>@tanstack/react-query<span style="color: #F8F8F2"> </span>zustad<span style="color: #F8F8F2"> </span>react-hook-form<span style="color: #F8F8F2"> </span>zod<span style="color: #F8F8F2"> </span>@hookform/resolvers<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\</span>
+<span style="color: #F8F8F2">  </span>expo-router<span style="color: #F8F8F2"> </span>expo-secure-store<span style="color: #F8F8F2"> </span>expo-auth-session<span style="color: #F8F8F2"> </span>expo-notifications<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\</span>
+<span style="color: #F8F8F2">  </span>@microsoft/signalr<span style="color: #F8F8F2"> </span>@react-native-async-storage/async-storage<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\</span>
+<span style="color: #F8F8F2">  </span>nativewind<span style="color: #F8F8F2"> </span>react-native-paper
+pnpm<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>-D<span style="color: #F8F8F2"> </span>typescript<span style="color: #F8F8F2"> </span>@types/react<span style="color: #F8F8F2"> </span>@types/react-native<span style="color: #F8F8F2"> </span>tailwindcss
+<span style="color: #F8F8F2">cd </span>..
+
+<span style="color: #959077"># 5. Infrastructure</span>
+mkdir<span style="color: #F8F8F2"> </span>-p<span style="color: #F8F8F2"> </span>infra/terraform/modules<span style="color: #F8F8F2"> </span>infra/terraform/environments<span style="color: #F8F8F2"> </span>infra/helm<span style="color: #F8F8F2"> </span>infra/k8s<span style="color: #F8F8F2"> </span>infra/docker
+
+<span style="color: #959077"># 6. Initial commit</span>
+git<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>-A
+git<span style="color: #F8F8F2"> </span>commit<span style="color: #F8F8F2"> </span>-m<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Sprint 0: Initial monorepo scaffold (backend .NET 8, web Vite+React+TS, mobile Expo+RN+TS)&quot;</span>
+</code></pre></div>
+
+<p>Detailed Sprint 0 plan: <code>19-ROADMAP-SPRINTS.md</code>.</p>
+<hr />
+<p><strong>Next file to read</strong>: <code>06-ARCHITECTURE.md</code> for system architecture, module boundaries, and C4 diagrams.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-04-prd-phase2-3.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: Phase 2 & 3</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-06-architecture.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Architecture</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

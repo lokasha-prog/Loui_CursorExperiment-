@@ -1,0 +1,506 @@
+# 18 — Cursor Rules
+
+> **Paste the entire contents of this file into `.cursorrules` at the root of your NMS repo.** This tells the Cursor agent how to work on this project: what to read, what conventions to follow, what to avoid.
+
+---
+
+## How to Use This File
+
+1. Create your NMS repo: `mkdir nms && cd nms && git init`.
+2. Copy this entire `nms-prerequisites/` directory into `docs/prerequisites/`.
+3. Create `.cursorrules` at the repo root (NOT inside docs).
+4. Paste the **entire contents below the line** into `.cursorrules`.
+5. Open the repo in Cursor. The agent now has the project context.
+
+---
+
+## ─── BEGIN .cursorrules CONTENTS ───
+
+```markdown
+# NMS — Cursor Rules
+
+You are working on the Nursery Management System (NMS), a full-stack platform for UAE early childhood centres. The product is built with .NET 8 (backend) + React + Vite (web) + React Native + Expo (mobile), deployed both on-prem (single-tenant) and SaaS (multi-tenant).
+
+## Mandatory Reading
+
+Before writing any code on this project, you MUST read these files in `/docs/prerequisites/`:
+
+1. `00-MASTER-BRIEF.md` — Project overview, file map, decisions already made.
+2. `01-PRODUCT-VISION.md` — Vision, personas, commercial model.
+3. `02-PRD-MVP.md` — If building MVP. The MVP scope is the only valid starting scope.
+4. `03-PRD-PHASE1-FULL.md` — If expanding beyond MVP.
+5. `05-TECH-STACK.md` — Concrete stack details.
+6. `06-ARCHITECTURE.md` — Modular monolith, module boundaries.
+7. `07-DATABASE-SCHEMA.md` — Entities, RLS, JSONB i18n, audit log.
+8. `08-API-SPEC.md` — REST conventions, OpenAPI, SignalR.
+9. `09-AUTH-SECURITY.md` — Keycloak, RBAC, parent-child ownership.
+10. `10-MULTI-TENANCY.md` — Shared schema + RLS, on-prem vs SaaS.
+11. `12-WEB-FRONTEND.md` — If working on web.
+12. `13-MOBILE-APP.md` — If working on mobile.
+13. `14-UX-UI-DESIGN.md` — Design system, color, typography, RTL.
+14. `18-CURSOR-RULES.md` — This file.
+
+When asked to implement a feature, ALWAYS read the relevant PRD section + the relevant technical file before writing code. Do NOT rely on memory of similar projects — these specs are project-specific.
+
+## Tech Stack (Locked)
+
+- **Backend**: .NET 8 (ASP.NET Core Minimal APIs where possible, controllers for complex endpoints), C# 12, EF Core 8, MediatR (CQRS), FluentValidation, AutoMapper/Mapster, Serilog.
+- **Database**: PostgreSQL 16 with RLS for multi-tenancy, JSONB for i18n, partitioning for audit_log + attendance_record.
+- **Cache + Real-time**: Redis 7 (StackExchange.Redis), SignalR with Redis backplane.
+- **Message Queue**: RabbitMQ 3.13 via MassTransit.
+- **Object Storage**: S3-compatible (AWS S3 for SaaS, MinIO for on-prem).
+- **Identity**: Keycloak 24 (OAuth 2.0 / OIDC).
+- **Web Frontend**: React 18 + Vite + TypeScript + shadcn/ui + Tailwind CSS + TanStack Query v5 + Zustand + React Hook Form + Zod + react-i18next.
+- **Mobile**: React Native 0.74 + Expo SDK 51 (Bare) + NativeWind + Expo Router + WatermelonDB (offline).
+- **Containerization**: Docker + Kubernetes + Helm + Terraform.
+- **CI/CD**: GitHub Actions.
+- **Observability**: OpenTelemetry + Prometheus + Grafana + Loki + Sentry.
+
+DO NOT suggest alternative technologies. DO NOT use Spring Boot, Laravel, Django, Vue, Angular, Flutter, or any other tech. The stack is locked per `20-ADRs.md`.
+
+## Project Structure
+
+```
+nms/
+├── backend/                    # .NET 8 solution
+│   ├── src/
+│   │   ├── NMS.Api/            # ASP.NET Core API entry
+│   │   ├── NMS.Domain/         # Domain entities
+│   │   ├── NMS.Application/    # Use cases, CQRS handlers, DTOs
+│   │   ├── NMS.Infrastructure/ # EF Core, RabbitMQ, S3, external services
+│   │   ├── NMS.Modules/        # Module-specific code (modular monolith)
+│   │   │   ├── Dashboard/
+│   │   │   ├── CentreManagement/
+│   │   │   ├── Attendance/
+│   │   │   ├── ParentCommunication/
+│   │   │   ├── Messaging/
+│   │   │   ├── Billing/
+│   │   │   ├── Enquiry/
+│   │   │   ├── Tours/
+│   │   │   ├── Calendar/
+│   │   │   ├── Forms/
+│   │   │   ├── Tools/
+│   │   │   ├── Reports/
+│   │   │   ├── Settings/
+│   │   │   ├── Notifications/
+│   │   │   ├── Learning/       # Phase 2
+│   │   │   └── Payments/       # Phase 3
+│   │   └── NMS.Shared/         # Shared kernel
+│   ├── tests/
+│   └── NMS.sln
+├── web/                        # React + Vite frontend
+│   ├── src/
+│   │   ├── api/                # Generated from OpenAPI
+│   │   ├── modules/            # Feature folders
+│   │   ├── components/         # Shared components (ui/, layout/, shared/)
+│   │   ├── hooks/
+│   │   ├── stores/             # Zustand
+│   │   ├── lib/
+│   │   └── styles/
+│   └── package.json
+├── mobile/                     # React Native + Expo
+│   ├── app/                    # Expo Router (file-based)
+│   ├── src/
+│   └── package.json
+├── infra/                      # DevOps
+│   ├── terraform/
+│   ├── helm/
+│   ├── k8s/
+│   ├── docker/
+│   └── docs/
+└── docs/
+    └── prerequisites/          # This pack — DO NOT MODIFY
+```
+
+## Coding Conventions
+
+### Backend (.NET / C#)
+
+- **File-scoped namespaces**: `namespace NMS.Modules.Attendance;` (not block-scoped).
+- **Nullable reference types**: enabled in csproj. All reference types explicitly `?` or non-null.
+- **var**: use for local variables when type is obvious. Use explicit type for clarity.
+- **Async/await**: all I/O is async. Suffix async methods with `Async`. Use `CancellationToken` everywhere.
+- **Naming**:
+  - Public: PascalCase (`StudentService`, `GetByIdAsync`).
+  - Private: _camelCase (`_logger`, `_dbContext`).
+  - Local: camelCase (`studentId`, `result`).
+  - Constants: PascalCase (`MaxRetryAttempts`).
+  - Interfaces: I-prefix (`IStudentRepository`).
+- **Records for DTOs + events**: `public record StudentDto(Guid Id, string FirstName, ...)`.
+- **Records for commands + queries**: `public record CheckInStudentCommand(string Barcode, CheckInMethod Method) : IRequest<Result<AttendanceDto>>;`.
+- **Result pattern**: `Result<T>` for return types (not exceptions for flow control). `Result.Success(value)` or `Result.Failure(error)`.
+- **EF Core**:
+  - Code-first with migrations.
+  - `IEntityTypeConfiguration<T>` for entity configs (one file per entity in `Configurations/`).
+  - `AsNoTracking()` for read-only queries.
+  - `Include()` only when needed (avoid cartesian explosion).
+  - Global query filters for tenant + soft delete.
+- **Validation**: FluentValidation on every command/query. Validation runs in MediatR pipeline.
+- **Logging**: Serilog structured logging. Use `_logger.LogInformation("Student checked in. StudentId: {StudentId}", studentId);` (template, not string interpolation).
+- **Error handling**: Global exception middleware. Custom exceptions (`NotFoundException`, `ValidationException`, `ForbiddenException`) map to HTTP status codes.
+- **Tests**: xUnit + FluentAssertions + Moq. Test file per class, method-per-fact. Use `Arrange/Act/Assert` comments.
+
+### Web Frontend (React + TypeScript)
+
+- **Functional components only**. No class components.
+- **TypeScript strict mode**. No `any` (use `unknown` if truly unknown).
+- **File naming**: kebab-case for files (`student-form.tsx`), PascalCase for components (`StudentForm`).
+- **Imports**: use `@/` alias for `src/` (configured in tsconfig.json + vite.config.ts).
+- **Components**:
+  - One component per file.
+  - Default export for pages, named export for components.
+  - Props interface above component.
+  - Destructure props in function signature.
+- **Hooks**:
+  - Custom hooks in `hooks/` or co-located in feature folder.
+  - Prefix with `use`: `useAuth`, `useStudents`.
+- **State**:
+  - Server state: TanStack Query (always).
+  - Global client state: Zustand (only if truly global — auth, theme, locale).
+  - Local state: useState (component-local).
+  - URL state: useSearchParams (filters, pagination).
+- **Forms**: React Hook Form + Zod. Schema-first: define Zod schema, infer type, use form.
+- **Styling**: Tailwind utility classes. CSS logical properties only (`ms-*`, `me-*`, `text-start` — never `ml-*`, `mr-*`, `text-left`). Custom CSS only for complex animations.
+- **shadcn/ui**: copy-paste components into `src/components/ui/`. Customize as needed. Don't install as dependency.
+- **API calls**: always via TanStack Query hooks (`useStudents`, `useCreateStudent`). Never `fetch` directly in components.
+- **i18n**: `useTranslation()` hook. All user-facing strings via `t('key')`. Never hardcoded English.
+- **Accessibility**: semantic HTML, ARIA labels on icon-only buttons, keyboard navigation. Run `axe` in tests.
+- **Testing**: Vitest + React Testing Library. One test file per component.
+
+### Mobile (React Native + Expo)
+
+- Same conventions as web where applicable (TypeScript, naming, structure).
+- **Navigation**: Expo Router (file-based). One file per screen in `app/`.
+- **Styling**: NativeWind (Tailwind for RN). Same utility classes as web where possible.
+- **State**: same as web (TanStack Query + Zustand).
+- **Offline**: WatermelonDB for local DB. All offline-capable features write to WatermelonDB + queue for sync.
+- **Push**: `expo-notifications`. Register token on login. Handle deep links on tap.
+- **Camera**: `react-native-vision-camera` + MLKit for barcode.
+- **Secure storage**: `expo-secure-store` for refresh token. NEVER localStorage or AsyncStorage for sensitive data.
+- **Testing**: Jest + React Native Testing Library. Detox for E2E.
+
+### Infrastructure (Terraform / Helm / K8s)
+
+- **Terraform**:
+  - One module per resource type (`vpc/`, `eks/`, `rds/`, etc.).
+  - `variables.tf` for inputs, `outputs.tf` for outputs.
+  - `terraform.tfvars` gitignored (per-env values).
+  - Always set `tags` on resources.
+  - Use `terraform fmt` + `terraform validate` in CI.
+- **Helm**:
+  - One chart per service (`nms-api/`, `nms-web/`).
+  - `values.yaml` for defaults, `values-{env}.yaml` for overrides.
+  - Use `_helpers.tpl` for shared template functions.
+- **K8s manifests**:
+  - Always set resource requests + limits.
+  - Always set liveness/readiness/startup probes.
+  - Always set PodDisruptionBudget for HA workloads.
+  - Always set NetworkPolicy (default deny).
+
+## Multi-Tenancy Rules (CRITICAL)
+
+EVERY entity has `tenant_id`. EVERY query is tenant-scoped. These are NON-NEGOTIABLE:
+
+1. **Every entity inherits from `TenantEntity`** (has `TenantId` property).
+2. **EF Core global query filter** in `OnModelCreating`: `HasQueryFilter(e => e.TenantId == _tenantContext.TenantId)`.
+3. **RLS policy on every table** in PostgreSQL (defense-in-depth).
+4. **Tenant context middleware** sets `app.tenant_id` PostgreSQL setting per request from JWT claim.
+5. **Background jobs** must explicitly set tenant context before any DB query.
+6. **RabbitMQ consumers** must explicitly set tenant context before processing.
+7. **Never write raw SQL** that bypasses tenant filter without explicit code review.
+8. **Never expose `tenant_id` in API responses** (it's implicit from JWT).
+
+If you write code that touches the database without respecting `tenant_id`, you have introduced a CRITICAL security bug. Fix immediately.
+
+## Parent-Child Ownership Rules (CRITICAL)
+
+Parents MUST NEVER see another parent's child data. This is NON-NEGOTIABLE:
+
+1. **Every parent-facing endpoint** must verify parent owns the requested child.
+2. **Ownership check** in the handler (not just controller): `if (!await IsParentOfStudent(parentId, studentId)) return Result.NotFound();`.
+3. **Return 404, NOT 403** for ownership denial — prevents ID enumeration.
+4. **List endpoints** must filter by ownership: parents only see their own children.
+5. **Tests required**: every parent-facing endpoint must have a test for "parent A tries to access parent B's child → 404".
+
+If you write a parent-facing endpoint without ownership check, you have introduced a CRITICAL security bug. Fix immediately.
+
+## RTL (Arabic) Rules (CRITICAL)
+
+Arabic is a first-class language. RTL is not an afterthought. NON-NEGOTIABLE:
+
+1. **All CSS uses logical properties**: `margin-inline-start`, `padding-inline-end`, `text-align: start`, `border-inline-start`. NEVER `margin-left`, `padding-right`, `text-align: left/right`.
+2. **Tailwind logical utilities**: `ms-*`, `me-*`, `ps-*`, `pe-*`, `text-start`, `text-end`. NEVER `ml-*`, `mr-*`, `pl-*`, `pr-*`, `text-left`, `text-right`.
+3. **Directional icons flip**: `ChevronRight` → `className="rtl:rotate-180"`.
+4. **All translatable strings** via `t('key')` in `react-i18next`. NEVER hardcoded English in components.
+5. **All DB translatable fields** as JSONB: `{"en": "...", "ar": "..."}`.
+6. **Test every screen in both LTR and RTL**. Visual regression tests in both directions.
+7. **ESLint rule** forbids physical properties — code won't merge if violated.
+
+## API Conventions
+
+1. **URI versioning**: `/api/v1/...`.
+2. **Cursor pagination**: `?cursor=<base64>&limit=50`. Max limit 100. Never OFFSET.
+3. **Response envelope**: `{ success, data, meta, errors }`. Always.
+4. **HTTP status codes**: 200, 201, 202, 204, 400, 401, 403, 404, 409, 422, 429, 500, 503.
+5. **Idempotency**: all mutating ops support `Idempotency-Key` header.
+6. **Auth**: JWT in `Authorization: Bearer <token>` header.
+7. **File uploads**: presigned S3 URLs. Never multipart form data to API.
+8. **Errors**: `{ success: false, errors: [{ code, message, field? }] }`.
+9. **OpenAPI 3.0**: spec auto-generated from code annotations.
+10. **Rate limiting**: 100 req/min/user (authenticated), 10 req/min/IP (unauthenticated).
+
+## Database Conventions
+
+1. **All tables have**: `id` (UUID v4), `tenant_id`, `created_at`, `updated_at`, `created_by`, `updated_by`, `is_deleted`, `deleted_at`.
+2. **Soft delete** for persistent entities (Student, Staff, Invoice, etc.). Hard delete only for transient data.
+3. **Immutable tables** (`attendance_event`, `audit_log`): trigger rejects UPDATE/DELETE.
+4. **Money**: integer fils (1 AED = 100 fils). NEVER `numeric`, `decimal`, `float` for money.
+5. **JSONB for i18n fields**: `{"en": "...", "ar": "..."}`.
+6. **Partitioning**: `attendance_record` and `audit_log` partitioned by month.
+7. **RLS**: every table with `tenant_id` has RLS policy.
+8. **Indexes**: composite on `(tenant_id, created_at DESC)` and `(tenant_id, status)` for high-traffic entities. Partial: `WHERE is_deleted = false`.
+9. **Migrations**: EF Core code-first. Each migration is immutable once published. New migration to change.
+10. **Audit log**: every mutation writes to `audit_log` via interceptor.
+
+## Notifications Conventions
+
+1. **3 tiers**: Critical (push + in-app + SMS), Operational (push + in-app), Informational (email + optional in-app).
+2. **No recipient acknowledgement required** — per source planning doc §7. We record delivery attempts but don't require user confirmation.
+3. **Critical tier**: 3 retries with exponential backoff, then fallback (push → SMS → email).
+4. **Operational tier**: 3 retries, no fallback.
+5. **Informational tier**: no retry beyond provider's own.
+6. **Every delivery attempt** logged in `notification_delivery` table.
+
+## Testing Requirements
+
+1. **Unit tests** for every business logic function. Mock external dependencies.
+2. **Integration tests** for every API endpoint. Use Testcontainers (real PostgreSQL + Redis).
+3. **E2E tests** for critical user journeys (login, check-in, post activity, send message, generate invoice).
+4. **Coverage**: backend 80%, web 75%, mobile 70%.
+5. **Accessibility**: axe tests in every component test. E2E tests run axe on every page.
+6. **RTL**: every screen tested in both LTR and RTL.
+7. **Performance**: k6 load tests on every PR (smoke), nightly (full load).
+8. **Security**: SAST (SonarCloud), SCA (OWASP Dependency Check), DAST (ZAP weekly), container scan (Trivy), IaC scan (tfsec).
+
+## Commit + PR Conventions
+
+1. **Commit message**: `<type>(<scope>): <subject>` — e.g., `feat(attendance): add barcode check-in endpoint`.
+   - Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `style`, `ci`.
+   - Scope: module name (e.g., `attendance`, `billing`, `web`, `mobile`).
+   - Subject: imperative, lowercase, no period.
+2. **PR title**: same format as commit message.
+3. **PR description**: includes summary, related issue, testing notes, screenshots (if UI).
+4. **PR size**: target < 500 lines. Split larger PRs.
+5. **2 approvals required** for merge to main (1 for develop).
+6. **All CI checks must pass** before merge.
+7. **Squash + merge** to main (clean history).
+
+## Forbidden Patterns
+
+DO NOT do any of these:
+
+1. ❌ Suggest alternative tech stack (Spring Boot, Laravel, Vue, Flutter, etc.).
+2. ❌ Use `any` in TypeScript (use `unknown` if truly unknown).
+3. ❌ Use physical CSS properties (`margin-left`, `text-align: left`, etc.).
+4. ❌ Hardcode user-facing English strings (use `t('key')`).
+5. ❌ Use floating-point for money (use integer cents/fils).
+6. ❌ Bypass tenant context (always set + respect `tenant_id`).
+7. ❌ Skip parent-child ownership check on parent-facing endpoints.
+8. ❌ Use `localStorage` for tokens (use HttpOnly cookie or SecureStore).
+9. ❌ Use `dangerouslySetInnerHTML` without DOMPurify.
+10. ❌ Disable RLS or remove audit log trigger.
+11. ❌ Use `OFFSET` pagination (use cursor).
+12. ❌ Use `console.log` in production code (use structured logging via Serilog or `logger`).
+13. ❌ Skip tests for new features.
+14. ❌ Use class components in React.
+15. ❌ Install heavy dependencies without justification (bundle size matters).
+16. ❌ Add features beyond the requested sprint scope (refer to `19-ROADMAP-SPRINTS.md`).
+17. ❌ Modify files in `docs/prerequisites/` (these are immutable specs).
+18. ❌ Skip code review for any change > 10 lines.
+19. ❌ Use raw SQL without parameterization (EF Core LINQ or parameterized queries only).
+20. ❌ Hardcode secrets, API keys, or passwords in code.
+
+## How to Approach a Task
+
+When given a task, follow this process:
+
+1. **Read the relevant spec files** in `/docs/prerequisites/`. Always cite which files you read in your first response.
+2. **Understand the scope**. If unclear, ask clarifying questions before coding.
+3. **Plan the implementation**. Outline the files you'll touch + changes you'll make.
+4. **Write the code** following the conventions above.
+5. **Write tests** alongside the code (TDD preferred for complex logic).
+6. **Run tests locally** before considering the task done.
+7. **Update documentation** if the change affects API, schema, or architecture.
+8. **Write a clear commit message** following the convention.
+9. **Summarize what you did** + flag any concerns or follow-ups.
+
+## When Unsure
+
+- **Ask the human** — don't guess on architecture decisions.
+- **Read more spec files** — the answer is probably there.
+- **Look at existing code** — follow established patterns.
+- **Write a test first** — clarify the expected behavior before implementing.
+- **Add an ADR** — if making a non-trivial decision, document it in `/docs/adr/`.
+
+## Useful Aliases
+
+- `npm run dev` — start dev environment (web + mobile).
+- `dotnet watch run --project backend/src/NMS.Api` — backend hot reload.
+- `cd web && pnpm dev` — web dev server.
+- `cd mobile && pnpm start` — Expo dev server.
+- `dotnet test backend/NMS.sln` — run backend tests.
+- `cd web && pnpm test` — run web tests.
+- `cd web && pnpm test:e2e` — run web E2E tests.
+- `cd web && pnpm lint` — lint web.
+- `cd web && pnpm typecheck` — typecheck web.
+
+## Reference Files
+
+- `/docs/prerequisites/00-MASTER-BRIEF.md` — start here.
+- `/docs/prerequisites/19-ROADMAP-SPRINTS.md` — what to build in what sprint.
+- `/docs/prerequisites/20-ADRs.md` — why each major decision was made.
+- `/docs/adr/` — new ADRs go here (Nygard format, see ADR template in `20-ADRs.md`).
+- `/infra/docs/runbooks/` — operational runbooks.
+
+You are an experienced engineer working on a high-quality, production-grade, AI-built product. Hold yourself to that standard.
+```
+
+## ─── END .cursorrules CONTENTS ───
+
+---
+
+## How to Use These Rules
+
+### Step 1: Bootstrap the Repo
+
+```bash
+mkdir nms && cd nms
+git init
+
+# Create directory structure
+mkdir -p backend web mobile infra docs/prerequisites
+
+# Copy the prerequisites pack
+cp -r /path/to/downloaded/nms-prerequisites/* docs/prerequisites/
+
+# Create .cursorrules with the content above
+# (paste the "BEGIN .cursorrules CONTENTS" through "END .cursorrules CONTENTS" block)
+
+# Initial commit
+git add -A
+git commit -m "Sprint 0: Initial repo with prerequisites + cursor rules"
+```
+
+### Step 2: Open in Cursor
+
+```bash
+cursor .
+```
+
+Cursor will automatically read `.cursorrules` on every interaction.
+
+### Step 3: Start Building
+
+Use prompts like this to guide Cursor:
+
+**For Sprint 0 setup:**
+```
+Read /docs/prerequisites/00-MASTER-BRIEF.md, /docs/prerequisites/05-TECH-STACK.md,
+and /docs/prerequisites/11-DEVOPS-INFRASTRUCTURE.md.
+
+Then perform Sprint 0 setup per /docs/prerequisites/19-ROADMAP-SPRINTS.md:
+1. Scaffold the monorepo (backend .NET 8, web Vite+React+TS, mobile Expo+RN+TS).
+2. Set up Docker Compose for local dev (Postgres, Redis, RabbitMQ, Keycloak, MinIO, MailHog).
+3. Create initial .gitignore, .editorconfig, .vscode/extensions.json.
+4. Run the scaffolding commands from 05-TECH-STACK.md §11.
+5. Initial commit.
+```
+
+**For Sprint 1 (Centre Management):**
+```
+Read /docs/prerequisites/02-PRD-MVP.md (sections on Centre Management),
+/docs/prerequisites/07-DATABASE-SCHEMA.md (Student, Staff, Room entities),
+/docs/prerequisites/08-API-SPEC.md (Student/Staff/Room endpoints),
+and /docs/prerequisites/06-ARCHITECTURE.md (Module: Centre Management).
+
+Then implement Sprint 1 deliverables:
+- Student entity with full lifecycle (6 statuses) + EF Core config + migration
+- Staff entity
+- Room entity with capacity + ratio config
+- Program entity
+- Group entity
+- Label entity
+- Guardian entity (primary + secondary)
+- CRUD endpoints for each
+- RBAC enforcement (only Centre Admin+ can create)
+- Audit log via interceptor
+- Unit tests for each entity
+- Integration tests for each endpoint
+
+Follow the conventions in .cursorrules. Use the directory structure specified.
+```
+
+**For adding a feature:**
+```
+Read /docs/prerequisites/[relevant files].
+
+I need to add [feature description].
+
+Per [file:section], the requirements are:
+- [requirement 1]
+- [requirement 2]
+
+Implement:
+- [entity changes]
+- [endpoint changes]
+- [UI changes]
+- [tests]
+
+Follow conventions in .cursorrules.
+```
+
+### Step 4: Iterate
+
+When Cursor produces code:
+1. Review it for spec compliance (did it follow the conventions?).
+2. Run tests locally.
+3. If issues: tell Cursor what's wrong + ask for fix. Be specific.
+4. If correct: commit + move to next task.
+
+### Step 5: Cross-Cutting Changes
+
+For changes that affect multiple files (e.g., "add a new notification type"):
+
+```
+I need to add a new notification category: 'tour_reminder' (Operational tier).
+
+Read:
+- /docs/prerequisites/15-NOTIFICATIONS.md (categories catalog, tier rules)
+- /docs/prerequisites/08-API-SPEC.md (notification endpoints)
+- Existing notification code in backend/src/NMS.Modules/Notifications/
+
+Implement:
+1. Add 'tour_reminder' to notification categories enum.
+2. Add template to notification_template table (migration).
+3. Update Tour Management module to publish TourReminderEvent 24h before tour.
+4. Update Notification module to consume event + create notifications.
+5. Add notification preference entry for staff.
+6. Test: integration test that creates tour, fast-forwards time, verifies notification sent.
+
+Follow conventions in .cursorrules.
+```
+
+---
+
+## Why These Rules Matter
+
+1. **Consistency** — every file follows the same conventions. Easier to read, review, maintain.
+2. **Security** — tenant isolation + parent-child ownership are non-negotiable. The rules make violations obvious.
+3. **RTL parity** — Arabic is first-class. The rules enforce RTL from the start, not as retrofit.
+4. **Spec adherence** — Cursor reads the spec files before coding. Reduces drift from requirements.
+5. **Quality gates** — coverage, accessibility, security scans all enforced in CI.
+6. **Onboarding** — new developers (or AI agents) can be productive immediately by reading `.cursorrules`.
+
+---
+
+**Next file to read**: `19-ROADMAP-SPRINTS.md` — the sprint-by-sprint breakdown of what to build when.

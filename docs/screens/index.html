@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NMS Bright Futures — All Screens</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+  <style>
+    body { background: linear-gradient(180deg, #FFF8F3 0%, #F8F9FA 30%); min-height: 100vh; }
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+</head>
+<body>
+  <!-- HERO -->
+  <header class="relative overflow-hidden">
+    <div class="accent-bar h-1.5"></div>
+    <div class="floating-blob animate-float" style="background:#E07A5F;width:500px;height:500px;top:-150px;right:-100px;"></div>
+    <div class="floating-blob animate-float" style="background:#81B29A;width:400px;height:400px;top:200px;left:-150px;animation-delay:-3s;"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
+      <div class="flex flex-wrap items-center gap-2 mb-6">
+        <span class="pill pill-start">v1.0</span>
+        <span class="pill pill-info">56 Pages</span>
+        <span class="pill pill-done">22 Specs</span>
+        <span class="pill pill-purple">25 Screens</span>
+        <span class="pill pill-amber">7 Mobile</span>
+        <span class="pill pill-critical">2 Phase 3</span>
+      </div>
+
+      <div class="flex items-center gap-4 mb-5">
+        <div class="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg">
+          <i data-lucide="baby" class="w-7 h-7 text-amber-300"></i>
+        </div>
+        <div>
+          <h1 class="font-heading text-3xl lg:text-5xl font-extrabold tracking-tight text-slate-900">
+            Bright<span class="text-amber-600">Futures</span> NMS
+          </h1>
+          <p class="font-mono text-xs text-slate-500 mt-1">All Project Screens · Single Connected Set</p>
+        </div>
+      </div>
+
+      <h2 class="font-heading text-2xl lg:text-4xl font-bold text-slate-900 leading-tight mb-4 max-w-3xl">
+        One folder. <span class="text-amber-700">56 unique pages.</span> All cross-linked.
+      </h2>
+
+      <p class="text-slate-700 text-base lg:text-lg leading-relaxed max-w-3xl mb-8">
+        The complete NMS Bright Futures project — 22 specification documents rendered as interactive HTML, plus 34 product screen mockups (web + mobile + Phase 3 previews). All in one folder with unique names, no conflicts.
+      </p>
+
+      <div class="flex flex-wrap gap-3">
+        <a href="screen-dashboard.html" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition font-mono flex items-center gap-2 shadow-md">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-amber-300"></i>
+          Live Dashboard →
+        </a>
+        <a href="spec-00-master-brief.html" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm transition font-mono flex items-center gap-2 shadow-md">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          Read Spec Docs
+        </a>
+        <a href="mobile-teacher.html" class="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-sm font-mono transition flex items-center gap-2">
+          <i data-lucide="smartphone" class="w-4 h-4 text-slate-500"></i>
+          Mobile Apps
+        </a>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-10 pt-8 border-t border-slate-200">
+        <div><div class="font-heading text-3xl font-bold text-slate-900">56</div><div class="text-xs font-mono text-slate-500 mt-1">Total Pages</div></div>
+        <div><div class="font-heading text-3xl font-bold text-slate-900">22</div><div class="text-xs font-mono text-slate-500 mt-1">Spec Docs</div></div>
+        <div><div class="font-heading text-3xl font-bold text-slate-900">25</div><div class="text-xs font-mono text-slate-500 mt-1">Web Screens</div></div>
+        <div><div class="font-heading text-3xl font-bold text-slate-900">7</div><div class="text-xs font-mono text-slate-500 mt-1">Mobile Apps</div></div>
+        <div><div class="font-heading text-3xl font-bold text-slate-900 flex items-center gap-2"><span class="pulse-dot"></span> Live</div><div class="text-xs font-mono text-slate-500 mt-1">Theme + RTL</div></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 lg:px-8 py-12">
+
+    <!-- Filter -->
+    <div class="flex flex-wrap items-center gap-3 mb-6 text-xs font-mono text-slate-500">
+      <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+      <span>Filter:</span>
+      <button onclick="filterPages('all', event)" class="filter-btn active px-2.5 py-1 rounded-md bg-slate-900 text-white">All (56)</button>
+      <button onclick="filterPages('spec', event)" class="filter-btn px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-50">Specs (22)</button>
+      <button onclick="filterPages('screen', event)" class="filter-btn px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-50">Web Screens (25)</button>
+      <button onclick="filterPages('mobile', event)" class="filter-btn px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-50">Mobile (7)</button>
+      <button onclick="filterPages('phase3', event)" class="filter-btn px-2.5 py-1 rounded-md bg-white border border-slate-200 hover:bg-slate-50">Phase 3 (2)</button>
+    </div>
+
+    <div id="pagesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+    <!-- Specs section -->
+    <section class="mt-16 pt-12 border-t border-slate-200">
+      <div class="flex items-center gap-3 mb-2"><i data-lucide="book-open" class="w-6 h-6 text-amber-600"></i><h2 class="font-heading text-2xl font-bold text-slate-900">Specification Documents</h2></div>
+      <p class="text-sm text-slate-600 mb-8">22 build-ready spec files covering product, engineering, compliance, and delivery. Each rendered as a beautiful interactive HTML page.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <a href="spec-00-master-brief.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="sparkles" class="w-4 h-4"></i></div>
+            <span class="pill pill-start">Start</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Master Brief</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-00-master-brief.html</div>
+        </a>
+
+        <a href="spec-01-product-vision.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="target" class="w-4 h-4"></i></div>
+            <span class="pill pill-start">Start</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Product Vision</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-01-product-vision.html</div>
+        </a>
+
+        <a href="spec-02-prd-mvp.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="rocket" class="w-4 h-4"></i></div>
+            <span class="pill pill-info">Product</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">PRD: MVP Pilot</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-02-prd-mvp.html</div>
+        </a>
+
+        <a href="spec-03-prd-phase1.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="layers" class="w-4 h-4"></i></div>
+            <span class="pill pill-info">Product</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">PRD: Phase 1 Full</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-03-prd-phase1.html</div>
+        </a>
+
+        <a href="spec-04-prd-phase2-3.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="git-branch" class="w-4 h-4"></i></div>
+            <span class="pill pill-info">Product</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">PRD: Phase 2 & 3</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-04-prd-phase2-3.html</div>
+        </a>
+
+        <a href="spec-05-tech-stack.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="cpu" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Tech Stack</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-05-tech-stack.html</div>
+        </a>
+
+        <a href="spec-06-architecture.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="git-fork" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Architecture</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-06-architecture.html</div>
+        </a>
+
+        <a href="spec-07-database-schema.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="database" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Database Schema</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-07-database-schema.html</div>
+        </a>
+
+        <a href="spec-08-api-spec.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="code-2" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">API Specification</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-08-api-spec.html</div>
+        </a>
+
+        <a href="spec-09-auth-security.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="shield-check" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Auth & Security</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-09-auth-security.html</div>
+        </a>
+
+        <a href="spec-10-multi-tenancy.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="building-2" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Multi-Tenancy</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-10-multi-tenancy.html</div>
+        </a>
+
+        <a href="spec-11-devops.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="server" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">DevOps & Infrastructure</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-11-devops.html</div>
+        </a>
+
+        <a href="spec-12-web-frontend.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="monitor" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Web Frontend</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-12-web-frontend.html</div>
+        </a>
+
+        <a href="spec-13-mobile-app.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="smartphone" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Mobile App</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-13-mobile-app.html</div>
+        </a>
+
+        <a href="spec-14-ux-ui-design.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="palette" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">UX/UI Design</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-14-ux-ui-design.html</div>
+        </a>
+
+        <a href="spec-15-notifications.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="bell" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Notifications</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-15-notifications.html</div>
+        </a>
+
+        <a href="spec-16-testing-quality.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="check-circle" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Testing & Quality</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-16-testing-quality.html</div>
+        </a>
+
+        <a href="spec-17-compliance-legal.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="scale" class="w-4 h-4"></i></div>
+            <span class="pill pill-done">Engineering</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Compliance & Legal</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-17-compliance-legal.html</div>
+        </a>
+
+        <a href="spec-18-cursor-rules.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="terminal" class="w-4 h-4"></i></div>
+            <span class="pill pill-purple">Workflow</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Cursor Rules</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-18-cursor-rules.html</div>
+        </a>
+
+        <a href="spec-19-roadmap-sprints.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="map" class="w-4 h-4"></i></div>
+            <span class="pill pill-purple">Workflow</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Roadmap & Sprints</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-19-roadmap-sprints.html</div>
+        </a>
+
+        <a href="spec-20-adrs.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="git-commit" class="w-4 h-4"></i></div>
+            <span class="pill pill-purple">Workflow</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Architecture Decisions</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-20-adrs.html</div>
+        </a>
+
+        <a href="spec-21-delivery-checklist.html" class="nursery-card nursery-card-hover p-4 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-amber-300"><i data-lucide="clipboard-check" class="w-4 h-4"></i></div>
+            <span class="pill pill-purple">Workflow</span>
+          </div>
+          <h3 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Delivery Checklist</h3>
+          <div class="text-[10px] font-mono text-slate-400">spec-21-delivery-checklist.html</div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- Web screens section -->
+    <section class="mt-16 pt-12 border-t border-slate-200">
+      <div class="flex items-center gap-3 mb-2"><i data-lucide="layout-dashboard" class="w-6 h-6 text-amber-600"></i><h2 class="font-heading text-2xl font-bold text-slate-900">Web App Screens</h2></div>
+      <p class="text-sm text-slate-600 mb-8">25 web application mockups — staff dashboard, attendance, billing, enquiries, calendar, forms, reports, and more.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+
+        <a href="screen-login.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="log-in" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-start">Entry</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Login</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-login.html</div>
+        </a>
+
+        <a href="screen-dashboard.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Dashboard</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-dashboard.html</div>
+        </a>
+
+        <a href="screen-attendance.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="clipboard-check" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Attendance</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-attendance.html</div>
+        </a>
+
+        <a href="screen-student-profile.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="users" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Student Profile</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-student-profile.html</div>
+        </a>
+
+        <a href="screen-activity-feed.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="image" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Activity Feed</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-activity-feed.html</div>
+        </a>
+
+        <a href="screen-messaging.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="message-square" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Messaging</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-messaging.html</div>
+        </a>
+
+        <a href="screen-billing.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="credit-card" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Billing</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-billing.html</div>
+        </a>
+
+        <a href="screen-enquiry-pipeline.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="user-plus" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Enquiry Pipeline</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-enquiry-pipeline.html</div>
+        </a>
+
+        <a href="screen-calendar.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="calendar-days" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Calendar</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-calendar.html</div>
+        </a>
+
+        <a href="screen-emergency-report.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="shield-alert" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Emergency Report</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-emergency-report.html</div>
+        </a>
+
+        <a href="screen-notifications.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="bell" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Notifications</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-notifications.html</div>
+        </a>
+
+        <a href="screen-settings-audit.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="settings" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Settings & Audit Log</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-settings-audit.html</div>
+        </a>
+
+        <a href="screen-staff-list.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="users" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Staff Directory</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-staff-list.html</div>
+        </a>
+
+        <a href="screen-rooms-programs.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="door-open" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Rooms & Programs</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-rooms-programs.html</div>
+        </a>
+
+        <a href="screen-tour-management.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="calendar-clock" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Tour Management</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-tour-management.html</div>
+        </a>
+
+        <a href="screen-forms-builder.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="file-text" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Forms Builder</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-forms-builder.html</div>
+        </a>
+
+        <a href="screen-admissions-process.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="clipboard-list" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Admissions Process</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-admissions-process.html</div>
+        </a>
+
+        <a href="screen-id-cards.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="credit-card" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">ID Card Generator</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-id-cards.html</div>
+        </a>
+
+        <a href="screen-certificates.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="award" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Certificate Generator</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-certificates.html</div>
+        </a>
+
+        <a href="screen-reports-analytics.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="bar-chart-3" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Reports & Analytics</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-reports-analytics.html</div>
+        </a>
+
+        <a href="screen-newsletter-builder.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="newspaper" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Newsletter Builder</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-newsletter-builder.html</div>
+        </a>
+
+        <a href="screen-resource-centre.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="folder-open" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Resource Centre</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-resource-centre.html</div>
+        </a>
+
+        <a href="screen-leave-management.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="calendar-off" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-info">Staff</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Leave Management</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-leave-management.html</div>
+        </a>
+
+        <a href="screen-user-roles.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="shield" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">User Roles & Permissions</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-user-roles.html</div>
+        </a>
+
+        <a href="screen-notification-preferences.html" class="nursery-card nursery-card-hover p-3 group flex flex-col">
+          <div class="flex items-start justify-between mb-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><i data-lucide="bell" class="w-4 h-4 text-amber-700"></i></div>
+            <span class="pill pill-done">Admin</span>
+          </div>
+          <h3 class="font-heading text-xs font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Notification Preferences</h3>
+          <div class="text-[9px] font-mono text-slate-400">screen-notification-preferences.html</div>
+        </a>
+
+      </div>
+
+      <!-- Phase 3 previews -->
+      <div class="mt-6">
+        <h3 class="font-heading text-base font-bold text-slate-900 mb-3 flex items-center gap-2"><i data-lucide="rocket" class="w-4 h-4 text-purple-600"></i> Phase 3 Previews</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+          <a href="phase3-multi-centre.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center"><i data-lucide="building-2" class="w-5 h-5 text-purple-700"></i></div>
+            <div class="flex-1"><h4 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition">Multi-Centre Dashboard</h4><div class="text-[10px] font-mono text-slate-500">Phase 3 · 5 centres consolidated</div></div>
+            <span class="pill pill-purple">PHASE 3</span>
+          </a>
+
+          <a href="phase3-payment-flow.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center"><i data-lucide="credit-card" class="w-5 h-5 text-purple-700"></i></div>
+            <div class="flex-1"><h4 class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700 transition">Online Payment Flow</h4><div class="text-[10px] font-mono text-slate-500">Phase 3 · UAE gateway · Apple/Google Pay</div></div>
+            <span class="pill pill-purple">PHASE 3</span>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Mobile apps section -->
+    <section class="mt-16 pt-12 border-t border-slate-200">
+      <div class="flex items-center gap-3 mb-2"><i data-lucide="smartphone" class="w-6 h-6 text-amber-600"></i><h2 class="font-heading text-2xl font-bold text-slate-900">Mobile Apps by Persona</h2></div>
+      <p class="text-sm text-slate-600 mb-8">7 phone mockups — each role gets a tailored mobile experience with only the features they need.</p>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <a href="mobile-teacher.html" class="nursery-card nursery-card-hover p-5 group flex flex-col">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm" style="background:linear-gradient(135deg, #E07A5F, #E07A5Fdd)"><i data-lucide="book-open" class="w-5 h-5"></i></div>
+            <span class="pill pill-amber">MOBILE</span>
+          </div>
+          <h3 class="font-heading text-base font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Teacher</h3>
+          <div class="text-[10px] font-mono text-slate-500 mb-2">Mariam R · 8 toddlers</div>
+          <p class="text-xs text-slate-600 leading-relaxed flex-1">Scan attendance, post photos, log food/nap/mood, parent chat</p>
+          <div class="flex items-center gap-1 mt-3 pt-3 border-t border-slate-100 text-[11px] font-mono text-amber-700 font-semibold"><span>Open</span><i data-lucide="arrow-right" class="w-3 h-3"></i></div>
+        </a>
+
+        <a href="mobile-receptionist.html" class="nursery-card nursery-card-hover p-5 group flex flex-col">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm" style="background:linear-gradient(135deg, #0EA5E9, #0EA5E9dd)"><i data-lucide="user-check" class="w-5 h-5"></i></div>
+            <span class="pill pill-amber">MOBILE</span>
+          </div>
+          <h3 class="font-heading text-base font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Receptionist</h3>
+          <div class="text-[10px] font-mono text-slate-500 mb-2">Fatima A-Z · Front desk</div>
+          <p class="text-xs text-slate-600 leading-relaxed flex-1">New enquiries, tour booking, visitor log, follow-ups</p>
+          <div class="flex items-center gap-1 mt-3 pt-3 border-t border-slate-100 text-[11px] font-mono text-amber-700 font-semibold"><span>Open</span><i data-lucide="arrow-right" class="w-3 h-3"></i></div>
+        </a>
+
+        <a href="mobile-accounts.html" class="nursery-card nursery-card-hover p-5 group flex flex-col">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm" style="background:linear-gradient(135deg, #16A34A, #16A34Add)"><i data-lucide="credit-card" class="w-5 h-5"></i></div>
+            <span class="pill pill-amber">MOBILE</span>
+          </div>
+          <h3 class="font-heading text-base font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Accounts</h3>
+          <div class="text-[10px] font-mono text-slate-500 mb-2">Omar K · Billing</div>
+          <p class="text-xs text-slate-600 leading-relaxed flex-1">Record payments, overdue alerts, revenue charts</p>
+          <div class="flex items-center gap-1 mt-3 pt-3 border-t border-slate-100 text-[11px] font-mono text-amber-700 font-semibold"><span>Open</span><i data-lucide="arrow-right" class="w-3 h-3"></i></div>
+        </a>
+
+        <a href="mobile-admin.html" class="nursery-card nursery-card-hover p-5 group flex flex-col">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm" style="background:linear-gradient(135deg, #E9C46A, #E9C46Add)"><i data-lucide="shield" class="w-5 h-5"></i></div>
+            <span class="pill pill-amber">MOBILE</span>
+          </div>
+          <h3 class="font-heading text-base font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Centre Admin</h3>
+          <div class="text-[10px] font-mono text-slate-500 mb-2">Layla A · Director</div>
+          <p class="text-xs text-slate-600 leading-relaxed flex-1">Approve posts, broadcast, monitor ratios, critical alerts</p>
+          <div class="flex items-center gap-1 mt-3 pt-3 border-t border-slate-100 text-[11px] font-mono text-amber-700 font-semibold"><span>Open</span><i data-lucide="arrow-right" class="w-3 h-3"></i></div>
+        </a>
+
+        <a href="mobile-superadmin.html" class="nursery-card nursery-card-hover p-5 group flex flex-col">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm" style="background:linear-gradient(135deg, #3D405B, #3D405Bdd)"><i data-lucide="shield-check" class="w-5 h-5"></i></div>
+            <span class="pill pill-amber">MOBILE</span>
+          </div>
+          <h3 class="font-heading text-base font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Super Admin</h3>
+          <div class="text-[10px] font-mono text-slate-500 mb-2">Yousef H · Group IT</div>
+          <p class="text-xs text-slate-600 leading-relaxed flex-1">Multi-centre, audit alerts, system health, incidents</p>
+          <div class="flex items-center gap-1 mt-3 pt-3 border-t border-slate-100 text-[11px] font-mono text-amber-700 font-semibold"><span>Open</span><i data-lucide="arrow-right" class="w-3 h-3"></i></div>
+        </a>
+
+        <a href="mobile-parent-payments.html" class="nursery-card nursery-card-hover p-5 group flex flex-col">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm" style="background:linear-gradient(135deg, #EC4899, #EC4899dd)"><i data-lucide="heart" class="w-5 h-5"></i></div>
+            <span class="pill pill-amber">MOBILE</span>
+          </div>
+          <h3 class="font-heading text-base font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Parent · Pay</h3>
+          <div class="text-[10px] font-mono text-slate-500 mb-2">Sarah A · Aisha's mom</div>
+          <p class="text-xs text-slate-600 leading-relaxed flex-1">One-tap pay, Apple/Google Pay, invoice history, receipts</p>
+          <div class="flex items-center gap-1 mt-3 pt-3 border-t border-slate-100 text-[11px] font-mono text-amber-700 font-semibold"><span>Open</span><i data-lucide="arrow-right" class="w-3 h-3"></i></div>
+        </a>
+
+        <a href="mobile-parent-feed.html" class="nursery-card nursery-card-hover p-5 group flex flex-col">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm" style="background:linear-gradient(135deg, #EC4899, #EC4899dd)"><i data-lucide="image" class="w-5 h-5"></i></div>
+            <span class="pill pill-amber">MOBILE</span>
+          </div>
+          <h3 class="font-heading text-base font-bold text-slate-900 group-hover:text-amber-700 transition mb-1">Parent · Feed</h3>
+          <div class="text-[10px] font-mono text-slate-500 mb-2">Sarah A · Activity feed</div>
+          <p class="text-xs text-slate-600 leading-relaxed flex-1">Real-time photos, daily reports, messaging, smart alerts</p>
+          <div class="flex items-center gap-1 mt-3 pt-3 border-t border-slate-100 text-[11px] font-mono text-amber-700 font-semibold"><span>Open</span><i data-lucide="arrow-right" class="w-3 h-3"></i></div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- Quick tour -->
+    <section class="mt-16 pt-12 border-t border-slate-200">
+      <h2 class="font-heading text-2xl font-bold text-slate-900 mb-2">Quick Tour</h2>
+      <p class="text-sm text-slate-600 mb-8">Start here for the full product story:</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <a href="screen-login.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center font-heading font-bold text-amber-800 flex-shrink-0">1</div><div class="flex-1"><div class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700">Login</div><div class="text-[10px] font-mono text-slate-500">Bilingual sign-in</div></div></a>
+        <a href="screen-dashboard.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center font-heading font-bold text-amber-800 flex-shrink-0">2</div><div class="flex-1"><div class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700">Dashboard</div><div class="text-[10px] font-mono text-slate-500">Admin center</div></div></a>
+        <a href="screen-attendance.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center font-heading font-bold text-amber-800 flex-shrink-0">3</div><div class="flex-1"><div class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700">Attendance</div><div class="text-[10px] font-mono text-slate-500">Barcode check-in</div></div></a>
+        <a href="screen-activity-feed.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center font-heading font-bold text-amber-800 flex-shrink-0">4</div><div class="flex-1"><div class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700">Activities</div><div class="text-[10px] font-mono text-slate-500">8 types · approval</div></div></a>
+        <a href="screen-emergency-report.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center font-heading font-bold text-red-800 flex-shrink-0">5</div><div class="flex-1"><div class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700">Emergency</div><div class="text-[10px] font-mono text-slate-500">Evacuation PDF</div></div></a>
+        <a href="screen-billing.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center font-heading font-bold text-emerald-800 flex-shrink-0">6</div><div class="flex-1"><div class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700">Billing</div><div class="text-[10px] font-mono text-slate-500">Invoices + revenue</div></div></a>
+        <a href="mobile-parent-feed.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-pink-100 flex items-center justify-center font-heading font-bold text-pink-800 flex-shrink-0">7</div><div class="flex-1"><div class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700">Parent Mobile</div><div class="text-[10px] font-mono text-slate-500">Phone mockup</div></div></a>
+        <a href="phase3-payment-flow.html" class="nursery-card nursery-card-hover p-4 group flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center font-heading font-bold text-purple-800 flex-shrink-0">8</div><div class="flex-1"><div class="font-heading text-sm font-bold text-slate-900 group-hover:text-amber-700">Payment</div><div class="text-[10px] font-mono text-slate-500">Phase 3 · UAE gateway</div></div></a>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-200 bg-white mt-16">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8 py-8">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center"><i data-lucide="baby" class="w-4 h-4 text-amber-300"></i></div>
+          <div>
+            <div class="font-heading font-bold text-sm text-slate-800">NMS Bright Futures · All Screens</div>
+            <div class="text-[10px] font-mono text-slate-500">56 unique HTML pages · Built with Nursery CRM UI DNA v3.5</div>
+          </div>
+        </div>
+        <div class="text-[10px] font-mono text-slate-500">Single connected set · All cross-linked · No conflicts</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const PAGES = [
+      { file: 'spec-00-master-brief.html', title: 'Master Brief', category: 'spec', icon: 'sparkles', desc: 'Start · specification document', accent: '#E9C46A' },
+      { file: 'spec-01-product-vision.html', title: 'Product Vision', category: 'spec', icon: 'target', desc: 'Start · specification document', accent: '#E9C46A' },
+      { file: 'spec-02-prd-mvp.html', title: 'PRD: MVP Pilot', category: 'spec', icon: 'rocket', desc: 'Product · specification document', accent: '#0EA5E9' },
+      { file: 'spec-03-prd-phase1.html', title: 'PRD: Phase 1 Full', category: 'spec', icon: 'layers', desc: 'Product · specification document', accent: '#0EA5E9' },
+      { file: 'spec-04-prd-phase2-3.html', title: 'PRD: Phase 2 & 3', category: 'spec', icon: 'git-branch', desc: 'Product · specification document', accent: '#0EA5E9' },
+      { file: 'spec-05-tech-stack.html', title: 'Tech Stack', category: 'spec', icon: 'cpu', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-06-architecture.html', title: 'Architecture', category: 'spec', icon: 'git-fork', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-07-database-schema.html', title: 'Database Schema', category: 'spec', icon: 'database', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-08-api-spec.html', title: 'API Specification', category: 'spec', icon: 'code-2', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-09-auth-security.html', title: 'Auth & Security', category: 'spec', icon: 'shield-check', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-10-multi-tenancy.html', title: 'Multi-Tenancy', category: 'spec', icon: 'building-2', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-11-devops.html', title: 'DevOps & Infrastructure', category: 'spec', icon: 'server', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-12-web-frontend.html', title: 'Web Frontend', category: 'spec', icon: 'monitor', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-13-mobile-app.html', title: 'Mobile App', category: 'spec', icon: 'smartphone', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-14-ux-ui-design.html', title: 'UX/UI Design', category: 'spec', icon: 'palette', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-15-notifications.html', title: 'Notifications', category: 'spec', icon: 'bell', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-16-testing-quality.html', title: 'Testing & Quality', category: 'spec', icon: 'check-circle', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-17-compliance-legal.html', title: 'Compliance & Legal', category: 'spec', icon: 'scale', desc: 'Engineering · specification document', accent: '#16A34A' },
+      { file: 'spec-18-cursor-rules.html', title: 'Cursor Rules', category: 'spec', icon: 'terminal', desc: 'Workflow · specification document', accent: '#8B5CF6' },
+      { file: 'spec-19-roadmap-sprints.html', title: 'Roadmap & Sprints', category: 'spec', icon: 'map', desc: 'Workflow · specification document', accent: '#8B5CF6' },
+      { file: 'spec-20-adrs.html', title: 'Architecture Decisions', category: 'spec', icon: 'git-commit', desc: 'Workflow · specification document', accent: '#8B5CF6' },
+      { file: 'spec-21-delivery-checklist.html', title: 'Delivery Checklist', category: 'spec', icon: 'clipboard-check', desc: 'Workflow · specification document', accent: '#8B5CF6' },
+      { file: 'screen-login.html', title: 'Login', category: 'screen', icon: 'log-in', desc: 'Bilingual sign-in · Staff + Parent', accent: '#E07A5F' },
+      { file: 'screen-dashboard.html', title: 'Dashboard', category: 'screen', icon: 'layout-dashboard', desc: 'Centre Admin command center', accent: '#16A34A' },
+      { file: 'screen-attendance.html', title: 'Attendance', category: 'screen', icon: 'clipboard-check', desc: 'Barcode check-in · Live ratios', accent: '#0EA5E9' },
+      { file: 'screen-student-profile.html', title: 'Student Profile', category: 'screen', icon: 'users', desc: 'Aisha Ali · Toddlers Room B', accent: '#0EA5E9' },
+      { file: 'screen-activity-feed.html', title: 'Activity Feed', category: 'screen', icon: 'image', desc: '8 activity types · Approval workflow', accent: '#0EA5E9' },
+      { file: 'screen-messaging.html', title: 'Messaging', category: 'screen', icon: 'message-square', desc: 'Shared inbox · 5 unread', accent: '#0EA5E9' },
+      { file: 'screen-billing.html', title: 'Billing', category: 'screen', icon: 'credit-card', desc: 'AED 358K billed · 87% collected', accent: '#16A34A' },
+      { file: 'screen-enquiry-pipeline.html', title: 'Enquiry Pipeline', category: 'screen', icon: 'user-plus', desc: '6-stage CRM Kanban', accent: '#16A34A' },
+      { file: 'screen-calendar.html', title: 'Calendar', category: 'screen', icon: 'calendar-days', desc: 'School calendar · May 2026', accent: '#0EA5E9' },
+      { file: 'screen-emergency-report.html', title: 'Emergency Report', category: 'screen', icon: 'shield-alert', desc: 'One-click evacuation PDF', accent: '#0EA5E9' },
+      { file: 'screen-notifications.html', title: 'Notifications', category: 'screen', icon: 'bell', desc: '3-tier system · 12 items', accent: '#0EA5E9' },
+      { file: 'screen-settings-audit.html', title: 'Settings & Audit Log', category: 'screen', icon: 'settings', desc: 'Super Admin · Append-only audit', accent: '#16A34A' },
+      { file: 'screen-staff-list.html', title: 'Staff Directory', category: 'screen', icon: 'users', desc: '24 staff · 8 roles', accent: '#0EA5E9' },
+      { file: 'screen-rooms-programs.html', title: 'Rooms & Programs', category: 'screen', icon: 'door-open', desc: '8 rooms · 6 programs', accent: '#16A34A' },
+      { file: 'screen-tour-management.html', title: 'Tour Management', category: 'screen', icon: 'calendar-clock', desc: '12 upcoming · 65% conversion', accent: '#0EA5E9' },
+      { file: 'screen-forms-builder.html', title: 'Forms Builder', category: 'screen', icon: 'file-text', desc: '5 live forms · 78% completion', accent: '#16A34A' },
+      { file: 'screen-admissions-process.html', title: 'Admissions Process', category: 'screen', icon: 'clipboard-list', desc: '14 active · 6-step checklist', accent: '#16A34A' },
+      { file: 'screen-id-cards.html', title: 'ID Card Generator', category: 'screen', icon: 'credit-card', desc: '10 templates · Bulk export', accent: '#16A34A' },
+      { file: 'screen-certificates.html', title: 'Certificate Generator', category: 'screen', icon: 'award', desc: '10 templates · Custom branding', accent: '#16A34A' },
+      { file: 'screen-reports-analytics.html', title: 'Reports & Analytics', category: 'screen', icon: 'bar-chart-3', desc: '10 reports · 47 generated', accent: '#16A34A' },
+      { file: 'screen-newsletter-builder.html', title: 'Newsletter Builder', category: 'screen', icon: 'newspaper', desc: 'AI-assisted · Bilingual', accent: '#0EA5E9' },
+      { file: 'screen-resource-centre.html', title: 'Resource Centre', category: 'screen', icon: 'folder-open', desc: '4 folders · 47 documents', accent: '#0EA5E9' },
+      { file: 'screen-leave-management.html', title: 'Leave Management', category: 'screen', icon: 'calendar-off', desc: '5 pending · 12 approved', accent: '#0EA5E9' },
+      { file: 'screen-user-roles.html', title: 'User Roles & Permissions', category: 'screen', icon: 'shield', desc: '8 system + 3 custom roles', accent: '#16A34A' },
+      { file: 'screen-notification-preferences.html', title: 'Notification Preferences', category: 'screen', icon: 'bell', desc: '3-tier · Per-category', accent: '#16A34A' },
+      { file: 'phase3-multi-centre.html', title: 'Multi-Centre Dashboard', category: 'phase3', icon: 'building-2', desc: 'Phase 3 · 5 centres consolidated', accent: '#8B5CF6' },
+      { file: 'phase3-payment-flow.html', title: 'Online Payment Flow', category: 'phase3', icon: 'credit-card', desc: 'Phase 3 · UAE gateway · Apple/Google Pay', accent: '#8B5CF6' },
+      { file: 'mobile-teacher.html', title: 'Teacher', category: 'mobile', icon: 'book-open', desc: 'Scan attendance, post photos, log food/nap/mood, parent chat', accent: '#E07A5F' },
+      { file: 'mobile-receptionist.html', title: 'Receptionist', category: 'mobile', icon: 'user-check', desc: 'New enquiries, tour booking, visitor log, follow-ups', accent: '#0EA5E9' },
+      { file: 'mobile-accounts.html', title: 'Accounts', category: 'mobile', icon: 'credit-card', desc: 'Record payments, overdue alerts, revenue charts', accent: '#16A34A' },
+      { file: 'mobile-admin.html', title: 'Centre Admin', category: 'mobile', icon: 'shield', desc: 'Approve posts, broadcast, monitor ratios, critical alerts', accent: '#E9C46A' },
+      { file: 'mobile-superadmin.html', title: 'Super Admin', category: 'mobile', icon: 'shield-check', desc: 'Multi-centre, audit alerts, system health, incidents', accent: '#3D405B' },
+      { file: 'mobile-parent-payments.html', title: 'Parent · Pay', category: 'mobile', icon: 'heart', desc: 'One-tap pay, Apple/Google Pay, invoice history, receipts', accent: '#EC4899' },
+      { file: 'mobile-parent-feed.html', title: 'Parent · Feed', category: 'mobile', icon: 'image', desc: 'Real-time photos, daily reports, messaging, smart alerts', accent: '#EC4899' },
+    ];
+
+    function renderPages(filter = 'all') {
+      const grid = document.getElementById('pagesGrid');
+      const filtered = filter === 'all' ? PAGES : PAGES.filter(p => p.category === filter);
+      grid.innerHTML = filtered.map(p => {
+        const pillClass = { spec: 'pill-info', screen: 'pill-done', mobile: 'pill-amber', phase3: 'pill-purple' }[p.category];
+        const pillLabel = { spec: 'Spec', screen: 'Screen', mobile: 'Mobile', phase3: 'Phase 3' }[p.category];
+        return `
+          <a href="${p.file}" class="nursery-card nursery-card-hover p-5 group flex flex-col">
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm" style="background:linear-gradient(135deg, ${p.accent}, ${p.accent}dd)">
+                <i data-lucide="${p.icon}" class="w-5 h-5"></i>
+              </div>
+              <span class="pill ${pillClass}">${pillLabel}</span>
+            </div>
+            <h3 class="font-heading text-base font-bold text-slate-900 group-hover:text-amber-700 transition mb-1.5">${p.title}</h3>
+            <p class="text-xs text-slate-600 leading-relaxed flex-1">${p.desc}</p>
+            <div class="flex items-center gap-1 mt-4 pt-3 border-t border-slate-100 text-[11px] font-mono text-amber-700 font-semibold">
+              <span>Open</span><i data-lucide="arrow-right" class="w-3 h-3"></i>
+            </div>
+          </a>
+        `;
+      }).join('');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function filterPages(category, event) {
+      renderPages(category);
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-slate-900', 'text-white');
+        btn.classList.add('bg-white', 'border', 'border-slate-200');
+      });
+      event.target.classList.add('active', 'bg-slate-900', 'text-white');
+      event.target.classList.remove('bg-white', 'border', 'border-slate-200');
+    }
+
+    window.onload = function() { if (window.lucide) lucide.createIcons(); renderPages(); };
+  </script>
+</body>
+</html>

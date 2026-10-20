@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auth & Security — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class="active"><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-identity-architecture" class="toc-link" data-target="1-identity-architecture">1. Identity Architecture</a><a href="#11-identity-provider-keycloak-24" class="toc-link toc-h3" data-target="11-identity-provider-keycloak-24">1.1 Identity Provider: Keycloak 24</a><a href="#12-realm-strategy" class="toc-link toc-h3" data-target="12-realm-strategy">1.2 Realm Strategy</a><a href="#13-client-configuration" class="toc-link toc-h3" data-target="13-client-configuration">1.3 Client Configuration</a><a href="#14-token-configuration" class="toc-link toc-h3" data-target="14-token-configuration">1.4 Token Configuration</a><a href="#15-jwt-claims" class="toc-link toc-h3" data-target="15-jwt-claims">1.5 JWT Claims</a><a href="#2-roles-permissions" class="toc-link" data-target="2-roles-permissions">2. Roles &amp; Permissions</a><a href="#21-standard-roles-8-system-roles" class="toc-link toc-h3" data-target="21-standard-roles-8-system-roles">2.1 Standard Roles (8 system roles)</a><a href="#22-rbac-permission-matrix" class="toc-link toc-h3" data-target="22-rbac-permission-matrix">2.2 RBAC Permission Matrix</a><a href="#23-permission-enforcement-layers" class="toc-link toc-h3" data-target="23-permission-enforcement-layers">2.3 Permission Enforcement Layers</a><a href="#24-parent-child-ownership-enforcement" class="toc-link toc-h3" data-target="24-parent-child-ownership-enforcement">2.4 Parent-Child Ownership Enforcement</a><a href="#3-authentication-flows" class="toc-link" data-target="3-authentication-flows">3. Authentication Flows</a><a href="#31-staff-login-flow-web" class="toc-link toc-h3" data-target="31-staff-login-flow-web">3.1 Staff Login Flow (Web)</a><a href="#32-parent-login-flow-web" class="toc-link toc-h3" data-target="32-parent-login-flow-web">3.2 Parent Login Flow (Web)</a><a href="#33-mobile-login-flow-react-native-expo" class="toc-link toc-h3" data-target="33-mobile-login-flow-react-native-expo">3.3 Mobile Login Flow (React Native + Expo)</a><a href="#34-refresh-token-flow" class="toc-link toc-h3" data-target="34-refresh-token-flow">3.4 Refresh Token Flow</a><a href="#35-logout-flow" class="toc-link toc-h3" data-target="35-logout-flow">3.5 Logout Flow</a><a href="#36-password-reset-flow" class="toc-link toc-h3" data-target="36-password-reset-flow">3.6 Password Reset Flow</a><a href="#37-parent-invitation-flow" class="toc-link toc-h3" data-target="37-parent-invitation-flow">3.7 Parent Invitation Flow</a><a href="#38-mfa" class="toc-link toc-h3" data-target="38-mfa">3.8 MFA</a><a href="#4-data-security" class="toc-link" data-target="4-data-security">4. Data Security</a><a href="#41-encryption-at-rest" class="toc-link toc-h3" data-target="41-encryption-at-rest">4.1 Encryption at Rest</a><a href="#42-encryption-in-transit" class="toc-link toc-h3" data-target="42-encryption-in-transit">4.2 Encryption in Transit</a><a href="#43-column-level-encryption" class="toc-link toc-h3" data-target="43-column-level-encryption">4.3 Column-Level Encryption</a><a href="#44-media-security" class="toc-link toc-h3" data-target="44-media-security">4.4 Media Security</a><a href="#45-content-moderation-pipeline" class="toc-link toc-h3" data-target="45-content-moderation-pipeline">4.5 Content Moderation Pipeline</a><a href="#5-rate-limiting-brute-force-protection" class="toc-link" data-target="5-rate-limiting-brute-force-protection">5. Rate Limiting &amp; Brute Force Protection</a><a href="#51-api-rate-limiting" class="toc-link toc-h3" data-target="51-api-rate-limiting">5.1 API Rate Limiting</a><a href="#52-account-lockout" class="toc-link toc-h3" data-target="52-account-lockout">5.2 Account Lockout</a><a href="#53-ip-blocking" class="toc-link toc-h3" data-target="53-ip-blocking">5.3 IP Blocking</a><a href="#54-bot-protection" class="toc-link toc-h3" data-target="54-bot-protection">5.4 Bot Protection</a><a href="#6-input-validation" class="toc-link" data-target="6-input-validation">6. Input Validation</a><a href="#61-validation-layers" class="toc-link toc-h3" data-target="61-validation-layers">6.1 Validation Layers</a><a href="#62-sql-injection-prevention" class="toc-link toc-h3" data-target="62-sql-injection-prevention">6.2 SQL Injection Prevention</a><a href="#63-xss-prevention" class="toc-link toc-h3" data-target="63-xss-prevention">6.3 XSS Prevention</a><a href="#64-csrf-protection" class="toc-link toc-h3" data-target="64-csrf-protection">6.4 CSRF Protection</a><a href="#65-file-upload-validation" class="toc-link toc-h3" data-target="65-file-upload-validation">6.5 File Upload Validation</a><a href="#7-audit-trail" class="toc-link" data-target="7-audit-trail">7. Audit Trail</a><a href="#71-whats-logged" class="toc-link toc-h3" data-target="71-whats-logged">7.1 What&#x27;s Logged</a><a href="#72-audit-log-record" class="toc-link toc-h3" data-target="72-audit-log-record">7.2 Audit Log Record</a><a href="#73-append-only-enforcement" class="toc-link toc-h3" data-target="73-append-only-enforcement">7.3 Append-Only Enforcement</a><a href="#74-audit-log-viewer-super-admin" class="toc-link toc-h3" data-target="74-audit-log-viewer-super-admin">7.4 Audit Log Viewer (Super Admin)</a><a href="#75-retention" class="toc-link toc-h3" data-target="75-retention">7.5 Retention</a><a href="#8-session-management" class="toc-link" data-target="8-session-management">8. Session Management</a><a href="#81-session-limits" class="toc-link toc-h3" data-target="81-session-limits">8.1 Session Limits</a><a href="#82-idle-timeout" class="toc-link toc-h3" data-target="82-idle-timeout">8.2 Idle Timeout</a><a href="#83-forced-logout" class="toc-link toc-h3" data-target="83-forced-logout">8.3 Forced Logout</a><a href="#9-secrets-management" class="toc-link" data-target="9-secrets-management">9. Secrets Management</a><a href="#91-secrets-inventory" class="toc-link toc-h3" data-target="91-secrets-inventory">9.1 Secrets Inventory</a><a href="#92-secret-access-pattern" class="toc-link toc-h3" data-target="92-secret-access-pattern">9.2 Secret Access Pattern</a><a href="#93-forbidden-locations" class="toc-link toc-h3" data-target="93-forbidden-locations">9.3 Forbidden Locations</a><a href="#10-security-hardening-checklist" class="toc-link" data-target="10-security-hardening-checklist">10. Security Hardening Checklist</a><a href="#101-backend" class="toc-link toc-h3" data-target="101-backend">10.1 Backend</a><a href="#102-frontend" class="toc-link toc-h3" data-target="102-frontend">10.2 Frontend</a><a href="#103-mobile" class="toc-link toc-h3" data-target="103-mobile">10.3 Mobile</a><a href="#104-infrastructure" class="toc-link toc-h3" data-target="104-infrastructure">10.4 Infrastructure</a><a href="#11-compliance-alignment" class="toc-link" data-target="11-compliance-alignment">11. Compliance Alignment</a><a href="#111-uae-pdpl-federal-decree-law-no-45-of-2021" class="toc-link toc-h3" data-target="111-uae-pdpl-federal-decree-law-no-45-of-2021">11.1 UAE PDPL (Federal Decree-Law No. 45 of 2021)</a><a href="#112-khda-adek-alignment" class="toc-link toc-h3" data-target="112-khda-adek-alignment">11.2 KHDA / ADEK Alignment</a><a href="#12-penetration-testing" class="toc-link" data-target="12-penetration-testing">12. Penetration Testing</a><a href="#121-schedule" class="toc-link toc-h3" data-target="121-schedule">12.1 Schedule</a><a href="#122-scope" class="toc-link toc-h3" data-target="122-scope">12.2 Scope</a><a href="#123-remediation" class="toc-link toc-h3" data-target="123-remediation">12.3 Remediation</a><a href="#13-incident-response" class="toc-link" data-target="13-incident-response">13. Incident Response</a><a href="#131-incident-severity" class="toc-link toc-h3" data-target="131-incident-severity">13.1 Incident Severity</a><a href="#132-incident-response-runbook" class="toc-link toc-h3" data-target="132-incident-response-runbook">13.2 Incident Response Runbook</a><a href="#133-breach-notification" class="toc-link toc-h3" data-target="133-breach-notification">13.3 Breach Notification</a><a href="#134-post-mortem" class="toc-link toc-h3" data-target="134-post-mortem">13.4 Post-Mortem</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-amber-600"></i><span>Auth & Security</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-09-auth-security.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 09</span>
+          <span class="text-[10px] font-mono text-slate-400">~5,399 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Auth & Security</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-08-api-spec.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">API Specification</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-10-multi-tenancy.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Multi-Tenancy</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="09-authentication-security">09 — Authentication &amp; Security</h1>
+<blockquote>
+<p>Keycloak realms, RBAC matrix, parent-child ownership enforcement, encryption, audit, and security best practices.</p>
+</blockquote>
+<hr />
+<h2 id="1-identity-architecture">1. Identity Architecture</h2>
+<h3 id="11-identity-provider-keycloak-24">1.1 Identity Provider: Keycloak 24</h3>
+<p>NMS uses <strong>Keycloak</strong> as its identity provider (IdP). Keycloak handles:
+- User registration (admin-provisioned for staff/parents; no self-service for parents in MVP).
+- Authentication (username/password, MFA, social login if needed).
+- Authorization (RBAC via realm roles → JWT claims).
+- Session management (refresh token rotation, revocation).
+- User federation (LDAP/AD for on-prem customers with existing IdP).
+- Multi-realm support (one realm per centre in Phase 1, multi-realm per MCG in Phase 3).</p>
+<h3 id="12-realm-strategy">1.2 Realm Strategy</h3>
+<p><strong>Phase 1 (single-centre deployment):</strong>
+- One realm per deployment.
+- Realm name = tenant slug (e.g., <code>bright-futures-nursery</code>).
+- All users (staff + parents) live in the same realm.</p>
+<p><strong>Phase 3 (multi-centre SaaS with MCG):</strong>
+- One realm per Multi-Centre Group.
+- Users can be assigned roles in multiple centres within the MCG.
+- Cross-realm SSO: Group Owner logs in once, accesses all centres.</p>
+<p><strong>On-prem:</strong>
+- Customer-managed Keycloak realm.
+- Optional LDAP/AD federation (customer's existing IdP).
+- Customer controls user lifecycle.</p>
+<h3 id="13-client-configuration">1.3 Client Configuration</h3>
+<p>Two clients per realm:</p>
+<table>
+<thead>
+<tr>
+<th>Client</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nms-web</code></td>
+<td>Public (OIDC Authorization Code + PKCE)</td>
+<td>Web frontend (React)</td>
+</tr>
+<tr>
+<td><code>nms-mobile</code></td>
+<td>Public (OIDC Authorization Code + PKCE)</td>
+<td>Mobile app (React Native)</td>
+</tr>
+</tbody>
+</table>
+<p>For Phase 3 Open API:
+| Client | Type | Purpose |
+|---|---|---|
+| <code>nms-api</code> | Confidential (Client Credentials) | Third-party API access |</p>
+<h3 id="14-token-configuration">1.4 Token Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Token type</th>
+<th>Lifetime</th>
+<th>Storage</th>
+<th>Rotation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access token (JWT)</td>
+<td>15 minutes</td>
+<td>In-memory (web) / Secure Keychain (iOS) / EncryptedSharedPreferences (Android)</td>
+<td>Refreshed via refresh token</td>
+</tr>
+<tr>
+<td>Refresh token</td>
+<td>7 days</td>
+<td>HttpOnly + Secure + SameSite=Strict cookie (web) / Secure Keychain (mobile)</td>
+<td>Rotated on each use (detects theft)</td>
+</tr>
+<tr>
+<td>ID token</td>
+<td>15 minutes</td>
+<td>Same as access token</td>
+<td>Same as access token</td>
+</tr>
+</tbody>
+</table>
+<h3 id="15-jwt-claims">1.5 JWT Claims</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;sub&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;uuid-of-user&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;email&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;layla@brightfutures.ae&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;email_verified&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;name&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Layla Ahmed&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;given_name&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Layla&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;family_name&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Ahmed&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;preferred_language&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;ar&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;tenant_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;uuid-of-tenant&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;realm_access&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;roles&quot;</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&quot;centre_admin&quot;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;resource_access&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;nms-web&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;roles&quot;</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&quot;centre_admin&quot;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;tenant_roles&quot;</span><span style="color: #F8F8F2">: [</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;centre_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;uuid&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;role&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;centre_admin&quot;</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">  ],</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;scope&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;openid profile email&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;iss&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;https://keycloak.nms.ae/realms/bright-futures-nursery&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;aud&quot;</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&quot;nms-web&quot;</span><span style="color: #F8F8F2">],</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;exp&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1716339000</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;iat&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1716338100</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;jti&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;unique-token-id&quot;</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p><strong>Custom claims added by Keycloak mapper:</strong>
+- <code>tenant_id</code> — UUID of the tenant (centre).
+- <code>preferred_language</code> — User's UI language preference.
+- <code>tenant_roles</code> — Roles per centre (for multi-centre users in Phase 3).</p>
+<hr />
+<h2 id="2-roles-permissions">2. Roles &amp; Permissions</h2>
+<h3 id="21-standard-roles-8-system-roles">2.1 Standard Roles (8 system roles)</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Keycloak role name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Super Admin</strong></td>
+<td><code>super_admin</code></td>
+<td>Full system owner. All permissions. MFA mandatory.</td>
+</tr>
+<tr>
+<td><strong>Centre Admin</strong></td>
+<td><code>centre_admin</code></td>
+<td>Day-to-day admin. Attendance, enquiries, billing, communication, forms.</td>
+</tr>
+<tr>
+<td><strong>Teacher / Key Person</strong></td>
+<td><code>teacher</code></td>
+<td>Classroom staff. Attendance, activities, learning journals, room-scoped view.</td>
+</tr>
+<tr>
+<td><strong>Parent / Guardian</strong></td>
+<td><code>parent</code></td>
+<td>Read daily reports, send messages, view invoices, photos. Limited to own children.</td>
+</tr>
+<tr>
+<td><strong>Receptionist</strong></td>
+<td><code>receptionist</code></td>
+<td>Front desk. Enquiries, calendar, visitor management.</td>
+</tr>
+<tr>
+<td><strong>Accounts</strong></td>
+<td><code>accounts</code></td>
+<td>Billing, payment settings, financial system.</td>
+</tr>
+<tr>
+<td><strong>IT</strong></td>
+<td><code>it</code></td>
+<td>All modules, settings, user management, billing (system administration).</td>
+</tr>
+<tr>
+<td><strong>Marketing</strong></td>
+<td><code>marketing</code></td>
+<td>Enquiries and communication only.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Per Loui Okasha comment on source SRS, also include "Procurement" role for Phase 2+ (Inventory &amp; Asset Management module). Not in Phase 1.</p>
+</blockquote>
+<h3 id="22-rbac-permission-matrix">2.2 RBAC Permission Matrix</h3>
+<p>Permission format: <code>&lt;module&gt;.&lt;action&gt;</code> (e.g., <code>students.read</code>, <code>students.write</code>, <code>students.delete</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Permission</th>
+<th>Super Admin</th>
+<th>Centre Admin</th>
+<th>Teacher</th>
+<th>Parent</th>
+<th>Receptionist</th>
+<th>Accounts</th>
+<th>IT</th>
+<th>Marketing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dashboard.view</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (room-scoped)</td>
+<td>✅ (child-scoped)</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>students.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (room-scoped)</td>
+<td>✅ (own children)</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>students.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>students.delete</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>staff.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (own room)</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>staff.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>attendance.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (room-scoped)</td>
+<td>✅ (own child)</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>attendance.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (room-scoped)</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>attendance.override</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>activities.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (room-scoped)</td>
+<td>✅ (own child)</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>activities.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (own + room)</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>activities.approve</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>messaging.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (room-scoped)</td>
+<td>✅ (own threads)</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>messaging.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (own threads)</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>messaging.broadcast</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>billing.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅ (own invoices)</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>billing.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>invoices.generate</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>payments.record</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>enquiries.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>enquiries.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>tours.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>tours.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>calendar.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (relevant)</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>calendar.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>forms.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (parent forms)</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>forms.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>tools.use</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>reports.view</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (room-scoped)</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>reports.generate</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>settings.read</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>settings.write</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>audit_log.view</code></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>user_management.manage</code></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>notifications.preferences</code></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-permission-enforcement-layers">2.3 Permission Enforcement Layers</h3>
+<ol>
+<li><strong>Keycloak (JWT claims)</strong> — issues JWT with <code>realm_access.roles</code>. Cannot be tampered (signed by Keycloak).</li>
+<li><strong>.NET API middleware</strong> — <code>[Authorize]</code> attribute requires valid JWT. <code>[Authorize(Policy = "students.write")]</code> requires permission claim.</li>
+<li><strong>.NET API handler</strong> — explicit checks: <code>if (!await _authorizationService.AuthorizeAsync(user, student, "student.ownership")) return NotFound();</code></li>
+<li><strong>Database (RLS)</strong> — defense-in-depth. Even if app layer bug, DB rejects cross-tenant queries.</li>
+<li><strong>Frontend</strong> — UI elements conditionally rendered based on permissions from <code>/auth/me</code>. <strong>Never security-critical</strong> — backend always enforces.</li>
+</ol>
+<h3 id="24-parent-child-ownership-enforcement">2.4 Parent-Child Ownership Enforcement</h3>
+<p>This is the <strong>most critical</strong> security rule in the system. Parents MUST NEVER see another parent's child data.</p>
+<p><strong>Implementation:</strong></p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// In StudentQueryHandler</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">StudentDto</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> Handle(GetStudentByIdQuery request, CancellationToken ct)</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> student </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _dbContext.Students</span>
+<span style="color: #F8F8F2">        .FirstOrDefaultAsync(s </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> s.Id </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> request.Id, ct);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (student </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">null</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> Result</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">StudentDto</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">.NotFound();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// If user is a parent, verify ownership</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (_currentUser.IsInRole(</span><span style="color: #E6DB74">&quot;parent&quot;</span><span style="color: #F8F8F2">))</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> isParentOfStudent </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _dbContext.StudentGuardians</span>
+<span style="color: #F8F8F2">            .AnyAsync(sg </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> sg.StudentId </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> request.Id </span>
+<span style="color: #F8F8F2">                         </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> sg.Guardian.AppUserId </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> _currentUser.UserId, ct);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (</span><span style="color: #FF4689">!</span><span style="color: #F8F8F2">isParentOfStudent)</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> Result</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">StudentDto</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">.NotFound();  </span><span style="color: #959077">// 404, NOT 403 — prevents ID enumeration</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> Result</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">StudentDto</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">.Success(_mapper.Map</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">StudentDto</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">(student));</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p><strong>Applied to every endpoint that returns child-specific data:</strong>
+- <code>/api/v1/students/{id}</code> — ownership check
+- <code>/api/v1/students/{id}/activities</code> — ownership check
+- <code>/api/v1/students/{id}/attendance</code> — ownership check
+- <code>/api/v1/activities?studentId={id}</code> — filter to only owned children
+- <code>/api/v1/threads</code> — only threads where parent is participant
+- <code>/api/v1/invoices?studentId={id}</code> — only invoices for owned children
+- <code>/api/v1/notifications</code> — only notifications addressed to current user</p>
+<p><strong>Testing:</strong>
+- Unit tests: every endpoint tested with parent owning student A, attempting to access student B → 404.
+- Integration tests: parent JWT from tenant X, attempt to access tenant Y → 404.
+- Pen test: attempt ID enumeration + JWT tampering before each phase go-live.</p>
+<hr />
+<h2 id="3-authentication-flows">3. Authentication Flows</h2>
+<h3 id="31-staff-login-flow-web">3.1 Staff Login Flow (Web)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. User navigates to https://app.nms.ae
+2. App checks for valid JWT in memory
+   - If valid → redirect to dashboard
+   - If expired → attempt refresh via /api/v1/auth/refresh
+   - If refresh fails → redirect to /login
+3. User enters email + password on /login
+4. App calls POST /api/v1/auth/login with credentials
+5. Backend (Keycloak JS adapter):
+   a. Authenticates against Keycloak
+   b. Returns access_token + refresh_token (in HttpOnly cookie)
+6. App stores access_token in memory, refresh_token in HttpOnly cookie (set by backend)
+7. App fetches /api/v1/auth/me → gets user info + permissions
+8. App redirects to role-specific landing page
+</code></pre></div>
+
+<h3 id="32-parent-login-flow-web">3.2 Parent Login Flow (Web)</h3>
+<p>Same as staff, EXCEPT:
+- Default landing page: child activity feed (not dashboard).
+- Only sees parent-scoped data.
+- Optionally: magic link login (no password) — email a one-time login link valid for 15 minutes.</p>
+<h3 id="33-mobile-login-flow-react-native-expo">3.3 Mobile Login Flow (React Native + Expo)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. App checks Keychain/EncryptedSharedPreferences for stored refresh_token
+   - If valid → use to get new access_token → skip to step 5
+2. User enters email + password on login screen
+3. App calls Keycloak token endpoint via expo-auth-session
+   - Uses Authorization Code + PKCE flow
+   - Keycloak returns authorization code
+   - App exchanges code for access_token + refresh_token
+4. App stores:
+   - access_token in memory
+   - refresh_token in Secure Keychain (iOS) / EncryptedSharedPreferences (Android)
+5. App calls /api/v1/auth/me → gets user info + permissions + tenant_id
+6. App navigates to role-specific landing page
+7. App connects to SignalR hub with JWT
+</code></pre></div>
+
+<h3 id="34-refresh-token-flow">3.4 Refresh Token Flow</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Access token expires (15 min)
+2. App calls POST /api/v1/auth/refresh with HttpOnly cookie containing refresh_token
+3. Backend:
+   a. Validates refresh_token signature + expiry
+   b. Checks if refresh_token is in revocation list (logout, password change, suspension)
+   c. Issues new access_token + new refresh_token (rotation)
+   d. Adds old refresh_token to revocation list (detected theft if reused)
+4. App stores new tokens
+</code></pre></div>
+
+<p><strong>Replay detection</strong>: If backend sees a refresh_token that's already been used (in revocation list), it immediately revokes ALL of that user's refresh tokens (assumes theft) and forces re-login.</p>
+<h3 id="35-logout-flow">3.5 Logout Flow</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. App calls POST /api/v1/auth/logout
+2. Backend:
+   a. Adds current refresh_token to revocation list
+   b. Calls Keycloak logout endpoint to revoke Keycloak session
+3. App clears local tokens (memory + Keychain)
+4. App redirects to /login
+</code></pre></div>
+
+<h3 id="36-password-reset-flow">3.6 Password Reset Flow</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. User clicks &quot;Forgot password&quot; on /login
+2. User enters email
+3. App calls POST /api/v1/auth/forgot-password
+4. Backend:
+   a. Looks up user by email (within tenant context)
+   b. Generates password reset token (UUID, 1-hour expiry)
+   c. Stores token hash in Keycloak (custom credential)
+   d. Sends email with link: https://app.nms.ae/reset-password?token=...
+5. User clicks link
+6. App calls POST /api/v1/auth/reset-password with token + new password
+7. Backend:
+   a. Validates token
+   b. Updates password in Keycloak
+   c. Revokes all user&#39;s refresh tokens (force re-login)
+   d. Sends confirmation email
+</code></pre></div>
+
+<h3 id="37-parent-invitation-flow">3.7 Parent Invitation Flow</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Centre Admin creates student with primary guardian email
+2. Backend:
+   a. Creates guardian record (app_user_id = NULL, status = &#39;invited&#39;)
+   b. Generates invitation token (UUID, 7-day expiry)
+   c. Sends email: &quot;You&#39;ve been invited to view &lt;child&gt;&#39;s activities at &lt;nursery&gt;&quot;
+3. Parent clicks link: https://app.nms.ae/accept-invitation?token=...
+4. App shows invitation acceptance form (set password, accept terms)
+5. App calls POST /api/v1/auth/accept-invitation with token + new password
+6. Backend:
+   a. Validates token
+   b. Creates app_user in Keycloak
+   c. Links app_user to guardian record
+   d. Sends welcome email
+7. Parent logs in → sees child&#39;s activity feed
+</code></pre></div>
+
+<h3 id="38-mfa">3.8 MFA</h3>
+<ul>
+<li><strong>TOTP</strong> (Time-based One-Time Password) via Keycloak built-in.</li>
+<li><strong>Mandatory for</strong>: Super Admin, IT roles.</li>
+<li><strong>Optional for</strong>: All other staff roles.</li>
+<li><strong>Not applicable for</strong>: Parents (in Phase 1; consider SMS OTP for Phase 3 if security review requires).</li>
+</ul>
+<p>Setup flow:
+1. User navigates to Settings → Security → Enable MFA.
+2. Backend generates TOTP secret + QR code (via Keycloak API).
+3. User scans QR with authenticator app (Google Authenticator, Authy, etc.).
+4. User enters 6-digit code to verify setup.
+5. Backend stores backup codes (10 single-use codes) — user must save.</p>
+<p>Login flow with MFA:
+1. User enters email + password.
+2. Backend validates credentials.
+3. If MFA enabled, backend returns 200 with <code>mfa_required: true</code> (no tokens).
+4. App shows MFA code input.
+5. App calls POST /api/v1/auth/mfa-verify with TOTP code.
+6. Backend validates → returns access + refresh tokens.</p>
+<hr />
+<h2 id="4-data-security">4. Data Security</h2>
+<h3 id="41-encryption-at-rest">4.1 Encryption at Rest</h3>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Encryption method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostgreSQL (database)</td>
+<td>AWS RDS encryption at rest (AWS-managed KMS key)</td>
+</tr>
+<tr>
+<td>PostgreSQL (on-prem)</td>
+<td>LUKS disk encryption (customer-managed)</td>
+</tr>
+<tr>
+<td>S3 / MinIO (object storage)</td>
+<td>Server-side encryption (S3: SSE-S3 or SSE-KMS; MinIO: SSE-S3)</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>Encrypted at rest (AWS ElastiCache at-rest encryption)</td>
+</tr>
+<tr>
+<td>RabbitMQ</td>
+<td>Encrypted at rest (EBS volume encryption)</td>
+</tr>
+<tr>
+<td>Keycloak DB</td>
+<td>Same as PostgreSQL</td>
+</tr>
+<tr>
+<td>Backups</td>
+<td>Encrypted (AWS KMS or customer-managed)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-encryption-in-transit">4.2 Encryption in Transit</h3>
+<table>
+<thead>
+<tr>
+<th>Connection</th>
+<th>Encryption</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client ↔ Load Balancer</td>
+<td>TLS 1.2+ (TLS 1.3 preferred)</td>
+</tr>
+<tr>
+<td>Load Balancer ↔ Backend pods</td>
+<td>mTLS (via Istio service mesh in Phase 2+) or plain HTTP in same VPC (Phase 1)</td>
+</tr>
+<tr>
+<td>Backend pods ↔ PostgreSQL</td>
+<td>TLS 1.2+ (require sslmode=verify-full)</td>
+</tr>
+<tr>
+<td>Backend pods ↔ Redis</td>
+<td>TLS 1.2+ (rediss:// connection string)</td>
+</tr>
+<tr>
+<td>Backend pods ↔ RabbitMQ</td>
+<td>TLS 1.2+ (amqps://)</td>
+</tr>
+<tr>
+<td>Backend pods ↔ S3</td>
+<td>TLS 1.2+ (HTTPS)</td>
+</tr>
+<tr>
+<td>Backend pods ↔ Keycloak</td>
+<td>TLS 1.2+ (HTTPS)</td>
+</tr>
+<tr>
+<td>Backend pods ↔ External services (FCM, SES, etc.)</td>
+<td>TLS 1.2+ (HTTPS)</td>
+</tr>
+<tr>
+<td>Keycloak ↔ User browser</td>
+<td>TLS 1.2+ (HTTPS)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>TLS configuration</strong>:
+- Cipher suites: Mozilla intermediate compatibility list.
+- HSTS: <code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code>.
+- Certificate: Let's Encrypt (SaaS) or customer-supplied cert (on-prem).
+- Certificate rotation: automated via cert-manager (K8s).</p>
+<h3 id="43-column-level-encryption">4.3 Column-Level Encryption</h3>
+<p>Sensitive fields encrypted at column level using PostgreSQL <code>pgcrypto</code> extension (additional layer beyond at-rest encryption):</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> EXTENSION </span><span style="color: #66D9EF">IF</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">EXISTS</span><span style="color: #F8F8F2"> pgcrypto;</span>
+
+<span style="color: #959077">-- Encrypt on write</span>
+<span style="color: #66D9EF">INSERT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">INTO</span><span style="color: #F8F8F2"> student (</span>
+<span style="color: #F8F8F2">  id, tenant_id, first_name, ...,</span>
+<span style="color: #F8F8F2">  medical_notes,  </span><span style="color: #959077">-- This will be encrypted</span>
+<span style="color: #F8F8F2">  allergy_info,</span>
+<span style="color: #F8F8F2">  custody_notes,</span>
+<span style="color: #F8F8F2">  safeguarding_flags,</span>
+<span style="color: #F8F8F2">  passport_number,</span>
+<span style="color: #F8F8F2">  emirates_id</span>
+<span style="color: #F8F8F2">) </span><span style="color: #66D9EF">VALUES</span><span style="color: #F8F8F2"> (</span>
+<span style="color: #F8F8F2">  </span><span style="color: #ED007E; background-color: #1E0010">$</span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">, </span><span style="color: #ED007E; background-color: #1E0010">$</span><span style="color: #AE81FF">2</span><span style="color: #F8F8F2">, </span><span style="color: #ED007E; background-color: #1E0010">$</span><span style="color: #AE81FF">3</span><span style="color: #F8F8F2">, ...,</span>
+<span style="color: #F8F8F2">  pgp_sym_encrypt(</span><span style="color: #ED007E; background-color: #1E0010">$</span><span style="color: #F8F8F2">medical_notes, current_setting(</span><span style="color: #E6DB74">&#39;app.encryption_key&#39;</span><span style="color: #F8F8F2">)),</span>
+<span style="color: #F8F8F2">  pgp_sym_encrypt(</span><span style="color: #ED007E; background-color: #1E0010">$</span><span style="color: #F8F8F2">allergy_info, current_setting(</span><span style="color: #E6DB74">&#39;app.encryption_key&#39;</span><span style="color: #F8F8F2">)),</span>
+<span style="color: #F8F8F2">  ...</span>
+<span style="color: #F8F8F2">);</span>
+
+<span style="color: #959077">-- Decrypt on read</span>
+<span style="color: #66D9EF">SELECT</span><span style="color: #F8F8F2"> </span>
+<span style="color: #F8F8F2">  ...,</span>
+<span style="color: #F8F8F2">  pgp_sym_decrypt(medical_notes, current_setting(</span><span style="color: #E6DB74">&#39;app.encryption_key&#39;</span><span style="color: #F8F8F2">)) </span><span style="color: #66D9EF">AS</span><span style="color: #F8F8F2"> medical_notes,</span>
+<span style="color: #F8F8F2">  pgp_sym_decrypt(allergy_info, current_setting(</span><span style="color: #E6DB74">&#39;app.encryption_key&#39;</span><span style="color: #F8F8F2">)) </span><span style="color: #66D9EF">AS</span><span style="color: #F8F8F2"> allergy_info,</span>
+<span style="color: #F8F8F2">  ...</span>
+<span style="color: #66D9EF">FROM</span><span style="color: #F8F8F2"> student </span><span style="color: #66D9EF">WHERE</span><span style="color: #F8F8F2"> id </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">$</span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">;</span>
+</code></pre></div>
+
+<p><strong>Encrypted fields:</strong>
+- <code>student.medical_notes</code>
+- <code>student.allergy_info</code>
+- <code>student.dietary_requirements</code>
+- <code>student.custody_notes</code>
+- <code>student.safeguarding_flags</code>
+- <code>student.passport_number</code>
+- <code>student.emirates_id</code>
+- <code>staff.salary_amount_fils</code>
+- <code>staff.emirates_id</code>
+- <code>staff.passport_number</code>
+- <code>staff.visa_info</code></p>
+<p><strong>Key management:</strong>
+- Encryption key stored in AWS KMS (SaaS) or HashiCorp Vault (on-prem).
+- Key rotation: annual, with re-encryption job.
+- Key never in code, env vars, or config files — fetched at app startup from secrets manager.</p>
+<p><strong>Access controls:</strong>
+- Decryption only in API layer (never in DB views or stored procedures).
+- Audit log records every decryption (who, when, which field).
+- Emergency report PDF generation triggers explicit audit event.</p>
+<h3 id="44-media-security">4.4 Media Security</h3>
+<ul>
+<li><strong>Storage</strong>: S3 / MinIO bucket, <strong>private</strong> (no public access).</li>
+<li><strong>Access</strong>: Only via presigned URLs (5-min expiry for downloads, 60-sec for uploads).</li>
+<li><strong>CDN</strong>: CloudFront / Cloudflare in front of S3, with signed URLs (CloudFront signed URLs or Cloudflare signed URLs).</li>
+<li><strong>Quarantine</strong>: Failed-scan files moved to separate quarantine bucket. CDN NEVER serves from quarantine bucket — bucket policy blocks.</li>
+<li><strong>Watermarking</strong> (Phase 2+): Optional, configurable per tenant — overlay staff member name + timestamp on photos for leakage attribution.</li>
+</ul>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// Presigned URL generation</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">GenerateDownloadUrl</span><span style="color: #F8F8F2">(Guid mediaId, </span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2"> contentType)</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> media </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _mediaRepo.GetByIdAsync(mediaId);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Verify ownership / permission</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (</span><span style="color: #FF4689">!</span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> CanUserAccessMedia(_currentUser.UserId, mediaId))</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">throw</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">ForbiddenException</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Verify scan status</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (media.ScanStatus </span><span style="color: #FF4689">!=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;approved&quot;</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">throw</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">ForbiddenException</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&quot;Media not approved for viewing&quot;</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Generate presigned URL (5 min expiry)</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> url </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> _s3Client.GetPresignedURL(</span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> GetPresignedURLRequest</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        BucketName </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> _bucketName,</span>
+<span style="color: #F8F8F2">        Key </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> media.ObjectKey,</span>
+<span style="color: #F8F8F2">        Verb </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> HttpVerb.GET,</span>
+<span style="color: #F8F8F2">        Expires </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> DateTime.UtcNow.AddMinutes(</span><span style="color: #AE81FF">5</span><span style="color: #F8F8F2">),</span>
+<span style="color: #F8F8F2">        ResponseContentType </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> media.ContentType</span>
+<span style="color: #F8F8F2">    });</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Audit</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _auditLogger.LogAsync(</span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> AuditEvent</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        ActionType </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;media_access&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">        EntityType </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;media&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">        EntityId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> mediaId,</span>
+<span style="color: #F8F8F2">        Details </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> { accessedBy </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> _currentUser.UserId, expiry </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;5min&quot;</span><span style="color: #F8F8F2"> }</span>
+<span style="color: #F8F8F2">    });</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> url;</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="45-content-moderation-pipeline">4.5 Content Moderation Pipeline</h3>
+<p>Every media upload goes through content moderation BEFORE parent visibility:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Staff uploads photo (via presigned URL to S3)
+2. API creates media record with scan_status = &#39;pending&#39;
+3. API publishes MediaUploaded event to RabbitMQ
+4. Media Processing module consumes event:
+   a. Downloads file from S3
+   b. Runs ClamAV scan (malware)
+   c. Calls AWS Rekognition (or Azure Content Safety) for inappropriate content:
+      - DetectModerationLabels API
+      - Thresholds: explicit, suggestive, violence, drugs
+   d. Updates media.scan_status:
+      - APPROVED if all checks pass
+      - QUARANTINED if any check fails
+   e. If QUARANTINED:
+      - Moves file to quarantine bucket
+      - Deletes from main bucket
+      - Notifies uploading staff + Centre Admin
+   f. Publishes MediaScanCompleted event
+5. Parent Communication module consumes MediaScanCompleted:
+   - If APPROVED: activity_post.approval_status → &#39;approved&#39; → visible to parents
+   - If QUARANTINED: activity_post.approval_status → &#39;rejected&#39;
+</code></pre></div>
+
+<p><strong>Configuration:</strong>
+- Sensitivity thresholds configurable per tenant (Conservative / Standard / Permissive).
+- False positive appeal flow: staff can request manual review by Centre Admin.
+- Manual override: Centre Admin can manually approve/reject any media.</p>
+<hr />
+<h2 id="5-rate-limiting-brute-force-protection">5. Rate Limiting &amp; Brute Force Protection</h2>
+<h3 id="51-api-rate-limiting">5.1 API Rate Limiting</h3>
+<p>Per-user rate limiting (per IP fallback for unauthenticated):
+- Authenticated: 100 req/min/user
+- Unauthenticated: 10 req/min/IP
+- Login attempts: 5 per minute, then 15-min lockout
+- Password reset: 3 per hour per email</p>
+<p>Implemented via Redis sliding window counter. Returns 429 with <code>Retry-After</code> header.</p>
+<h3 id="52-account-lockout">5.2 Account Lockout</h3>
+<ul>
+<li>5 failed login attempts → 15-min lockout</li>
+<li>3 lockouts in 24h → 24h lockout</li>
+<li>Account locked → email sent to user (security notification)</li>
+<li>Super Admin can manually unlock</li>
+</ul>
+<h3 id="53-ip-blocking">5.3 IP Blocking</h3>
+<ul>
+<li>100 failed requests in 5 min from same IP → 1h IP block</li>
+<li>IP blocked → logged in audit, surfaced in Grafana</li>
+<li>False positive appeal: Super Admin can whitelist IP</li>
+</ul>
+<h3 id="54-bot-protection">5.4 Bot Protection</h3>
+<ul>
+<li>reCAPTCHA v3 on public forms (enquiry form, password reset)</li>
+<li>Honeypot fields on public forms</li>
+<li>User-Agent + IP fingerprinting for suspicious patterns</li>
+</ul>
+<hr />
+<h2 id="6-input-validation">6. Input Validation</h2>
+<h3 id="61-validation-layers">6.1 Validation Layers</h3>
+<ol>
+<li><strong>Frontend</strong> — Zod schema validation before submit. UX feedback.</li>
+<li><strong>Backend</strong> — FluentValidation on every command/query. <strong>Never trust the client.</strong></li>
+<li><strong>Database</strong> — Check constraints, NOT NULL, foreign keys, unique indexes. Last line of defense.</li>
+</ol>
+<h3 id="62-sql-injection-prevention">6.2 SQL Injection Prevention</h3>
+<ul>
+<li>EF Core uses parameterized queries by default.</li>
+<li>Never use <code>FromSqlRaw</code> with string concatenation.</li>
+<li>For dynamic queries, use LINQ <code>IQueryable</code> composition.</li>
+<li>Audit any raw SQL usage in code review.</li>
+</ul>
+<h3 id="63-xss-prevention">6.3 XSS Prevention</h3>
+<ul>
+<li>React auto-escapes by default (don't use <code>dangerouslySetInnerHTML</code>).</li>
+<li>For rich text (newsletter, email templates), use DOMPurify on render.</li>
+<li>CSP headers: <code>default-src 'self'; script-src 'self' 'unsafe-inline'</code> (lock down further in production).</li>
+</ul>
+<h3 id="64-csrf-protection">6.4 CSRF Protection</h3>
+<ul>
+<li>API uses JWT in <code>Authorization</code> header (not cookies) for access tokens.</li>
+<li>Refresh token in HttpOnly cookie + SameSite=Strict → CSRF-resistant.</li>
+<li>For state-changing operations, require <code>X-Requested-With</code> header (custom header, CORS-restricted).</li>
+</ul>
+<h3 id="65-file-upload-validation">6.5 File Upload Validation</h3>
+<ul>
+<li>File type validation via magic bytes (not just extension) — <code>file-type</code> library.</li>
+<li>File size validation at presign time + S3 bucket policy.</li>
+<li>Filename sanitization (no path traversal, no special chars).</li>
+<li>Virus scan via ClamAV.</li>
+<li>Image dimension validation (reject excessively large images that could DoS).</li>
+</ul>
+<hr />
+<h2 id="7-audit-trail">7. Audit Trail</h2>
+<h3 id="71-whats-logged">7.1 What's Logged</h3>
+<p>Every mutation (CREATE, UPDATE, DELETE) on every entity. Plus:
+- Login / logout / failed login
+- Password change / reset
+- MFA enable / disable
+- Permission change
+- Data export (audit log export, report export, emergency report)
+- Media access (especially sensitive for emergency reports)
+- Settings changes
+- Failed authorization attempts (403, 404 on ownership denial)</p>
+<h3 id="72-audit-log-record">7.2 Audit Log Record</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;uuid&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;tenant_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;uuid&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;user_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;uuid&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;user_email&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;user@example.com&quot;</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">// Denormalized for forensic query</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;entity_type&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;student&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;entity_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;uuid&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;action&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;update&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;changed_fields&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;status&quot;</span><span style="color: #F8F8F2">: { </span><span style="color: #FF4689">&quot;before&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;active&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #FF4689">&quot;after&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;on_hold&quot;</span><span style="color: #F8F8F2"> },</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;status_reason&quot;</span><span style="color: #F8F8F2">: { </span><span style="color: #FF4689">&quot;before&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">null</span><span style="color: #F8F8F2">, </span><span style="color: #FF4689">&quot;after&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Family travel&quot;</span><span style="color: #F8F8F2"> }</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;ip_address&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;192.168.1.1&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;user_agent&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Mozilla/5.0 ...&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;request_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;req_abc123&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;occurred_at&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;2026-05-17T10:30:00.123Z&quot;</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="73-append-only-enforcement">7.3 Append-Only Enforcement</h3>
+<p>PostgreSQL trigger rejects UPDATE and DELETE on <code>audit_log</code>:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">OR</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">REPLACE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">FUNCTION</span><span style="color: #F8F8F2"> prevent_audit_log_mutation()</span>
+<span style="color: #66D9EF">RETURNS</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TRIGGER</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">AS</span><span style="color: #F8F8F2"> </span><span style="color: #ED007E; background-color: #1E0010">$$</span>
+<span style="color: #66D9EF">BEGIN</span>
+<span style="color: #F8F8F2">  RAISE </span><span style="color: #66D9EF">EXCEPTION</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;audit_log is append-only. UPDATE and DELETE are not permitted.&#39;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">END</span><span style="color: #F8F8F2">;</span>
+<span style="color: #ED007E; background-color: #1E0010">$$</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">LANGUAGE</span><span style="color: #F8F8F2"> plpgsql;</span>
+
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TRIGGER</span><span style="color: #F8F8F2"> audit_log_immutable</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">BEFORE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">UPDATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">OR</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DELETE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> audit_log</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">FOR</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">EACH</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">ROW</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">EXECUTE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">FUNCTION</span><span style="color: #F8F8F2"> prevent_audit_log_mutation();</span>
+</code></pre></div>
+
+<p>Even Super Admin cannot modify audit log via app. Only platform ops team with <code>service</code> role (BYPASSRLS) can access — and that access is itself logged at infrastructure level.</p>
+<h3 id="74-audit-log-viewer-super-admin">7.4 Audit Log Viewer (Super Admin)</h3>
+<p>UI in Settings → Audit Log:
+- Filters: user, date range, entity type, action.
+- Paginated list (cursor-based, 100 per page).
+- Click entry → see full JSONB diff.
+- Export to Excel (Super Admin only; export itself is audited).</p>
+<h3 id="75-retention">7.5 Retention</h3>
+<ul>
+<li>Audit log retained per legal requirement (proposed 7 years).</li>
+<li>After 1 year: partition detached from main table, moved to archive schema (still queryable, but doesn't slow down recent queries).</li>
+<li>After retention period: archived to S3 cold storage, partition dropped.</li>
+</ul>
+<hr />
+<h2 id="8-session-management">8. Session Management</h2>
+<h3 id="81-session-limits">8.1 Session Limits</h3>
+<ul>
+<li>Max 5 concurrent sessions per user (5 devices).</li>
+<li>6th login → oldest session revoked.</li>
+<li>Sessions viewable in user profile → can manually revoke.</li>
+</ul>
+<h3 id="82-idle-timeout">8.2 Idle Timeout</h3>
+<ul>
+<li>Web: 30-min idle → access token expires (15 min anyway) → refresh fails if no activity → redirect to login.</li>
+<li>Mobile: no idle timeout (tokens auto-refresh in background).</li>
+</ul>
+<h3 id="83-forced-logout">8.3 Forced Logout</h3>
+<p>Super Admin can force-logout any user (revokes all their refresh tokens). Used for:
+- Suspected account compromise.
+- Staff termination.
+- Compliance investigation.</p>
+<hr />
+<h2 id="9-secrets-management">9. Secrets Management</h2>
+<h3 id="91-secrets-inventory">9.1 Secrets Inventory</h3>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Where stored</th>
+<th>Rotation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Database password</td>
+<td>AWS Secrets Manager / Vault</td>
+<td>Every 90 days (auto-rotated)</td>
+</tr>
+<tr>
+<td>Redis AUTH token</td>
+<td>AWS Secrets Manager / Vault</td>
+<td>Every 90 days</td>
+</tr>
+<tr>
+<td>RabbitMQ password</td>
+<td>AWS Secrets Manager / Vault</td>
+<td>Every 90 days</td>
+</tr>
+<tr>
+<td>S3 access key (if not using IAM role)</td>
+<td>AWS Secrets Manager</td>
+<td>Every 90 days</td>
+</tr>
+<tr>
+<td>Keycloak client secrets</td>
+<td>AWS Secrets Manager</td>
+<td>Every 180 days</td>
+</tr>
+<tr>
+<td>JWT signing key (Keycloak-managed)</td>
+<td>Keycloak internal</td>
+<td>Every 365 days (Keycloak auto-rotates)</td>
+</tr>
+<tr>
+<td>FCM server key</td>
+<td>AWS Secrets Manager</td>
+<td>On-demand</td>
+</tr>
+<tr>
+<td>SES SMTP credentials</td>
+<td>AWS Secrets Manager</td>
+<td>Every 180 days</td>
+</tr>
+<tr>
+<td>Twilio auth token</td>
+<td>AWS Secrets Manager</td>
+<td>Every 180 days</td>
+</tr>
+<tr>
+<td>AWS Rekognition access</td>
+<td>IAM role (no secret)</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>OpenAI API key (Phase 2+)</td>
+<td>AWS Secrets Manager</td>
+<td>On-demand</td>
+</tr>
+<tr>
+<td>pgcrypto encryption key</td>
+<td>AWS KMS / Vault</td>
+<td>Every 365 days (with re-encryption)</td>
+</tr>
+<tr>
+<td>TLS private keys</td>
+<td>cert-manager (K8s)</td>
+<td>Auto-renewed (Let's Encrypt 90 days)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-secret-access-pattern">9.2 Secret Access Pattern</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// Program.cs</span>
+<span style="color: #F8F8F2">builder.Services.AddSingleton</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">ISecretsProvider, AwsSecretsManagerProvider</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #959077">// In service</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">DatabaseConnectionFactory</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> ISecretsProvider _secrets;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2"> _cachedConnectionString;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> DateTime _cacheExpiry </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> DateTime.MinValue;</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task</span><span style="color: #FF4689">&lt;</span><span style="color: #66D9EF">string</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> GetConnectionStringAsync()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (DateTime.UtcNow </span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2"> _cacheExpiry)</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> _cachedConnectionString;</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> secret </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _secrets.GetSecretAsync(</span><span style="color: #E6DB74">&quot;nms/prod/database&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        _cachedConnectionString </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">$&quot;Host=...;Password={secret.Password};...&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        _cacheExpiry </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> DateTime.UtcNow.AddHours(</span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">);  </span><span style="color: #959077">// Cache 1h, refresh before rotation</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> _cachedConnectionString;</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="93-forbidden-locations">9.3 Forbidden Locations</h3>
+<p>Secrets MUST NEVER be in:
+- Source code (caught by GitGuardian in pre-commit).
+- Environment variables in production (only non-sensitive config in env vars).
+- Config files committed to git.
+- Log output (Serilog has Destructuring transformers to mask secrets).
+- Error messages sent to clients.
+- Database tables (unencrypted).</p>
+<hr />
+<h2 id="10-security-hardening-checklist">10. Security Hardening Checklist</h2>
+<h3 id="101-backend">10.1 Backend</h3>
+<ul>
+<li>[ ] HTTPS only, HTTP redirects to HTTPS.</li>
+<li>[ ] HSTS header enabled.</li>
+<li>[ ] TLS 1.2+ only (TLS 1.0/1.1 disabled).</li>
+<li>[ ] Security headers: <code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: DENY</code>, <code>X-XSS-Protection: 1; mode=block</code>, <code>Referrer-Policy: strict-origin-when-cross-origin</code>.</li>
+<li>[ ] CSP header (production): <code>default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' wss:; font-src 'self' data:</code>.</li>
+<li>[ ] Rate limiting on all endpoints.</li>
+<li>[ ] JWT validation on every endpoint (no unauthenticated endpoints except login, password reset, public forms).</li>
+<li>[ ] Permission check on every endpoint.</li>
+<li>[ ] Tenant isolation via RLS on every query.</li>
+<li>[ ] Parent-child ownership check on every parent-facing endpoint.</li>
+<li>[ ] Input validation on every command.</li>
+<li>[ ] SQL injection prevention (parameterized queries only).</li>
+<li>[ ] XSS prevention (React auto-escape, DOMPurify for rich text).</li>
+<li>[ ] CSRF prevention (SameSite cookies + custom header requirement).</li>
+<li>[ ] File upload validation (magic bytes, size, scan).</li>
+<li>[ ] Secrets in secrets manager (never in code/env).</li>
+<li>[ ] Encryption at rest (DB, S3, Redis).</li>
+<li>[ ] Column-level encryption for sensitive fields.</li>
+<li>[ ] Audit log on every mutation.</li>
+<li>[ ] Logging of all auth events (login, logout, failed, MFA).</li>
+<li>[ ] Dependency scanning on every PR.</li>
+<li>[ ] Container image scanning on every build.</li>
+<li>[ ] SAST scan on every PR.</li>
+<li>[ ] DAST scan weekly on staging.</li>
+</ul>
+<h3 id="102-frontend">10.2 Frontend</h3>
+<ul>
+<li>[ ] JWT in memory (not localStorage).</li>
+<li>[ ] Refresh token in HttpOnly + Secure + SameSite=Strict cookie.</li>
+<li>[ ] No sensitive data in URL params.</li>
+<li>[ ] React auto-escape used (no <code>dangerouslySetInnerHTML</code> except with DOMPurify).</li>
+<li>[ ] CSP-compliant (no inline scripts).</li>
+<li>[ ] Bundle size monitored (no accidental secret inclusion).</li>
+<li>[ ] Source maps not exposed in production.</li>
+<li>[ ] HTTPS only (HSTS preload).</li>
+</ul>
+<h3 id="103-mobile">10.3 Mobile</h3>
+<ul>
+<li>[ ] Access token in memory.</li>
+<li>[ ] Refresh token in Secure Keychain (iOS) / EncryptedSharedPreferences (Android).</li>
+<li>[ ] Certificate pinning (Phase 2+ for high-security customers).</li>
+<li>[ ] Biometric unlock (Face ID / Touch ID / fingerprint) — optional, configurable.</li>
+<li>[ ] No sensitive data in URL params.</li>
+<li>[ ] App screenshots disabled in sensitive screens (e.g., emergency report).</li>
+<li>[ ] Root/jailbreak detection (warn user, optional block).</li>
+</ul>
+<h3 id="104-infrastructure">10.4 Infrastructure</h3>
+<ul>
+<li>[ ] K8s RBAC enabled.</li>
+<li>[ ] Network policies (pods can only reach required services).</li>
+<li>[ ] Private subnets for DB, Redis, RabbitMQ.</li>
+<li>[ ] Public subnets only for load balancer + NAT gateway.</li>
+<li>[ ] WAF on load balancer (OWASP rules).</li>
+<li>[ ] DDoS protection (AWS Shield Standard on CloudFront + ALB).</li>
+<li>[ ] Security groups: deny by default, allow by explicit rule.</li>
+<li>[ ] IAM roles: least privilege.</li>
+<li>[ ] CloudTrail / Audit Log enabled (AWS account-level audit).</li>
+<li>[ ] Backup encryption.</li>
+<li>[ ] DR plan tested quarterly.</li>
+</ul>
+<hr />
+<h2 id="11-compliance-alignment">11. Compliance Alignment</h2>
+<h3 id="111-uae-pdpl-federal-decree-law-no-45-of-2021">11.1 UAE PDPL (Federal Decree-Law No. 45 of 2021)</h3>
+<table>
+<thead>
+<tr>
+<th>PDPL requirement</th>
+<th>How we comply</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Consent for data collection</td>
+<td>Parent consent captured at invitation acceptance. Configurable per data category.</td>
+</tr>
+<tr>
+<td>Data subject right: access</td>
+<td>Parent can view all child's data via portal. Admin-only function for staff data.</td>
+</tr>
+<tr>
+<td>Data subject right: correction</td>
+<td>Parent can request correction via messaging. Admin can edit any record (audited).</td>
+</tr>
+<tr>
+<td>Data subject right: deletion</td>
+<td>Soft-delete for student record. Hard delete after retention period. Legal hold for safeguarding records.</td>
+</tr>
+<tr>
+<td>Data minimization</td>
+<td>Only collect what's needed for nursery operations. No marketing tracking without consent.</td>
+</tr>
+<tr>
+<td>Purpose limitation</td>
+<td>Data used only for nursery operations. Not shared with third parties without consent.</td>
+</tr>
+<tr>
+<td>Data residency</td>
+<td>UAE-hosted infrastructure (AWS me-central-1 or customer's UAE cloud).</td>
+</tr>
+<tr>
+<td>Breach notification</td>
+<td>Incident response runbook. Notify authorities within 72 hours of breach discovery.</td>
+</tr>
+<tr>
+<td>Data Protection Officer (DPO)</td>
+<td>Customer designates DPO. We provide tools (audit log, consent management) for DPO.</td>
+</tr>
+<tr>
+<td>Children's data</td>
+<td>Special protection: encryption, access controls, audit, retention limits.</td>
+</tr>
+<tr>
+<td>Cross-border transfer</td>
+<td>Not permitted without explicit consent + adequate protection. We host in UAE only (SaaS default).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="112-khda-adek-alignment">11.2 KHDA / ADEK Alignment</h3>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>How we comply</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Record retention</td>
+<td>Configurable retention per record type (proposed: attendance 7y, medical 10y, assessment 5y).</td>
+</tr>
+<tr>
+<td>Inspection readiness</td>
+<td>Reports module generates KHDA-aligned reports (Phase 1 Sprint 13). Audit log accessible.</td>
+</tr>
+<tr>
+<td>Staff qualifications tracking</td>
+<td><code>staff.qualifications</code> JSONB field. Reports for inspection.</td>
+</tr>
+<tr>
+<td>Child safety</td>
+<td>Ratio enforcement, emergency reports, safeguarding flags, audit trail.</td>
+</tr>
+<tr>
+<td>Parent communication records</td>
+<td>Activity feed + messaging + daily reports all retained per policy.</td>
+</tr>
+</tbody>
+</table>
+<p>Full compliance details: <code>17-COMPLIANCE-LEGAL.md</code>.</p>
+<hr />
+<h2 id="12-penetration-testing">12. Penetration Testing</h2>
+<h3 id="121-schedule">12.1 Schedule</h3>
+<ul>
+<li><strong>Phase 1 go-live</strong> (Sprint 17): External pen test by 3rd party, OWASP Top 10 + business logic.</li>
+<li><strong>Phase 2 go-live</strong> (Sprint 26): External pen test, focus on new modules (Learning &amp; Assessment, mobile app).</li>
+<li><strong>Phase 3 go-live</strong> (Sprint 30): External pen test, focus on payment gateway + multi-tenancy + Open API.</li>
+<li><strong>Annual</strong> (ongoing): Annual pen test by 3rd party.</li>
+</ul>
+<h3 id="122-scope">12.2 Scope</h3>
+<ul>
+<li>Web application (admin + parent portal).</li>
+<li>Mobile app (iOS + Android).</li>
+<li>API (all endpoints).</li>
+<li>Authentication (Keycloak, JWT, MFA).</li>
+<li>Multi-tenancy isolation (cross-tenant access attempts).</li>
+<li>Parent-child ownership (ID enumeration attempts).</li>
+<li>File upload (malicious file attempts).</li>
+<li>Infrastructure (K8s, network, secrets).</li>
+</ul>
+<h3 id="123-remediation">12.3 Remediation</h3>
+<ul>
+<li>Critical findings: fix before go-live (block release).</li>
+<li>High findings: fix within 1 week.</li>
+<li>Medium findings: fix within 1 month.</li>
+<li>Low findings: fix in next sprint.</li>
+</ul>
+<p>All findings tracked in GitHub Issues with security label. Reproducible test cases added to regression suite.</p>
+<hr />
+<h2 id="13-incident-response">13. Incident Response</h2>
+<h3 id="131-incident-severity">13.1 Incident Severity</h3>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th>Definition</th>
+<th>Response time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SEV-1</td>
+<td>Active data breach, child safety incident, production outage</td>
+<td>15 min</td>
+</tr>
+<tr>
+<td>SEV-2</td>
+<td>Security vulnerability being exploited, major functionality broken</td>
+<td>1 hour</td>
+</tr>
+<tr>
+<td>SEV-3</td>
+<td>Bug affecting many users, degraded service</td>
+<td>4 hours</td>
+</tr>
+<tr>
+<td>SEV-4</td>
+<td>Minor bug, single user impact</td>
+<td>1 business day</td>
+</tr>
+</tbody>
+</table>
+<h3 id="132-incident-response-runbook">13.2 Incident Response Runbook</h3>
+<p><code>infra/docs/incident-response.md</code> contains:
+- On-call rotation.
+- Escalation matrix.
+- Communication templates (customer email, status page update).
+- Forensic steps (snapshot DB, preserve logs, don't destroy evidence).
+- Recovery steps per incident type.
+- Post-mortem template.</p>
+<h3 id="133-breach-notification">13.3 Breach Notification</h3>
+<p>Per UAE PDPL:
+- Notify UAE Data Office within 72 hours of breach discovery.
+- Notify affected individuals "without undue delay" if high risk.
+- Document breach: nature, scope, individuals affected, remediation.</p>
+<h3 id="134-post-mortem">13.4 Post-Mortem</h3>
+<p>After every SEV-1/SEV-2 incident:
+- Blameless post-mortem within 5 business days.
+- Root cause analysis (5 Whys).
+- Action items with owners + due dates.
+- Action items tracked to completion.
+- Post-mortem document archived in <code>docs/post-mortems/</code>.</p>
+<hr />
+<p><strong>Next file to read</strong>: <code>10-MULTI-TENANCY.md</code> for the dual-mode (on-prem + SaaS) multi-tenancy architecture.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-08-api-spec.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">API Specification</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-10-multi-tenancy.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Multi-Tenancy</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

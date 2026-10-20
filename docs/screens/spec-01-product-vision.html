@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Vision — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class="active"><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-vision-statement" class="toc-link" data-target="1-vision-statement">1. Vision Statement</a><a href="#2-strategic-goals" class="toc-link" data-target="2-strategic-goals">2. Strategic Goals</a><a href="#3-the-problem-we-solve" class="toc-link" data-target="3-the-problem-we-solve">3. The Problem We Solve</a><a href="#31-todays-uae-nursery-reality" class="toc-link toc-h3" data-target="31-todays-uae-nursery-reality">3.1 Today&#x27;s UAE Nursery Reality</a><a href="#32-what-this-costs" class="toc-link toc-h3" data-target="32-what-this-costs">3.2 What This Costs</a><a href="#33-why-existing-solutions-fall-short" class="toc-link toc-h3" data-target="33-why-existing-solutions-fall-short">3.3 Why Existing Solutions Fall Short</a><a href="#4-personas" class="toc-link" data-target="4-personas">4. Personas</a><a href="#41-primary-personas" class="toc-link toc-h3" data-target="41-primary-personas">4.1 Primary Personas</a><a href="#42-secondary-personas-phase-2" class="toc-link toc-h3" data-target="42-secondary-personas-phase-2">4.2 Secondary Personas (Phase 2+)</a><a href="#5-commercial-model" class="toc-link" data-target="5-commercial-model">5. Commercial Model</a><a href="#51-dual-delivery-mode" class="toc-link toc-h3" data-target="51-dual-delivery-mode">5.1 Dual Delivery Mode</a><a href="#52-add-on-revenue-streams" class="toc-link toc-h3" data-target="52-add-on-revenue-streams">5.2 Add-On Revenue Streams</a><a href="#53-free-tier-strategy-saas-only" class="toc-link toc-h3" data-target="53-free-tier-strategy-saas-only">5.3 Free Tier Strategy (SaaS only)</a><a href="#6-competitive-positioning" class="toc-link" data-target="6-competitive-positioning">6. Competitive Positioning</a><a href="#61-vs-parentapp-the-baseline" class="toc-link toc-h3" data-target="61-vs-parentapp-the-baseline">6.1 vs parent.app (the baseline)</a><a href="#62-design-aspiration" class="toc-link toc-h3" data-target="62-design-aspiration">6.2 Design Aspiration</a><a href="#7-roadmap-summary" class="toc-link" data-target="7-roadmap-summary">7. Roadmap Summary</a><a href="#8-success-metrics" class="toc-link" data-target="8-success-metrics">8. Success Metrics</a><a href="#81-mvp-pilot-exit-criteria-end-of-sprint-5" class="toc-link toc-h3" data-target="81-mvp-pilot-exit-criteria-end-of-sprint-5">8.1 MVP Pilot Exit Criteria (end of Sprint 5)</a><a href="#82-phase-1-commercial-targets" class="toc-link toc-h3" data-target="82-phase-1-commercial-targets">8.2 Phase 1 Commercial Targets</a><a href="#83-product-quality-targets-every-phase" class="toc-link toc-h3" data-target="83-product-quality-targets-every-phase">8.3 Product Quality Targets (every phase)</a><a href="#9-stakeholders" class="toc-link" data-target="9-stakeholders">9. Stakeholders</a><a href="#10-non-goals-what-we-are-not-building" class="toc-link" data-target="10-non-goals-what-we-are-not-building">10. Non-Goals (What We Are NOT Building)</a><a href="#11-glossary-reminder" class="toc-link" data-target="11-glossary-reminder">11. Glossary Reminder</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="target" class="w-4 h-4 text-amber-600"></i><span>Product Vision</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Start · spec-01-product-vision.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Start</span>
+          <span class="pill pill-done">DOC 01</span>
+          <span class="text-[10px] font-mono text-slate-400">~2,666 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Product Vision</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-00-master-brief.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Master Brief</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-02-prd-mvp.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: MVP Pilot</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="01-product-vision">01 — Product Vision</h1>
+<blockquote>
+<p>Why this product exists, who it serves, what success looks like, and how it makes money.</p>
+</blockquote>
+<hr />
+<h2 id="1-vision-statement">1. Vision Statement</h2>
+<blockquote>
+<p><strong>"Every UAE nursery — from a single 30-child neighborhood centre to a 20-branch group — runs on one trustworthy digital backbone that lets educators focus on children, parents feel close to their kids, and owners sleep at night knowing the books, ratios, and compliance are taken care of."</strong></p>
+</blockquote>
+<p>The Nursery Management System (NMS) replaces fragmented manual and spreadsheet-driven workflows across UAE early childhood centres (ECCs) with a single, integrated, real-time platform. It is built for the <strong>UAE regulatory and cultural context</strong> first (PDPL, KHDA/ADEK, Arabic-English bilingual, AED billing) and designed to scale across the GCC.</p>
+<p>We are <strong>not</strong> building a generic childcare SaaS. We are building the system that UAE nurseries choose because it understands their world: Ministry approval cycles, mixed Arabic/English parent populations, weekend-Friday scheduling expectations, AED fee plans, and KHDA inspection reporting.</p>
+<h2 id="2-strategic-goals">2. Strategic Goals</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Goal</th>
+<th>How we measure it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G1</td>
+<td>Replace manual nursery operations with a unified real-time platform</td>
+<td>≥80% of daily admin tasks digitized in pilot nurseries by end of Phase 1</td>
+</tr>
+<tr>
+<td>G2</td>
+<td>Give administrators live attendance, ratio, and child-safety visibility</td>
+<td>Ratio breaches detected and alerted within 30 seconds; dashboard p95 &lt; 2s</td>
+</tr>
+<tr>
+<td>G3</td>
+<td>Give parents a portal they actually use</td>
+<td>≥70% of pilot parents active weekly (≥1 login or push interaction)</td>
+</tr>
+<tr>
+<td>G4</td>
+<td>Automate billing and fee reminders</td>
+<td>≥90% of invoices auto-generated; ≥50% reduction in overdue invoices at 30 days</td>
+</tr>
+<tr>
+<td>G5</td>
+<td>Support EYFS and Montessori curriculum with structured observation</td>
+<td>Phase 2 milestone — observations captured digitally ≥80% of the time</td>
+</tr>
+<tr>
+<td>G6</td>
+<td>Comply with UAE PDPL, KHDA/ADEK, GDPR-aligned standards</td>
+<td>Zero unresolved compliance findings at go-live; legal sign-off before pilot</td>
+</tr>
+<tr>
+<td>G7</td>
+<td>Build a horizontally scalable, multi-tenant-ready architecture</td>
+<td>Phase 3 supports 20 centres, 500 concurrent users, p99 &lt; 3s</td>
+</tr>
+<tr>
+<td>G8</td>
+<td>Be commercially viable in both on-prem and SaaS modes</td>
+<td>2 on-prem pilot deployments + 1 SaaS tenant live by end of Phase 1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-the-problem-we-solve">3. The Problem We Solve</h2>
+<h3 id="31-todays-uae-nursery-reality">3.1 Today's UAE Nursery Reality</h3>
+<p>A typical 100-child UAE nursery runs on:
+- <strong>WhatsApp groups</strong> for parent communication (privacy risk, no audit trail, photos leak)
+- <strong>Excel sheets</strong> for attendance, billing, and ratios (manual, error-prone, no real-time view)
+- <strong>Paper daily report cards</strong> handed to parents at pickup (often skipped when staff are busy)
+- <strong>Manual invoice generation</strong> in Word/PDF, sent individually via WhatsApp (hours of admin per week)
+- <strong>Sticky notes</strong> for safeguarding concerns (lost, not actioned, no audit trail)
+- <strong>Phone calls</strong> for emergency contact (parents unreachable, no log)
+- <strong>KHDA inspection panic</strong> every year — scrambling to assemble records from 5 sources</p>
+<h3 id="32-what-this-costs">3.2 What This Costs</h3>
+<table>
+<thead>
+<tr>
+<th>Cost</th>
+<th>Quantified impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Admin time</td>
+<td>15–20 hours/week per centre on billing, attendance, parent comms</td>
+</tr>
+<tr>
+<td>Lost fees</td>
+<td>5–10% of monthly revenue from untracked overdue invoices</td>
+</tr>
+<tr>
+<td>Compliance risk</td>
+<td>KHDA/ADEK inspection findings; PDPL exposure via WhatsApp photo leaks</td>
+</tr>
+<tr>
+<td>Parent dissatisfaction</td>
+<td>Churn — parents switch nurseries when they feel "out of the loop"</td>
+</tr>
+<tr>
+<td>Staff burnout</td>
+<td>Teachers spend 30% of day on admin instead of children</td>
+</tr>
+<tr>
+<td>Safety risk</td>
+<td>Ratio breaches undetected; safeguarding notes lost; emergency contacts not on hand</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-why-existing-solutions-fall-short">3.3 Why Existing Solutions Fall Short</h3>
+<table>
+<thead>
+<tr>
+<th>Competitor</th>
+<th>Gap we close</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>parent.app</strong></td>
+<td>Strong UX baseline but limited UAE-specific localization, AED billing, KHDA reporting, Arabic RTL depth — we exceed their feature set and improve UX</td>
+</tr>
+<tr>
+<td><strong>Famly</strong></td>
+<td>UK/EU-focused, weak on Arabic, no on-prem option for sensitive nurseries</td>
+</tr>
+<tr>
+<td><strong>Blossom Educational</strong></td>
+<td>Limited billing automation, no SaaS+on-prem dual model</td>
+</tr>
+<tr>
+<td><strong>Tapestry</strong></td>
+<td>Learning-only, no operations, no billing</td>
+</tr>
+<tr>
+<td><strong>Local UAE point solutions</strong></td>
+<td>Often single-feature (attendance only, or billing only), no integrated platform</td>
+</tr>
+<tr>
+<td><strong>Excel + WhatsApp</strong></td>
+<td>Free but every problem above remains</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-personas">4. Personas</h2>
+<h3 id="41-primary-personas">4.1 Primary Personas</h3>
+<h4 id="persona-1-layla-centre-director-super-admin-centre-admin">Persona 1: <strong>Layla — Centre Director</strong> (Super Admin / Centre Admin)</h4>
+<ul>
+<li><strong>Role</strong>: Owner or hired director of a 60–150 child UAE nursery</li>
+<li><strong>Age</strong>: 35–50, female (60% / 40% male)</li>
+<li><strong>Languages</strong>: Arabic + English bilingual</li>
+<li><strong>Goals</strong>: Keep ratios compliant, keep parents happy, pass KHDA inspections, grow enrolment</li>
+<li><strong>Pains</strong>: Spends evenings on billing; worries about WhatsApp photo leaks; KHDA inspection panic</li>
+<li><strong>Tech comfort</strong>: Moderate — uses WhatsApp, Excel, basic SaaS tools</li>
+<li><strong>Decision power</strong>: Buys the software. Decides on-prem vs SaaS.</li>
+</ul>
+<h4 id="persona-2-ahmed-owner-of-3-nurseries-super-admin-multi-centre">Persona 2: <strong>Ahmed — Owner of 3 nurseries</strong> (Super Admin, multi-centre)</h4>
+<ul>
+<li><strong>Role</strong>: Owns a small group of 2–5 nurseries across Dubai/Sharjah</li>
+<li><strong>Age</strong>: 40–55, male or female</li>
+<li><strong>Goals</strong>: Standardize operations across centres, see consolidated revenue, scale to 10 centres</li>
+<li><strong>Pains</strong>: Each centre runs differently; no consolidated view; can't compare performance</li>
+<li><strong>Tech comfort</strong>: High — wants dashboards, expects modern UX</li>
+<li><strong>Decision power</strong>: Buys multi-centre SaaS subscription. Brand-sensitive.</li>
+</ul>
+<h4 id="persona-3-mariam-teacher-key-person">Persona 3: <strong>Mariam — Teacher / Key Person</strong></h4>
+<ul>
+<li><strong>Role</strong>: Classroom teacher, assigned as key person to 8–12 children</li>
+<li><strong>Age</strong>: 25–40, female (90%)</li>
+<li><strong>Languages</strong>: Arabic primary, English functional</li>
+<li><strong>Goals</strong>: Spend time with children, not admin; share moments with parents; track development</li>
+<li><strong>Pains</strong>: Hates end-of-day paperwork; forgets observations; phone camera roll full of child photos with privacy risk</li>
+<li><strong>Tech comfort</strong>: High on mobile, moderate on web</li>
+<li><strong>Decision power</strong>: Influencer — adoption lives or dies with teachers</li>
+</ul>
+<h4 id="persona-4-fatima-parent">Persona 4: <strong>Fatima — Parent</strong></h4>
+<ul>
+<li><strong>Role</strong>: Working mother, child aged 2–4 in nursery</li>
+<li><strong>Age</strong>: 28–40, female (primary app user; fathers secondary)</li>
+<li><strong>Languages</strong>: Arabic or English (50/50 in UAE)</li>
+<li><strong>Goals</strong>: Know her child is safe, fed, learning; feel connected during workday; pay fees easily</li>
+<li><strong>Pains</strong>: Anxious when nursery doesn't communicate; WhatsApp group is noisy and not about her kid; paying fees is a chore</li>
+<li><strong>Tech comfort</strong>: Very high on mobile</li>
+<li><strong>Decision power</strong>: Adoption driver — if parents don't use the app, the nursery churns</li>
+</ul>
+<h4 id="persona-5-sara-receptionist-front-desk">Persona 5: <strong>Sara — Receptionist / Front Desk</strong></h4>
+<ul>
+<li><strong>Role</strong>: Manages check-in/out, enquiries, tours, parent phone calls</li>
+<li><strong>Age</strong>: 25–35, female</li>
+<li><strong>Languages</strong>: Arabic + English</li>
+<li><strong>Goals</strong>: Smooth check-in rush hour; convert enquiries to enrolments; never double-book a tour</li>
+<li><strong>Pains</strong>: Barcode scanners don't work; paper sign-in sheets lost; enquiry follow-ups forgotten</li>
+<li><strong>Tech comfort</strong>: Moderate</li>
+<li><strong>Decision power</strong>: Influencer on operational UX</li>
+</ul>
+<h4 id="persona-6-omar-accounts-manager">Persona 6: <strong>Omar — Accounts Manager</strong></h4>
+<ul>
+<li><strong>Role</strong>: Handles billing, invoices, fee collection, expense tracking</li>
+<li><strong>Age</strong>: 30–50, male</li>
+<li><strong>Languages</strong>: English primary, Arabic functional</li>
+<li><strong>Goals</strong>: Get invoices out on time, collect fees, track revenue, prepare monthly accounts</li>
+<li><strong>Pains</strong>: Manual invoice generation in Excel; chasing parents for fees; reconciliation with bank</li>
+<li><strong>Tech comfort</strong>: High on accounting tools, moderate on SaaS</li>
+<li><strong>Decision power</strong>: Influencer on billing module</li>
+</ul>
+<h3 id="42-secondary-personas-phase-2">4.2 Secondary Personas (Phase 2+)</h3>
+<ul>
+<li><strong>Khalid — IT Manager</strong> (multi-centre group): Manages the SaaS tenant, user provisioning, integrations</li>
+<li><strong>Aisha — Marketing Lead</strong>: Manages enquiries, newsletter, social media-sourced leads</li>
+<li><strong>Yousef — Procurement</strong>: Inventory &amp; asset management (Phase 2 scope)</li>
+</ul>
+<h2 id="5-commercial-model">5. Commercial Model</h2>
+<h3 id="51-dual-delivery-mode">5.1 Dual Delivery Mode</h3>
+<p>NMS is sold in <strong>two commercial modes</strong> from a single codebase. The architecture must support both without forking.</p>
+<h4 id="mode-a-on-prem-single-tenant-license">Mode A: <strong>On-Prem (Single-Tenant License)</strong></h4>
+<ul>
+<li><strong>Customer</strong>: Single nursery or small group (1–3 centres) that requires data sovereignty (e.g., government-affiliated, royal family nurseries, military nurseries)</li>
+<li><strong>Deployment</strong>: Customer's own cloud account (AWS UAE / Azure UAE / local data centre) or on-prem servers</li>
+<li><strong>Tenant model</strong>: Single tenant. <code>tenant_id</code> column exists but only one tenant row. RLS policies still enforced.</li>
+<li><strong>Pricing</strong>: One-time license fee (AED 80,000–150,000) + annual maintenance (20% of license) + implementation (AED 20,000–50,000)</li>
+<li><strong>Identity</strong>: Customer-managed Keycloak realm (or Active Directory federation)</li>
+<li><strong>Updates</strong>: Customer controls update cadence. We provide LTS branches.</li>
+<li><strong>Contract</strong>: Perpetual license + annual support</li>
+</ul>
+<h4 id="mode-b-saas-multi-tenant-subscription">Mode B: <strong>SaaS (Multi-Tenant Subscription)</strong></h4>
+<ul>
+<li><strong>Customer</strong>: Any nursery preferring low-capex, fast onboarding</li>
+<li><strong>Deployment</strong>: Our managed AWS UAE Central (me-central-1) region</li>
+<li><strong>Tenant model</strong>: Multi-tenant. Shared DB, RLS-enforced isolation. Each centre = one tenant.</li>
+<li><strong>Pricing</strong>: Per-centre monthly subscription (AED 1,500–4,000/month depending on student count)</li>
+<li>Tier 1: ≤50 students — AED 1,500/month</li>
+<li>Tier 2: 51–100 students — AED 2,500/month</li>
+<li>Tier 3: 101–200 students — AED 3,500/month</li>
+<li>Tier 4: 201+ students — AED 4,000/month + custom</li>
+<li><strong>Identity</strong>: Shared Keycloak instance, one realm per centre (Phase 1) → multi-realm (Phase 3)</li>
+<li><strong>Updates</strong>: Continuous, we control cadence. Customer notified 7 days ahead.</li>
+<li><strong>Contract</strong>: Monthly or annual subscription, cancel anytime</li>
+</ul>
+<h3 id="52-add-on-revenue-streams">5.2 Add-On Revenue Streams</h3>
+<table>
+<thead>
+<tr>
+<th>Add-on</th>
+<th>Phase</th>
+<th>Price point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SMS notifications (above free quota)</td>
+<td>Phase 1</td>
+<td>AED 0.30/SMS, billed monthly</td>
+</tr>
+<tr>
+<td>Additional storage (above 50GB/centre)</td>
+<td>Phase 1</td>
+<td>AED 50/100GB/month</td>
+</tr>
+<tr>
+<td>Custom branding (white-label app)</td>
+<td>Phase 1 on-prem, Phase 3 SaaS</td>
+<td>AED 10,000 one-time</td>
+</tr>
+<tr>
+<td>Payment gateway processing (transaction fee)</td>
+<td>Phase 3</td>
+<td>1.5–2.5% per transaction</td>
+</tr>
+<tr>
+<td>Premium support (24/7, dedicated CSM)</td>
+<td>All phases</td>
+<td>+30% on subscription</td>
+</tr>
+<tr>
+<td>Migration services (from Excel / competitor)</td>
+<td>All phases</td>
+<td>AED 5,000–25,000 one-time</td>
+</tr>
+<tr>
+<td>Training (on-site, per centre)</td>
+<td>All phases</td>
+<td>AED 3,000/day</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-free-tier-strategy-saas-only">5.3 Free Tier Strategy (SaaS only)</h3>
+<p>To drive adoption, a free 30-day trial per nursery (full features, no card required). Conversion target: 25% trial → paid.</p>
+<h2 id="6-competitive-positioning">6. Competitive Positioning</h2>
+<h3 id="61-vs-parentapp-the-baseline">6.1 vs parent.app (the baseline)</h3>
+<p>parent.app is the <strong>minimum acceptable feature bar</strong>. We must match them on:
+- Real-time newsfeed / activity feed
+- Secure messaging
+- Attendance tracking with ratio compliance
+- Billing with online payments
+- Multi-centre management
+- Multi-language (they have 198 auto-translation; we deliver Arabic + English natively with proper RTL)
+- AI-powered observation capture (Phase 2)</p>
+<p>We must <strong>exceed</strong> them on:
+- <strong>UX/UI quality</strong>: Modern, warm, premium feel — not the dated enterprise look many incumbents have
+- <strong>UAE-specific depth</strong>: KHDA inspection reports, AED-native billing, Arabic-first RTL, Friday-weekend awareness
+- <strong>Dual deployment model</strong>: On-prem option (parent.app is SaaS-only)
+- <strong>Real-time ratio enforcement</strong>: Live WebSocket-driven alerts, not periodic refresh
+- <strong>Parent experience</strong>: Thoughtful, mobile-first, with offline emergency info cache
+- <strong>Compliance auditability</strong>: Append-only audit log with Super Admin UI viewer</p>
+<h3 id="62-design-aspiration">6.2 Design Aspiration</h3>
+<p>Reference for design quality: <strong>Linear, Notion, Stripe Dashboard, Vercel Dashboard, Arc Browser</strong>. NOT 2010s enterprise SaaS. NOT a Material Design template.</p>
+<p>The product must feel:
+- <strong>Calm</strong>: Generous whitespace, soft colors, no clutter
+- <strong>Confident</strong>: Strong typography, clear hierarchy, decisive interactions
+- <strong>Warm</strong>: This is for children — soft pastels, friendly iconography, approachable tone
+- <strong>Trustworthy</strong>: Professional, secure-feeling, no dark patterns
+- <strong>Fast</strong>: Interactions &lt; 200ms perceived, dashboard &lt; 2s load</p>
+<p>Full design system in <code>14-UX-UI-DESIGN.md</code>.</p>
+<h2 id="7-roadmap-summary">7. Roadmap Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Duration</th>
+<th>Outcome</th>
+<th>Commercial milestone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MVP Pilot</strong></td>
+<td>Sprints 0–5 (~10 weeks)</td>
+<td>Deploy to 1–2 pilot nurseries. Core: centre setup, attendance, ratios, parent comms, messaging, dashboard.</td>
+<td>First pilot signed (free or discounted)</td>
+</tr>
+<tr>
+<td><strong>Phase 1 Full</strong></td>
+<td>Sprints 0–18 (~38 weeks)</td>
+<td>All 13 Phase 1 modules. Web + mobile. Notifications. Emergency reports. KHDA-aligned reports.</td>
+<td>First paid on-prem + first 3 SaaS tenants</td>
+</tr>
+<tr>
+<td><strong>Phase 2</strong></td>
+<td>Sprints 19–26 (~16 weeks)</td>
+<td>Learning &amp; Assessment (EYFS + Montessori). Full mobile maturity. Performance hardening.</td>
+<td>10 SaaS tenants, 2 on-prem sites</td>
+</tr>
+<tr>
+<td><strong>Phase 3</strong></td>
+<td>Sprints 27–30 (~8 weeks)</td>
+<td>Multi-centre groups. Payment gateway. ERP integration. Open API.</td>
+<td>20 SaaS tenants, multi-centre groups</td>
+</tr>
+</tbody>
+</table>
+<p>Detailed sprint plan: <code>19-ROADMAP-SPRINTS.md</code>.</p>
+<h2 id="8-success-metrics">8. Success Metrics</h2>
+<h3 id="81-mvp-pilot-exit-criteria-end-of-sprint-5">8.1 MVP Pilot Exit Criteria (end of Sprint 5)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pilot nurseries live</td>
+<td>≥1 (target: 2)</td>
+</tr>
+<tr>
+<td>Active users (staff)</td>
+<td>≥10</td>
+</tr>
+<tr>
+<td>Active users (parents)</td>
+<td>≥30</td>
+</tr>
+<tr>
+<td>Daily check-ins logged in system</td>
+<td>≥80% of expected attendance</td>
+</tr>
+<tr>
+<td>Critical bugs open</td>
+<td>0</td>
+</tr>
+<tr>
+<td>High bugs open</td>
+<td>≤3</td>
+</tr>
+<tr>
+<td>Parent portal load time p95</td>
+<td>&lt; 2.5s</td>
+</tr>
+<tr>
+<td>Ratio breach alert delivery</td>
+<td>&lt; 30s from breach to push notification</td>
+</tr>
+<tr>
+<td>Pilot user NPS</td>
+<td>≥30</td>
+</tr>
+<tr>
+<td>Pilot user "would recommend"</td>
+<td>≥60%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-phase-1-commercial-targets">8.2 Phase 1 Commercial Targets</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target by end of Phase 1 (Sprint 18)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>On-prem deployments</td>
+<td>2 paid</td>
+</tr>
+<tr>
+<td>SaaS tenants</td>
+<td>3 paid</td>
+</tr>
+<tr>
+<td>ARR</td>
+<td>AED 600,000</td>
+</tr>
+<tr>
+<td>Centres live</td>
+<td>5+</td>
+</tr>
+<tr>
+<td>Net Revenue Retention</td>
+<td>≥110%</td>
+</tr>
+<tr>
+<td>Trial → paid conversion</td>
+<td>≥25%</td>
+</tr>
+<tr>
+<td>Customer satisfaction (CSAT)</td>
+<td>≥4.5/5</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-product-quality-targets-every-phase">8.3 Product Quality Targets (every phase)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dashboard p95 load</td>
+<td>&lt; 2s</td>
+</tr>
+<tr>
+<td>API p99 latency</td>
+<td>&lt; 500ms</td>
+</tr>
+<tr>
+<td>Uptime SLA</td>
+<td>99.5% (Phase 1), 99.9% (Phase 3)</td>
+</tr>
+<tr>
+<td>Test coverage (backend)</td>
+<td>≥80%</td>
+</tr>
+<tr>
+<td>E2E test pass rate</td>
+<td>≥95% on main</td>
+</tr>
+<tr>
+<td>Critical security findings open</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Accessibility (parent portal)</td>
+<td>WCAG 2.1 AA</td>
+</tr>
+<tr>
+<td>RTL parity</td>
+<td>100% (no broken layouts in Arabic)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-stakeholders">9. Stakeholders</h2>
+<table>
+<thead>
+<tr>
+<th>Stakeholder</th>
+<th>Interest</th>
+<th>Engagement cadence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sponsor / Product Owner</strong></td>
+<td>Commercial success, scope decisions</td>
+<td>Weekly sprint review</td>
+</tr>
+<tr>
+<td><strong>Centre Directors (pilot)</strong></td>
+<td>Operational fit, daily usability</td>
+<td>Weekly during pilot, monthly after</td>
+</tr>
+<tr>
+<td><strong>Parents (pilot)</strong></td>
+<td>App quality, communication value</td>
+<td>Bi-weekly survey during pilot</td>
+</tr>
+<tr>
+<td><strong>Legal counsel (UAE)</strong></td>
+<td>PDPL compliance, data residency, contracts</td>
+<td>Sprint 0, before go-live, Phase 3 kickoff</td>
+</tr>
+<tr>
+<td><strong>KHDA / ADEK liaison</strong></td>
+<td>Regulatory alignment</td>
+<td>Sprint 0 consultation, pre-go-live review</td>
+</tr>
+<tr>
+<td><strong>Cloud provider (AWS/Azure UAE)</strong></td>
+<td>Infrastructure, compliance certifications</td>
+<td>Sprint 0 setup, ongoing</td>
+</tr>
+<tr>
+<td><strong>AI/Coding agent (Cursor)</strong></td>
+<td>Builds the code per these specs</td>
+<td>Continuous</td>
+</tr>
+</tbody>
+</table>
+<h2 id="10-non-goals-what-we-are-not-building">10. Non-Goals (What We Are NOT Building)</h2>
+<p>To prevent scope creep, these are explicitly out of scope for all 3 phases:</p>
+<ul>
+<li><strong>Payroll processing for staff</strong> — nurseries use external payroll. We export attendance, they calculate.</li>
+<li><strong>HR management (recruitment, performance reviews)</strong> — out of scope.</li>
+<li><strong>Inventory management for supplies</strong> — Phase 2 consideration only if Procurement role activates.</li>
+<li><strong>Transportation / bus tracking</strong> — out of scope for all phases.</li>
+<li><strong>Catering / meal planning</strong> — food log is in scope (parent comms), but menu planning is not.</li>
+<li><strong>Custom CRM beyond enquiry pipeline</strong> — not a sales CRM.</li>
+<li><strong>Marketing automation (email campaigns, social scheduling)</strong> — newsletter builder is in scope, full marketing automation is not.</li>
+<li><strong>Website builder for nurseries</strong> — out of scope. We integrate with their existing website for enquiry form.</li>
+<li><strong>Mobile app for parents in Phase 1</strong> — parent experience is responsive web in Phase 1; native parent app considered in Phase 2.</li>
+<li><strong>AI chatbot for parents</strong> — out of scope.</li>
+<li><strong>Biometric attendance (fingerprint, facial recognition)</strong> — barcode only in Phase 1; biometrics deferred pending legal review.</li>
+</ul>
+<h2 id="11-glossary-reminder">11. Glossary Reminder</h2>
+<p>Full glossary in upstream SRS v1.2 §8. Key terms used in this pack:</p>
+<ul>
+<li><strong>NMS</strong> — Nursery Management System (this product)</li>
+<li><strong>ECC</strong> — Early Childhood Centre (preferred UAE term over "nursery")</li>
+<li><strong>EYFS</strong> — Early Years Foundation Stage (UK statutory framework, used in UAE nurseries)</li>
+<li><strong>PDPL</strong> — UAE Personal Data Protection Law (Federal Decree-Law No. 45 of 2021)</li>
+<li><strong>KHDA</strong> — Knowledge and Human Development Authority (Dubai education regulator)</li>
+<li><strong>ADEK</strong> — Abu Dhabi Department of Education and Knowledge</li>
+<li><strong>RTL</strong> — Right-to-Left text direction (Arabic)</li>
+<li><strong>RLS</strong> — Row Level Security (PostgreSQL feature for multi-tenancy)</li>
+<li><strong>Tenant</strong> — A single nursery centre (SaaS) or the single deployment (on-prem)</li>
+<li><strong>Key Person</strong> — Designated staff member primary-responsible for a specific child</li>
+<li><strong>Ratio</strong> — Mandated student-to-staff ratio per age band (UAE regulatory)</li>
+</ul>
+<hr />
+<p><strong>Next file to read</strong>: <code>02-PRD-MVP.md</code> — the MVP pilot scope and acceptance criteria.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-00-master-brief.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Master Brief</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-02-prd-mvp.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: MVP Pilot</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

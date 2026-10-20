@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Testing & Quality — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class="active"><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-testing-strategy" class="toc-link" data-target="1-testing-strategy">1. Testing Strategy</a><a href="#11-test-pyramid" class="toc-link toc-h3" data-target="11-test-pyramid">1.1 Test Pyramid</a><a href="#12-coverage-gates" class="toc-link toc-h3" data-target="12-coverage-gates">1.2 Coverage Gates</a><a href="#13-quality-gates-sonarcloud" class="toc-link toc-h3" data-target="13-quality-gates-sonarcloud">1.3 Quality Gates (SonarCloud)</a><a href="#2-backend-testing-net" class="toc-link" data-target="2-backend-testing-net">2. Backend Testing (.NET)</a><a href="#21-test-stack" class="toc-link toc-h3" data-target="21-test-stack">2.1 Test Stack</a><a href="#22-unit-test-example" class="toc-link toc-h3" data-target="22-unit-test-example">2.2 Unit Test Example</a><a href="#23-integration-test-example" class="toc-link toc-h3" data-target="23-integration-test-example">2.3 Integration Test Example</a><a href="#24-architecture-tests-netarchtest" class="toc-link toc-h3" data-target="24-architecture-tests-netarchtest">2.4 Architecture Tests (NetArchTest)</a><a href="#3-web-frontend-testing" class="toc-link" data-target="3-web-frontend-testing">3. Web Frontend Testing</a><a href="#31-test-stack" class="toc-link toc-h3" data-target="31-test-stack">3.1 Test Stack</a><a href="#32-component-test-example" class="toc-link toc-h3" data-target="32-component-test-example">3.2 Component Test Example</a><a href="#33-e2e-test-example-playwright" class="toc-link toc-h3" data-target="33-e2e-test-example-playwright">3.3 E2E Test Example (Playwright)</a><a href="#34-visual-regression-tests" class="toc-link toc-h3" data-target="34-visual-regression-tests">3.4 Visual Regression Tests</a><a href="#4-mobile-testing" class="toc-link" data-target="4-mobile-testing">4. Mobile Testing</a><a href="#41-test-stack" class="toc-link toc-h3" data-target="41-test-stack">4.1 Test Stack</a><a href="#42-detox-e2e-example" class="toc-link toc-h3" data-target="42-detox-e2e-example">4.2 Detox E2E Example</a><a href="#5-performance-testing" class="toc-link" data-target="5-performance-testing">5. Performance Testing</a><a href="#51-tools" class="toc-link toc-h3" data-target="51-tools">5.1 Tools</a><a href="#52-k6-load-test-example" class="toc-link toc-h3" data-target="52-k6-load-test-example">5.2 k6 Load Test Example</a><a href="#53-performance-budgets" class="toc-link toc-h3" data-target="53-performance-budgets">5.3 Performance Budgets</a><a href="#54-web-performance-targets" class="toc-link toc-h3" data-target="54-web-performance-targets">5.4 Web Performance Targets</a><a href="#55-mobile-performance-targets" class="toc-link toc-h3" data-target="55-mobile-performance-targets">5.5 Mobile Performance Targets</a><a href="#56-performance-ci-gate" class="toc-link toc-h3" data-target="56-performance-ci-gate">5.6 Performance CI Gate</a><a href="#6-accessibility-testing" class="toc-link" data-target="6-accessibility-testing">6. Accessibility Testing</a><a href="#61-automated-ci" class="toc-link toc-h3" data-target="61-automated-ci">6.1 Automated (CI)</a><a href="#62-manual-testing-checklist-before-each-phase-go-live" class="toc-link toc-h3" data-target="62-manual-testing-checklist-before-each-phase-go-live">6.2 Manual Testing Checklist (Before Each Phase...</a><a href="#63-wcag-21-aa-compliance-checklist" class="toc-link toc-h3" data-target="63-wcag-21-aa-compliance-checklist">6.3 WCAG 2.1 AA Compliance Checklist</a><a href="#7-security-testing" class="toc-link" data-target="7-security-testing">7. Security Testing</a><a href="#71-sast-static-analysis" class="toc-link toc-h3" data-target="71-sast-static-analysis">7.1 SAST (Static Analysis)</a><a href="#72-sca-software-composition-analysis" class="toc-link toc-h3" data-target="72-sca-software-composition-analysis">7.2 SCA (Software Composition Analysis)</a><a href="#73-dast-dynamic-analysis" class="toc-link toc-h3" data-target="73-dast-dynamic-analysis">7.3 DAST (Dynamic Analysis)</a><a href="#74-container-scanning" class="toc-link toc-h3" data-target="74-container-scanning">7.4 Container Scanning</a><a href="#75-iac-scanning" class="toc-link toc-h3" data-target="75-iac-scanning">7.5 IaC Scanning</a><a href="#76-secrets-scanning" class="toc-link toc-h3" data-target="76-secrets-scanning">7.6 Secrets Scanning</a><a href="#77-penetration-testing" class="toc-link toc-h3" data-target="77-penetration-testing">7.7 Penetration Testing</a><a href="#8-mutation-testing-sample-not-every-pr" class="toc-link" data-target="8-mutation-testing-sample-not-every-pr">8. Mutation Testing (Sample, Not Every PR)</a><a href="#9-test-data-management" class="toc-link" data-target="9-test-data-management">9. Test Data Management</a><a href="#91-dev-environment-seed-data" class="toc-link toc-h3" data-target="91-dev-environment-seed-data">9.1 Dev Environment Seed Data</a><a href="#92-staging-data" class="toc-link toc-h3" data-target="92-staging-data">9.2 Staging Data</a><a href="#93-test-data-builders" class="toc-link toc-h3" data-target="93-test-data-builders">9.3 Test Data Builders</a><a href="#10-continuous-quality" class="toc-link" data-target="10-continuous-quality">10. Continuous Quality</a><a href="#101-pr-review-checklist" class="toc-link toc-h3" data-target="101-pr-review-checklist">10.1 PR Review Checklist</a><a href="#102-definition-of-done" class="toc-link toc-h3" data-target="102-definition-of-done">10.2 Definition of Done</a><a href="#103-bug-triage" class="toc-link toc-h3" data-target="103-bug-triage">10.3 Bug Triage</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-amber-600"></i><span>Testing & Quality</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-16-testing-quality.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 16</span>
+          <span class="text-[10px] font-mono text-slate-400">~3,169 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Testing & Quality</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-15-notifications.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Notifications</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-17-compliance-legal.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Compliance & Legal</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="16-testing-quality">16 — Testing &amp; Quality</h1>
+<blockquote>
+<p>Test pyramid, coverage gates, quality bars, performance testing, accessibility testing.</p>
+</blockquote>
+<hr />
+<h2 id="1-testing-strategy">1. Testing Strategy</h2>
+<h3 id="11-test-pyramid">1.1 Test Pyramid</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>              ┌──────────┐
+              │   E2E    │  ~5% (critical journeys only)
+           ┌──┴──────────┴──┐
+           │  Integration   │  ~25% (API contract, DB)
+        ┌──┴────────────────┴──┐
+        │     Component        │  ~30% (React components, hooks)
+     ┌──┴──────────────────────┴──┐
+     │          Unit               │  ~40% (business logic, pure functions)
+     └─────────────────────────────┘
+</code></pre></div>
+
+<h3 id="12-coverage-gates">1.2 Coverage Gates</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Coverage target</th>
+<th>CI gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend (.NET)</td>
+<td>80% line coverage</td>
+<td>Blocks merge if &lt; 80%</td>
+</tr>
+<tr>
+<td>Web (React)</td>
+<td>75% line coverage</td>
+<td>Blocks merge if &lt; 75%</td>
+</tr>
+<tr>
+<td>Mobile (RN)</td>
+<td>70% line coverage</td>
+<td>Blocks merge if &lt; 70%</td>
+</tr>
+</tbody>
+</table>
+<p>Coverage measured by:
+- .NET: Coverlet + Cobertura XML → Codecov.
+- React/Vite: Vitest + c8 → Codecov.
+- React Native: Jest + coverage → Codecov.</p>
+<h3 id="13-quality-gates-sonarcloud">1.3 Quality Gates (SonarCloud)</h3>
+<p>Every PR must pass:
+- 0 critical or blocker issues.
+- 0 security hotspots (or all marked as "safe" with justification).
+- Coverage ≥ gate threshold.
+- Duplicated lines &lt; 3%.
+- Cyclomatic complexity &lt; 15 average.
+- Cognitive complexity &lt; 15 average.</p>
+<hr />
+<h2 id="2-backend-testing-net">2. Backend Testing (.NET)</h2>
+<h3 id="21-test-stack">2.1 Test Stack</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>xUnit + FluentAssertions + Moq</td>
+<td>Pure business logic, no DB</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>xUnit + Testcontainers (PostgreSQL, Redis, RabbitMQ)</td>
+<td>API endpoints, DB, real infrastructure</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td>NetArchTest</td>
+<td>Enforce module boundaries, no circular deps</td>
+</tr>
+<tr>
+<td>Load</td>
+<td>k6</td>
+<td>API performance</td>
+</tr>
+<tr>
+<td>Static analysis</td>
+<td>SonarCloud</td>
+<td>Quality gate</td>
+</tr>
+<tr>
+<td>Mutation</td>
+<td>Stryker.NET</td>
+<td>Verify test quality (catches tests that pass with broken code)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-unit-test-example">2.2 Unit Test Example</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// tests/NMS.UnitTests/Application/Attendance/CheckInStudentHandlerTests.cs</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">CheckInStudentHandlerTests</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> Mock</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">IStudentRepository</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> _studentRepoMock;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> Mock</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">IAttendanceRepository</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> _attendanceRepoMock;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> Mock</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">IAuditLogger</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> _auditLoggerMock;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> CheckInStudentHandler _handler;</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">CheckInStudentHandlerTests</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        _studentRepoMock </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Mock</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">IStudentRepository</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">        _attendanceRepoMock </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Mock</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">IAttendanceRepository</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">        _auditLoggerMock </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Mock</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">IAuditLogger</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">        _handler </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> CheckInStudentHandler(</span>
+<span style="color: #F8F8F2">            _studentRepoMock.Object,</span>
+<span style="color: #F8F8F2">            _attendanceRepoMock.Object,</span>
+<span style="color: #F8F8F2">            _auditLoggerMock.Object);</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">[Fact]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">Handle_ValidBarcode_StudentActive_ReturnsSuccess</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Arrange</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;STU-12345&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> student </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Student { Id </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> Guid.NewGuid(), Barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> barcode, Status </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> StudentStatus.Active };</span>
+<span style="color: #F8F8F2">        _studentRepoMock</span>
+<span style="color: #F8F8F2">            .Setup(r </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> r.GetByBarcodeAsync(barcode, It.IsAny</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">CancellationToken</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">()))</span>
+<span style="color: #F8F8F2">            .ReturnsAsync(student);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> command </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> CheckInStudentCommand(barcode, CheckInMethod.Barcode);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Act</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> result </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _handler.Handle(command, CancellationToken.None);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Assert</span>
+<span style="color: #F8F8F2">        result.IsSuccess.Should().BeTrue();</span>
+<span style="color: #F8F8F2">        result.Value.StudentId.Should().Be(student.Id);</span>
+<span style="color: #F8F8F2">        _attendanceRepoMock.Verify(r </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> r.AddAsync(It.Is</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">AttendanceRecord</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">(a </span><span style="color: #FF4689">=&gt;</span>
+<span style="color: #F8F8F2">            a.StudentId </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> student.Id </span><span style="color: #FF4689">&amp;&amp;</span>
+<span style="color: #F8F8F2">            a.CheckInAt </span><span style="color: #FF4689">!=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">null</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span>
+<span style="color: #F8F8F2">            a.CheckInMethod </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> CheckInMethod.Barcode), It.IsAny</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">CancellationToken</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">()), Times.Once);</span>
+<span style="color: #F8F8F2">        _auditLoggerMock.Verify(a </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> a.LogAsync(It.IsAny</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">AuditEvent</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">()), Times.Once);</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">[Fact]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">Handle_StudentAlreadyCheckedIn_ReturnsFailure</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Arrange</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;STU-12345&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> student </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Student { Id </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> Guid.NewGuid(), Barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> barcode, Status </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> StudentStatus.Active };</span>
+<span style="color: #F8F8F2">        _studentRepoMock.Setup(r </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> r.GetByBarcodeAsync(barcode, It.IsAny</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">CancellationToken</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">()))</span>
+<span style="color: #F8F8F2">            .ReturnsAsync(student);</span>
+<span style="color: #F8F8F2">        _attendanceRepoMock.Setup(r </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> r.GetTodayAttendanceAsync(student.Id, It.IsAny</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">CancellationToken</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">()))</span>
+<span style="color: #F8F8F2">            .ReturnsAsync(</span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> AttendanceRecord { CheckInAt </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> DateTime.UtcNow.AddMinutes(</span><span style="color: #FF4689">-</span><span style="color: #AE81FF">30</span><span style="color: #F8F8F2">) });</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> command </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> CheckInStudentCommand(barcode, CheckInMethod.Barcode);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Act</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> result </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _handler.Handle(command, CancellationToken.None);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Assert</span>
+<span style="color: #F8F8F2">        result.IsSuccess.Should().BeFalse();</span>
+<span style="color: #F8F8F2">        result.Error.Code.Should().Be(</span><span style="color: #E6DB74">&quot;ALREADY_CHECKED_IN&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        _attendanceRepoMock.Verify(r </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> r.AddAsync(It.IsAny</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">AttendanceRecord</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">(), It.IsAny</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">CancellationToken</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">()), Times.Never);</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">[Fact]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">Handle_StudentNotFound_ReturnsNotFound</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Arrange</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;INVALID&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        _studentRepoMock.Setup(r </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> r.GetByBarcodeAsync(barcode, It.IsAny</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">CancellationToken</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">()))</span>
+<span style="color: #F8F8F2">            .ReturnsAsync((Student</span><span style="color: #FF4689">?</span><span style="color: #F8F8F2">)</span><span style="color: #66D9EF">null</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> command </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> CheckInStudentCommand(barcode, CheckInMethod.Barcode);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Act</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> result </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _handler.Handle(command, CancellationToken.None);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Assert</span>
+<span style="color: #F8F8F2">        result.IsSuccess.Should().BeFalse();</span>
+<span style="color: #F8F8F2">        result.Error.StatusCode.Should().Be(</span><span style="color: #AE81FF">404</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="23-integration-test-example">2.3 Integration Test Example</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// tests/NMS.IntegrationTests/Api/AttendanceEndpointsTests.cs</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">AttendanceEndpointsTests</span><span style="color: #F8F8F2"> : IClassFixture</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">ApiFactory</span><span style="color: #FF4689">&gt;</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> HttpClient _client;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> ApiFactory _factory;</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">AttendanceEndpointsTests</span><span style="color: #F8F8F2">(ApiFactory factory)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        _factory </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> factory;</span>
+<span style="color: #F8F8F2">        _client </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> factory.CreateClient();</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">[Fact]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">POST_CheckIn_ValidBarcode_Returns200</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Arrange</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.SeedDataAsync(</span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> db </span><span style="color: #FF4689">=&gt;</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            db.Students.Add(</span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Student</span>
+<span style="color: #F8F8F2">            {</span>
+<span style="color: #F8F8F2">                Id </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> Guid.NewGuid(),</span>
+<span style="color: #F8F8F2">                TenantId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> _factory.TenantId,</span>
+<span style="color: #F8F8F2">                Barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;STU-TEST-001&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">                FirstName </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Test&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">                LastName </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Student&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">                DateOfBirth </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> DateOnly(</span><span style="color: #AE81FF">2023</span><span style="color: #F8F8F2">, </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">, </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">),</span>
+<span style="color: #F8F8F2">                Status </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> StudentStatus.Active,</span>
+<span style="color: #F8F8F2">            });</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> db.SaveChangesAsync();</span>
+<span style="color: #F8F8F2">        });</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> token </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.GetTokenForUserAsync(role: </span><span style="color: #E6DB74">&quot;teacher&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        _client.DefaultRequestHeaders.Authorization </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&quot;Bearer&quot;</span><span style="color: #F8F8F2">, token);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Act</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> response </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _client.PostAsJsonAsync(</span><span style="color: #E6DB74">&quot;/api/v1/attendance/actions/check-in&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">new</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            Barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;STU-TEST-001&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">            Method </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;barcode&quot;</span>
+<span style="color: #F8F8F2">        });</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Assert</span>
+<span style="color: #F8F8F2">        response.StatusCode.Should().Be(HttpStatusCode.OK);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> content </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> response.Content.ReadFromJsonAsync</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">ApiResponse</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">AttendanceDto</span><span style="color: #FF4689">&gt;&gt;</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">        content</span><span style="color: #FF4689">!</span><span style="color: #F8F8F2">.Success.Should().BeTrue();</span>
+<span style="color: #F8F8F2">        content.Data</span><span style="color: #FF4689">!</span><span style="color: #F8F8F2">.CheckInAt.Should().NotBeNull();</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">[Fact]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">POST_CheckIn_ParentAttenptingOtherChild_Returns404</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Arrange — parent A owns student A, attempts to check in student B</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> parentA </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.CreateUserAsync(role: </span><span style="color: #E6DB74">&quot;parent&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> studentA </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.CreateStudentAsync();</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> studentB </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.CreateStudentAsync();</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.LinkParentToStudentAsync(parentA, studentA);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> token </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.GetTokenForUserAsync(parentA);</span>
+<span style="color: #F8F8F2">        _client.DefaultRequestHeaders.Authorization </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&quot;Bearer&quot;</span><span style="color: #F8F8F2">, token);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Act</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> response </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _client.PostAsJsonAsync(</span><span style="color: #E6DB74">&quot;/api/v1/attendance/actions/check-in&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">new</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            Barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> studentB.Barcode,</span>
+<span style="color: #F8F8F2">            Method </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;barcode&quot;</span>
+<span style="color: #F8F8F2">        });</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Assert — 404 not 403 (prevents ID enumeration)</span>
+<span style="color: #F8F8F2">        response.StatusCode.Should().Be(HttpStatusCode.NotFound);</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">[Fact]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">POST_CheckIn_CrossTenant_Returns404</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Arrange — staff from tenant A attempts to check in student from tenant B</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> tenantA </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.CreateTenantAsync(</span><span style="color: #E6DB74">&quot;tenant-a&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> tenantB </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.CreateTenantAsync(</span><span style="color: #E6DB74">&quot;tenant-b&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> staffA </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.CreateUserAsync(tenantA, role: </span><span style="color: #E6DB74">&quot;teacher&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> studentB </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.CreateStudentAsync(tenantB);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> token </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _factory.GetTokenForUserAsync(staffA);</span>
+<span style="color: #F8F8F2">        _client.DefaultRequestHeaders.Authorization </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&quot;Bearer&quot;</span><span style="color: #F8F8F2">, token);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Act</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> response </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _client.PostAsJsonAsync(</span><span style="color: #E6DB74">&quot;/api/v1/attendance/actions/check-in&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">new</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            Barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> studentB.Barcode,</span>
+<span style="color: #F8F8F2">            Method </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;barcode&quot;</span>
+<span style="color: #F8F8F2">        });</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Assert</span>
+<span style="color: #F8F8F2">        response.StatusCode.Should().Be(HttpStatusCode.NotFound);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="24-architecture-tests-netarchtest">2.4 Architecture Tests (NetArchTest)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// tests/NMS.ArchitectureTests/ModuleBoundariesTests.cs</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">ModuleBoundariesTests</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">[Fact]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">void</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">Modules_ShouldNotReference_OtherModulesInternals</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> modules </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2">[]</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">typeof</span><span style="color: #F8F8F2">(NMS.Modules.Attendance.AssemblyMarker),</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">typeof</span><span style="color: #F8F8F2">(NMS.Modules.Billing.AssemblyMarker),</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">typeof</span><span style="color: #F8F8F2">(NMS.Modules.CentreManagement.AssemblyMarker),</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">typeof</span><span style="color: #F8F8F2">(NMS.Modules.Messaging.AssemblyMarker),</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">typeof</span><span style="color: #F8F8F2">(NMS.Modules.Notifications.AssemblyMarker),</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">typeof</span><span style="color: #F8F8F2">(NMS.Modules.ParentCommunication.AssemblyMarker),</span>
+<span style="color: #F8F8F2">        };</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">foreach</span><span style="color: #F8F8F2"> (</span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> module </span><span style="color: #66D9EF">in</span><span style="color: #F8F8F2"> modules)</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> otherModules </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> modules.Where(m </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> m </span><span style="color: #FF4689">!=</span><span style="color: #F8F8F2"> module).ToArray();</span>
+
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> result </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> Types.InAssembly(module.Assembly)</span>
+<span style="color: #F8F8F2">                .ShouldNot()</span>
+<span style="color: #F8F8F2">                .HaveDependencyOnAny(otherModules.Select(m </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> m.Namespace</span><span style="color: #FF4689">!</span><span style="color: #F8F8F2">).ToArray())</span>
+<span style="color: #F8F8F2">                .GetResult();</span>
+
+<span style="color: #F8F8F2">            result.IsSuccessful.Should().BeTrue(</span>
+<span style="color: #F8F8F2">                </span><span style="color: #E6DB74">$&quot;Module {module.Namespace} should not depend on other modules&#39; internals. Failing types: {string.Join(&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;, result.FailingTypeNames ?? Array.Empty&lt;string&gt;())}&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        }</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">[Fact]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">void</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">Controllers_ShouldNotReference_RepositoriesDirectly</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> result </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> Types.InCurrentDomain()</span>
+<span style="color: #F8F8F2">            .That().HaveNameEndingWith(</span><span style="color: #E6DB74">&quot;Controller&quot;</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">            .ShouldNot().HaveDependencyOnAny(</span><span style="color: #E6DB74">&quot;NMS.Infrastructure.Persistence.Repositories&quot;</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">            .GetResult();</span>
+
+<span style="color: #F8F8F2">        result.IsSuccessful.Should().BeTrue();</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="3-web-frontend-testing">3. Web Frontend Testing</h2>
+<h3 id="31-test-stack">3.1 Test Stack</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>Vitest</td>
+<td>Pure functions, hooks</td>
+</tr>
+<tr>
+<td>Component</td>
+<td>Vitest + React Testing Library + MSW</td>
+<td>Component rendering + interactions</td>
+</tr>
+<tr>
+<td>Visual regression</td>
+<td>Playwright + Percy/Chromatic</td>
+<td>Catch visual changes</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>Playwright</td>
+<td>Critical user journeys</td>
+</tr>
+<tr>
+<td>A11y</td>
+<td>axe-core + vitest-axe + @axe-core/playwright</td>
+<td>Accessibility</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-component-test-example">3.2 Component Test Example</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// src/modules/centre-management/components/StudentForm.test.tsx</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">render</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">waitFor</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;@testing-library/react&#39;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">userEvent</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;@testing-library/user-event&#39;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">StudentForm</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;./StudentForm&#39;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">server</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;@/test/mocks/server&#39;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">rest</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;msw&#39;</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #A6E22E">describe</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;StudentForm&#39;</span><span style="color: #F8F8F2">, () =&gt; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">it</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should submit valid form data&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">onSubmit</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">vi</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">fn</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">userEvent</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">setup</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">render</span><span style="color: #F8F8F2">(&lt;</span><span style="color: #FF4689">StudentForm</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">onSubmit</span><span style="color: #FF4689">=</span><span style="color: #F8F8F2">{</span><span style="color: #A6E22E">onSubmit</span><span style="color: #F8F8F2">} /&gt;);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2">.</span><span style="color: #66D9EF">type</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">getByLabelText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">/first name/i</span><span style="color: #F8F8F2">), </span><span style="color: #E6DB74">&#39;Ahmed&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2">.</span><span style="color: #66D9EF">type</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">getByLabelText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">/last name/i</span><span style="color: #F8F8F2">), </span><span style="color: #E6DB74">&#39;Ali&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2">.</span><span style="color: #66D9EF">type</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">getByLabelText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">/date of birth/i</span><span style="color: #F8F8F2">), </span><span style="color: #E6DB74">&#39;2023-01-15&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">click</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">getByRole</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;button&#39;</span><span style="color: #F8F8F2">, { </span><span style="color: #A6E22E">name</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">/save/i</span><span style="color: #F8F8F2"> }));</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">waitFor</span><span style="color: #F8F8F2">(() =&gt; {</span>
+<span style="color: #F8F8F2">      </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">onSubmit</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">toHaveBeenCalledWith</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">objectContaining</span><span style="color: #F8F8F2">({</span>
+<span style="color: #F8F8F2">        </span><span style="color: #A6E22E">firstName</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;Ahmed&#39;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">        </span><span style="color: #A6E22E">lastName</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;Ali&#39;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">        </span><span style="color: #A6E22E">dateOfBirth</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;2023-01-15&#39;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      }));</span>
+<span style="color: #F8F8F2">    });</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">it</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should show validation errors for empty required fields&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">userEvent</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">setup</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">render</span><span style="color: #F8F8F2">(&lt;</span><span style="color: #FF4689">StudentForm</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">onSubmit</span><span style="color: #FF4689">=</span><span style="color: #F8F8F2">{</span><span style="color: #A6E22E">vi</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">fn</span><span style="color: #F8F8F2">()} /&gt;);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">click</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">getByRole</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;button&#39;</span><span style="color: #F8F8F2">, { </span><span style="color: #A6E22E">name</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">/save/i</span><span style="color: #F8F8F2"> }));</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">findByText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">/first name is required/i</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">toBeInTheDocument</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">getByText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">/last name is required/i</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">toBeInTheDocument</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">it</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should handle API error gracefully&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">server</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">use</span><span style="color: #F8F8F2">(</span>
+<span style="color: #F8F8F2">      </span><span style="color: #A6E22E">rest</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">post</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;/api/v1/students&#39;</span><span style="color: #F8F8F2">, (</span><span style="color: #A6E22E">req</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">res</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">ctx</span><span style="color: #F8F8F2">) =&gt; {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">res</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">ctx</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">status</span><span style="color: #F8F8F2">(</span><span style="color: #AE81FF">409</span><span style="color: #F8F8F2">), </span><span style="color: #A6E22E">ctx</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">json</span><span style="color: #F8F8F2">({</span>
+<span style="color: #F8F8F2">          </span><span style="color: #A6E22E">success</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">          </span><span style="color: #A6E22E">errors</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> [{ </span><span style="color: #A6E22E">code</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;DUPLICATE_RESOURCE&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">message</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;Barcode already exists&#39;</span><span style="color: #F8F8F2"> }],</span>
+<span style="color: #F8F8F2">        }));</span>
+<span style="color: #F8F8F2">      })</span>
+<span style="color: #F8F8F2">    );</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">userEvent</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">setup</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">render</span><span style="color: #F8F8F2">(&lt;</span><span style="color: #FF4689">StudentForm</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">onSubmit</span><span style="color: #FF4689">=</span><span style="color: #F8F8F2">{</span><span style="color: #A6E22E">vi</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">fn</span><span style="color: #F8F8F2">()} /&gt;);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2">.</span><span style="color: #66D9EF">type</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">getByLabelText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">/first name/i</span><span style="color: #F8F8F2">), </span><span style="color: #E6DB74">&#39;Ahmed&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Fill all required fields...</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">user</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">click</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">getByRole</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;button&#39;</span><span style="color: #F8F8F2">, { </span><span style="color: #A6E22E">name</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">/save/i</span><span style="color: #F8F8F2"> }));</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">screen</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">findByText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">/barcode already exists/i</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">toBeInTheDocument</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">it</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should have no accessibility violations&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">container</span><span style="color: #F8F8F2"> } </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">render</span><span style="color: #F8F8F2">(&lt;</span><span style="color: #FF4689">StudentForm</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">onSubmit</span><span style="color: #FF4689">=</span><span style="color: #F8F8F2">{</span><span style="color: #A6E22E">vi</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">fn</span><span style="color: #F8F8F2">()} /&gt;);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">results</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">axe</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">container</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">results</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">toHaveNoViolations</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">  });</span>
+<span style="color: #F8F8F2">});</span>
+</code></pre></div>
+
+<h3 id="33-e2e-test-example-playwright">3.3 E2E Test Example (Playwright)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// e2e/attendance.spec.ts</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">test</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;@playwright/test&#39;</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #A6E22E">test</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">describe</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;Attendance&#39;</span><span style="color: #F8F8F2">, () =&gt; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">test</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">beforeEach</span><span style="color: #F8F8F2">(</span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> ({ </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2"> }) =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">loginAsStaff</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;teacher@brightfutures.ae&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;password&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">test</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should check in student via manual button&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> ({ </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2"> }) =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #66D9EF">goto</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;/attendance&#39;</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">studentRow</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">locator</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;tr&#39;</span><span style="color: #F8F8F2">, { </span><span style="color: #A6E22E">hasText</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;Ahmed Ali&#39;</span><span style="color: #F8F8F2"> });</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">studentRow</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">locator</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;[data-testid=&quot;check-in-button&quot;]&#39;</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">click</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">studentRow</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">toContainText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;Checked In&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">locator</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;[data-testid=&quot;check-in-success&quot;]&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">toBeVisible</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">test</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should show ratio breach alert when ratio falls below threshold&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> ({ </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2"> }) =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #66D9EF">goto</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;/dashboard&#39;</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Trigger ratio breach via test helper</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">evaluate</span><span style="color: #F8F8F2">(() =&gt; {</span>
+<span style="color: #F8F8F2">      window.</span><span style="color: #A6E22E">dispatchEvent</span><span style="color: #F8F8F2">(</span><span style="color: #FF4689">new</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">CustomEvent</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;test:trigger-ratio-breach&#39;</span><span style="color: #F8F8F2">, {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #A6E22E">detail</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">roomId</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;room-1&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">studentsPresent</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">10</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">staffPresent</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">1</span><span style="color: #F8F8F2"> }</span>
+<span style="color: #F8F8F2">      }));</span>
+<span style="color: #F8F8F2">    });</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">locator</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;[data-testid=&quot;critical-banner&quot;]&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">toBeVisible</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">locator</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;[data-testid=&quot;critical-banner&quot;]&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">toContainText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">/ratio breach/i</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">test</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should display correctly in Arabic RTL&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> ({ </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2"> }) =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">click</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;[data-testid=&quot;language-switcher&quot;]&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">click</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;text=العربية&#39;</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">toHaveURL</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">/.*lang=ar/</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">locator</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;html&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">toHaveAttribute</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;dir&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;rtl&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">locator</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;h1&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">toContainText</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;الحضور&#39;</span><span style="color: #F8F8F2">); </span><span style="color: #959077">// &quot;Attendance&quot; in Arabic</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Verify layout mirrors correctly</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">sidebar</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">locator</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;[data-testid=&quot;sidebar&quot;]&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">sidebarBox</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">sidebar</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">boundingBox</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">sidebarBox</span><span style="color: #FF4689">?</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">x</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">toBeLessThan</span><span style="color: #F8F8F2">(</span><span style="color: #AE81FF">100</span><span style="color: #F8F8F2">); </span><span style="color: #959077">// Sidebar on left in LTR... wait, in RTL should be on right</span>
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Actually in RTL, sidebar is on right side</span>
+<span style="color: #F8F8F2">  });</span>
+<span style="color: #F8F8F2">});</span>
+</code></pre></div>
+
+<h3 id="34-visual-regression-tests">3.4 Visual Regression Tests</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// e2e/visual-regression.spec.ts</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">test</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;@playwright/test&#39;</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #A6E22E">test</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">describe</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;Visual regression&#39;</span><span style="color: #F8F8F2">, () =&gt; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">test</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">describe</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">configure</span><span style="color: #F8F8F2">({ </span><span style="color: #A6E22E">mode</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;parallel&#39;</span><span style="color: #F8F8F2"> });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">for</span><span style="color: #F8F8F2"> (</span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">locale</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">of</span><span style="color: #F8F8F2"> [</span><span style="color: #E6DB74">&#39;en&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;ar&#39;</span><span style="color: #F8F8F2">]) {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">for</span><span style="color: #F8F8F2"> (</span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">theme</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">of</span><span style="color: #F8F8F2"> [</span><span style="color: #E6DB74">&#39;light&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;dark&#39;</span><span style="color: #F8F8F2">]) {</span>
+<span style="color: #F8F8F2">      </span><span style="color: #A6E22E">test</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">`dashboard - ${</span><span style="color: #A6E22E">locale</span><span style="color: #E6DB74">} - ${</span><span style="color: #A6E22E">theme</span><span style="color: #E6DB74">}`</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> ({ </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2"> }) =&gt; {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #66D9EF">goto</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">`/dashboard?lang=${</span><span style="color: #A6E22E">locale</span><span style="color: #E6DB74">}&amp;theme=${</span><span style="color: #A6E22E">theme</span><span style="color: #E6DB74">}`</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">waitForLoadState</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;networkidle&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">toHaveScreenshot</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">`dashboard-${</span><span style="color: #A6E22E">locale</span><span style="color: #E6DB74">}-${</span><span style="color: #A6E22E">theme</span><span style="color: #E6DB74">}.png`</span><span style="color: #F8F8F2">, {</span>
+<span style="color: #F8F8F2">          </span><span style="color: #A6E22E">fullPage</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">          </span><span style="color: #A6E22E">maxDiffPixelRatio</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">0.01</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">        });</span>
+<span style="color: #F8F8F2">      });</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">});</span>
+</code></pre></div>
+
+<hr />
+<h2 id="4-mobile-testing">4. Mobile Testing</h2>
+<h3 id="41-test-stack">4.1 Test Stack</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>Jest</td>
+<td>Pure functions, hooks</td>
+</tr>
+<tr>
+<td>Component</td>
+<td>Jest + React Native Testing Library</td>
+<td>Component rendering</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>Detox</td>
+<td>Real device/simulator flows</td>
+</tr>
+<tr>
+<td>A11y</td>
+<td>Manual (VoiceOver, TalkBack)</td>
+<td>Screen reader testing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-detox-e2e-example">4.2 Detox E2E Example</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// e2e/attendance.spec.js</span>
+<span style="color: #A6E22E">describe</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;Attendance&#39;</span><span style="color: #F8F8F2">, () =&gt; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">beforeAll</span><span style="color: #F8F8F2">(</span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">device</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">launchApp</span><span style="color: #F8F8F2">({ </span><span style="color: #A6E22E">newInstance</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2"> });</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">loginAsStaff</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;teacher@brightfutures.ae&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;password&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">beforeEach</span><span style="color: #F8F8F2">(</span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">device</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">reloadReactNative</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">it</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should navigate to attendance and check in student&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;tab-attendance&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">tap</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Wait for student list to load</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">waitFor</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">text</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;Ahmed Ali&#39;</span><span style="color: #F8F8F2">))).</span><span style="color: #A6E22E">toBeVisible</span><span style="color: #F8F8F2">().</span><span style="color: #A6E22E">withTimeout</span><span style="color: #F8F8F2">(</span><span style="color: #AE81FF">5000</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Tap check-in button for first student</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;check-in-button&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">atIndex</span><span style="color: #F8F8F2">(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">tap</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Verify success overlay</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;check-in-success&#39;</span><span style="color: #F8F8F2">))).</span><span style="color: #A6E22E">toBeVisible</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">waitFor</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;check-in-success&#39;</span><span style="color: #F8F8F2">))).</span><span style="color: #A6E22E">toBeNotVisible</span><span style="color: #F8F8F2">().</span><span style="color: #A6E22E">withTimeout</span><span style="color: #F8F8F2">(</span><span style="color: #AE81FF">3000</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Verify student status updated</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">text</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;Ahmed Ali&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">withDescendant</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">text</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;Checked In&#39;</span><span style="color: #F8F8F2">))).</span><span style="color: #A6E22E">toBeVisible</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">it</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should scan barcode via camera&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;tab-attendance&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">tap</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;scan-button&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">tap</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Mock camera barcode detection (Detox test helper)</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">device</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">mockBarcodeScan</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;STU-12345&#39;</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;check-in-success&#39;</span><span style="color: #F8F8F2">))).</span><span style="color: #A6E22E">toBeVisible</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">it</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should work offline (queue check-in)&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">device</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">setURLBlacklist</span><span style="color: #F8F8F2">([</span><span style="color: #E6DB74">&#39;.*api.nms.ae.*&#39;</span><span style="color: #F8F8F2">]);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;tab-attendance&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">tap</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;check-in-button&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">atIndex</span><span style="color: #F8F8F2">(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">tap</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">text</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;Queued (offline)&#39;</span><span style="color: #F8F8F2">))).</span><span style="color: #A6E22E">toBeVisible</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Restore network</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">device</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">setURLBlacklist</span><span style="color: #F8F8F2">([]);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Trigger sync</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">id</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;sync-now&#39;</span><span style="color: #F8F8F2">)).</span><span style="color: #A6E22E">tap</span><span style="color: #F8F8F2">();</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">element</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">by</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">text</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;Synced&#39;</span><span style="color: #F8F8F2">))).</span><span style="color: #A6E22E">toBeVisible</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">  });</span>
+<span style="color: #F8F8F2">});</span>
+</code></pre></div>
+
+<hr />
+<h2 id="5-performance-testing">5. Performance Testing</h2>
+<h3 id="51-tools">5.1 Tools</h3>
+<ul>
+<li><strong>k6</strong> for API load testing.</li>
+<li><strong>Playwright Tracing</strong> for web performance profiling.</li>
+<li><strong>Firebase Performance Monitoring</strong> for mobile.</li>
+</ul>
+<h3 id="52-k6-load-test-example">5.2 k6 Load Test Example</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// infra/load-tests/dashboard-load.js</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">http</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;k6/http&#39;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">check</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">sleep</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;k6&#39;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">Rate</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;k6/metrics&#39;</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">successRate</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">new</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">Rate</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;success_rate&#39;</span><span style="color: #F8F8F2">);</span>
+
+<span style="color: #66D9EF">export</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">options</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">stages</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> [</span>
+<span style="color: #F8F8F2">    { </span><span style="color: #A6E22E">duration</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;30s&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">target</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">50</span><span style="color: #F8F8F2"> },   </span><span style="color: #959077">// Ramp up to 50 users</span>
+<span style="color: #F8F8F2">    { </span><span style="color: #A6E22E">duration</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;1m&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">target</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">50</span><span style="color: #F8F8F2"> },    </span><span style="color: #959077">// Stay at 50</span>
+<span style="color: #F8F8F2">    { </span><span style="color: #A6E22E">duration</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;30s&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">target</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">100</span><span style="color: #F8F8F2"> },  </span><span style="color: #959077">// Ramp up to 100</span>
+<span style="color: #F8F8F2">    { </span><span style="color: #A6E22E">duration</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;2m&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">target</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">100</span><span style="color: #F8F8F2"> },   </span><span style="color: #959077">// Stay at 100 (Phase 1 target)</span>
+<span style="color: #F8F8F2">    { </span><span style="color: #A6E22E">duration</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;30s&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">target</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">200</span><span style="color: #F8F8F2"> },  </span><span style="color: #959077">// Spike to 200</span>
+<span style="color: #F8F8F2">    { </span><span style="color: #A6E22E">duration</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;1m&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">target</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">200</span><span style="color: #F8F8F2"> },   </span><span style="color: #959077">// Stay at 200 (stress test)</span>
+<span style="color: #F8F8F2">    { </span><span style="color: #A6E22E">duration</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;30s&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">target</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> },    </span><span style="color: #959077">// Ramp down</span>
+<span style="color: #F8F8F2">  ],</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">thresholds</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">http_req_duration</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> [</span><span style="color: #E6DB74">&#39;p(95)&lt;2000&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;p(99)&lt;3000&#39;</span><span style="color: #F8F8F2">],  </span><span style="color: #959077">// 95% &lt; 2s, 99% &lt; 3s</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">http_req_failed</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> [</span><span style="color: #E6DB74">&#39;rate&lt;0.01&#39;</span><span style="color: #F8F8F2">],  </span><span style="color: #959077">// &lt; 1% errors</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">success_rate</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> [</span><span style="color: #E6DB74">&#39;rate&gt;0.99&#39;</span><span style="color: #F8F8F2">],</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">};</span>
+
+<span style="color: #66D9EF">export</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">default</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">function</span><span style="color: #F8F8F2"> () {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">token</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">__ENV</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">AUTH_TOKEN</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">response</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">http</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">get</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;https://staging.nms.ae/api/v1/dashboard/kpis&#39;</span><span style="color: #F8F8F2">, {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">headers</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">Authorization</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">`Bearer ${</span><span style="color: #A6E22E">token</span><span style="color: #E6DB74">}`</span><span style="color: #F8F8F2"> },</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">isSuccess</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">check</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">response</span><span style="color: #F8F8F2">, {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #E6DB74">&#39;status is 200&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> (</span><span style="color: #A6E22E">r</span><span style="color: #F8F8F2">) =&gt; </span><span style="color: #A6E22E">r</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">status</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">===</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">200</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #E6DB74">&#39;response has data&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> (</span><span style="color: #A6E22E">r</span><span style="color: #F8F8F2">) =&gt; </span><span style="color: #A6E22E">r</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">json</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;success&#39;</span><span style="color: #F8F8F2">) </span><span style="color: #FF4689">===</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #E6DB74">&#39;response time &lt; 2s&#39;</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> (</span><span style="color: #A6E22E">r</span><span style="color: #F8F8F2">) =&gt; </span><span style="color: #A6E22E">r</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">timings</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">duration</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">2000</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  });</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">successRate</span><span style="color: #F8F8F2">.</span><span style="color: #A6E22E">add</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">isSuccess</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">sleep</span><span style="color: #F8F8F2">(</span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">);  </span><span style="color: #959077">// 1 RPS per virtual user</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="53-performance-budgets">5.3 Performance Budgets</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Target p50</th>
+<th>Target p95</th>
+<th>Target p99</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dashboard KPIs</td>
+<td>200ms</td>
+<td>500ms</td>
+<td>1s</td>
+</tr>
+<tr>
+<td>Student list (50 students)</td>
+<td>100ms</td>
+<td>300ms</td>
+<td>500ms</td>
+</tr>
+<tr>
+<td>Activity feed (cursor paginated)</td>
+<td>150ms</td>
+<td>400ms</td>
+<td>800ms</td>
+</tr>
+<tr>
+<td>Check-in/out</td>
+<td>100ms</td>
+<td>250ms</td>
+<td>500ms</td>
+</tr>
+<tr>
+<td>Invoice generation (batch)</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>&lt; 30s (async)</td>
+</tr>
+<tr>
+<td>Emergency report (single PDF)</td>
+<td>500ms</td>
+<td>1s</td>
+<td>2s</td>
+</tr>
+<tr>
+<td>Emergency report bulk (whole room)</td>
+<td>2s</td>
+<td>5s</td>
+<td>10s</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-web-performance-targets">5.4 Web Performance Targets</h3>
+<ul>
+<li>LCP (Largest Contentful Paint): &lt; 2s.</li>
+<li>FID (First Input Delay): &lt; 100ms.</li>
+<li>CLS (Cumulative Layout Shift): &lt; 0.1.</li>
+<li>TTI (Time to Interactive): &lt; 3s.</li>
+<li>Lighthouse Performance: &gt; 90.</li>
+</ul>
+<h3 id="55-mobile-performance-targets">5.5 Mobile Performance Targets</h3>
+<ul>
+<li>App launch to interactive: &lt; 2s (cold start), &lt; 1s (warm).</li>
+<li>Activity feed scroll: 60 FPS (no jank).</li>
+<li>Photo upload (presigned URL flow): &lt; 5s for 5MB image.</li>
+<li>Push notification delivery: &lt; 30s from event to device.</li>
+</ul>
+<h3 id="56-performance-ci-gate">5.6 Performance CI Gate</h3>
+<p>Every PR runs:
+- k6 smoke test (10 virtual users, 30 seconds).
+- Lighthouse audit on key pages (dashboard, attendance, parent feed).
+- Bundle size check (warn if &gt; budget).</p>
+<p>Staging nightly:
+- Full k6 load test (Phase 1 target: 100 concurrent users).
+- Lighthouse audit on all routes.</p>
+<hr />
+<h2 id="6-accessibility-testing">6. Accessibility Testing</h2>
+<h3 id="61-automated-ci">6.1 Automated (CI)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// Every component test runs axe</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">axe</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;vitest-axe&#39;</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #A6E22E">it</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;should have no accessibility violations&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> () =&gt; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">container</span><span style="color: #F8F8F2"> } </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">render</span><span style="color: #F8F8F2">(&lt;</span><span style="color: #FF4689">Button</span><span style="color: #F8F8F2">&gt;</span><span style="color: #A6E22E">Save</span><span style="color: #F8F8F2">&lt;/</span><span style="color: #FF4689">Button</span><span style="color: #F8F8F2">&gt;);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">const</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">results</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">axe</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">container</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">expect</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">results</span><span style="color: #F8F8F2">).</span><span style="color: #A6E22E">toHaveNoViolations</span><span style="color: #F8F8F2">();</span>
+<span style="color: #F8F8F2">});</span>
+
+<span style="color: #959077">// E2E tests run axe on every page</span>
+<span style="color: #66D9EF">import</span><span style="color: #F8F8F2"> { </span><span style="color: #A6E22E">injectAxe</span><span style="color: #F8F8F2">, </span><span style="color: #A6E22E">checkA11y</span><span style="color: #F8F8F2"> } </span><span style="color: #66D9EF">from</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;axe-playwright&#39;</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #A6E22E">test</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;dashboard has no a11y violations&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> ({ </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2"> }) =&gt; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">.</span><span style="color: #66D9EF">goto</span><span style="color: #F8F8F2">(</span><span style="color: #E6DB74">&#39;/dashboard&#39;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">injectAxe</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">checkA11y</span><span style="color: #F8F8F2">(</span><span style="color: #A6E22E">page</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">undefined</span><span style="color: #F8F8F2">, {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">detailedReport</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  });</span>
+<span style="color: #F8F8F2">});</span>
+</code></pre></div>
+
+<h3 id="62-manual-testing-checklist-before-each-phase-go-live">6.2 Manual Testing Checklist (Before Each Phase Go-Live)</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Tool</th>
+<th>Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Screen reader (parent portal)</td>
+<td>NVDA on Windows</td>
+<td>Each phase go-live</td>
+</tr>
+<tr>
+<td>Screen reader (parent portal)</td>
+<td>VoiceOver on macOS</td>
+<td>Each phase go-live</td>
+</tr>
+<tr>
+<td>Screen reader (mobile app)</td>
+<td>VoiceOver on iOS</td>
+<td>Each phase go-live</td>
+</tr>
+<tr>
+<td>Screen reader (mobile app)</td>
+<td>TalkBack on Android</td>
+<td>Each phase go-live</td>
+</tr>
+<tr>
+<td>Keyboard-only navigation</td>
+<td>Browser</td>
+<td>Each phase go-live</td>
+</tr>
+<tr>
+<td>High contrast mode</td>
+<td>Windows High Contrast</td>
+<td>Each phase go-live</td>
+</tr>
+<tr>
+<td>200% zoom</td>
+<td>Browser</td>
+<td>Each phase go-live</td>
+</tr>
+<tr>
+<td>Color blindness simulator</td>
+<td>Chrome DevTools</td>
+<td>Each phase go-live</td>
+</tr>
+<tr>
+<td>Cognitive test</td>
+<td>Wave extension</td>
+<td>Each phase go-live</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-wcag-21-aa-compliance-checklist">6.3 WCAG 2.1 AA Compliance Checklist</h3>
+<ul>
+<li>[ ] All non-decorative images have meaningful alt text.</li>
+<li>[ ] Form inputs have associated labels (not just placeholders).</li>
+<li>[ ] Color is never the only indicator of meaning (icon + text too).</li>
+<li>[ ] Color contrast meets 4.5:1 (normal text) / 3:1 (large text).</li>
+<li>[ ] All interactive elements reachable via Tab.</li>
+<li>[ ] Visible focus indicator on all interactive elements.</li>
+<li>[ ] Skip-to-content link on every page.</li>
+<li>[ ] Headings are hierarchical (no skipped levels).</li>
+<li>[ ] ARIA labels on icon-only buttons.</li>
+<li>[ ] Live regions (<code>aria-live</code>) announce dynamic content.</li>
+<li>[ ] Modals trap focus, return focus on close.</li>
+<li>[ ] Page has logical reading order in DOM.</li>
+<li>[ ] Page works with CSS disabled (semantic HTML).</li>
+<li>[ ] Form errors are announced (not just visually shown).</li>
+</ul>
+<hr />
+<h2 id="7-security-testing">7. Security Testing</h2>
+<h3 id="71-sast-static-analysis">7.1 SAST (Static Analysis)</h3>
+<ul>
+<li><strong>SonarCloud</strong>: scans every PR for security hotspots.</li>
+<li><strong>Semgrep</strong>: custom rules for NMS-specific patterns (e.g., "no raw SQL without parameterization").</li>
+</ul>
+<h3 id="72-sca-software-composition-analysis">7.2 SCA (Software Composition Analysis)</h3>
+<ul>
+<li><strong>OWASP Dependency Check</strong>: scans .NET + npm dependencies on every PR.</li>
+<li><strong>GitHub Dependabot</strong>: opens PRs for vulnerable dependencies.</li>
+<li><strong>Snyk</strong> (optional): additional scanning.</li>
+</ul>
+<h3 id="73-dast-dynamic-analysis">7.3 DAST (Dynamic Analysis)</h3>
+<ul>
+<li><strong>OWASP ZAP</strong>: weekly scan of staging environment.</li>
+<li>Findings triaged within 1 week (critical: immediate).</li>
+</ul>
+<h3 id="74-container-scanning">7.4 Container Scanning</h3>
+<ul>
+<li><strong>Trivy</strong>: scans every Docker image on push.</li>
+<li>Critical findings block deployment.</li>
+</ul>
+<h3 id="75-iac-scanning">7.5 IaC Scanning</h3>
+<ul>
+<li><strong>tfsec</strong>: scans Terraform on every PR.</li>
+<li><strong>checkov</strong>: additional IaC scanning.</li>
+</ul>
+<h3 id="76-secrets-scanning">7.6 Secrets Scanning</h3>
+<ul>
+<li><strong>GitGuardian</strong>: scans every push for committed secrets.</li>
+<li><strong>GitHub Secret Scanning</strong>: additional coverage.</li>
+</ul>
+<h3 id="77-penetration-testing">7.7 Penetration Testing</h3>
+<p>External pen test before each phase go-live:
+- <strong>Phase 1 go-live</strong> (Sprint 17): full OWASP Top 10 + business logic.
+- <strong>Phase 2 go-live</strong> (Sprint 26): new modules + mobile app.
+- <strong>Phase 3 go-live</strong> (Sprint 30): payment gateway + multi-tenancy + Open API.
+- <strong>Annual</strong> (ongoing): annual pen test by 3rd party.</p>
+<hr />
+<h2 id="8-mutation-testing-sample-not-every-pr">8. Mutation Testing (Sample, Not Every PR)</h2>
+<p>To verify test quality (catches "tests that pass with broken code"):</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># Backend</span>
+dotnet<span style="color: #F8F8F2"> </span>stryker<span style="color: #F8F8F2"> </span>--project<span style="color: #F8F8F2"> </span>NMS.Application<span style="color: #F8F8F2"> </span>--reporter<span style="color: #F8F8F2"> </span>html
+
+<span style="color: #959077"># Web</span>
+npx<span style="color: #F8F8F2"> </span>@stryker-mutator/core<span style="color: #F8F8F2"> </span>run<span style="color: #F8F8F2"> </span>--config<span style="color: #F8F8F2"> </span>stryker.config.json
+</code></pre></div>
+
+<p>Run on critical modules before each phase go-live. Mutation score target: &gt; 70%.</p>
+<hr />
+<h2 id="9-test-data-management">9. Test Data Management</h2>
+<h3 id="91-dev-environment-seed-data">9.1 Dev Environment Seed Data</h3>
+<p><code>backend/src/NMS.Api/DevDataSeeder.cs</code> seeds:
+- 1 tenant (Bright Futures Nursery).
+- 8 staff users (1 per role).
+- 30 students with guardians, distributed across 4 rooms.
+- 4 rooms, 3 programs, 6 groups.
+- 2 weeks of attendance history.
+- 50 activity posts (mixed types, mixed approval status).
+- 20 messages across 10 threads.
+- 5 invoices (mixed statuses).
+- 10 enquiries (mixed stages).
+- Audit log with 100+ entries.</p>
+<p>Reset weekly (Monday 3 AM via Hangfire job).</p>
+<h3 id="92-staging-data">9.2 Staging Data</h3>
+<p>Anonymized production snapshot, refreshed monthly:
+- Strip PII (names → "Student 1, 2, 3", emails → "user1@example.com").
+- Preserve data shape + volume.
+- Same tenant structure as production (single tenant).</p>
+<h3 id="93-test-data-builders">9.3 Test Data Builders</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// tests/NMS.IntegrationTests/Builders/StudentBuilder.cs</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">StudentBuilder</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> Student _student </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        Id </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> Guid.NewGuid(),</span>
+<span style="color: #F8F8F2">        TenantId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> Guid.NewGuid(),</span>
+<span style="color: #F8F8F2">        FirstName </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Test&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">        LastName </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Student&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">        DateOfBirth </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> DateOnly(</span><span style="color: #AE81FF">2023</span><span style="color: #F8F8F2">, </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">, </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">),</span>
+<span style="color: #F8F8F2">        Status </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> StudentStatus.Active,</span>
+<span style="color: #F8F8F2">        Barcode </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">$&quot;STU-{Guid.NewGuid():N}&quot;</span><span style="color: #F8F8F2">.Substring(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">, </span><span style="color: #AE81FF">15</span><span style="color: #F8F8F2">),</span>
+<span style="color: #F8F8F2">    };</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> StudentBuilder </span><span style="color: #A6E22E">WithTenant</span><span style="color: #F8F8F2">(Guid tenantId)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        _student.TenantId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> tenantId;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">this</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> StudentBuilder </span><span style="color: #A6E22E">WithStatus</span><span style="color: #F8F8F2">(StudentStatus status)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        _student.Status </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> status;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">this</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> StudentBuilder </span><span style="color: #A6E22E">InRoom</span><span style="color: #F8F8F2">(Guid roomId)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        _student.RoomId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> roomId;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">this</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> Student </span><span style="color: #A6E22E">Build</span><span style="color: #F8F8F2">() </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> _student;</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="10-continuous-quality">10. Continuous Quality</h2>
+<h3 id="101-pr-review-checklist">10.1 PR Review Checklist</h3>
+<p>Reviewer verifies:
+- [ ] Tests added/updated for new functionality.
+- [ ] Coverage maintained or improved.
+- [ ] No critical SonarCloud issues.
+- [ ] No new security hotspots.
+- [ ] E2E tests pass on PR (if UI change).
+- [ ] Visual regression screenshots reviewed.
+- [ ] Performance impact considered (if perf-sensitive code).
+- [ ] Accessibility tested (if UI change).
+- [ ] Both LTR and RTL tested (if UI change).
+- [ ] Documentation updated (if API/architecture change).
+- [ ] ADR written (if architecture decision).</p>
+<h3 id="102-definition-of-done">10.2 Definition of Done</h3>
+<p>A story is "done" when:
+- [ ] All acceptance criteria met.
+- [ ] Code reviewed + approved by 2 reviewers (1 for non-architectural changes).
+- [ ] All tests pass (unit, integration, E2E).
+- [ ] Coverage gate met.
+- [ ] SonarCloud gate met.
+- [ ] No critical security findings.
+- [ ] Deployed to staging.
+- [ ] Product Owner verified in staging.
+- [ ] Documentation updated.
+- [ ] Merged to main.</p>
+<h3 id="103-bug-triage">10.3 Bug Triage</h3>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th>Definition</th>
+<th>SLA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0 (Critical)</td>
+<td>Production down, data loss, security breach</td>
+<td>Fix in 4 hours</td>
+</tr>
+<tr>
+<td>P1 (High)</td>
+<td>Major feature broken, no workaround</td>
+<td>Fix in 24 hours</td>
+</tr>
+<tr>
+<td>P2 (Medium)</td>
+<td>Feature partially broken, workaround exists</td>
+<td>Fix in 1 week</td>
+</tr>
+<tr>
+<td>P3 (Low)</td>
+<td>Cosmetic, minor inconvenience</td>
+<td>Fix in next sprint</td>
+</tr>
+<tr>
+<td>P4 (Trivial)</td>
+<td>Typo, tooltip improvement</td>
+<td>Fix when convenient</td>
+</tr>
+</tbody>
+</table>
+<p>Bugs tracked in GitHub Issues with severity label.</p>
+<hr />
+<p><strong>Next file to read</strong>: <code>17-COMPLIANCE-LEGAL.md</code> for UAE PDPL, KHDA/ADEK, data residency, retention policies.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-15-notifications.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Notifications</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-17-compliance-legal.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Compliance & Legal</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

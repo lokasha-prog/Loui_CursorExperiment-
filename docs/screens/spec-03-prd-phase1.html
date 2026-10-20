@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRD: Phase 1 Full — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class="active"><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-phase-1-module-map" class="toc-link" data-target="1-phase-1-module-map">1. Phase 1 Module Map</a><a href="#2-cross-module-conventions" class="toc-link" data-target="2-cross-module-conventions">2. Cross-Module Conventions</a><a href="#3-module-1-dashboard-phase-1-extensions-over-mvp" class="toc-link" data-target="3-module-1-dashboard-phase-1-extensions-over-mvp">3. Module 1: Dashboard (Phase 1 Extensions over...</a><a href="#31-additional-kpi-cards-over-mvp" class="toc-link toc-h3" data-target="31-additional-kpi-cards-over-mvp">3.1 Additional KPI Cards (over MVP)</a><a href="#32-widgets-extension" class="toc-link toc-h3" data-target="32-widgets-extension">3.2 Widgets Extension</a><a href="#33-dashboard-personalization" class="toc-link toc-h3" data-target="33-dashboard-personalization">3.3 Dashboard Personalization</a><a href="#34-websocket-driven-updates-phase-1-full" class="toc-link toc-h3" data-target="34-websocket-driven-updates-phase-1-full">3.4 WebSocket-Driven Updates (Phase 1 Full)</a><a href="#4-module-2-centre-management-phase-1-extensions" class="toc-link" data-target="4-module-2-centre-management-phase-1-extensions">4. Module 2: Centre Management (Phase 1 Extensi...</a><a href="#41-student-lifecycle-full-6-statuses" class="toc-link toc-h3" data-target="41-student-lifecycle-full-6-statuses">4.1 Student Lifecycle (Full 6 Statuses)</a><a href="#42-email-template-management" class="toc-link toc-h3" data-target="42-email-template-management">4.2 Email Template Management</a><a href="#43-labels-tagging" class="toc-link toc-h3" data-target="43-labels-tagging">4.3 Labels &amp; Tagging</a><a href="#5-module-3-attendance-leaves-phase-1-extensions" class="toc-link" data-target="5-module-3-attendance-leaves-phase-1-extensions">5. Module 3: Attendance &amp; Leaves (Phase 1 Exten...</a><a href="#51-monthly-attendance-report" class="toc-link toc-h3" data-target="51-monthly-attendance-report">5.1 Monthly Attendance Report</a><a href="#52-leave-management" class="toc-link toc-h3" data-target="52-leave-management">5.2 Leave Management</a><a href="#53-attendance-forecast" class="toc-link toc-h3" data-target="53-attendance-forecast">5.3 Attendance Forecast</a><a href="#54-barcode-scanner-support-full" class="toc-link toc-h3" data-target="54-barcode-scanner-support-full">5.4 Barcode Scanner Support (Full)</a><a href="#55-sign-in-sheet-export" class="toc-link toc-h3" data-target="55-sign-in-sheet-export">5.5 Sign-in Sheet Export</a><a href="#6-module-4-parent-communication-phase-1-extensions" class="toc-link" data-target="6-module-4-parent-communication-phase-1-extensions">6. Module 4: Parent Communication (Phase 1 Exte...</a><a href="#61-newsletter-builder-phase-1-sprint-56" class="toc-link toc-h3" data-target="61-newsletter-builder-phase-1-sprint-56">6.1 Newsletter Builder (Phase 1 Sprint 5–6)</a><a href="#62-resource-centre-phase-1-sprint-56" class="toc-link toc-h3" data-target="62-resource-centre-phase-1-sprint-56">6.2 Resource Centre (Phase 1 Sprint 5–6)</a><a href="#63-notes-concerns-phase-1" class="toc-link toc-h3" data-target="63-notes-concerns-phase-1">6.3 Notes &amp; Concerns (Phase 1)</a><a href="#7-module-5-messaging-phase-1-extensions" class="toc-link" data-target="7-module-5-messaging-phase-1-extensions">7. Module 5: Messaging (Phase 1 Extensions)</a><a href="#71-group-messaging-broadcast" class="toc-link toc-h3" data-target="71-group-messaging-broadcast">7.1 Group Messaging &amp; Broadcast</a><a href="#72-messaging-ux-enhancements" class="toc-link toc-h3" data-target="72-messaging-ux-enhancements">7.2 Messaging UX Enhancements</a><a href="#73-auto-translation-consideration" class="toc-link toc-h3" data-target="73-auto-translation-consideration">7.3 Auto-Translation Consideration</a><a href="#8-module-6-billing-accounting-phase-1-sprint-78" class="toc-link" data-target="8-module-6-billing-accounting-phase-1-sprint-78">8. Module 6: Billing &amp; Accounting (Phase 1 Spri...</a><a href="#81-billing-dashboard" class="toc-link toc-h3" data-target="81-billing-dashboard">8.1 Billing Dashboard</a><a href="#82-fee-plans" class="toc-link toc-h3" data-target="82-fee-plans">8.2 Fee Plans</a><a href="#83-invoice-management" class="toc-link toc-h3" data-target="83-invoice-management">8.3 Invoice Management</a><a href="#84-automated-fee-reminders" class="toc-link toc-h3" data-target="84-automated-fee-reminders">8.4 Automated Fee Reminders</a><a href="#85-expenses" class="toc-link toc-h3" data-target="85-expenses">8.5 Expenses</a><a href="#86-payment-link-phase-1-minimal" class="toc-link toc-h3" data-target="86-payment-link-phase-1-minimal">8.6 Payment Link (Phase 1 minimal)</a><a href="#9-module-7-tour-management-phase-1-sprint-910" class="toc-link" data-target="9-module-7-tour-management-phase-1-sprint-910">9. Module 7: Tour Management (Phase 1 Sprint 9–...</a><a href="#91-tour-appointment-features" class="toc-link toc-h3" data-target="91-tour-appointment-features">9.1 Tour Appointment Features</a><a href="#92-tour-appointment-fields" class="toc-link toc-h3" data-target="92-tour-appointment-fields">9.2 Tour Appointment Fields</a><a href="#10-module-8-enquiry-management-phase-1-sprint-910" class="toc-link" data-target="10-module-8-enquiry-management-phase-1-sprint-910">10. Module 8: Enquiry Management (Phase 1 Sprin...</a><a href="#101-pipeline-stages-6-stages" class="toc-link toc-h3" data-target="101-pipeline-stages-6-stages">10.1 Pipeline Stages (6 stages)</a><a href="#102-enquiry-record-fields" class="toc-link toc-h3" data-target="102-enquiry-record-fields">10.2 Enquiry Record Fields</a><a href="#103-filters-actions" class="toc-link toc-h3" data-target="103-filters-actions">10.3 Filters &amp; Actions</a><a href="#104-online-self-service-enquiry-form" class="toc-link toc-h3" data-target="104-online-self-service-enquiry-form">10.4 Online Self-Service Enquiry Form</a><a href="#105-enquiry-conversion-analytics" class="toc-link toc-h3" data-target="105-enquiry-conversion-analytics">10.5 Enquiry Conversion Analytics</a><a href="#11-module-9-calendar-phase-1-sprint-1112" class="toc-link" data-target="11-module-9-calendar-phase-1-sprint-1112">11. Module 9: Calendar (Phase 1 Sprint 11–12)</a><a href="#111-calendar-views-3-separate-calendars-4-specialized-views" class="toc-link toc-h3" data-target="111-calendar-views-3-separate-calendars-4-specialized-views">11.1 Calendar Views (3 separate calendars + 4 s...</a><a href="#112-school-calendar-events" class="toc-link toc-h3" data-target="112-school-calendar-events">11.2 School Calendar Events</a><a href="#113-calendar-integration" class="toc-link toc-h3" data-target="113-calendar-integration">11.3 Calendar Integration</a><a href="#12-module-10-forms-admissions-phase-1-sprint-1112" class="toc-link" data-target="12-module-10-forms-admissions-phase-1-sprint-1112">12. Module 10: Forms &amp; Admissions (Phase 1 Spri...</a><a href="#121-form-builder" class="toc-link toc-h3" data-target="121-form-builder">12.1 Form Builder</a><a href="#122-form-analytics" class="toc-link toc-h3" data-target="122-form-analytics">12.2 Form Analytics</a><a href="#123-admissions-process" class="toc-link toc-h3" data-target="123-admissions-process">12.3 Admissions Process</a><a href="#124-form-submission-storage" class="toc-link toc-h3" data-target="124-form-submission-storage">12.4 Form Submission Storage</a><a href="#13-module-11-tools-id-card-certificate-generators-phase-1-sprint-1112" class="toc-link" data-target="13-module-11-tools-id-card-certificate-generators-phase-1-sprint-1112">13. Module 11: Tools — ID Card &amp; Certificate Ge...</a><a href="#131-id-card-generator" class="toc-link toc-h3" data-target="131-id-card-generator">13.1 ID Card Generator</a><a href="#132-certificate-generator" class="toc-link toc-h3" data-target="132-certificate-generator">13.2 Certificate Generator</a><a href="#14-module-12-reports-analytics-phase-1-sprint-1314" class="toc-link" data-target="14-module-12-reports-analytics-phase-1-sprint-1314">14. Module 12: Reports &amp; Analytics (Phase 1 Spr...</a><a href="#141-available-reports" class="toc-link toc-h3" data-target="141-available-reports">14.1 Available Reports</a><a href="#142-report-requirements" class="toc-link toc-h3" data-target="142-report-requirements">14.2 Report Requirements</a><a href="#143-analytics-dashboard-phase-1" class="toc-link toc-h3" data-target="143-analytics-dashboard-phase-1">14.3 Analytics Dashboard (Phase 1)</a><a href="#15-module-13-settings-configuration-phase-1-extensions" class="toc-link" data-target="15-module-13-settings-configuration-phase-1-extensions">15. Module 13: Settings &amp; Configuration (Phase ...</a><a href="#151-settings-areas" class="toc-link toc-h3" data-target="151-settings-areas">15.1 Settings Areas</a><a href="#152-custom-roles" class="toc-link toc-h3" data-target="152-custom-roles">15.2 Custom Roles</a><a href="#153-notification-preferences-per-user" class="toc-link toc-h3" data-target="153-notification-preferences-per-user">15.3 Notification Preferences Per User</a><a href="#16-cross-cutting-requirements-full-phase-1" class="toc-link" data-target="16-cross-cutting-requirements-full-phase-1">16. Cross-Cutting Requirements (Full Phase 1)</a><a href="#161-audit-trail-ui-accessibility" class="toc-link toc-h3" data-target="161-audit-trail-ui-accessibility">16.1 Audit Trail — UI Accessibility</a><a href="#162-media-storage-security-full" class="toc-link toc-h3" data-target="162-media-storage-security-full">16.2 Media Storage &amp; Security (Full)</a><a href="#163-emergency-child-report-one-click-evacuation-export" class="toc-link toc-h3" data-target="163-emergency-child-report-one-click-evacuation-export">16.3 Emergency Child Report (One-Click Evacuati...</a><a href="#164-notification-hierarchy-full-phase-1" class="toc-link toc-h3" data-target="164-notification-hierarchy-full-phase-1">16.4 Notification Hierarchy (Full Phase 1)</a><a href="#17-non-functional-requirements-full-phase-1" class="toc-link" data-target="17-non-functional-requirements-full-phase-1">17. Non-Functional Requirements (Full Phase 1)</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-amber-600"></i><span>PRD: Phase 1 Full</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Product · spec-03-prd-phase1.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Product</span>
+          <span class="pill pill-done">DOC 03</span>
+          <span class="text-[10px] font-mono text-slate-400">~5,019 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">PRD: Phase 1 Full</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-02-prd-mvp.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: MVP Pilot</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-04-prd-phase2-3.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: Phase 2 & 3</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="03-prd-phase-1-full-scope-all-13-modules">03 — PRD: Phase 1 Full Scope (All 13 Modules)</h1>
+<blockquote>
+<p>Full Phase 1 functional specification. Read this AFTER the MVP is piloted and you're expanding to the complete Phase 1 product.</p>
+<p>MVP modules (Centre Management, Attendance, Parent Communication, Messaging, Dashboard, Audit) are detailed in <code>02-PRD-MVP.md</code>. This file extends them with full Phase 1 features and adds the remaining 7 modules.</p>
+</blockquote>
+<hr />
+<h2 id="1-phase-1-module-map">1. Phase 1 Module Map</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Module</th>
+<th>Status</th>
+<th>Primary Spec</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Dashboard</td>
+<td>MVP baseline + Phase 1 extensions</td>
+<td>§3 below</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Centre Management</td>
+<td>MVP baseline + Phase 1 extensions</td>
+<td>§4 below</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Attendance &amp; Leaves</td>
+<td>MVP baseline + Phase 1 extensions</td>
+<td>§5 below</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Parent Communication</td>
+<td>MVP baseline + Phase 1 extensions</td>
+<td>§6 below</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Messaging</td>
+<td>MVP baseline + Phase 1 extensions</td>
+<td>§7 below</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Billing &amp; Accounting</td>
+<td><strong>Phase 1 only</strong></td>
+<td>§8</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Tour Management</td>
+<td><strong>Phase 1 only</strong></td>
+<td>§9</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Enquiry Management</td>
+<td><strong>Phase 1 only</strong></td>
+<td>§10</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Calendar</td>
+<td><strong>Phase 1 only</strong></td>
+<td>§11</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Forms &amp; Admissions</td>
+<td><strong>Phase 1 only</strong></td>
+<td>§12</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Tools (ID/Certificates)</td>
+<td><strong>Phase 1 only</strong></td>
+<td>§13</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Reports &amp; Analytics</td>
+<td><strong>Phase 1 only</strong></td>
+<td>§14</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Settings &amp; Configuration</td>
+<td>MVP baseline + Phase 1 extensions</td>
+<td>§15</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Learning &amp; Assessment</td>
+<td><strong>Phase 2</strong></td>
+<td>See <code>04-PRD-PHASE2-3.md</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-cross-module-conventions">2. Cross-Module Conventions</h2>
+<p>These apply to every module:</p>
+<ol>
+<li><strong>i18n</strong>: All user-facing strings via <code>react-i18next</code> (web) and <code>i18next</code> (mobile). All translatable DB fields stored as JSONB <code>{"en": "...", "ar": "..."}</code>. Default to English if locale missing.</li>
+<li><strong>RTL</strong>: Arabic locale sets <code>dir="rtl"</code> on <code>&lt;html&gt;</code>. CSS uses logical properties (<code>margin-inline-start</code>, never <code>margin-left</code>). Every screen QA'd in both LTR and RTL.</li>
+<li><strong>Audit</strong>: Every CREATE/UPDATE/DELETE writes to append-only <code>audit_log</code> with before/after JSONB diff.</li>
+<li><strong>Multi-tenancy</strong>: Every entity has <code>tenant_id</code>. EF Core global query filter ensures tenant isolation. PostgreSQL RLS is defense-in-depth.</li>
+<li><strong>Soft delete</strong>: <code>is_deleted</code> + <code>deleted_at</code> on Student, Staff, Invoice, Activity, Message. Hard delete only on transient data (sessions, temp uploads).</li>
+<li><strong>Pagination</strong>: Cursor-based (<code>?cursor=&lt;base64&gt;&amp;limit=50</code>). Max page size 100. Never return unbounded lists.</li>
+<li><strong>Permissions</strong>: Every endpoint annotated with <code>[Authorize(Policy = "...")]</code>. Every UI element conditionally rendered based on permissions.</li>
+<li><strong>Real-time</strong>: SignalR pushes updates for: dashboard KPIs, ratio monitor, messaging, activity feed (for parents), attendance summary.</li>
+<li><strong>File uploads</strong>: All binary uploads via presigned S3 URLs. App server never receives multipart form data for binaries.</li>
+<li><strong>Error responses</strong>: Consistent envelope <code>{ success: false, errors: [{code, message, field?}] }</code>. HTTP status code matches error class.</li>
+</ol>
+<h2 id="3-module-1-dashboard-phase-1-extensions-over-mvp">3. Module 1: Dashboard (Phase 1 Extensions over MVP)</h2>
+<h3 id="31-additional-kpi-cards-over-mvp">3.1 Additional KPI Cards (over MVP)</h3>
+<ul>
+<li>Total Programs (in addition to Rooms, Staff, Students)</li>
+<li>Staff on leave today</li>
+<li>Students absent for 2+ consecutive days (alert card with student list)</li>
+<li>Today's revenue (Phase 1 Sprint 7+ — when billing is live)</li>
+<li>Overdue invoice count (Phase 1 Sprint 7+)</li>
+<li>New enquiries this week (Phase 1 Sprint 9+)</li>
+<li>Pending tour appointments (Phase 1 Sprint 9+)</li>
+<li>App installation adoption rate (Phase 1 Sprint 13+ — staff and parent)</li>
+</ul>
+<h3 id="32-widgets-extension">3.2 Widgets Extension</h3>
+<table>
+<thead>
+<tr>
+<th>Widget</th>
+<th>Phase 1 additions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Attendance Table</td>
+<td>Filter by Room/Group/Program/Date; student status filter (Active, Inactive, On Hold, Withdrawn, Signed Up, Transferred); summary counters Total/Pending/Checked In/Checked Out/Absent for both staff and students</td>
+</tr>
+<tr>
+<td>Live Ratio Monitor</td>
+<td>Room-level ratio with compliance status (warning if breach); historical breach log accessible</td>
+</tr>
+<tr>
+<td>Pending Actions</td>
+<td>Add: pending invoice approvals (Sprint 7+), pending tour confirmations (Sprint 9+), pending admissions checklist items (Sprint 11+)</td>
+</tr>
+<tr>
+<td>Billing snapshot</td>
+<td>New widget (Sprint 7+): Total billed / Collected / Overdue / Outstanding this month, with revenue trend sparkline</td>
+</tr>
+<tr>
+<td>Enquiry pipeline</td>
+<td>New widget (Sprint 9+): Mini pipeline view showing count per stage</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-dashboard-personalization">3.3 Dashboard Personalization</h3>
+<ul>
+<li>Each role sees a default layout (Centre Admin: full; Teacher: room-scoped; Parent: child-scoped; Accounts: billing-focused).</li>
+<li>Centre Admins can pin/reorder widgets within their own dashboard.</li>
+<li>Saved layouts stored per user.</li>
+</ul>
+<h3 id="34-websocket-driven-updates-phase-1-full">3.4 WebSocket-Driven Updates (Phase 1 Full)</h3>
+<p>Every dashboard widget subscribes to specific SignalR channels:
+- <code>tenant-{id}-attendance</code> — check-in/out events → attendance table + KPIs
+- <code>tenant-{id}-ratio</code> — ratio recalculation → live ratio monitor
+- <code>tenant-{id}-notifications</code> — new notifications → pending actions
+- <code>tenant-{id}-billing</code> — invoice/payment events → billing snapshot (Sprint 7+)
+- <code>tenant-{id}-enquiries</code> — enquiry stage changes → enquiry pipeline (Sprint 9+)</p>
+<p>Client reconnects with exponential backoff. On reconnect, fetches full state for changed widgets.</p>
+<h2 id="4-module-2-centre-management-phase-1-extensions">4. Module 2: Centre Management (Phase 1 Extensions)</h2>
+<h3 id="41-student-lifecycle-full-6-statuses">4.1 Student Lifecycle (Full 6 Statuses)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Signed Up → Active → On Hold → Withdrawn
+                ↓                  ↑
+            Inactive → Transferred
+</code></pre></div>
+
+<p>Each transition is logged with: previous status, new status, reason (free text or configurable enum), acting user, timestamp.</p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+<th>Visible in attendance?</th>
+<th>Parent access?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Signed Up</td>
+<td>Registered but not yet started</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Active</td>
+<td>Currently enrolled and attending</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>On Hold</td>
+<td>Temporarily not attending (travel, illness)</td>
+<td>No (but retained in roster)</td>
+<td>Read-only</td>
+</tr>
+<tr>
+<td>Inactive</td>
+<td>Long-term pause (e.g., summer break for part-year programs)</td>
+<td>No</td>
+<td>Read-only</td>
+</tr>
+<tr>
+<td>Withdrawn</td>
+<td>Permanently left the nursery</td>
+<td>No (soft-deleted from active views)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Transferred</td>
+<td>Moved to another room or centre within same org</td>
+<td>No (in old room) / Yes (in new room)</td>
+<td>Yes (linked to new room)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-email-template-management">4.2 Email Template Management</h3>
+<ul>
+<li>CRUD for templates used by system communications (billing reminders, daily report, newsletter, enquiry auto-reply, etc.).</li>
+<li>Template fields: name, type (enum), subject (i18n), body (rich text, i18n), reply-to, attachments.</li>
+<li>Variables: <code>{{student.first_name}}</code>, <code>{{parent.first_name}}</code>, <code>{{invoice.amount}}</code>, <code>{{invoice.due_date}}</code>, etc. — full variable list in <code>08-API-SPEC.md</code> §11.</li>
+<li>Preview mode with sample data.</li>
+<li>Versioned — changes tracked, previous version restorable.</li>
+</ul>
+<h3 id="43-labels-tagging">4.3 Labels &amp; Tagging</h3>
+<ul>
+<li>Custom tags applied to students or staff for cross-module filtering.</li>
+<li>Examples: "Allergy: Peanuts", "Sibling Discount", "VIP Family", "New Starter".</li>
+<li>Color-coded in UI.</li>
+<li>Used in: attendance filter, billing report filter, broadcast messaging target, calendar filter.</li>
+</ul>
+<h2 id="5-module-3-attendance-leaves-phase-1-extensions">5. Module 3: Attendance &amp; Leaves (Phase 1 Extensions)</h2>
+<h3 id="51-monthly-attendance-report">5.1 Monthly Attendance Report</h3>
+<ul>
+<li>Monthly view per student: Days Present, Days Absent, Days on Leave, Attendance Percentage.</li>
+<li>Export to Excel (Apache POI equivalent — EPPlus or ClosedXML in .NET).</li>
+<li>Filter by Room, Group, Program, Date Range.</li>
+<li>Includes staff attendance variant.</li>
+</ul>
+<h3 id="52-leave-management">5.2 Leave Management</h3>
+<p><strong>Student Leave:</strong>
+- Create: Student, Leave Type (configurable — Sick, Travel, Family, Other), Date range, Notes.
+- Filter: Month, Room, Student, Status.
+- Workflow: Submitted → Approved / Rejected (Centre Admin approves).
+- Approved leave auto-marks student absent for the date range (no manual check-in needed).</p>
+<p><strong>Staff Leave:</strong>
+- Same structure as student leave.
+- Approved leave affects ratio calculation — staff on leave are excluded from ratio numerator.
+- Approved leave visible in Calendar module (Staff Leaves view).
+- Leave history per staff member.</p>
+<h3 id="53-attendance-forecast">5.3 Attendance Forecast</h3>
+<ul>
+<li>Forward-looking view by date.</li>
+<li>Splits expected attendance by Program.</li>
+<li>Columns: Program | Expected Students | Checked In | Checked Out.</li>
+<li>"Expected" = Enrolled − Approved Leave.</li>
+<li>Requires verification of pickup individual's identity (configurable — Centre Admin can mark specific students as requiring ID check at pickup).</li>
+</ul>
+<h3 id="54-barcode-scanner-support-full">5.4 Barcode Scanner Support (Full)</h3>
+<ul>
+<li>USB HID scanners (keyboard emulation) — works in web app via input field auto-focus.</li>
+<li>Bluetooth HID scanners — same as USB.</li>
+<li>Mobile camera scanning (web app, in mobile browser) via <code>BarcodeDetector</code> API or <code>quagga2</code> library fallback.</li>
+<li>Each student has a unique barcode (generated on registration, printable on ID card).</li>
+<li>Each staff has a unique barcode.</li>
+<li><code>attendance_event</code> table logs every scan (success or failure) for audit.</li>
+</ul>
+<h3 id="55-sign-in-sheet-export">5.5 Sign-in Sheet Export</h3>
+<ul>
+<li>PDF / Excel export of daily attendance with signature lines for parents.</li>
+<li>Configurable: include photo column, include pickup-time column, include signature column.</li>
+</ul>
+<h2 id="6-module-4-parent-communication-phase-1-extensions">6. Module 4: Parent Communication (Phase 1 Extensions)</h2>
+<h3 id="61-newsletter-builder-phase-1-sprint-56">6.1 Newsletter Builder (Phase 1 Sprint 5–6)</h3>
+<ul>
+<li>Rich-text editor (TipTap) with i18n content (parallel EN/AR editing).</li>
+<li>AI-assisted content generation (OpenAI API or local LLM) — "Generate newsletter draft from this week's activities" button.</li>
+<li>Recipient targeting: all parents, by room, by program, by group, by label.</li>
+<li>Scheduling: send now or schedule for future date/time.</li>
+<li>Status: Draft → Scheduled → Published → Archived.</li>
+<li>Analytics: delivery count, open rate (tracking pixel), click rate (per link).</li>
+<li>Filter by Title, Created By, Status.</li>
+</ul>
+<h3 id="62-resource-centre-phase-1-sprint-56">6.2 Resource Centre (Phase 1 Sprint 5–6)</h3>
+<ul>
+<li>Document library for sharing files with parents or staff.</li>
+<li>Folder organization with permissions (parent-facing vs. staff-only).</li>
+<li>File types: PDF, DOCX, XLSX, images, videos.</li>
+<li>Document versioning (SRS Open Question #13 — decided: full version history).</li>
+<li><code>document_version</code> table: version number, upload timestamp, uploader identity, per-parent download log.</li>
+<li>Object storage versioning enabled.</li>
+<li>Access control: per-folder, per-role.</li>
+<li>Search by name, tag, content (full-text search via PostgreSQL <code>tsvector</code> in Phase 1; Elasticsearch in Phase 3 if needed).</li>
+</ul>
+<h3 id="63-notes-concerns-phase-1">6.3 Notes &amp; Concerns (Phase 1)</h3>
+<ul>
+<li>Separate filtered views for informal notes and escalated concerns.</li>
+<li>Notes: day-to-day observations, not parent-facing by default.</li>
+<li>Concerns: flagged for Centre Admin attention (safeguarding, behavioral, medical).</li>
+<li>Filter by month, room, student.</li>
+<li>Concerns trigger an in-app notification to Centre Admin (Operational tier).</li>
+</ul>
+<h2 id="7-module-5-messaging-phase-1-extensions">7. Module 5: Messaging (Phase 1 Extensions)</h2>
+<h3 id="71-group-messaging-broadcast">7.1 Group Messaging &amp; Broadcast</h3>
+<ul>
+<li>Staff can broadcast announcements to: all parents, parents by room, parents by program, parents by group, parents by label.</li>
+<li>Broadcast messages are read-only for parents (no reply) — distinct from 1:1 threads.</li>
+<li>Staff can send group messages to selected staff (e.g., "All staff in Toddler Room").</li>
+<li>Staff Announcements: broadcast to all staff, scoped by date (today or calendar-based scheduling).</li>
+</ul>
+<h3 id="72-messaging-ux-enhancements">7.2 Messaging UX Enhancements</h3>
+<ul>
+<li>Search across messages (full-text search via PostgreSQL FTS in Phase 1).</li>
+<li>Star/pin important threads.</li>
+<li>Attachment support (photos, documents) via presigned URL upload.</li>
+<li>Typing indicators (SignalR).</li>
+<li>Read receipts per recipient — "Seen by Mariam at 10:32 AM, Ahmed at 10:35 AM".</li>
+<li>Both parents of a child shown as linked contacts in staff's view (so staff know who they're talking to).</li>
+</ul>
+<h3 id="73-auto-translation-consideration">7.3 Auto-Translation Consideration</h3>
+<ul>
+<li>Phase 1: NOT in scope (parent.app has 198-language auto-translation as a feature; we deliver EN + AR natively, which covers UAE market).</li>
+<li>Phase 2: Evaluate adding auto-translation for staff/parent messages when language mismatch detected.</li>
+</ul>
+<h2 id="8-module-6-billing-accounting-phase-1-sprint-78">8. Module 6: Billing &amp; Accounting (Phase 1 Sprint 7–8)</h2>
+<h3 id="81-billing-dashboard">8.1 Billing Dashboard</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total Billed Amount</td>
+<td>Sum of all issued invoices in selected period</td>
+</tr>
+<tr>
+<td>Total Collected Amount</td>
+<td>Payments received in selected period</td>
+</tr>
+<tr>
+<td>Overdue Amount</td>
+<td>Outstanding on past-due invoices</td>
+</tr>
+<tr>
+<td>Outstanding Amount</td>
+<td>Unpaid on current invoices</td>
+</tr>
+<tr>
+<td>Revenue Stats</td>
+<td>Graphical revenue trend over configurable date range (monthly/quarterly/yearly)</td>
+</tr>
+<tr>
+<td>New Invoices Today</td>
+<td>Count and amount of invoices created today</td>
+</tr>
+<tr>
+<td>Recent Payments</td>
+<td>Last 10 payments received</td>
+</tr>
+<tr>
+<td>Top Overdue Parents</td>
+<td>Top 5 by outstanding amount</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-fee-plans">8.2 Fee Plans</h3>
+<ul>
+<li>Create and manage fee plans linked to programs.</li>
+<li>Plan attributes: Name (i18n), Status (Active/Inactive), Period (monthly/term/annual), Linked Program, Labels.</li>
+<li>Fee Components (sub-entity): Description, Amount (integer AED fils), Type (Tuition, Meal, Transport, Activity, Discount, Tax), Tax Rate (optional).</li>
+<li>Discounts: Percentage or fixed amount, applicable to specific components or total.</li>
+<li>Tax Rates: Configurable per component (UAE VAT 5% standard, but flexibility for exemptions).</li>
+<li>Associate multiple students with a single plan (e.g., siblings).</li>
+<li>Proration logic: mid-month enrolment auto-prorates based on configurable rule (daily / weekly / monthly-charge-full).</li>
+</ul>
+<h3 id="83-invoice-management">8.3 Invoice Management</h3>
+<ul>
+<li>Auto-generate invoices from fee plans on configurable schedule (e.g., 1st of each month for monthly plans; start of term for term plans).</li>
+<li>Manual invoice creation (Centre Admin / Accounts role).</li>
+<li>Invoice fields: Number (auto-generated, sequential per tenant with prefix), Student, Fee Plan, Issue Date, Due Date, Line Items (fee components), Subtotal, Discounts, Tax, Total, Status, Notes.</li>
+<li>Status: Draft → Issued → Partially Paid → Paid → Overdue → Cancelled.</li>
+<li>Partial payment tracking via <code>invoice_payment</code> child table.</li>
+<li>Overpayments create <code>credit_balance</code> records (usable against future invoices).</li>
+<li>All amounts in integer AED fils.</li>
+<li>PDF generation via QuestPDF — branded template, bilingual (EN/AR side-by-side or sequential based on parent preference).</li>
+</ul>
+<h3 id="84-automated-fee-reminders">8.4 Automated Fee Reminders</h3>
+<ul>
+<li>Configurable email reminder templates (using Email Template Management from §4.2).</li>
+<li>Trigger options: X days before invoice due date OR X days after invoice issue date OR X days after overdue.</li>
+<li>Selectable lead times: 1, 2, 3, 5, 7 days.</li>
+<li>Push notification option in addition to email.</li>
+<li>Template editor: Title, Reply-to, Subject, Rich-text body with variable substitution.</li>
+<li>Reminder log: every reminder sent is recorded with delivery status.</li>
+<li>Unsubscribe: parents can opt out of informational reminders (not overdue notices).</li>
+</ul>
+<h3 id="85-expenses">8.5 Expenses</h3>
+<ul>
+<li>Record and categorize centre expenses.</li>
+<li>Fields: Date, Amount, Category (Rent, Utilities, Salaries, Supplies, Food, Other), Description, Receipt (optional file upload), Recorded By.</li>
+<li>Integrated into billing dashboard for net financial view (Revenue − Expenses = Net).</li>
+<li>Monthly expense report export.</li>
+</ul>
+<h3 id="86-payment-link-phase-1-minimal">8.6 Payment Link (Phase 1 minimal)</h3>
+<blockquote>
+<p>Added per Loui Okasha comment on source SRS: "Add: Accounts and Payment link."</p>
+</blockquote>
+<ul>
+<li>Phase 1: Generate a payment link (Stripe Payment Link-style) on each invoice — parents click → land on a hosted payment page → enter card details → payment recorded.</li>
+<li>Phase 1 payment gateway: deferred to Phase 3 full integration, but Phase 1 supports manual payment recording (Accounts role records: amount, method (cash/cheque/transfer), reference, date).</li>
+<li>Phase 3: Full payment gateway integration (Telr / PayTabs / Network International) with online card payment.</li>
+</ul>
+<h2 id="9-module-7-tour-management-phase-1-sprint-910">9. Module 7: Tour Management (Phase 1 Sprint 9–10)</h2>
+<h3 id="91-tour-appointment-features">9.1 Tour Appointment Features</h3>
+<ul>
+<li>Create and manage tour appointments linked to enquiry records.</li>
+<li>Calendar view: Month and List display modes.</li>
+<li>Filter by: Calendar (room/tour type), Staff, Month.</li>
+<li>Block-off management: staff can mark time slots as unavailable (leave, lunch, other tours).</li>
+<li>Print appointment schedule (PDF per day/week).</li>
+<li>Staff assignment per appointment.</li>
+<li>Tour confirmation: automated email/SMS (Phase 1: email only) to family on booking + reminder 24h before.</li>
+<li>Post-tour follow-up task creation: auto-create a task for assigned staff to follow up within 48h.</li>
+</ul>
+<h3 id="92-tour-appointment-fields">9.2 Tour Appointment Fields</h3>
+<ul>
+<li>Family name, contact details (linked to enquiry record).</li>
+<li>Preferred date/time (with staff availability check).</li>
+<li>Assigned staff.</li>
+<li>Tour type (General, Specific Program Focus, Birthday Party Booking).</li>
+<li>Number of adults, number of children visiting.</li>
+<li>Notes (special requests, questions to address).</li>
+<li>Status: Scheduled → Completed → Cancelled → No-show.</li>
+<li>Outcome: linked to enquiry stage update (Completed → Enquiry moves to "Toured").</li>
+</ul>
+<h2 id="10-module-8-enquiry-management-phase-1-sprint-910">10. Module 8: Enquiry Management (Phase 1 Sprint 9–10)</h2>
+<h3 id="101-pipeline-stages-6-stages">10.1 Pipeline Stages (6 stages)</h3>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No Stage</td>
+<td>Initial enquiry received, not yet categorised</td>
+</tr>
+<tr>
+<td>Interested</td>
+<td>Family has expressed interest; initial contact made</td>
+</tr>
+<tr>
+<td>Contacted</td>
+<td>Staff have reached out to the family</td>
+</tr>
+<tr>
+<td>Tour Appointment</td>
+<td>Tour has been scheduled</td>
+</tr>
+<tr>
+<td>Toured</td>
+<td>Family has visited the centre</td>
+</tr>
+<tr>
+<td>Enrolled</td>
+<td>Admission confirmed; transition to active student record</td>
+</tr>
+</tbody>
+</table>
+<h3 id="102-enquiry-record-fields">10.2 Enquiry Record Fields</h3>
+<ul>
+<li>Family / child name, contact details (phone, email, preferred contact method).</li>
+<li>Child DOB, desired start date, desired program.</li>
+<li>Enquiry source (configurable enum: Walk-in, Website, Referral, Social Media, Phone, Email, Existing Parent).</li>
+<li>Assigned staff member.</li>
+<li>Enquiry date and last contact date.</li>
+<li>Stage and status.</li>
+<li>Notes and activity log (every contact attempt, conversation summary).</li>
+<li>Stage history log (<code>enquiry_stage_log</code> table — append-only, every stage change with timestamp, user, reason).</li>
+</ul>
+<h3 id="103-filters-actions">10.3 Filters &amp; Actions</h3>
+<ul>
+<li>Filter by: Stage, Date Range (Today / This Month / Last Month / This Year / Custom), Source, Staff.</li>
+<li>Actions: Add Enquiry, Archive Enquiry, Convert to Admission.</li>
+<li>Convert to Admission: creates a Student record (status=Signed Up), links back to enquiry for analytics, sends admission workflow kickoff.</li>
+</ul>
+<h3 id="104-online-self-service-enquiry-form">10.4 Online Self-Service Enquiry Form</h3>
+<ul>
+<li>Public-facing form (no auth required) embedded on nursery's website or hosted at <code>enquiry.&lt;nursery-domain&gt;.com</code>.</li>
+<li>Fields configurable via Forms &amp; Admissions module.</li>
+<li>On submission: creates enquiry record at stage "No Stage", sends auto-acknowledgement email to family, notifies assigned staff.</li>
+<li>Anti-spam: reCAPTCHA v3, rate limiting (5 submissions per IP per hour).</li>
+</ul>
+<h3 id="105-enquiry-conversion-analytics">10.5 Enquiry Conversion Analytics</h3>
+<ul>
+<li>Conversion rate by source.</li>
+<li>Conversion rate by staff.</li>
+<li>Average time in each stage.</li>
+<li>Drop-off points (which stage has highest "no progression" rate).</li>
+<li>Report: Enquiry Conversion Rate Report (in Reports &amp; Analytics module).</li>
+</ul>
+<h2 id="11-module-9-calendar-phase-1-sprint-1112">11. Module 9: Calendar (Phase 1 Sprint 11–12)</h2>
+<blockquote>
+<p>Per Loui Okasha comment: "3 Calendars: School, Admin and teachers"</p>
+</blockquote>
+<h3 id="111-calendar-views-3-separate-calendars-4-specialized-views">11.1 Calendar Views (3 separate calendars + 4 specialized views)</h3>
+<table>
+<thead>
+<tr>
+<th>View</th>
+<th>Scope</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>School Calendar</strong></td>
+<td>Centre-wide events and holidays</td>
+<td>Event types: Regular Event, Holiday, Staff-only Event. Month/List views. Filter by category, room, time range. Room-scoping for events.</td>
+</tr>
+<tr>
+<td><strong>Admin Calendar</strong></td>
+<td>Management view of all schedules</td>
+<td>Aggregated view: staff schedules, student programs, leaves, tours, events, birthdays. Configurable layers.</td>
+</tr>
+<tr>
+<td><strong>Staff Calendar (per teacher)</strong></td>
+<td>Personal schedule</td>
+<td>My shifts, my tasks, my leave, my students' programs, my assigned tours, my birthdays to acknowledge.</td>
+</tr>
+<tr>
+<td>Staff Schedule</td>
+<td>All staff or by room</td>
+<td>Shift times, assignments, leave blocks</td>
+</tr>
+<tr>
+<td>Student Schedule</td>
+<td>All students or by room/program</td>
+<td>Program days, special events</td>
+</tr>
+<tr>
+<td>Staff Leaves</td>
+<td>Leave calendar for all staff</td>
+<td>Approved and pending leaves colour-coded</td>
+</tr>
+<tr>
+<td>Birthday Calendars</td>
+<td>Students and Staff (separate)</td>
+<td>Upcoming birthdays, filter by room/status</td>
+</tr>
+</tbody>
+</table>
+<h3 id="112-school-calendar-events">11.2 School Calendar Events</h3>
+<ul>
+<li>Event types: Regular Event, Holiday, Staff-only Event.</li>
+<li>Fields: Title (i18n), Description (i18n), Start/End (date or datetime), Type, Room scoping (optional — "All Rooms" or specific rooms), Created By, Visibility (Public to parents / Staff only).</li>
+<li>Month and list display modes.</li>
+<li>Recurrence: daily, weekly, monthly, custom (e.g., "Every Tuesday and Thursday").</li>
+<li>ICS export for parents to subscribe to nursery calendar.</li>
+<li>Holiday events affect attendance forecast (no expected attendance on holidays).</li>
+</ul>
+<h3 id="113-calendar-integration">11.3 Calendar Integration</h3>
+<ul>
+<li>Phase 1: ICS export only (parents subscribe via Google Calendar / Apple Calendar / Outlook).</li>
+<li>Phase 3: Two-way Google Calendar / Microsoft 365 sync for staff.</li>
+</ul>
+<h2 id="12-module-10-forms-admissions-phase-1-sprint-1112">12. Module 10: Forms &amp; Admissions (Phase 1 Sprint 11–12)</h2>
+<h3 id="121-form-builder">12.1 Form Builder</h3>
+<ul>
+<li>Configurable form fields: text, textarea, number, date, dropdown, radio, checkbox, file upload, signature (canvas-based), section header, conditional logic.</li>
+<li>Field types support i18n labels and options.</li>
+<li>Form types: Enquiry Form, Admission Form, Check-in/Check-out Form, Incident Form, Custom.</li>
+<li>Status: Live / Draft.</li>
+<li>Form versioning — changes tracked, published version is what users see.</li>
+<li>Embeddable on external website (public forms like Enquiry) or in-app (internal forms like Incident).</li>
+</ul>
+<h3 id="122-form-analytics">12.2 Form Analytics</h3>
+<ul>
+<li>Per form: Submission count, Completion rate (started vs. submitted), Average completion time, Drop-off point (which field has highest abandonment).</li>
+<li>Filter by date range.</li>
+</ul>
+<h3 id="123-admissions-process">12.3 Admissions Process</h3>
+<ul>
+<li>Define a multi-step admission checklist/process per centre.</li>
+<li>Process steps configurable: e.g., "Submit admission form", "Pay registration fee", "Submit medical records", "Sign contract", "Schedule trial day", "Confirm enrolment".</li>
+<li>Track each enrolled student through process steps.</li>
+<li>Status dashboard: Process Name | Status | Due Date | Total Students.</li>
+<li>Automate form delivery: when student enters a step, the relevant form is automatically sent to parent.</li>
+<li>Notifications to parent + assigned staff when step is pending or overdue.</li>
+</ul>
+<h3 id="124-form-submission-storage">12.4 Form Submission Storage</h3>
+<ul>
+<li>All submissions stored as JSONB in <code>form_submission</code> table.</li>
+<li>Submissions linked to student or enquiry.</li>
+<li>File uploads via presigned URLs to object storage.</li>
+<li>PII fields encrypted at column level.</li>
+</ul>
+<h2 id="13-module-11-tools-id-card-certificate-generators-phase-1-sprint-1112">13. Module 11: Tools — ID Card &amp; Certificate Generators (Phase 1 Sprint 11–12)</h2>
+<h3 id="131-id-card-generator">13.1 ID Card Generator</h3>
+<ul>
+<li>Minimum 10 pre-designed template options (5 student, 5 staff variants).</li>
+<li>Template customization: logo upload, color scheme (primary, secondary, accent), field selection (name, photo, DOB, room, program, barcode, expiry).</li>
+<li>Scope: Students or Staff.</li>
+<li>Bulk generation: select multiple students/staff → generate all cards as PDF (one per page, ready to print).</li>
+<li>Print-ready export: PDF, A6 size (105 × 148 mm) standard, configurable.</li>
+<li>Barcode generation (Code 128 or QR code) on each card for attendance scanning.</li>
+</ul>
+<h3 id="132-certificate-generator">13.2 Certificate Generator</h3>
+<ul>
+<li>Minimum 10 pre-designed certificate templates.</li>
+<li>Customizable: title, recipient name, date, signature fields (multiple signatures supported), logo, color scheme.</li>
+<li>Scope: Students.</li>
+<li>Bulk generation: select multiple students → generate all certificates as PDF.</li>
+<li>PDF export, A4 landscape standard, configurable.</li>
+<li>Certificate numbering (sequential per template) for authenticity tracking.</li>
+</ul>
+<h2 id="14-module-12-reports-analytics-phase-1-sprint-1314">14. Module 12: Reports &amp; Analytics (Phase 1 Sprint 13–14)</h2>
+<h3 id="141-available-reports">14.1 Available Reports</h3>
+<table>
+<thead>
+<tr>
+<th>Report</th>
+<th>Scope</th>
+<th>Format</th>
+<th>Filters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Monthly Attendance Report (Students)</td>
+<td>Per-student monthly attendance summary</td>
+<td>Excel + PDF</td>
+<td>Room, Group, Program, Month</td>
+</tr>
+<tr>
+<td>Monthly Attendance Report (Staff)</td>
+<td>Per-staff monthly attendance summary</td>
+<td>Excel + PDF</td>
+<td>Room, Role, Month</td>
+</tr>
+<tr>
+<td>Billing &amp; Revenue Report</td>
+<td>Invoices, payments, overdue breakdown</td>
+<td>Excel</td>
+<td>Date range, Status, Room</td>
+</tr>
+<tr>
+<td>Enquiry Conversion Rate Report</td>
+<td>Pipeline conversion by source, staff, stage</td>
+<td>Excel + PDF</td>
+<td>Date range, Source, Staff</td>
+</tr>
+<tr>
+<td>Parent App Installation Report</td>
+<td>Adoption tracking — % parents who logged in this month</td>
+<td>Excel</td>
+<td>Date range, Room</td>
+</tr>
+<tr>
+<td>Staff App Installation Report</td>
+<td>Adoption tracking — % staff who logged in this month</td>
+<td>Excel</td>
+<td>Date range, Role</td>
+</tr>
+<tr>
+<td>Observation &amp; Assessment Summary (Phase 2)</td>
+<td>Per-student observation count, assessment completion</td>
+<td>Excel + PDF</td>
+<td>Date range, Room, Framework</td>
+</tr>
+<tr>
+<td>Emergency Child Report</td>
+<td>Per-child emergency info + bulk per room/centre</td>
+<td>PDF (one-click)</td>
+<td>Room, Date</td>
+</tr>
+<tr>
+<td>Audit Log Export (Super Admin)</td>
+<td>Filtered audit log</td>
+<td>Excel + JSON</td>
+<td>User, Date range, Entity, Action</td>
+</tr>
+<tr>
+<td>Daily Sign-in Sheet</td>
+<td>Printable daily attendance with signature lines</td>
+<td>PDF</td>
+<td>Room, Date</td>
+</tr>
+</tbody>
+</table>
+<h3 id="142-report-requirements">14.2 Report Requirements</h3>
+<ul>
+<li>All reports support Excel download (and PDF where visual format matters).</li>
+<li>Filters: Date range, Room, Program, Group, Staff (depending on report).</li>
+<li>Recently generated reports list with timestamp and generated-by user (last 30 days).</li>
+<li>Reports generated asynchronously (RabbitMQ job) — user notified when ready.</li>
+<li>Long-running reports don't block UI — show "Generating..." status with progress.</li>
+<li>Reports stored in object storage for 30 days, then auto-deleted.</li>
+<li>Multi-tenant safe — strictly scoped to <code>tenant_id</code>.</li>
+</ul>
+<h3 id="143-analytics-dashboard-phase-1">14.3 Analytics Dashboard (Phase 1)</h3>
+<ul>
+<li>Visual KPIs over time: daily attendance rate trend, revenue trend, enquiry conversion trend.</li>
+<li>Charts: line, bar, pie, donut.</li>
+<li>Date range selector.</li>
+<li>Export chart as PNG.</li>
+</ul>
+<h2 id="15-module-13-settings-configuration-phase-1-extensions">15. Module 13: Settings &amp; Configuration (Phase 1 Extensions)</h2>
+<h3 id="151-settings-areas">15.1 Settings Areas</h3>
+<table>
+<thead>
+<tr>
+<th>Setting Area</th>
+<th>Description</th>
+<th>Phase 1 scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Programme Settings</td>
+<td>Configure which activity types and features are active per programme</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Access Control</td>
+<td>Define and manage user roles; assign permissions at module level</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>User Role Management</td>
+<td>Create custom roles; set read/write/admin access per section</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Notification Settings</td>
+<td>Configure push and email notification preferences per notification tier</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Language</td>
+<td>Multi-language support (UI language selection per user)</td>
+<td>EN + AR only</td>
+</tr>
+<tr>
+<td>Integrations</td>
+<td>External system API configurations</td>
+<td>Email only in Phase 1; payment + ERP in Phase 3</td>
+</tr>
+<tr>
+<td>Audit Log Viewer</td>
+<td>Filterable audit log for Super Admins</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Centre Profile</td>
+<td>Centre name (i18n), logo, branding colors, address, contact, regulatory info</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Ratio Rules</td>
+<td>Configure staff-to-student ratio per age band per room</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Attendance Settings</td>
+<td>Barcode enabled, grace period, auto-absent time, supervisor override threshold</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Billing Settings</td>
+<td>Default invoice due days, reminder schedule, currency, tax rate</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Calendar Settings</td>
+<td>Weekend days (Fri-Sat UAE default), working hours, holiday calendar import</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Parent Portal Settings</td>
+<td>Daily report time, allowed activity types, photo watermark, branding</td>
+<td>Full</td>
+</tr>
+<tr>
+<td>Data Retention</td>
+<td>Per-entity retention periods (attendance, medical, assessment) — configurable within legal minimums</td>
+<td>Full</td>
+</tr>
+</tbody>
+</table>
+<h3 id="152-custom-roles">15.2 Custom Roles</h3>
+<ul>
+<li>Super Admins can create custom roles beyond the standard 8 (Super Admin, Centre Admin, Teacher, Parent, Receptionist, Accounts, IT, Marketing, Procurement).</li>
+<li>Custom role: name, description, permissions per module (read / write / admin / none).</li>
+<li>Permissions enforced at API layer via <code>[Authorize(Policy = "...")]</code> + at UI layer via conditional rendering.</li>
+</ul>
+<h3 id="153-notification-preferences-per-user">15.3 Notification Preferences Per User</h3>
+<ul>
+<li>Each user can configure per-notification-type preferences (push on/off, email on/off).</li>
+<li>Critical tier notifications cannot be suppressed by users (safety alerts are mandatory).</li>
+<li>Operational tier: user can suppress push but not in-app.</li>
+<li>Informational tier: user can suppress both push and email (unsubscribe).</li>
+</ul>
+<h2 id="16-cross-cutting-requirements-full-phase-1">16. Cross-Cutting Requirements (Full Phase 1)</h2>
+<h3 id="161-audit-trail-ui-accessibility">16.1 Audit Trail — UI Accessibility</h3>
+<p>All data mutations (CREATE, UPDATE, DELETE) logged with: acting user, timestamp, entity type, entity ID, action, before/after JSONB diff.</p>
+<p><strong>Two access levels:</strong>
+- Backend/DB level: complete log always persisted, accessible to platform ops team for compliance/forensics. Baseline requirement.
+- Admin UI level: filterable Audit Log viewer in Settings module, accessible to Super Admins. Filter by: user, date range, entity type, action.</p>
+<p><strong>Implementation:</strong>
+- <code>audit_log</code> table — append-only, enforced via PostgreSQL trigger rejecting UPDATE/DELETE.
+- Partitioned by month for query performance.
+- Indexed on <code>(tenant_id, created_at DESC)</code>, <code>(tenant_id, user_id)</code>, <code>(tenant_id, entity_type, entity_id)</code>.</p>
+<h3 id="162-media-storage-security-full">16.2 Media Storage &amp; Security (Full)</h3>
+<ul>
+<li>All media (photos, videos, documents) stored in S3-compatible object storage (NEVER in DB).</li>
+<li>CDN serves all media to parents — UAE edge PoPs required.</li>
+<li>Content moderation: every upload scanned (file type, size, ClamAV malware, optional AWS Rekognition for inappropriate content) BEFORE parent visibility.</li>
+<li>Pending or rejected media is quarantined at CDN layer — even if a signed URL is generated, CDN returns 403.</li>
+<li>Signed/expiring URLs only (5-minute default expiry for media, 60-second for upload presigned URLs).</li>
+<li>Direct public links to storage buckets NOT permitted — bucket policy blocks all public access.</li>
+<li>Media retention policy aligned with data retention (Section 5 of SRS).</li>
+</ul>
+<h3 id="163-emergency-child-report-one-click-evacuation-export">16.3 Emergency Child Report (One-Click Evacuation Export)</h3>
+<p>Per child, instantly generatable single-page PDF containing:
+- Child's full name, DOB, profile photo.
+- Room and assigned key person.
+- Medical conditions, allergies, dietary requirements (encrypted at rest, decrypted for this report only with audit log).
+- Medication currently in use and administration notes.
+- Emergency contact names, relationships, phone numbers (minimum 2 contacts).
+- Any active safeguarding or custody notes flagged as relevant to emergency response.</p>
+<p><strong>Access:</strong>
+- From Student profile: "Export Emergency Report" button.
+- From Room view: "Export All for Room" button → bulk PDF (zipped or merged).
+- From Dashboard: "Export All for Centre" button → bulk PDF (most critical for evacuation).
+- Cached on device (mobile app, Phase 1 Sprint 15+) for offline access during network outage.
+- Access requires Teacher+ role; access is logged at higher audit level (security-sensitive).</p>
+<h3 id="164-notification-hierarchy-full-phase-1">16.4 Notification Hierarchy (Full Phase 1)</h3>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Examples</th>
+<th>Required Channels</th>
+<th>Suppressible?</th>
+<th>Acknowledgement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Critical / Safety</strong></td>
+<td>Ratio breach, unexpected absence, safeguarding flag</td>
+<td>In-app banner (red, persistent) + Push + SMS (Phase 1 Sprint 13+)</td>
+<td>No — mandatory</td>
+<td>Not required (per planning doc §7), but UX "Acknowledge" button records user-side dismissal</td>
+</tr>
+<tr>
+<td><strong>Operational</strong></td>
+<td>Leave approved/rejected, invoice generated, message received, activity pending approval</td>
+<td>In-app notification + Push</td>
+<td>Per user preference (push on/off per type)</td>
+<td>Not required</td>
+</tr>
+<tr>
+<td><strong>Informational / Reminders</strong></td>
+<td>Fee reminder emails, daily report sent, upcoming birthday, newsletter published</td>
+<td>Email + optional in-app</td>
+<td>Yes — configurable, unsubscribe supported</td>
+<td>Not required</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Technical Requirements:</strong>
+- No recipient acknowledgement required for any individual delivery.
+- Delivery attempts and available delivery status recorded in <code>notification_delivery</code> table.
+- Retry and fallback behavior: defined around delivery errors, provider status, agreed timeout rules.
+- Every attempt traceable.
+- Critical tier: FCM failure → retry 3x (exponential backoff) → fallback to SMS (Sprint 13+) → fallback to email. All attempts logged.
+- Operational tier: FCM delivery, retry 3x on failure, no SMS fallback.
+- Informational tier: email batch delivery, no retry beyond provider's own.</p>
+<p>Full spec: <code>15-NOTIFICATIONS.md</code>.</p>
+<h2 id="17-non-functional-requirements-full-phase-1">17. Non-Functional Requirements (Full Phase 1)</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Performance</strong></td>
+<td>Dashboard and attendance screens &lt; 2s p95 on standard broadband. API p99 &lt; 500ms.</td>
+</tr>
+<tr>
+<td><strong>Scalability</strong></td>
+<td>500 students + 50 staff per centre. Multi-centre Phase 3: up to 20 centres, 500 concurrent users.</td>
+</tr>
+<tr>
+<td><strong>Availability</strong></td>
+<td>99.5% uptime SLA Phase 1; planned maintenance windows outside 6 AM–8 PM local.</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>RBAC, TLS 1.2+, encryption at rest + in transit, column-level encryption for sensitive fields, GDPR/PDPL-aligned.</td>
+</tr>
+<tr>
+<td><strong>Data Residency</strong></td>
+<td>UAE-hosted infrastructure (AWS me-central-1 recommended).</td>
+</tr>
+<tr>
+<td><strong>Audit Logging</strong></td>
+<td>All mutations logged, append-only, Super Admin UI viewer.</td>
+</tr>
+<tr>
+<td><strong>Backup &amp; Recovery</strong></td>
+<td>Daily automated backups, RPO ≤ 4h, RTO ≤ 8h.</td>
+</tr>
+<tr>
+<td><strong>Localization</strong></td>
+<td>Arabic + English, full RTL. All third-party libraries must natively support RTL.</td>
+</tr>
+<tr>
+<td><strong>Mobile Responsiveness</strong></td>
+<td>All screens fully functional on tablet + mobile browsers.</td>
+</tr>
+<tr>
+<td><strong>Accessibility</strong></td>
+<td>WCAG 2.1 AA for parent portal.</td>
+</tr>
+<tr>
+<td><strong>Barcode Support</strong></td>
+<td>USB + Bluetooth HID scanners; mobile camera scanning.</td>
+</tr>
+<tr>
+<td><strong>Integrations</strong></td>
+<td>Phase 1: Email (SMTP/SES); Phase 2: payment gateway, external ERP, open API.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Next file to read</strong>: <code>04-PRD-PHASE2-3.md</code> for Learning &amp; Assessment, payment gateway, ERP integration, and multi-centre scale.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-02-prd-mvp.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: MVP Pilot</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-04-prd-phase2-3.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: Phase 2 & 3</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

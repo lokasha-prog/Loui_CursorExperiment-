@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRD: MVP Pilot — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class="active"><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-mvp-purpose" class="toc-link" data-target="1-mvp-purpose">1. MVP Purpose</a><a href="#2-mvp-scope" class="toc-link" data-target="2-mvp-scope">2. MVP Scope</a><a href="#21-in-scope-build" class="toc-link toc-h3" data-target="21-in-scope-build">2.1 In Scope (Build)</a><a href="#22-out-of-scope-for-mvp-deferred-to-later-phase-1-sprints" class="toc-link toc-h3" data-target="22-out-of-scope-for-mvp-deferred-to-later-phase-1-sprints">2.2 Out of Scope for MVP (Deferred to Later Pha...</a><a href="#23-deliberate-mvp-constraints" class="toc-link toc-h3" data-target="23-deliberate-mvp-constraints">2.3 Deliberate MVP Constraints</a><a href="#3-user-stories" class="toc-link" data-target="3-user-stories">3. User Stories</a><a href="#31-authentication-onboarding" class="toc-link toc-h3" data-target="31-authentication-onboarding">3.1 Authentication &amp; Onboarding</a><a href="#32-centre-management" class="toc-link toc-h3" data-target="32-centre-management">3.2 Centre Management</a><a href="#33-attendance" class="toc-link toc-h3" data-target="33-attendance">3.3 Attendance</a><a href="#34-parent-communication" class="toc-link toc-h3" data-target="34-parent-communication">3.4 Parent Communication</a><a href="#35-messaging" class="toc-link toc-h3" data-target="35-messaging">3.5 Messaging</a><a href="#36-dashboard" class="toc-link toc-h3" data-target="36-dashboard">3.6 Dashboard</a><a href="#37-notifications" class="toc-link toc-h3" data-target="37-notifications">3.7 Notifications</a><a href="#38-audit-settings" class="toc-link toc-h3" data-target="38-audit-settings">3.8 Audit &amp; Settings</a><a href="#4-mvp-acceptance-criteria-pilot-exit-gates" class="toc-link" data-target="4-mvp-acceptance-criteria-pilot-exit-gates">4. MVP Acceptance Criteria (Pilot Exit Gates)</a><a href="#41-functional-acceptance" class="toc-link toc-h3" data-target="41-functional-acceptance">4.1 Functional Acceptance</a><a href="#42-pilot-engagement-metrics" class="toc-link toc-h3" data-target="42-pilot-engagement-metrics">4.2 Pilot Engagement Metrics</a><a href="#43-pilot-process-requirements" class="toc-link toc-h3" data-target="43-pilot-process-requirements">4.3 Pilot Process Requirements</a><a href="#5-mvp-dependencies-assumptions" class="toc-link" data-target="5-mvp-dependencies-assumptions">5. MVP Dependencies &amp; Assumptions</a><a href="#51-hard-dependencies-must-resolve-before-sprint-0-ends" class="toc-link toc-h3" data-target="51-hard-dependencies-must-resolve-before-sprint-0-ends">5.1 Hard Dependencies (Must Resolve Before Spri...</a><a href="#52-working-assumptions-for-planning-only-confirm-before-sprint-1" class="toc-link toc-h3" data-target="52-working-assumptions-for-planning-only-confirm-before-sprint-1">5.2 Working Assumptions (For Planning Only — Co...</a><a href="#6-mvp-sprint-plan-summary" class="toc-link" data-target="6-mvp-sprint-plan-summary">6. MVP Sprint Plan Summary</a><a href="#7-risks-specific-to-mvp" class="toc-link" data-target="7-risks-specific-to-mvp">7. Risks Specific to MVP</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="rocket" class="w-4 h-4 text-amber-600"></i><span>PRD: MVP Pilot</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Product · spec-02-prd-mvp.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Product</span>
+          <span class="pill pill-done">DOC 02</span>
+          <span class="text-[10px] font-mono text-slate-400">~4,482 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">PRD: MVP Pilot</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-01-product-vision.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Product Vision</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-03-prd-phase1.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: Phase 1 Full</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="02-prd-mvp-pilot-release">02 — PRD: MVP Pilot Release</h1>
+<blockquote>
+<p>The smallest releasable NMS that delivers real value to 1–2 pilot nurseries and generates structured feedback to decide what to build next.</p>
+<p><strong>Build this first.</strong> Do not start Phase 1 full scope until MVP pilot is live and pilot exit criteria are met.</p>
+</blockquote>
+<hr />
+<h2 id="1-mvp-purpose">1. MVP Purpose</h2>
+<p>Deploy a <strong>safe, usable first release</strong> to 1–2 pilot nurseries, observe actual workflows, and use structured feedback to decide what to change before expanding to full Phase 1.</p>
+<p>The MVP is a <strong>release boundary for piloting</strong>, not a feature subset of Phase 1. It deliberately excludes modules that the source SRS lists as Phase 1 (billing, enquiry pipeline, forms, calendar breadth, reports catalogue, mobile) to keep the pilot focused on the riskiest unknowns: real-time operations, parent engagement, safety alerting, and Arabic RTL in production.</p>
+<h2 id="2-mvp-scope">2. MVP Scope</h2>
+<h3 id="21-in-scope-build">2.1 In Scope (Build)</h3>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>What's included</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tenancy</strong></td>
+<td>Single-tenant deployment (one pilot nursery per deployment). Architecture is multi-tenant-ready, but pilot runs one tenant.</td>
+</tr>
+<tr>
+<td><strong>Languages</strong></td>
+<td>English + Arabic (web). Full RTL parity.</td>
+</tr>
+<tr>
+<td><strong>Identity</strong></td>
+<td>Keycloak with one realm. Roles: Super Admin, Centre Admin, Teacher, Parent. MFA optional for admins.</td>
+</tr>
+<tr>
+<td><strong>Centre setup</strong></td>
+<td>Students (full lifecycle), Staff, Rooms, Programs, Groups, Labels, Guardians (primary + secondary).</td>
+</tr>
+<tr>
+<td><strong>Attendance</strong></td>
+<td>Student + staff check-in/check-out. Barcode scanner support (HID keyboard emulation). Daily summary counters.</td>
+</tr>
+<tr>
+<td><strong>Ratio monitoring</strong></td>
+<td>Real-time staff-to-student ratio per room. WebSocket-driven dashboard widget. Critical alert when ratio breaches.</td>
+</tr>
+<tr>
+<td><strong>Parent communication</strong></td>
+<td>Activity feed (8 types): announcement, photo, video, diary, food, toilet, medical, mood. Staff approval workflow before parent visibility. Daily consolidated report.</td>
+</tr>
+<tr>
+<td><strong>Messaging</strong></td>
+<td>Staff-to-parent shared inbox. Parent-to-staff. Threaded. Read receipts. Staff-to-staff internal. Broadcast announcements.</td>
+</tr>
+<tr>
+<td><strong>Dashboard</strong></td>
+<td>KPI cards (rooms, staff, students, programs). Live attendance summary. Live ratio widget. Pending actions widget (leave approvals, unapproved activities, unread messages).</td>
+</tr>
+<tr>
+<td><strong>Audit trail</strong></td>
+<td>Append-only audit log on all mutations. Super Admin viewer with filter by user, date, entity, action.</td>
+</tr>
+<tr>
+<td><strong>Media pipeline</strong></td>
+<td>Object storage with presigned URLs. Content moderation (basic — file type + size validation + ClamAV scan). CDN with signed URLs. Quarantine blocks CDN delivery.</td>
+</tr>
+<tr>
+<td><strong>Notifications</strong></td>
+<td>In-app banner (Critical tier). Push notifications via FCM (Operational + Critical). Email via SMTP for Informational. NO SMS in MVP (deferred to Phase 1 Sprint 13).</td>
+</tr>
+<tr>
+<td><strong>Security baseline</strong></td>
+<td>TLS 1.2+. Encryption at rest. Column-level encryption for medical/allergy/custody fields. Rate limiting. RBAC + parent-child ownership checks.</td>
+</tr>
+<tr>
+<td><strong>Reports (minimal)</strong></td>
+<td>Daily attendance print/export. Emergency child report (one-click PDF per child + bulk per room).</td>
+</tr>
+<tr>
+<td><strong>Web frontend</strong></td>
+<td>Responsive React app. Desktop-first for staff. Mobile-responsive for parents. RTL parity.</td>
+</tr>
+<tr>
+<td><strong>Deployment</strong></td>
+<td>K8s (dev/staging/prod). CI/CD pipeline. Monitoring (Prometheus + Grafana + Loki). Daily backups.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-out-of-scope-for-mvp-deferred-to-later-phase-1-sprints">2.2 Out of Scope for MVP (Deferred to Later Phase 1 Sprints)</h3>
+<p>These are <strong>Phase 1 features</strong> per the source SRS, but explicitly <strong>excluded from MVP</strong> to keep pilot focused. They are built in later sprints after MVP validation.</p>
+<ul>
+<li>❌ Billing &amp; accounting automation (Sprint 7–8)</li>
+<li>❌ Enquiry &amp; tour pipeline (Sprint 9–10)</li>
+<li>❌ Configurable forms builder &amp; admissions (Sprint 11–12)</li>
+<li>❌ Calendar module full breadth (Sprint 11–12) — basic school events only in MVP</li>
+<li>❌ ID card / certificate generators (Sprint 11–12)</li>
+<li>❌ Full reports catalogue (Sprint 13–14) — only daily attendance + emergency report in MVP</li>
+<li>❌ Newsletter builder &amp; resource centre (Sprint 5–6 minimal — full features later)</li>
+<li>❌ Mobile app (Sprint 15–16) — MVP is web-only</li>
+<li>❌ SMS notifications (Sprint 13)</li>
+<li>❌ AI-assisted newsletter content (Phase 2)</li>
+<li>❌ Learning &amp; Assessment module (Phase 2)</li>
+<li>❌ Payment gateway (Phase 3)</li>
+<li>❌ Multi-centre SaaS (Phase 3)</li>
+</ul>
+<h3 id="23-deliberate-mvp-constraints">2.3 Deliberate MVP Constraints</h3>
+<p>To force focus and ship in ~10 weeks:</p>
+<ol>
+<li><strong>One nursery per deployment</strong> — no multi-tenant UI in MVP.</li>
+<li><strong>Web only</strong> — no native mobile app. Parents use responsive web on phone.</li>
+<li><strong>No SMS</strong> — Critical alerts use push + in-app banner only. SMS added in Sprint 13.</li>
+<li><strong>No payment processing</strong> — invoices not generated in MVP. Parents pay via existing channels.</li>
+<li><strong>No learning/assessment</strong> — observation is parent-communication-only in MVP.</li>
+<li><strong>No custom forms</strong> — enquiry form is a fixed web form, not a builder.</li>
+<li><strong>No tours module</strong> — pilot nurseries manage tours via existing calendar.</li>
+<li><strong>One UAE region</strong> — pilot deploys to single AWS UAE region (me-central-1) or pilot nursery's chosen cloud.</li>
+</ol>
+<h2 id="3-user-stories">3. User Stories</h2>
+<p>Stories use the format: <code>As a &lt;role&gt;, I want &lt;goal&gt;, so that &lt;value&gt;</code>. Each story has acceptance criteria (AC) in Given/When/Then format. Story IDs use <code>MVP-&lt;module&gt;-&lt;n&gt;</code>.</p>
+<h3 id="31-authentication-onboarding">3.1 Authentication &amp; Onboarding</h3>
+<h4 id="mvp-auth-01-first-super-admin-bootstrap">MVP-AUTH-01: First Super Admin bootstrap</h4>
+<p><strong>As a</strong> Centre Director<br />
+<strong>I want</strong> to set up the first Super Admin account via secure bootstrap link<br />
+<strong>So that</strong> I can begin configuring my nursery without IT help.</p>
+<p><strong>AC:</strong>
+- Given a fresh deployment with no users, when the bootstrap URL is opened with a one-time token (valid 24h, emailed to the licensed contact), then a Super Admin account creation form is shown.
+- Given a valid token, when the user sets email + password (min 12 chars, complexity rules) + TOTP MFA, then the account is created in Keycloak with role <code>super_admin</code> and redirected to onboarding wizard.
+- Given an expired or used token, when the URL is opened, then a 410 Gone page is shown with a "contact support" link.</p>
+<h4 id="mvp-auth-02-role-based-login">MVP-AUTH-02: Role-based login</h4>
+<p><strong>As a</strong> staff member or parent<br />
+<strong>I want</strong> to log in with my email + password (or magic link)<br />
+<strong>So that</strong> I access my role-appropriate dashboard.</p>
+<p><strong>AC:</strong>
+- Given valid credentials, when the user logs in, then they receive a 15-minute JWT access token + 7-day refresh token (HttpOnly cookie) and are redirected to their role's landing page.
+- Given a Teacher role, when logged in, then landing page is Dashboard with their assigned rooms' ratios prominent.
+- Given a Parent role, when logged in, then landing page is their child's activity feed.
+- Given 5 failed attempts, when the 6th attempt fails, then the account is locked for 15 minutes and the user is emailed.</p>
+<h4 id="mvp-auth-03-parent-child-ownership-enforcement">MVP-AUTH-03: Parent-child ownership enforcement</h4>
+<p><strong>As a</strong> Parent<br />
+<strong>I want</strong> the system to strictly limit my access to my own child's data<br />
+<strong>So that</strong> I cannot see other children's photos, reports, or messages.</p>
+<p><strong>AC:</strong>
+- Given a Parent authenticated, when they call any <code>/api/v1/students/*</code> endpoint, then only students where they are linked as guardian are returned.
+- Given a Parent attempts <code>/api/v1/students/&lt;other-child-id&gt;</code>, when the request hits the API, then a 404 Not Found is returned (not 403, to prevent ID enumeration).
+- Given a Parent attempts <code>/api/v1/activities?student_id=&lt;other-child-id&gt;</code>, when the request is processed, then an empty result set is returned (no error leak).</p>
+<h3 id="32-centre-management">3.2 Centre Management</h3>
+<h4 id="mvp-centre-01-create-a-room">MVP-CENTRE-01: Create a room</h4>
+<p><strong>As a</strong> Centre Admin<br />
+<strong>I want</strong> to create a room with capacity and ratio config<br />
+<strong>So that</strong> the system can track children and staff per room and enforce ratios.</p>
+<p><strong>AC:</strong>
+- Given the Centre Admin is on Settings → Rooms, when they click "Add Room", then a form opens with: name (i18n: en + ar), capacity, min_age_months, max_age_months, ratio_staff_to_student (e.g., 1:4), active checkbox.
+- Given a valid form, when submitted, then the room is created with <code>tenant_id</code> of the current tenant, audit log records CREATE, and the room appears in the rooms list.
+- Given a name conflict in the same tenant, when submitted, then a 409 Conflict is returned with a clear message in the user's locale.</p>
+<h4 id="mvp-centre-02-register-a-student-with-guardians">MVP-CENTRE-02: Register a student with guardians</h4>
+<p><strong>As a</strong> Centre Admin<br />
+<strong>I want</strong> to register a student with their guardians, room, program, and key person<br />
+<strong>So that</strong> the student is ready for attendance and parent communication.</p>
+<p><strong>AC:</strong>
+- Given a new student form, when filled (name, DOB, photo upload via presigned URL, gender, room, program, group, primary guardian details, optional secondary guardian, key person staff assignment, medical notes encrypted, allergy info encrypted), when submitted, then the student is created with status <code>Signed Up</code>.
+- Given the student is created, when the Centre Admin clicks "Activate", then status transitions to <code>Active</code>, an invitation email is sent to the primary guardian with a magic link to set up their parent account, and the audit log records the status transition.
+- Given a guardian email that already exists as a parent in the same tenant, when the student is saved, then the guardian is linked to the additional student (not a new account created).</p>
+<h4 id="mvp-centre-03-student-status-lifecycle">MVP-CENTRE-03: Student status lifecycle</h4>
+<p><strong>As a</strong> Centre Admin<br />
+<strong>I want</strong> to transition student status: Signed Up → Active → On Hold → Withdrawn / Transferred<br />
+<strong>So that</strong> the system reflects the real lifecycle and inactive students don't appear in attendance.</p>
+<p><strong>AC:</strong>
+- Given an Active student, when Centre Admin sets status to On Hold, then the student is excluded from attendance lists, but remains in reports; the audit log records the transition + reason.
+- Given an Active student, when status is set to Withdrawn, then the student's data is retained (soft delete <code>is_deleted=true</code>, <code>deleted_at=now()</code>), guardians lose access immediately, but the record remains for compliance retention.</p>
+<h3 id="33-attendance">3.3 Attendance</h3>
+<h4 id="mvp-att-01-staff-check-in-a-student-via-barcode">MVP-ATT-01: Staff check-in a student via barcode</h4>
+<p><strong>As a</strong> Teacher at the door<br />
+<strong>I want</strong> to scan a parent's barcode (on their phone or paper card) at drop-off<br />
+<strong>So that</strong> the student is checked in quickly and accurately.</p>
+<p><strong>AC:</strong>
+- Given the Attendance screen is open on a USB/Bluetooth barcode scanner-connected device, when a barcode is scanned (HID keyboard emulation sends the code + Enter), then the system looks up the student by barcode, checks them in with timestamp, plays a success sound, and shows a green confirmation overlay for 2s.
+- Given a scanned barcode that doesn't match any active student in the tenant, when the lookup fails, then a red error overlay shows "Student not found" + audio cue, and the event is logged to <code>attendance_event</code> table with <code>outcome=FAILED_LOOKUP</code>.
+- Given a student already checked in, when their barcode is scanned again, then a yellow warning shows "Already checked in at <time>" + audio cue, no second check-in recorded.</p>
+<h4 id="mvp-att-02-manual-check-inout">MVP-ATT-02: Manual check-in/out</h4>
+<p><strong>As a</strong> Teacher<br />
+<strong>I want</strong> to manually check in/out a student from the attendance screen<br />
+<strong>So that</strong> I can handle exceptions (forgotten card, scanner broken).</p>
+<p><strong>AC:</strong>
+- Given the attendance list filtered by room and date, when the Teacher clicks "Check In" next to a Pending student, then the student is checked in with the current timestamp, summary counters update in real-time (via SignalR), and the audit log records the action.
+- Given a student checked in &gt; 24h ago, when a Teacher tries to edit the check-in time, then the system requires a Supervisor override (Centre Admin role), the override is logged as a separate audit event, and the original timestamp is preserved in <code>attendance_event</code>.</p>
+<h4 id="mvp-att-03-live-ratio-monitor">MVP-ATT-03: Live ratio monitor</h4>
+<p><strong>As a</strong> Centre Admin<br />
+<strong>I want</strong> to see a live room-by-room ratio on my dashboard<br />
+<strong>So that</strong> I can spot breaches before they become safety incidents.</p>
+<p><strong>AC:</strong>
+- Given the Dashboard is open, when the page loads, then a "Live Ratio Monitor" widget shows all active rooms with: Room name, Student count, Staff count, Ratio, Compliance badge (green OK / red BREACH / yellow WARNING).
+- Given a room's ratio falls below the configured threshold, when the breach occurs, then within 30 seconds: (a) the dashboard widget turns red, (b) a SignalR event pushes a Critical in-app banner to all admins/teachers, (c) an FCM push notification is sent to all admins, (d) a <code>notification</code> record is created with <code>tier=Critical</code>.
+- Given a breach is resolved (more staff checked in or students leave), when the ratio returns to compliant, then the dashboard updates within 30s and a "resolved" notification is sent.</p>
+<h3 id="34-parent-communication">3.4 Parent Communication</h3>
+<h4 id="mvp-comm-01-teacher-posts-a-photo-activity">MVP-COMM-01: Teacher posts a photo activity</h4>
+<p><strong>As a</strong> Teacher<br />
+<strong>I want</strong> to take a photo of an activity in class, write a caption, and post it for parents<br />
+<strong>So that</strong> parents see what their child did today.</p>
+<p><strong>AC:</strong>
+- Given the Teacher is on the Activity Feed → New Post, when they select type=Photo, upload an image (via presigned URL — JPG/PNG/HEIC, max 10MB, max 5 images per post), select the student(s) tagged, write a caption (i18n optional — if Arabic provided, both shown), then the post is saved with <code>approval_status=PENDING</code> and is NOT visible to parents.
+- Given the post is saved, when an auto content-moderation scan (file type, size, ClamAV malware scan, optional AWS Rekognition for inappropriate content) returns APPROVED, then <code>approval_status</code> auto-transitions to APPROVED and the post becomes visible to linked parents.
+- Given a scan returns QUARANTINED, when the post is saved, then <code>media.scan_status=QUARANTINED</code>, the media is moved to a quarantine bucket, the CDN returns 403 on any signed URL for it, and the Teacher + Centre Admin are notified in-app.
+- Given a Teacher wants to override auto-approval (e.g., add a sensitive caption review), when they mark the post as "Needs Manual Approval", then a Centre Admin must approve before parent visibility.</p>
+<h4 id="mvp-comm-02-parent-views-activity-feed">MVP-COMM-02: Parent views activity feed</h4>
+<p><strong>As a</strong> Parent<br />
+<strong>I want</strong> to see a chronological feed of my child's activities<br />
+<strong>So that</strong> I feel connected during the workday.</p>
+<p><strong>AC:</strong>
+- Given the Parent logs in (web responsive on mobile), when they open the app, then the default landing is their child's activity feed (most recent first), with each card showing: timestamp, type icon, caption, photo/video thumbnail (tappable to full-screen), staff member name.
+- Given the Parent has multiple children, when they open the feed, then a child selector at top lets them switch; default is the most recently active child.
+- Given a new activity is posted, when the parent has the app open, then a SignalR event appends the new card to the top with a subtle animation + soft chime (if not muted in settings).
+- Given the parent scrolls, when they reach the bottom, then cursor-based pagination loads more (page size 20).</p>
+<h4 id="mvp-comm-03-daily-consolidated-report">MVP-COMM-03: Daily consolidated report</h4>
+<p><strong>As a</strong> Parent<br />
+<strong>I want</strong> to receive a daily summary of my child's day at pickup time<br />
+<strong>So that</strong> I have a structured view even if I missed real-time updates.</p>
+<p><strong>AC:</strong>
+- Given 3:30 PM local time, when the scheduled job runs, then for each Active student present today, a daily report is generated (PDF + in-app card) containing: check-in/out times, food log, toilet log, nap log, mood, any incidents, photos posted today, staff member names.
+- Given the report is generated, when it's ready, then: (a) it appears as a special "Daily Report" card in the parent's feed, (b) an email is sent to the primary guardian with the PDF attached, (c) a push notification is sent.
+- Given a student was absent today, when the job runs, then no report is generated for them, but a "Marked Absent" notification is sent to the parent.</p>
+<h3 id="35-messaging">3.5 Messaging</h3>
+<h4 id="mvp-msg-01-parent-sends-a-message-to-staff">MVP-MSG-01: Parent sends a message to staff</h4>
+<p><strong>As a</strong> Parent<br />
+<strong>I want</strong> to message the nursery staff about my child<br />
+<strong>So that</strong> I can ask questions or share concerns.</p>
+<p><strong>AC:</strong>
+- Given the Parent opens Messaging, when they tap "New Message", then a thread is created between them and the room staff (all staff assigned to their child's room are recipients).
+- Given a parent sends a message, when the message is sent, then all room staff receive an in-app notification + FCM push (Operational tier), and the message appears in the staff shared inbox.
+- Given any staff member responds, when the response is sent, then the parent receives a push notification and the thread updates in real-time on their app.
+- Given a parent sends a message outside staff hours (configurable per centre — default 7 AM – 6 PM), when the message is sent, then an auto-reply confirms receipt and states staff will respond next working day.</p>
+<h4 id="mvp-msg-02-staff-shared-inbox">MVP-MSG-02: Staff shared inbox</h4>
+<p><strong>As a</strong> Teacher<br />
+<strong>I want</strong> to see all parent messages in a shared inbox<br />
+<strong>So that</strong> any available staff can respond, not just the assigned teacher.</p>
+<p><strong>AC:</strong>
+- Given the Teacher opens Messaging, when the inbox loads, then all parent threads for their assigned rooms are shown, sorted by most recent, with unread indicator.
+- Given a Teacher opens a thread, when they read it, then the thread is marked read for them but NOT for other staff (per-recipient read receipts).
+- Given two staff respond in the same thread, when the responses are sent, then both are visible in the thread with timestamps + staff names, and the parent sees a single conversation.</p>
+<h3 id="36-dashboard">3.6 Dashboard</h3>
+<h4 id="mvp-dash-01-centre-admin-dashboard">MVP-DASH-01: Centre Admin dashboard</h4>
+<p><strong>As a</strong> Centre Admin<br />
+<strong>I want</strong> a real-time dashboard on login<br />
+<strong>So that</strong> I immediately see the centre's status and any issues needing attention.</p>
+<p><strong>AC:</strong>
+- Given the Centre Admin logs in, when the Dashboard loads (&lt; 2s p95), then they see: KPI cards (Total Rooms, Total Staff, Total Students, Total Programs), Today's Attendance Summary (Checked In / Checked Out / Absent / Pending — for staff and students separately), Live Ratio Monitor widget, Pending Actions widget (unapproved activities count, pending leave requests count, unread parent messages count).
+- Given any KPI changes (a student checks in, an activity is posted, a message arrives), when the change occurs, then the dashboard updates within 5 seconds via SignalR without page reload.
+- Given the admin clicks a KPI card, when clicked, then they navigate to the relevant module filtered to today.</p>
+<h3 id="37-notifications">3.7 Notifications</h3>
+<h4 id="mvp-notif-01-critical-notification-escalation">MVP-NOTIF-01: Critical notification escalation</h4>
+<p><strong>As a</strong> Centre Admin<br />
+<strong>I want</strong> critical safety alerts (ratio breach, unexpected absence) to reach me reliably<br />
+<strong>So that</strong> I never miss a safety event.</p>
+<p><strong>AC:</strong>
+- Given a ratio breach occurs, when the system detects it, then within 30 seconds: in-app banner (red, persistent until dismissed) + FCM push to all admins. SMS is NOT sent in MVP.
+- Given a Critical notification fails to deliver (FCM returns failure), when the failure is detected, then a retry is attempted up to 3 times (exponential backoff), all attempts are logged to <code>notification_delivery</code>, and on final failure a fallback email is sent to the admin's email.
+- Given the admin opens the in-app banner, when they tap "Acknowledge", then the banner dismisses for them, but other admins still see it until they acknowledge. (Note: per source SRS §7 of planning doc, individual notification delivery does NOT require recipient acknowledgement — this "acknowledge" is a UX affordance only, not a delivery confirmation.)</p>
+<h3 id="38-audit-settings">3.8 Audit &amp; Settings</h3>
+<h4 id="mvp-audit-01-super-admin-views-audit-log">MVP-AUDIT-01: Super Admin views audit log</h4>
+<p><strong>As a</strong> Super Admin<br />
+<strong>I want</strong> to view a filterable audit log of all system changes<br />
+<strong>So that</strong> I can investigate incidents and demonstrate compliance.</p>
+<p><strong>AC:</strong>
+- Given the Super Admin opens Settings → Audit Log, when the page loads, then the most recent 100 audit entries are shown (newest first), with columns: timestamp, user, entity type, entity ID, action, summary.
+- Given the Super Admin applies filters (user, date range, entity type, action), when filters are applied, then the list updates with cursor-based pagination (page size 100).
+- Given the Super Admin clicks an entry, when expanded, then the full JSONB diff (before/after) is shown.</p>
+<h2 id="4-mvp-acceptance-criteria-pilot-exit-gates">4. MVP Acceptance Criteria (Pilot Exit Gates)</h2>
+<p>The MVP is considered <strong>piloted and ready for Phase 1 expansion</strong> when ALL the following are true. These must be measured during the pilot and signed off by the Product Owner.</p>
+<h3 id="41-functional-acceptance">4.1 Functional Acceptance</h3>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Acceptance evidence</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Core setup</td>
+<td>A nursery admin can create and maintain the pilot's children, guardians, staff, rooms, programs, and groups, with role permissions applied and validated.</td>
+<td>Proposed</td>
+</tr>
+<tr>
+<td>Attendance &amp; safety</td>
+<td>Staff can check children and staff in/out via barcode and manual override; room attendance and staff-to-child ratio are visible in real time; configured critical events create a traceable alert and delivery outcome within 30s.</td>
+<td>Proposed</td>
+</tr>
+<tr>
+<td>Parent experience</td>
+<td>A parent can access only linked child records, view approved activity updates and messages in their selected language (EN or AR), and receives a daily report by 4 PM local.</td>
+<td>Proposed</td>
+</tr>
+<tr>
+<td>Privacy &amp; audit</td>
+<td>Sensitive data and media follow approved access, storage, retention, and audit rules; quarantined media is inaccessible to parents via any path.</td>
+<td>Legal approval required</td>
+</tr>
+<tr>
+<td>Usability &amp; quality</td>
+<td>Critical pilot journeys pass UAT with the pilot nursery; parent portal accessibility (WCAG 2.1 AA) target recorded; Arabic RTL checks pass; no unresolved release-blocking defects.</td>
+<td>Define severity + sign-off owners</td>
+</tr>
+<tr>
+<td>Performance &amp; recovery</td>
+<td>Dashboard/attendance p95 &lt; 2s on standard broadband; backup restoration demonstrated; incident response runbook walked through.</td>
+<td>Confirm load profile</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-pilot-engagement-metrics">4.2 Pilot Engagement Metrics</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pilot nurseries live</td>
+<td>≥1 (target 2)</td>
+<td>Count of deployments with ≥1 active user in past 7 days</td>
+</tr>
+<tr>
+<td>Staff DAU</td>
+<td>≥10</td>
+<td>Daily active staff users</td>
+</tr>
+<tr>
+<td>Parent WAU</td>
+<td>≥30</td>
+<td>Weekly active parent users</td>
+</tr>
+<tr>
+<td>Daily check-ins logged in system</td>
+<td>≥80% of expected attendance</td>
+<td>Compare system check-ins vs. expected enrolment</td>
+</tr>
+<tr>
+<td>Activities posted per day</td>
+<td>≥5 per active room</td>
+<td>Average across pilot period</td>
+</tr>
+<tr>
+<td>Parent messages per week</td>
+<td>≥10</td>
+<td>Total threads + responses</td>
+</tr>
+<tr>
+<td>Critical bug count</td>
+<td>0</td>
+<td>Open P0/P1 bugs in tracker</td>
+</tr>
+<tr>
+<td>High bug count</td>
+<td>≤3</td>
+<td>Open P2 bugs in tracker</td>
+</tr>
+<tr>
+<td>Parent portal p95 load</td>
+<td>&lt; 2.5s</td>
+<td>RUM data</td>
+</tr>
+<tr>
+<td>Ratio breach alert delivery time</td>
+<td>&lt; 30s from breach to push</td>
+<td>Audit log + delivery log</td>
+</tr>
+<tr>
+<td>Pilot user NPS</td>
+<td>≥30</td>
+<td>Survey at end of pilot</td>
+</tr>
+<tr>
+<td>Pilot user "would recommend"</td>
+<td>≥60%</td>
+<td>Survey at end of pilot</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-pilot-process-requirements">4.3 Pilot Process Requirements</h3>
+<p>Before pilot launch, these must be agreed:
+- Named pilot nurseries + signed pilot agreement (free or discounted, time-limited)
+- Named user representatives at each pilot
+- Feedback channels (Slack/WhatsApp group with pilot leads, in-app feedback button)
+- Issue triage owner (Tech Lead) + SLA (P0 &lt; 4h, P1 &lt; 24h, P2 &lt; 1 week)
+- Review cadence: weekly during pilot (Sprint 4–5), bi-weekly after
+- MVP success measures baseline (captured at pilot start, compared at pilot end)
+- Expansion decision criteria: defined before pilot, signed off by Product Owner</p>
+<h2 id="5-mvp-dependencies-assumptions">5. MVP Dependencies &amp; Assumptions</h2>
+<h3 id="51-hard-dependencies-must-resolve-before-sprint-0-ends">5.1 Hard Dependencies (Must Resolve Before Sprint 0 Ends)</h3>
+<ol>
+<li><strong>Pilot nursery signed</strong> — at least one nursery organization committed to pilot with named director + 2-3 staff + 5-10 parents willing to test.</li>
+<li><strong>UAE cloud provider selected</strong> — AWS ME Central (me-central-1) recommended for SaaS pilot; on-prem pilot uses nursery's chosen infra.</li>
+<li><strong>PDPL legal review complete</strong> — legal counsel signs off on data handling, retention, parent consent terms.</li>
+<li><strong>KHDA/ADEK alignment confirmed</strong> — at minimum, confirm we're not violating any inspection requirements by digitizing records.</li>
+<li><strong>Pilot agreement template signed off</strong> — covers data ownership, pilot duration, support SLA, exit terms.</li>
+</ol>
+<h3 id="52-working-assumptions-for-planning-only-confirm-before-sprint-1">5.2 Working Assumptions (For Planning Only — Confirm Before Sprint 1)</h3>
+<ol>
+<li><strong>One tenant per pilot deployment</strong> — even though architecture is multi-tenant-ready, MVP runs single-tenant.</li>
+<li><strong>English + Arabic</strong> — no other languages in MVP. Auto-translation considered in Phase 2.</li>
+<li><strong>Parents use responsive web on their phones</strong> — no native parent app in MVP.</li>
+<li><strong>Pilot nurseries have stable WiFi</strong> — offline mode is for emergency report only, not full app.</li>
+<li><strong>Pilot nurseries have USB or Bluetooth HID barcode scanners</strong> — we don't supply hardware.</li>
+<li><strong>Ratios are configured per room per age band</strong> — default to UAE regulatory standards, configurable per centre.</li>
+<li><strong>Identity provider is Keycloak</strong> — pilot nurseries don't have existing AD to federate.</li>
+<li><strong>Email delivery via AWS SES or Azure Communication Services</strong> — not self-hosted SMTP.</li>
+<li><strong>Push notifications via FCM</strong> — APNs handled via FCM's APNs bridge, no separate APNs key needed in MVP.</li>
+</ol>
+<h2 id="6-mvp-sprint-plan-summary">6. MVP Sprint Plan Summary</h2>
+<p>Detailed sprint breakdown in <code>19-ROADMAP-SPRINTS.md</code>. Summary:</p>
+<table>
+<thead>
+<tr>
+<th>Sprint</th>
+<th>Weeks</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sprint 0</td>
+<td>1–2</td>
+<td>Env setup, tech stack lock, pilot nursery signed, Sprint 1–5 plan agreed</td>
+</tr>
+<tr>
+<td>Sprint 1</td>
+<td>3–4</td>
+<td>Centre Management module (Students, Staff, Rooms, Programs, Groups, Guardians, Labels) + auth + RBAC</td>
+</tr>
+<tr>
+<td>Sprint 2</td>
+<td>5–6</td>
+<td>Attendance module (check-in/out, barcode, leaves) + Dashboard (KPIs, live ratio)</td>
+</tr>
+<tr>
+<td>Sprint 3</td>
+<td>7–8</td>
+<td>Parent Communication module (activity feed 8 types, approval workflow, media pipeline) + Messaging (shared inbox, threads, push)</td>
+</tr>
+<tr>
+<td>Sprint 4</td>
+<td>9–10</td>
+<td>Notifications (3-tier in MVP scope — push + email + in-app, no SMS) + Daily report generation + Audit log viewer + Emergency child report</td>
+</tr>
+<tr>
+<td>Sprint 5</td>
+<td>11–12</td>
+<td>Pilot deployment + UAT + bug fixes + go-live + pilot feedback loop established</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total MVP duration: 12 weeks</strong> (Sprints 0–5). Buffer of 2 weeks included for pilot-driven fixes.</p>
+<p>After Sprint 5 pilot is live and stable, transition to Phase 1 Sprint 6 onwards (billing, enquiry, calendar, etc. per <code>19-ROADMAP-SPRINTS.md</code>).</p>
+<h2 id="7-risks-specific-to-mvp">7. Risks Specific to MVP</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Likelihood</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pilot nursery pulls out</td>
+<td>Medium</td>
+<td>High — delays MVP launch by 4+ weeks</td>
+<td>Have 2 pilot candidates lined up by Sprint 0 end; offer pilot incentive (free 6-month SaaS after pilot)</td>
+</tr>
+<tr>
+<td>Arabic RTL breaks in production</td>
+<td>High</td>
+<td>High — parent adoption fails</td>
+<td>Mandatory RTL QA pass every sprint; Arabic-speaking QA tester on team from Sprint 1</td>
+</tr>
+<tr>
+<td>Content moderation false positives block legitimate photos</td>
+<td>Medium</td>
+<td>Medium — frustrates teachers</td>
+<td>Configurable moderation sensitivity; manual override by Centre Admin; clear appeal flow</td>
+</tr>
+<tr>
+<td>Ratio alert delivery unreliable</td>
+<td>Medium</td>
+<td>High — safety incident</td>
+<td>Fallback email on FCM failure; alert retry queue with DLQ; monitor delivery rate in Grafana</td>
+</tr>
+<tr>
+<td>Parents don't adopt the web app</td>
+<td>High</td>
+<td>High — pilot fails</td>
+<td>Make parent onboarding &lt; 2 minutes; magic-link login (no password to remember); daily report email drives first login; in-app tutorial on first visit</td>
+</tr>
+<tr>
+<td>Pilot scope creep (nursery asks for billing mid-pilot)</td>
+<td>High</td>
+<td>Medium — delays Phase 1</td>
+<td>Clear MVP scope doc shared with pilot; "Phase 1 roadmap" shared; change control process for any addition</td>
+</tr>
+<tr>
+<td>Performance under load (even small)</td>
+<td>Low</td>
+<td>High — pilot reputation</td>
+<td>Load test with k6 from Sprint 2; p95 dashboard &lt; 2s is a sprint acceptance gate from Sprint 4</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Next file to read</strong>: <code>03-PRD-PHASE1-FULL.md</code> for the full Phase 1 module specs (read when MVP is piloted and you're expanding).</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-01-product-vision.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Product Vision</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-03-prd-phase1.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">PRD: Phase 1 Full</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

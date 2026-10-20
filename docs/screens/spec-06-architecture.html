@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class="active"><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-architecture-style-modular-monolith" class="toc-link" data-target="1-architecture-style-modular-monolith">1. Architecture Style: Modular Monolith</a><a href="#11-why-modular-monolith-not-microservices" class="toc-link toc-h3" data-target="11-why-modular-monolith-not-microservices">1.1 Why Modular Monolith (not Microservices)</a><a href="#12-module-list-14-modules" class="toc-link toc-h3" data-target="12-module-list-14-modules">1.2 Module List (14 modules)</a><a href="#2-c4-level-1-system-context" class="toc-link" data-target="2-c4-level-1-system-context">2. C4 Level 1 — System Context</a><a href="#3-c4-level-2-container-diagram" class="toc-link" data-target="3-c4-level-2-container-diagram">3. C4 Level 2 — Container Diagram</a><a href="#31-mobile-container" class="toc-link toc-h3" data-target="31-mobile-container">3.1 Mobile Container</a><a href="#4-module-boundaries-c4-level-3-component-view" class="toc-link" data-target="4-module-boundaries-c4-level-3-component-view">4. Module Boundaries (C4 Level 3 — Component Vi...</a><a href="#41-module-centre-management" class="toc-link toc-h3" data-target="41-module-centre-management">4.1 Module: Centre Management</a><a href="#42-module-attendance-leaves" class="toc-link toc-h3" data-target="42-module-attendance-leaves">4.2 Module: Attendance &amp; Leaves</a><a href="#43-module-parent-communication" class="toc-link toc-h3" data-target="43-module-parent-communication">4.3 Module: Parent Communication</a><a href="#44-module-messaging" class="toc-link toc-h3" data-target="44-module-messaging">4.4 Module: Messaging</a><a href="#45-module-billing-accounting" class="toc-link toc-h3" data-target="45-module-billing-accounting">4.5 Module: Billing &amp; Accounting</a><a href="#46-module-notifications-extraction-ready" class="toc-link toc-h3" data-target="46-module-notifications-extraction-ready">4.6 Module: Notifications (Extraction-Ready)</a><a href="#47-module-media-processing-extraction-ready" class="toc-link toc-h3" data-target="47-module-media-processing-extraction-ready">4.7 Module: Media Processing (Extraction-Ready)</a><a href="#48-module-dashboard" class="toc-link toc-h3" data-target="48-module-dashboard">4.8 Module: Dashboard</a><a href="#49-module-enquiry-management" class="toc-link toc-h3" data-target="49-module-enquiry-management">4.9 Module: Enquiry Management</a><a href="#410-module-tour-management" class="toc-link toc-h3" data-target="410-module-tour-management">4.10 Module: Tour Management</a><a href="#411-module-calendar" class="toc-link toc-h3" data-target="411-module-calendar">4.11 Module: Calendar</a><a href="#412-module-forms-admissions" class="toc-link toc-h3" data-target="412-module-forms-admissions">4.12 Module: Forms &amp; Admissions</a><a href="#413-module-tools-idcertificates" class="toc-link toc-h3" data-target="413-module-tools-idcertificates">4.13 Module: Tools (ID/Certificates)</a><a href="#414-module-reports-analytics" class="toc-link toc-h3" data-target="414-module-reports-analytics">4.14 Module: Reports &amp; Analytics</a><a href="#415-module-settings-configuration" class="toc-link toc-h3" data-target="415-module-settings-configuration">4.15 Module: Settings &amp; Configuration</a><a href="#416-module-learning-assessment-phase-2" class="toc-link toc-h3" data-target="416-module-learning-assessment-phase-2">4.16 Module: Learning &amp; Assessment (Phase 2)</a><a href="#5-real-time-architecture-signalr" class="toc-link" data-target="5-real-time-architecture-signalr">5. Real-Time Architecture (SignalR)</a><a href="#51-signalr-hub-design" class="toc-link toc-h3" data-target="51-signalr-hub-design">5.1 SignalR Hub Design</a><a href="#52-connection-lifecycle" class="toc-link toc-h3" data-target="52-connection-lifecycle">5.2 Connection Lifecycle</a><a href="#53-fallback" class="toc-link toc-h3" data-target="53-fallback">5.3 Fallback</a><a href="#6-data-flow-examples" class="toc-link" data-target="6-data-flow-examples">6. Data Flow Examples</a><a href="#61-student-check-in-barcode-scan" class="toc-link toc-h3" data-target="61-student-check-in-barcode-scan">6.1 Student Check-In (Barcode Scan)</a><a href="#62-photo-activity-post-with-content-moderation" class="toc-link toc-h3" data-target="62-photo-activity-post-with-content-moderation">6.2 Photo Activity Post (with Content Moderation)</a><a href="#63-invoice-generation-monthly" class="toc-link toc-h3" data-target="63-invoice-generation-monthly">6.3 Invoice Generation (Monthly)</a><a href="#7-multi-deployment-architecture-on-prem-vs-saas" class="toc-link" data-target="7-multi-deployment-architecture-on-prem-vs-saas">7. Multi-Deployment Architecture (On-Prem vs Sa...</a><a href="#71-same-codebase-different-configuration" class="toc-link toc-h3" data-target="71-same-codebase-different-configuration">7.1 Same Codebase, Different Configuration</a><a href="#72-configuration-switches" class="toc-link toc-h3" data-target="72-configuration-switches">7.2 Configuration Switches</a><a href="#73-tenant-resolution-saas" class="toc-link toc-h3" data-target="73-tenant-resolution-saas">7.3 Tenant Resolution (SaaS)</a><a href="#8-performance-architecture" class="toc-link" data-target="8-performance-architecture">8. Performance Architecture</a><a href="#81-caching-strategy" class="toc-link toc-h3" data-target="81-caching-strategy">8.1 Caching Strategy</a><a href="#82-query-optimization" class="toc-link toc-h3" data-target="82-query-optimization">8.2 Query Optimization</a><a href="#83-connection-pooling" class="toc-link toc-h3" data-target="83-connection-pooling">8.3 Connection Pooling</a><a href="#84-background-job-scaling" class="toc-link toc-h3" data-target="84-background-job-scaling">8.4 Background Job Scaling</a><a href="#85-asynchronous-processing" class="toc-link toc-h3" data-target="85-asynchronous-processing">8.5 Asynchronous Processing</a><a href="#9-availability-disaster-recovery" class="toc-link" data-target="9-availability-disaster-recovery">9. Availability &amp; Disaster Recovery</a><a href="#91-availability-tiers" class="toc-link toc-h3" data-target="91-availability-tiers">9.1 Availability Tiers</a><a href="#92-high-availability-design" class="toc-link toc-h3" data-target="92-high-availability-design">9.2 High Availability Design</a><a href="#93-backup-recovery" class="toc-link toc-h3" data-target="93-backup-recovery">9.3 Backup &amp; Recovery</a><a href="#94-disaster-recovery-plan" class="toc-link toc-h3" data-target="94-disaster-recovery-plan">9.4 Disaster Recovery Plan</a><a href="#10-architectural-quality-attributes" class="toc-link" data-target="10-architectural-quality-attributes">10. Architectural Quality Attributes</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="git-fork" class="w-4 h-4 text-amber-600"></i><span>Architecture</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-06-architecture.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 06</span>
+          <span class="text-[10px] font-mono text-slate-400">~4,375 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Architecture</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-05-tech-stack.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Tech Stack</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-07-database-schema.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Database Schema</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="06-system-architecture">06 — System Architecture</h1>
+<blockquote>
+<p>How the system is structured: modular monolith, module boundaries, deployment topology, real-time flow, data flow.</p>
+</blockquote>
+<hr />
+<h2 id="1-architecture-style-modular-monolith">1. Architecture Style: Modular Monolith</h2>
+<h3 id="11-why-modular-monolith-not-microservices">1.1 Why Modular Monolith (not Microservices)</h3>
+<p>NMS is built as a <strong>modular monolith</strong> for Phases 1–2, with <strong>extraction-ready</strong> Notification and Media Processing modules for Phase 3 if scale justifies.</p>
+<p><strong>Reasoning:</strong>
+- <strong>Team size</strong>: Phase 1 team is 4–6 engineers. Microservices require larger teams for the operational overhead.
+- <strong>Transactional integrity</strong>: Billing, attendance, and audit need cross-module transactions. Distributed transactions are painful; in-process transactions are easy and safe.
+- <strong>Complexity budget</strong>: Microservices add distributed tracing, service mesh, network failure modes, schema versioning across services. We spend that budget later if needed.
+- <strong>Extraction-ready</strong>: Two modules (Notification, Media Processing) are designed with explicit interfaces so they can be extracted to separate services without re-architecture. Decision gate at Phase 3 Sprint 30.</p>
+<p><strong>Modular monolith principles we follow:</strong>
+1. <strong>Explicit module boundaries</strong> — each module has a public interface (CQRS handlers + events) and a private implementation.
+2. <strong>No direct cross-module DB access</strong> — modules access only their own tables. Cross-module data via in-process event bus or query handlers.
+3. <strong>Shared kernel</strong> — minimal: <code>Result&lt;T&gt;</code>, <code>Pagination</code>, <code>TenantContext</code>, <code>ICurrentUser</code>, base entity.
+4. <strong>Module communication</strong> — in-process MediatR (CQRS) for queries/commands; in-process event bus for events. Both abstractions swap to RabbitMQ when extracted.
+5. <strong>Module deployment</strong> — single deployable for now. When extracted, the module's project becomes its own service.</p>
+<h3 id="12-module-list-14-modules">1.2 Module List (14 modules)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Module</th>
+<th>Extraction candidate?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Dashboard</td>
+<td>No (read-side concern, uses others' data)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Centre Management</td>
+<td>No (master data, transactional)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Attendance &amp; Leaves</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Parent Communication</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Messaging</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Billing &amp; Accounting</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Tour Management</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Enquiry Management</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Calendar</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Forms &amp; Admissions</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Tools (ID/Certificates)</td>
+<td>No (stateless PDF generation)</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Reports &amp; Analytics</td>
+<td>Maybe (extract to reporting service in Phase 3 if reporting load is heavy)</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Settings &amp; Configuration</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Learning &amp; Assessment (Phase 2)</td>
+<td>No (transactional)</td>
+</tr>
+<tr>
+<td>-</td>
+<td><strong>Notifications</strong></td>
+<td><strong>YES — extraction-ready</strong></td>
+</tr>
+<tr>
+<td>-</td>
+<td><strong>Media Processing</strong></td>
+<td><strong>YES — extraction-ready</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-c4-level-1-system-context">2. C4 Level 1 — System Context</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>                                    ┌─────────────────────┐
+                                    │   Parent (mobile)   │
+                                    │  React Native app   │
+                                    └──────────┬──────────┘
+                                               │ HTTPS
+                                               │
+┌─────────────────────┐               ┌────────▼────────┐
+│  Staff (web+mobile) │ ─── HTTPS ───▶│                 │
+│  Admin (web)        │ ─── HTTPS ───▶│       NMS       │◀─── HTTPS ──── Third-Party
+│  Accounts (web)     │ ─── HTTPS ───▶│   (this system) │                  Apps (Phase 3)
+└─────────────────────┘               │                 │
+                                      │  .NET 8 API +   │
+                                      │  React Web +    │
+                                      │  React Native   │
+                                      └─┬─────┬─────┬───┘
+                                        │     │     │
+                              ┌─────────┘     │     └─────────┐
+                              │               │               │
+                       ┌──────▼─────┐  ┌──────▼─────┐  ┌──────▼─────┐
+                       │ PostgreSQL │  │  Redis     │  │ RabbitMQ   │
+                       │   (RLS)    │  │ (cache+    │  │ (queue +   │
+                       │            │  │  backplane)│  │  events)   │
+                       └────────────┘  └────────────┘  └────────────┘
+
+                       ┌────────────┐  ┌────────────┐  ┌────────────┐
+                       │ Keycloak   │  │  S3 /      │  │  CDN       │
+                       │ (identity) │  │  MinIO     │  │ (signed    │
+                       │            │  │ (storage)  │  │  URLs)     │
+                       └────────────┘  └────────────┘  └────────────┘
+
+                       ┌────────────────────────────────────────────┐
+                       │ External Services                          │
+                       │ - FCM (push)                               │
+                       │ - SES / Azure Comm (email)                 │
+                       │ - Twilio / Unifonic (SMS, Phase 1 Sprint   │
+                       │   13+)                                     │
+                       │ - AWS Rekognition / Azure Content Safety   │
+                       │   (content moderation)                     │
+                       │ - ClamAV (malware scan)                    │
+                       │ - OpenAI (AI features, Phase 2+ newsletter │
+                       │   generation + observation dictation)      │
+                       └────────────────────────────────────────────┘
+</code></pre></div>
+
+<h2 id="3-c4-level-2-container-diagram">3. C4 Level 2 — Container Diagram</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>                    ┌─────────────────────────────────────────────────────┐
+                    │                   NMS System                        │
+                    │                                                     │
+   Browser ────────▶│  ┌──────────────┐  ┌──────────────────────────┐    │
+   (Admin/Staff)    │  │  NMS Web     │  │  NMS API (.NET 8)        │    │
+                    │  │  (React+Vite)│  │  ┌─────────────────────┐ │    │
+                    │  │              │  │  │  Modular Monolith   │ │    │
+                    │  │  - SSR: none │  │  │  - 14 modules       │ │    │
+                    │  │  - SPA       │  │  │  - CQRS (MediatR)   │ │    │
+                    │  │              │  │  │  - Event bus        │ │    │
+                    │  └──────┬───────┘  │  └─────────────────────┘ │    │
+                    │         │          │                           │    │
+                    │         │ HTTPS    │  Hangfire (background     │    │
+                    │         │          │  jobs, in-process)        │    │
+                    │         ▼          │                           │    │
+                    │  ┌──────────────┐  │  SignalR Hub (real-time)  │    │
+                    │  │  Keycloak    │  │                           │    │
+                    │  │  (OIDC)      │  └─┬─────┬─────┬─────┬───────┘    │
+                    │  └──────────────┘    │     │     │     │            │
+                    │                      ▼     ▼     ▼     ▼            │
+                    │              ┌────────┐ ┌────┐ ┌─────┐ ┌─────┐      │
+                    │              │Postgre │ │Redi│ │Rabb │ │ S3  │      │
+                    │              │SQL 16  │ │s 7 │ │itMQ │ │     │      │
+                    │              │(RLS)   │ │    │ │     │ │     │      │
+                    │              └────────┘ └────┘ └─────┘ └─────┘      │
+                    └─────────────────────────────────────────────────────┘
+                                            │
+                                            │ async (events)
+                                            ▼
+                                    ┌───────────────────┐
+                                    │ External Services │
+                                    │ FCM, SES, etc.    │
+                                    └───────────────────┘
+</code></pre></div>
+
+<h3 id="31-mobile-container">3.1 Mobile Container</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>   Mobile App (React Native + Expo)
+   ├── Staff app
+   │   ├── Login (Keycloak via expo-auth-session)
+   │   ├── Dashboard (SignalR real-time)
+   │   ├── Attendance (camera barcode)
+   │   ├── Activities (photo upload via presigned S3 URL)
+   │   ├── Messaging (SignalR)
+   │   ├── Notifications (FCM)
+   │   └── Emergency Cache (SQLite/WatermelonDB)
+   └── Parent app
+       ├── Feed (SignalR real-time)
+       ├── Messaging
+       ├── Daily Report
+       ├── Notifications
+       └── Profile + Settings
+</code></pre></div>
+
+<p>The mobile app talks to the same NMS API (REST + SignalR) as the web. No separate mobile API in Phase 1–2. GraphQL evaluated for Phase 2 mobile if REST payload size becomes a problem on slow mobile networks.</p>
+<hr />
+<h2 id="4-module-boundaries-c4-level-3-component-view">4. Module Boundaries (C4 Level 3 — Component View)</h2>
+<p>Each module exposes:
+- <strong>Commands</strong> (write-side, via MediatR <code>IRequest</code>):
+  - Example: <code>CreateStudentCommand</code>, <code>CheckInStudentCommand</code>, <code>GenerateInvoiceCommand</code>
+- <strong>Queries</strong> (read-side, via MediatR <code>IRequest&lt;TResult&gt;</code>):
+  - Example: <code>GetStudentByIdQuery</code>, <code>GetLiveRatiosQuery</code>, <code>GetDailyReportQuery</code>
+- <strong>Events</strong> (published to in-process bus, consumed by other modules):
+  - Example: <code>StudentCreatedEvent</code>, <code>StudentCheckedInEvent</code>, <code>InvoicePaidEvent</code>
+- <strong>DTOs</strong> (public contracts):
+  - Example: <code>StudentDto</code>, <code>AttendanceDto</code>, <code>InvoiceDto</code></p>
+<p>Modules NEVER:
+- Call another module's repository directly.
+- Read another module's DB tables directly.
+- Import another module's internal classes (only DTOs + events + commands/queries).</p>
+<p>Modules CAN:
+- Dispatch another module's commands/queries via MediatR.
+- Subscribe to another module's events.
+- Share DTOs from <code>NMS.Shared</code>.</p>
+<h3 id="41-module-centre-management">4.1 Module: Centre Management</h3>
+<p><strong>Responsibilities:</strong>
+- CRUD: Students, Staff, Rooms, Programs, Groups, Labels, Guardians, Email Templates.
+- Student lifecycle state machine.
+- Guardian ↔ Student relationships (primary/secondary).
+- Staff ↔ Room assignments (time-slot aware).</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>CreateStudent</code>, <code>UpdateStudent</code>, <code>TransitionStudentStatus</code>, <code>CreateStaff</code>, <code>AssignStaffToRoom</code>, <code>CreateRoom</code>, etc.
+- Queries: <code>GetStudentById</code>, <code>GetStudentsByRoom</code>, <code>GetStaffByRole</code>, etc.
+- Events: <code>StudentCreated</code>, <code>StudentStatusChanged</code>, <code>StaffCreated</code>, <code>RoomCreated</code>, etc.</p>
+<p><strong>Consumes events from:</strong>
+- (none — master data, doesn't react to others)</p>
+<p><strong>Publishes events consumed by:</strong>
+- Attendance (StudentCreated → student becomes available in attendance)
+- Parent Communication (StudentCreated → parent account provisioning)
+- Messaging (StudentCreated → parent-teacher thread creation)
+- Billing (StudentCreated → fee plan association check)
+- Calendar (StudentCreated → birthday calendar entry)</p>
+<h3 id="42-module-attendance-leaves">4.2 Module: Attendance &amp; Leaves</h3>
+<p><strong>Responsibilities:</strong>
+- Student + staff check-in/out (barcode + manual).
+- Leave requests + approvals.
+- Real-time ratio calculation.
+- Attendance forecasting.
+- Sign-in sheet export.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>CheckInStudent</code>, <code>CheckOutStudent</code>, <code>MarkStudentAbsent</code>, <code>RequestLeave</code>, <code>ApproveLeave</code>, <code>RejectLeave</code>
+- Queries: <code>GetAttendanceForDate</code>, <code>GetLiveRatios</code>, <code>GetMonthlyAttendanceReport</code>, <code>GetAttendanceForecast</code>
+- Events: <code>StudentCheckedIn</code>, <code>StudentCheckedOut</code>, <code>StaffCheckedIn</code>, <code>StaffCheckedOut</code>, <code>RatioBreached</code>, <code>RatioRecovered</code>, <code>LeaveRequested</code>, <code>LeaveApproved</code></p>
+<p><strong>Consumes events from:</strong>
+- Centre Management (StudentCreated → add to attendance roster; StaffCreated → add to staff attendance)
+- Calendar (HolidayEvent → mark all students absent automatically)</p>
+<p><strong>Publishes events consumed by:</strong>
+- Dashboard (all events → live KPI updates)
+- Notifications (RatioBreached → Critical notification)
+- Parent Communication (StudentCheckedOut → trigger daily report generation at end of day)
+- Billing (LeaveApproved → prorate invoice if applicable)</p>
+<h3 id="43-module-parent-communication">4.3 Module: Parent Communication</h3>
+<p><strong>Responsibilities:</strong>
+- Activity feed (8 types: announcement, photo, video, diary, food, toilet, medical, mood).
+- Staff approval workflow before parent visibility.
+- Daily consolidated report generation.
+- Notes &amp; concerns.
+- Newsletter builder + AI content generation.
+- Resource Centre (document library with versioning).</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>CreateActivityPost</code>, <code>ApproveActivityPost</code>, <code>RejectActivityPost</code>, <code>UploadMedia</code>, <code>GenerateDailyReport</code>, <code>CreateNewsletter</code>, <code>ScheduleNewsletter</code>, <code>PublishNewsletter</code>
+- Queries: <code>GetActivityFeed</code>, <code>GetDailyReport</code>, <code>GetNewsletters</code>, <code>GetResourceCentreDocuments</code>
+- Events: <code>ActivityPostCreated</code>, <code>ActivityPostApproved</code>, <code>ActivityPostRejected</code>, <code>MediaUploaded</code>, <code>MediaScanCompleted</code>, <code>DailyReportGenerated</code>, <code>NewsletterPublished</code></p>
+<p><strong>Consumes events from:</strong>
+- Centre Management (StudentCreated → parent account provisioning)
+- Attendance (StudentCheckedOut → trigger daily report)
+- Media Processing (MediaScanCompleted → update activity post approval_status)</p>
+<p><strong>Publishes events consumed by:</strong>
+- Notifications (ActivityPostApproved → notify parents; DailyReportGenerated → notify parents)
+- Messaging (parent replies to activity comment → new message thread)
+- Reports &amp; Analytics (daily activity counts → analytics)</p>
+<h3 id="44-module-messaging">4.4 Module: Messaging</h3>
+<p><strong>Responsibilities:</strong>
+- Staff ↔ Parent shared inbox.
+- Staff ↔ Staff internal messaging.
+- Broadcast announcements.
+- Threaded conversations with read receipts.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>SendMessage</code>, <code>MarkThreadRead</code>, <code>CreateBroadcastAnnouncement</code>, <code>ArchiveThread</code>
+- Queries: <code>GetInbox</code>, <code>GetThread</code>, <code>GetUnreadCount</code>
+- Events: <code>MessageSent</code>, <code>MessageRead</code>, <code>ThreadCreated</code></p>
+<p><strong>Consumes events from:</strong>
+- Centre Management (StudentCreated → create parent-staff thread)</p>
+<p><strong>Publishes events consumed by:</strong>
+- Notifications (MessageSent → notify recipient)
+- Dashboard (MessageSent → unread count widget)</p>
+<h3 id="45-module-billing-accounting">4.5 Module: Billing &amp; Accounting</h3>
+<p><strong>Responsibilities:</strong>
+- Fee plan management linked to programs.
+- Auto invoice generation on schedule (Hangfire recurring job).
+- Invoice lifecycle: Draft → Issued → Partially Paid → Paid → Overdue → Cancelled.
+- Payment recording (manual in Phase 1; gateway in Phase 3).
+- Automated fee reminders (email + push).
+- Expense recording.
+- Revenue dashboard.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>CreateFeePlan</code>, <code>UpdateFeePlan</code>, <code>GenerateInvoicesForMonth</code>, <code>RecordPayment</code>, <code>RecordExpense</code>, <code>CancelInvoice</code>, <code>SendReminder</code>
+- Queries: <code>GetBillingDashboard</code>, <code>GetInvoices</code>, <code>GetInvoiceById</code>, <code>GetFeePlans</code>, <code>GetExpenses</code>, <code>GetOverdueInvoices</code>
+- Events: <code>InvoiceCreated</code>, <code>InvoicePaid</code>, <code>InvoiceOverdue</code>, <code>PaymentRecorded</code>, <code>ExpenseRecorded</code>, <code>FeePlanCreated</code></p>
+<p><strong>Consumes events from:</strong>
+- Centre Management (StudentCreated → check fee plan assignment; StudentWithdrawn → final invoice)
+- Attendance (LeaveApproved → prorate if applicable)</p>
+<p><strong>Publishes events consumed by:</strong>
+- Notifications (InvoiceCreated → notify parent; InvoiceOverdue → reminder notification)
+- Dashboard (InvoiceCreated, PaymentRecorded → billing snapshot widget)
+- Reports &amp; Analytics (revenue data)</p>
+<h3 id="46-module-notifications-extraction-ready">4.6 Module: Notifications (Extraction-Ready)</h3>
+<p><strong>Responsibilities:</strong>
+- Route notification events to correct tier + channel.
+- Critical: in-app banner + push + SMS (Sprint 13+).
+- Operational: in-app + push.
+- Informational: email + optional in-app.
+- Retry with exponential backoff.
+- Channel fallback (push fail → SMS → email).
+- Delivery status tracking (no recipient ack required).
+- Dead-letter queue for un-deliverable notifications.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>SendNotification</code> (called by other modules)
+- Queries: <code>GetUserNotifications</code>, <code>GetNotificationDeliveryStatus</code>
+- Events: <code>NotificationSent</code>, <code>NotificationDelivered</code>, <code>NotificationFailed</code></p>
+<p><strong>Extraction-ready design:</strong>
+- All communication via RabbitMQ events (not direct MediatR call) — when extracted, same event contracts work cross-service.
+- Owns <code>notification</code> + <code>notification_delivery</code> tables.
+- Has its own connection pool to external services (FCM, SES, Twilio).
+- Stateless (no in-memory state needed) — easy to scale horizontally.</p>
+<p><strong>Consumes events from:</strong>
+- All modules (any event that should trigger a notification)</p>
+<p><strong>Publishes events consumed by:</strong>
+- Dashboard (NotificationSent → update notification indicator)</p>
+<h3 id="47-module-media-processing-extraction-ready">4.7 Module: Media Processing (Extraction-Ready)</h3>
+<p><strong>Responsibilities:</strong>
+- Receive media upload events (from Parent Communication, Forms, Learning).
+- Trigger ClamAV scan.
+- Trigger content moderation (AWS Rekognition or Azure Content Safety).
+- Update <code>media.scan_status</code> (PENDING → APPROVED / QUARANTINED).
+- Move quarantined files to quarantine bucket.
+- Notify uploader of scan outcome.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>TriggerMediaScan</code> (internal)
+- Events: <code>MediaScanCompleted</code> (with scan_status + reasons)</p>
+<p><strong>Extraction-ready design:</strong>
+- All triggers via RabbitMQ events.
+- Owns scan_result data.
+- Can be extracted without touching other modules.</p>
+<p><strong>Consumes events from:</strong>
+- Parent Communication (<code>MediaUploaded</code> → trigger scan)
+- Forms (<code>FormSubmitted</code> with attachment → trigger scan)
+- Learning (<code>ObservationCreated</code> with media → trigger scan)</p>
+<p><strong>Publishes events consumed by:</strong>
+- Parent Communication (<code>MediaScanCompleted</code> → update activity post approval_status)
+- Forms (<code>MediaScanCompleted</code> → update form submission status)
+- Learning (<code>MediaScanCompleted</code> → update observation status)</p>
+<h3 id="48-module-dashboard">4.8 Module: Dashboard</h3>
+<p><strong>Responsibilities:</strong>
+- Read-side aggregation of KPIs across modules.
+- Live ratio widget (subscribes to Attendance events).
+- Pending actions widget (subscribes to Messaging, Parent Communication, Billing events).
+- Billing snapshot widget (subscribes to Billing events).
+- Enquiry pipeline widget (subscribes to Enquiry events).</p>
+<p><strong>Implementation:</strong>
+- Read-side only — no commands of its own.
+- Uses Materialized Views in PostgreSQL for expensive aggregations, refreshed via RabbitMQ-triggered background job.
+- Real-time updates via SignalR Hub pushing to connected clients.</p>
+<h3 id="49-module-enquiry-management">4.9 Module: Enquiry Management</h3>
+<p><strong>Responsibilities:</strong>
+- 6-stage CRM pipeline: No Stage → Interested → Contacted → Tour Appointment → Toured → Enrolled.
+- Stage history log (append-only).
+- Source tracking.
+- Convert to Student on enrolment.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>CreateEnquiry</code>, <code>UpdateEnquiryStage</code>, <code>AssignEnquiryToStaff</code>, <code>ConvertEnquiryToStudent</code>, <code>ArchiveEnquiry</code>
+- Queries: <code>GetEnquiriesByStage</code>, <code>GetEnquiryById</code>, <code>GetEnquiryConversionRate</code>
+- Events: <code>EnquiryCreated</code>, <code>EnquiryStageChanged</code>, <code>EnquiryConvertedToStudent</code>, <code>EnquiryArchived</code></p>
+<h3 id="410-module-tour-management">4.10 Module: Tour Management</h3>
+<p><strong>Responsibilities:</strong>
+- Tour appointment scheduling linked to enquiries.
+- Staff assignment.
+- Block-off management.
+- Calendar + list views.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>CreateTourAppointment</code>, <code>UpdateTourAppointment</code>, <code>CancelTourAppointment</code>, <code>MarkTourCompleted</code>, <code>MarkTourNoShow</code>, <code>CreateBlockOff</code>
+- Queries: <code>GetTourAppointments</code>, <code>GetToursByDate</code>, <code>GetStaffAvailability</code>
+- Events: <code>TourScheduled</code>, <code>TourCompleted</code>, <code>TourCancelled</code>, <code>TourNoShow</code></p>
+<h3 id="411-module-calendar">4.11 Module: Calendar</h3>
+<p><strong>Responsibilities:</strong>
+- 3 calendar types: School, Admin, Staff (per Loui Okasha comment).
+- 4 specialized views: Staff Schedule, Student Schedule, Staff Leaves, Birthday Calendars.
+- Event types: Regular, Holiday, Staff-only.
+- Recurrence handling.
+- Room scoping.
+- ICS export.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>CreateCalendarEvent</code>, <code>UpdateCalendarEvent</code>, <code>DeleteCalendarEvent</code>, <code>ImportHolidays</code>
+- Queries: <code>GetSchoolCalendar</code>, <code>GetAdminCalendar</code>, <code>GetStaffCalendar</code>, <code>GetUpcomingBirthdays</code>
+- Events: <code>CalendarEventCreated</code>, <code>CalendarEventUpdated</code>, <code>CalendarEventDeleted</code>, <code>HolidayImported</code></p>
+<h3 id="412-module-forms-admissions">4.12 Module: Forms &amp; Admissions</h3>
+<p><strong>Responsibilities:</strong>
+- Form builder (5 types: Enquiry, Admission, Check-in/out, Incident, Custom).
+- Form versioning.
+- Form analytics (submission count, completion rate, avg time, drop-off).
+- Multi-step admission checklist.
+- Automated form delivery in admission workflow.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>CreateForm</code>, <code>UpdateForm</code>, <code>PublishForm</code>, <code>SubmitForm</code>, <code>CreateAdmissionProcess</code>, <code>UpdateAdmissionStep</code>
+- Queries: <code>GetForms</code>, <code>GetFormSubmissions</code>, <code>GetFormAnalytics</code>, <code>GetAdmissionProcessStatus</code>
+- Events: <code>FormPublished</code>, <code>FormSubmitted</code>, <code>AdmissionStepCompleted</code></p>
+<h3 id="413-module-tools-idcertificates">4.13 Module: Tools (ID/Certificates)</h3>
+<p><strong>Responsibilities:</strong>
+- ID card generation (10+ templates, bulk export, barcode).
+- Certificate generation (10+ templates, bulk export).
+- Stateless PDF generation via QuestPDF.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>GenerateIdCards</code>, <code>GenerateCertificates</code>
+- Queries: <code>GetIdCardTemplates</code>, <code>GetCertificateTemplates</code>
+- Events: (none — pure command/query, no state changes to publish)</p>
+<h3 id="414-module-reports-analytics">4.14 Module: Reports &amp; Analytics</h3>
+<p><strong>Responsibilities:</strong>
+- All defined reports (attendance, billing, enquiry conversion, app adoption, observation summary, audit log export).
+- Async report generation (Hangfire job, status updates via SignalR).
+- Excel + PDF export.
+- Analytics dashboard with charts.
+- Recently generated report history.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>GenerateReport</code>, <code>ScheduleReport</code>
+- Queries: <code>GetReportHistory</code>, <code>GetReportDownloadUrl</code>
+- Events: <code>ReportGenerated</code>, <code>ReportFailed</code></p>
+<h3 id="415-module-settings-configuration">4.15 Module: Settings &amp; Configuration</h3>
+<p><strong>Responsibilities:</strong>
+- All settings areas (programme settings, access control, user roles, notification prefs, language, integrations, centre profile, ratio rules, attendance settings, billing settings, calendar settings, parent portal settings, data retention).
+- Custom role management.
+- Audit Log viewer (Super Admin).
+- Multi-tenant safe.</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>UpdateSetting</code>, <code>CreateCustomRole</code>, <code>UpdateRolePermissions</code>, <code>UpdateNotificationPreferences</code>
+- Queries: <code>GetSettings</code>, <code>GetAuditLog</code>, <code>GetRoles</code>, <code>GetPermissions</code>
+- Events: <code>SettingUpdated</code>, <code>RoleCreated</code>, <code>RoleUpdated</code></p>
+<h3 id="416-module-learning-assessment-phase-2">4.16 Module: Learning &amp; Assessment (Phase 2)</h3>
+<p><strong>Responsibilities:</strong>
+- EYFS + Montessori framework management.
+- Lessons, observations, assessments, learning journeys.
+- Dual report views (staff + parent) with transformation layer.
+- AI-assisted observation capture (Phase 2).</p>
+<p><strong>Public contracts:</strong>
+- Commands: <code>CreateObservation</code>, <code>CreateAssessment</code>, <code>GenerateAssessmentReport</code>, <code>ApproveParentReport</code>
+- Queries: <code>GetLearningJourney</code>, <code>GetObservations</code>, <code>GetAssessments</code>, <code>GetMilestonesByAgeBand</code>
+- Events: <code>ObservationCreated</code>, <code>AssessmentCompleted</code>, <code>ParentReportApproved</code></p>
+<hr />
+<h2 id="5-real-time-architecture-signalr">5. Real-Time Architecture (SignalR)</h2>
+<h3 id="51-signalr-hub-design">5.1 SignalR Hub Design</h3>
+<p>Single hub: <code>/hubs/tenant</code> — all real-time events for a tenant flow through this hub.</p>
+<p><strong>Groups</strong> (per-tenant isolation):
+- <code>tenant-{tenantId}</code> — all users in the tenant (admins see everything)
+- <code>tenant-{tenantId}-role-{role}</code> — role-specific events (e.g., push to all teachers)
+- <code>tenant-{tenantId}-user-{userId}</code> — user-specific events (e.g., new direct message)
+- <code>tenant-{tenantId}-room-{roomId}</code> — room-specific events (e.g., ratio change in this room)</p>
+<p><strong>Methods (server → client):</strong>
+- <code>AttendanceUpdated</code> — check-in/out event
+- <code>RatioUpdated</code> — ratio change for a room
+- <code>NotificationReceived</code> — new notification for user
+- <code>MessageReceived</code> — new message in a thread
+- <code>ActivityPosted</code> — new activity (parent receives)
+- <code>DashboardRefreshed</code> — KPI update
+- <code>BillingUpdated</code> — invoice/payment event</p>
+<h3 id="52-connection-lifecycle">5.2 Connection Lifecycle</h3>
+<ul>
+<li>Client connects with JWT access token in query string (SignalR requirement).</li>
+<li>On connect: server validates token via Keycloak, extracts <code>tenant_id</code> + <code>user_id</code> + <code>roles</code>, adds connection to appropriate groups.</li>
+<li>On disconnect: server removes connection from groups.</li>
+<li>Token expiry: client receives <code>OnClose</code> event, refreshes token via refresh token flow, reconnects with new token.</li>
+<li>Backplane: Redis (StackExchange.Redis) — required for multi-pod scaling. All pods subscribe to Redis pub/sub for cross-pod message delivery.</li>
+</ul>
+<h3 id="53-fallback">5.3 Fallback</h3>
+<ul>
+<li>SignalR auto-negotiates transport: WebSocket → Server-Sent Events → Long-polling.</li>
+<li>Long-polling fallback is acceptable for parents on flaky mobile networks.</li>
+<li>Mobile app uses <code>@microsoft/signalr</code> client with automatic reconnect (exponential backoff, max 5 retries).</li>
+</ul>
+<hr />
+<h2 id="6-data-flow-examples">6. Data Flow Examples</h2>
+<h3 id="61-student-check-in-barcode-scan">6.1 Student Check-In (Barcode Scan)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Teacher scans barcode at door (USB HID scanner sends code + Enter)
+2. Web app captures input, calls POST /api/v1/attendance/check-in
+3. API:
+   a. Validates JWT (Keycloak), extracts tenant_id + user
+   b. Dispatches CheckInStudentCommand via MediatR
+   c. Attendance module:
+      - Looks up student by barcode (within tenant scope — RLS enforced)
+      - Creates attendance_record (check_in_at = now)
+      - Logs to attendance_event (immutable)
+      - Publishes StudentCheckedInEvent
+   d. Returns 200 OK with attendance DTO
+4. In-process event bus publishes StudentCheckedInEvent:
+   a. Dashboard module consumes → updates materialized view → pushes via SignalR
+   b. Notification module (if Critical alert needed) → queues notification
+   c. Billing module (if applicable) → proration event
+5. SignalR hub pushes AttendanceUpdated to:
+   - tenant-{id}-role-centre_admin (dashboard)
+   - tenant-{id}-room-{roomId} (room view)
+6. Client UIs update in real-time
+</code></pre></div>
+
+<h3 id="62-photo-activity-post-with-content-moderation">6.2 Photo Activity Post (with Content Moderation)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Teacher selects photos in web app, writes caption, clicks &quot;Post&quot;
+2. Web app:
+   a. Requests presigned upload URLs from API: POST /api/v1/media/presign
+   b. API returns array of presigned URLs (one per file, 60s expiry)
+   c. Web app uploads files directly to S3 (bypassing API)
+3. Web app calls POST /api/v1/activities with body containing:
+   - S3 keys (not URLs) of uploaded files
+   - Caption, student IDs, type=Photo
+4. API:
+   a. Creates activity_post (approval_status = PENDING)
+   b. Creates media records (scan_status = PENDING)
+   c. Publishes ActivityPostCreated event + MediaUploaded events
+5. RabbitMQ consumer (Media Processing module):
+   a. Receives MediaUploaded event
+   b. Downloads file from S3
+   c. Runs ClamAV scan
+   d. Runs AWS Rekognition (or Azure Content Safety) for inappropriate content
+   e. Updates media.scan_status (APPROVED or QUARANTINED)
+   f. If QUARANTINED: moves file to quarantine bucket
+   g. Publishes MediaScanCompleted event
+6. Parent Communication module consumes MediaScanCompleted:
+   a. If APPROVED: activity_post.approval_status → APPROVED → visible to parents
+   b. If QUARANTINED: activity_post.approval_status → REJECTED → notify teacher + admin
+   c. Publishes ActivityPostApproved or ActivityPostRejected event
+7. Notification module consumes ActivityPostApproved:
+   a. Sends push notification to linked parents
+   b. Records delivery status
+</code></pre></div>
+
+<h3 id="63-invoice-generation-monthly">6.3 Invoice Generation (Monthly)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Hangfire recurring job triggers at 1 AM on 1st of each month (tenant timezone)
+2. Job dispatches GenerateInvoicesForMonth command for each active tenant
+3. Billing module:
+   a. For each Active student with a FeePlan:
+      - Generate invoice with line items from FeePlan.FeeComponents
+      - Apply discounts
+      - Apply tax (VAT 5%)
+      - Set due_date = issue_date + 14 days (configurable per tenant)
+      - Status = Issued
+      - Save invoice
+      - Publish InvoiceCreated event
+4. Notification module consumes InvoiceCreated:
+   a. Sends email to parent (using email template) with PDF attachment
+   b. Sends push notification (Informational tier)
+5. Hangfire job at 8 AM: SendReminder for invoices due in 3 days
+   - Sends reminder email using configured template
+6. Hangfire job daily at 9 AM: Mark overdue invoices
+   - Invoices past due_date + grace period → status = Overdue
+   - Publishes InvoiceOverdue event
+7. Notification module consumes InvoiceOverdue:
+   a. Sends overdue reminder (email + push) per configured schedule
+</code></pre></div>
+
+<hr />
+<h2 id="7-multi-deployment-architecture-on-prem-vs-saas">7. Multi-Deployment Architecture (On-Prem vs SaaS)</h2>
+<h3 id="71-same-codebase-different-configuration">7.1 Same Codebase, Different Configuration</h3>
+<p>NMS is built as a single codebase that supports both on-prem (single-tenant) and SaaS (multi-tenant) deployments via configuration:</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>On-Prem</th>
+<th>SaaS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tenants</td>
+<td>1 (the customer's nursery)</td>
+<td>Many (one per centre)</td>
+</tr>
+<tr>
+<td><code>tenant_id</code> column</td>
+<td>Present (always same value)</td>
+<td>Present (varies per row)</td>
+</tr>
+<tr>
+<td>RLS policies</td>
+<td>Active (defense-in-depth)</td>
+<td>Active (critical for isolation)</td>
+</tr>
+<tr>
+<td>Keycloak realm</td>
+<td>1 realm (customer-managed)</td>
+<td>1 realm per centre (Phase 1), multi-realm per MCG (Phase 3)</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>Customer-managed Postgres</td>
+<td>Our managed RDS Postgres</td>
+</tr>
+<tr>
+<td>Object storage</td>
+<td>Customer's MinIO or S3</td>
+<td>Our AWS S3</td>
+</tr>
+<tr>
+<td>Domain</td>
+<td>Customer's subdomain (e.g., <code>nursery.example.com</code>)</td>
+<td><code>app.nms.ae</code> (per-tenant subdomain: <code>tenant.nms.ae</code>)</td>
+</tr>
+<tr>
+<td>Email</td>
+<td>Customer's SMTP or our SES (relay)</td>
+<td>Our SES</td>
+</tr>
+<tr>
+<td>Push</td>
+<td>Our FCM project (shared) or customer's FCM</td>
+<td>Our FCM project</td>
+</tr>
+<tr>
+<td>Updates</td>
+<td>Customer-controlled</td>
+<td>Continuous</td>
+</tr>
+<tr>
+<td>Branding</td>
+<td>Customer's branding</td>
+<td>Default NMS branding (custom branding as add-on)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-configuration-switches">7.2 Configuration Switches</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>// appsettings.json (on-prem example)
+{
+  &quot;Deployment&quot;: {
+    &quot;Mode&quot;: &quot;OnPrem&quot;,
+    &quot;TenantId&quot;: &quot;single-tenant-uuid-fixed&quot;,
+    &quot;SingleTenantMode&quot;: true
+  },
+  &quot;Database&quot;: {
+    &quot;Provider&quot;: &quot;PostgreSQL&quot;,
+    &quot;ConnectionString&quot;: &quot;...&quot; // from secrets
+  },
+  &quot;Storage&quot;: {
+    &quot;Provider&quot;: &quot;MinIO&quot;, // or &quot;S3&quot;
+    &quot;Endpoint&quot;: &quot;https://minio.customer.internal:9000&quot;
+  },
+  &quot;Identity&quot;: {
+    &quot;Authority&quot;: &quot;https://keycloak.customer.internal:8443/realms/nursery&quot;,
+    &quot;ClientId&quot;: &quot;nms&quot;,
+    &quot;MultiRealm&quot;: false
+  }
+}
+</code></pre></div>
+
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>// appsettings.json (SaaS example)
+{
+  &quot;Deployment&quot;: {
+    &quot;Mode&quot;: &quot;SaaS&quot;,
+    &quot;MultiTenantMode&quot;: true
+  },
+  &quot;Database&quot;: {
+    &quot;Provider&quot;: &quot;PostgreSQL&quot;,
+    &quot;ConnectionString&quot;: &quot;...&quot; // from AWS Secrets Manager
+  },
+  &quot;Storage&quot;: {
+    &quot;Provider&quot;: &quot;S3&quot;,
+    &quot;Endpoint&quot;: &quot;https://s3.me-central-1.amazonaws.com&quot;
+  },
+  &quot;Identity&quot;: {
+    &quot;Authority&quot;: &quot;https://keycloak.nms.ae/realms/{tenant-realm}&quot;,
+    &quot;ClientId&quot;: &quot;nms&quot;,
+    &quot;MultiRealm&quot;: true
+  }
+}
+</code></pre></div>
+
+<h3 id="73-tenant-resolution-saas">7.3 Tenant Resolution (SaaS)</h3>
+<p>On SaaS, the API resolves <code>tenant_id</code> from:
+1. JWT <code>tenant_id</code> claim (set by Keycloak based on user's realm/role mappings).
+2. Subdomain (e.g., <code>brightfutures.nms.ae</code> → tenant lookup by subdomain → tenant_id).
+3. Header <code>X-Tenant-Id</code> (for API-only access, where subdomain isn't available).</p>
+<p>Defense-in-depth:
+- JWT claim is source of truth.
+- Subdomain only used for login page routing + initial tenant identification.
+- RLS at DB level rejects any query where <code>tenant_id</code> doesn't match the JWT claim's <code>tenant_id</code>.</p>
+<p>Full multi-tenancy details: <code>10-MULTI-TENANCY.md</code>.</p>
+<hr />
+<h2 id="8-performance-architecture">8. Performance Architecture</h2>
+<h3 id="81-caching-strategy">8.1 Caching Strategy</h3>
+<table>
+<thead>
+<tr>
+<th>Cache scope</th>
+<th>TTL</th>
+<th>Invalidation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User profile + permissions</td>
+<td>15 min</td>
+<td>On permission change (event-driven)</td>
+</tr>
+<tr>
+<td>Room list (per tenant)</td>
+<td>1 hour</td>
+<td>On room CRUD</td>
+</tr>
+<tr>
+<td>Student list (per room)</td>
+<td>5 min</td>
+<td>On student CRUD</td>
+</tr>
+<tr>
+<td>Dashboard KPIs</td>
+<td>30 sec (materialized view)</td>
+<td>RabbitMQ-triggered refresh on attendance event</td>
+</tr>
+<tr>
+<td>Live ratio</td>
+<td>Real-time (computed)</td>
+<td>N/A — always computed fresh on attendance event</td>
+</tr>
+<tr>
+<td>Email templates</td>
+<td>1 hour</td>
+<td>On template CRUD</td>
+</tr>
+<tr>
+<td>Localization strings</td>
+<td>24 hour</td>
+<td>On translation file deploy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-query-optimization">8.2 Query Optimization</h3>
+<ul>
+<li>All list endpoints use cursor-based pagination (no OFFSET).</li>
+<li>Composite indexes on <code>(tenant_id, created_at DESC)</code> and <code>(tenant_id, status)</code> for high-traffic entities.</li>
+<li>Partial indexes: <code>WHERE is_deleted = false</code> for soft-deleted entities.</li>
+<li>Partitioning: <code>attendance_record</code> and <code>audit_log</code> partitioned by month.</li>
+<li>Materialized views for dashboard aggregations.</li>
+<li>Read replica for reporting queries (isolated from transactional writes).</li>
+</ul>
+<h3 id="83-connection-pooling">8.3 Connection Pooling</h3>
+<ul>
+<li>PgBouncer in transaction mode between .NET and PostgreSQL.</li>
+<li>Default pool: 100 connections, configurable per env.</li>
+<li>EF Core <code>DbContextPool</code> (20 default) — short-lived contexts per request.</li>
+</ul>
+<h3 id="84-background-job-scaling">8.4 Background Job Scaling</h3>
+<ul>
+<li>Hangfire on RabbitMQ backend (not SQL Server — we're on PostgreSQL).</li>
+<li>Worker count: 4 per pod (Phase 1), configurable.</li>
+<li>Queue priorities: <code>critical</code> (notifications), <code>default</code> (reports), <code>low</code> (cleanup tasks).</li>
+<li>Job deduplication via Hangfire's built-in dedup + our own idempotency keys.</li>
+</ul>
+<h3 id="85-asynchronous-processing">8.5 Asynchronous Processing</h3>
+<ul>
+<li>All non-critical path work goes async via RabbitMQ:</li>
+<li>Report generation</li>
+<li>Email sending</li>
+<li>Push notification sending</li>
+<li>Content moderation</li>
+<li>PDF generation (bulk)</li>
+<li>API returns 202 Accepted for async work, client polls status or receives SignalR update.</li>
+</ul>
+<hr />
+<h2 id="9-availability-disaster-recovery">9. Availability &amp; Disaster Recovery</h2>
+<h3 id="91-availability-tiers">9.1 Availability Tiers</h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Uptime SLA</th>
+<th>Failure budget</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 1</td>
+<td>99.5%</td>
+<td>3.6 hours/year downtime</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>99.5%</td>
+<td>3.6 hours/year</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>99.9%</td>
+<td>8.76 hours/year</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-high-availability-design">9.2 High Availability Design</h3>
+<ul>
+<li>Multi-AZ deployment (AWS me-central-1 has 3 AZs).</li>
+<li>K8s cluster: 3+ worker nodes, auto-scaling 3–10.</li>
+<li>API: 3+ replicas, HPA on CPU + custom metrics.</li>
+<li>PostgreSQL: Multi-AZ (primary + standby), automatic failover.</li>
+<li>Redis: Primary + replica, automatic failover.</li>
+<li>RabbitMQ: 3-node cluster, quorum queues.</li>
+<li>Keycloak: 3+ replicas, shared PostgreSQL backend.</li>
+</ul>
+<h3 id="93-backup-recovery">9.3 Backup &amp; Recovery</h3>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Backup frequency</th>
+<th>RPO</th>
+<th>RTO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostgreSQL</td>
+<td>Daily snapshot + WAL archiving (5 min)</td>
+<td>5 min</td>
+<td>1 hour</td>
+</tr>
+<tr>
+<td>Object storage (S3)</td>
+<td>Continuous (cross-region replication)</td>
+<td>0</td>
+<td>15 min</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>Not backed up (cache only)</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>RabbitMQ</td>
+<td>Not backed up (transient)</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Keycloak DB</td>
+<td>Daily snapshot + WAL</td>
+<td>5 min</td>
+<td>1 hour</td>
+</tr>
+<tr>
+<td>Configuration (Terraform state)</td>
+<td>Version-controlled in git + S3 backend</td>
+<td>0</td>
+<td>15 min</td>
+</tr>
+</tbody>
+</table>
+<h3 id="94-disaster-recovery-plan">9.4 Disaster Recovery Plan</h3>
+<ul>
+<li><strong>RTO</strong>: 8 hours (SRS mandate).</li>
+<li><strong>RPO</strong>: 4 hours (SRS mandate) — we achieve 5 min via WAL archiving.</li>
+<li><strong>DR region</strong>: Phase 3 — secondary region (AWS eu-central-1 or similar) for multi-region DR.</li>
+<li><strong>DR test</strong>: Quarterly DR drill — restore from backup to DR env, verify critical flows.</li>
+<li><strong>Runbook</strong>: <code>infra/docs/disaster-recovery.md</code> with step-by-step restore procedures.</li>
+</ul>
+<hr />
+<h2 id="10-architectural-quality-attributes">10. Architectural Quality Attributes</h2>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Target</th>
+<th>How achieved</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Performance</td>
+<td>Dashboard p95 &lt; 2s, API p99 &lt; 500ms</td>
+<td>Caching, materialized views, cursor pagination, read replica, CDN</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>500 students / 50 staff / centre, 20 centres Phase 3, 500 concurrent</td>
+<td>Multi-tenant RLS, horizontal pod autoscaling, partitioning</td>
+</tr>
+<tr>
+<td>Availability</td>
+<td>99.5% (P1) / 99.9% (P3)</td>
+<td>Multi-AZ, auto-failover, health checks, synthetic monitoring</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>Zero critical findings, PDPL-compliant</td>
+<td>Keycloak + RBAC + RLS + encryption + audit log + pen test</td>
+</tr>
+<tr>
+<td>Maintainability</td>
+<td>80% test coverage, &lt; 5 cyclomatic complexity avg</td>
+<td>Modular monolith, CQRS, unit + integration tests</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>p99 latency dashboards, alerting</td>
+<td>OpenTelemetry + Prometheus + Grafana + Loki</td>
+</tr>
+<tr>
+<td>Deployability</td>
+<td>Zero-downtime deploys, &lt; 15 min rollback</td>
+<td>Blue/green, Helm, CI/CD gates</td>
+</tr>
+<tr>
+<td>Localizability</td>
+<td>Full EN + AR RTL parity</td>
+<td>i18next + JSONB + logical CSS properties + RTL QA gate</td>
+</tr>
+<tr>
+<td>Accessibility</td>
+<td>WCAG 2.1 AA parent portal</td>
+<td>shadcn/ui + Radix (accessible primitives) + axe-core in CI</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Next file to read</strong>: <code>07-DATABASE-SCHEMA.md</code> for entities, RLS policies, partitioning, and JSONB i18n patterns.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-05-tech-stack.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Tech Stack</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-07-database-schema.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Database Schema</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

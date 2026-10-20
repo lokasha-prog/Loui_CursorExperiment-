@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class="active"><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-overview" class="toc-link" data-target="1-overview">1. Overview</a><a href="#11-three-tiers" class="toc-link toc-h3" data-target="11-three-tiers">1.1 Three Tiers</a><a href="#12-design-principles" class="toc-link toc-h3" data-target="12-design-principles">1.2 Design Principles</a><a href="#2-notification-lifecycle" class="toc-link" data-target="2-notification-lifecycle">2. Notification Lifecycle</a><a href="#3-data-model" class="toc-link" data-target="3-data-model">3. Data Model</a><a href="#31-notification-table" class="toc-link toc-h3" data-target="31-notification-table">3.1 notification Table</a><a href="#32-notificationdelivery-table" class="toc-link toc-h3" data-target="32-notificationdelivery-table">3.2 notificationdelivery Table</a><a href="#33-notificationpreference-table-per-user" class="toc-link toc-h3" data-target="33-notificationpreference-table-per-user">3.3 notificationpreference Table (per-user)</a><a href="#34-notificationtemplate-table-per-tenant-per-category" class="toc-link toc-h3" data-target="34-notificationtemplate-table-per-tenant-per-category">3.4 notificationtemplate Table (per-tenant, per...</a><a href="#4-tier-specific-behavior" class="toc-link" data-target="4-tier-specific-behavior">4. Tier-Specific Behavior</a><a href="#41-critical-safety" class="toc-link toc-h3" data-target="41-critical-safety">4.1 Critical / Safety</a><a href="#42-operational" class="toc-link toc-h3" data-target="42-operational">4.2 Operational</a><a href="#43-informational-reminders" class="toc-link toc-h3" data-target="43-informational-reminders">4.3 Informational / Reminders</a><a href="#5-channel-implementations" class="toc-link" data-target="5-channel-implementations">5. Channel Implementations</a><a href="#51-in-app-signalr" class="toc-link toc-h3" data-target="51-in-app-signalr">5.1 In-App (SignalR)</a><a href="#52-push-fcm-apns" class="toc-link toc-h3" data-target="52-push-fcm-apns">5.2 Push (FCM + APNs)</a><a href="#53-email-ses" class="toc-link toc-h3" data-target="53-email-ses">5.3 Email (SES)</a><a href="#54-sms-twilio-unifonic" class="toc-link toc-h3" data-target="54-sms-twilio-unifonic">5.4 SMS (Twilio / Unifonic)</a><a href="#6-retry-fallback-logic" class="toc-link" data-target="6-retry-fallback-logic">6. Retry &amp; Fallback Logic</a><a href="#61-retry-strategy" class="toc-link toc-h3" data-target="61-retry-strategy">6.1 Retry Strategy</a><a href="#62-fallback-decision-tree-critical-tier" class="toc-link toc-h3" data-target="62-fallback-decision-tree-critical-tier">6.2 Fallback Decision Tree (Critical Tier)</a><a href="#7-categories-catalog" class="toc-link" data-target="7-categories-catalog">7. Categories Catalog</a><a href="#8-user-preferences" class="toc-link" data-target="8-user-preferences">8. User Preferences</a><a href="#81-preference-ui" class="toc-link toc-h3" data-target="81-preference-ui">8.1 Preference UI</a><a href="#82-preference-storage" class="toc-link toc-h3" data-target="82-preference-storage">8.2 Preference Storage</a><a href="#83-unsubscribe-email" class="toc-link toc-h3" data-target="83-unsubscribe-email">8.3 Unsubscribe (Email)</a><a href="#9-batching-digests-informational-tier" class="toc-link" data-target="9-batching-digests-informational-tier">9. Batching &amp; Digests (Informational Tier)</a><a href="#91-batch-modes" class="toc-link toc-h3" data-target="91-batch-modes">9.1 Batch Modes</a><a href="#92-implementation" class="toc-link toc-h3" data-target="92-implementation">9.2 Implementation</a><a href="#10-monitoring-observability" class="toc-link" data-target="10-monitoring-observability">10. Monitoring &amp; Observability</a><a href="#101-metrics" class="toc-link toc-h3" data-target="101-metrics">10.1 Metrics</a><a href="#102-grafana-dashboard" class="toc-link toc-h3" data-target="102-grafana-dashboard">10.2 Grafana Dashboard</a><a href="#103-alerts" class="toc-link toc-h3" data-target="103-alerts">10.3 Alerts</a><a href="#11-tenant-configuration" class="toc-link" data-target="11-tenant-configuration">11. Tenant Configuration</a><a href="#111-per-tenant-settings" class="toc-link toc-h3" data-target="111-per-tenant-settings">11.1 Per-Tenant Settings</a><a href="#112-sms-quota" class="toc-link toc-h3" data-target="112-sms-quota">11.2 SMS Quota</a><a href="#12-testing" class="toc-link" data-target="12-testing">12. Testing</a><a href="#121-unit-tests" class="toc-link toc-h3" data-target="121-unit-tests">12.1 Unit Tests</a><a href="#122-integration-tests" class="toc-link toc-h3" data-target="122-integration-tests">12.2 Integration Tests</a><a href="#123-load-testing" class="toc-link toc-h3" data-target="123-load-testing">12.3 Load Testing</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4 text-amber-600"></i><span>Notifications</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-15-notifications.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 15</span>
+          <span class="text-[10px] font-mono text-slate-400">~4,220 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Notifications</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-14-ux-ui-design.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">UX/UI Design</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-16-testing-quality.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Testing & Quality</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="15-notification-system">15 — Notification System</h1>
+<blockquote>
+<p>Three-tier notification architecture, delivery channels, retry/fallback logic, no-acknowledgement policy.</p>
+</blockquote>
+<hr />
+<h2 id="1-overview">1. Overview</h2>
+<p>NMS notifications are classified into three tiers with distinct delivery needs. Per the source SRS and planning doc §7: <strong>no individual notification delivery requires recipient acknowledgement</strong> — delivery attempts and available delivery status are recorded, but the system does not require users to confirm receipt.</p>
+<h3 id="11-three-tiers">1.1 Three Tiers</h3>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Examples</th>
+<th>Channels</th>
+<th>Suppressible?</th>
+<th>User acknowledgement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Critical / Safety</strong></td>
+<td>Ratio breach, unexpected absence, safeguarding flag</td>
+<td>In-app banner (red, persistent) + Push + SMS (Sprint 13+)</td>
+<td>No — mandatory</td>
+<td>Not required (UX "Acknowledge" button is for dismissal only, not delivery confirmation)</td>
+</tr>
+<tr>
+<td><strong>Operational</strong></td>
+<td>Leave approved/rejected, invoice generated, message received, activity pending approval</td>
+<td>In-app notification + Push</td>
+<td>Per user preference (push on/off per type)</td>
+<td>Not required</td>
+</tr>
+<tr>
+<td><strong>Informational / Reminders</strong></td>
+<td>Fee reminder emails, daily report sent, upcoming birthday, newsletter published</td>
+<td>Email + optional in-app</td>
+<td>Yes — configurable, unsubscribe supported</td>
+<td>Not required</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-design-principles">1.2 Design Principles</h3>
+<ol>
+<li><strong>No recipient acknowledgement required</strong> — per source planning doc §7. We record delivery attempts + available status, but don't wait for user confirmation.</li>
+<li><strong>Every attempt traceable</strong> — <code>notification_delivery</code> table logs every attempt with status, provider response, retries.</li>
+<li><strong>Tiered fallback</strong> — Critical notifications have multi-channel fallback (push fail → SMS → email). Operational has limited fallback. Informational has no fallback (batch send, accept failures).</li>
+<li><strong>Configurable per tenant</strong> — Critical tier SMS enabled/disabled per tenant (cost control). Operational push preferences per user. Informational unsubscribe per user.</li>
+<li><strong>Idempotent</strong> — duplicate events don't create duplicate notifications (deduplication via <code>Idempotency-Key</code> + event ID).</li>
+</ol>
+<hr />
+<h2 id="2-notification-lifecycle">2. Notification Lifecycle</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>1. Event occurs (e.g., ratio breach detected by Attendance module)
+2. Attendance module publishes RatioBreachedEvent to RabbitMQ
+3. Notification module consumes event:
+   a. Determines tier (Critical), category (ratio_breach), recipients (all admins + assigned staff)
+   b. For each recipient: creates notification record (status=pending)
+   c. Determines channels based on tier + tenant config + user preferences
+   d. For each channel: creates notification_delivery record (status=queued)
+4. Notification dispatcher (Hangfire job) processes queued deliveries:
+   a. Picks up delivery records with status=queued
+   b. Calls channel-specific sender (FCM, SES, Twilio, in-app)
+   c. Updates notification_delivery.status (sent, delivered, failed)
+   d. On failure: schedules retry with exponential backoff
+   e. On final failure (max retries): triggers fallback for Critical tier
+5. Fallback logic (Critical tier only):
+   a. If push fails after 3 retries → try SMS
+   b. If SMS fails after 2 retries → try email
+   c. If all channels fail → log to alert monitoring (PagerDuty)
+6. Client receives notification:
+   a. Push: OS displays notification (FCM/APNs)
+   b. In-app: SignalR pushes to client, client shows banner
+   c. Email: arrives in user&#39;s inbox
+7. User interaction (optional, not required):
+   a. Taps notification → app opens to deep-linked screen
+   b. Dismisses in-app banner → updates notification.dismissed_at
+   c. Marks as read → updates notification.is_read=true, read_at=now
+8. Notification expires (after configurable retention, default 90 days)
+</code></pre></div>
+
+<hr />
+<h2 id="3-data-model">3. Data Model</h2>
+<h3 id="31-notification-table">3.1 <code>notification</code> Table</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TABLE</span><span style="color: #F8F8F2"> notification (</span>
+<span style="color: #F8F8F2">  id UUID </span><span style="color: #66D9EF">PRIMARY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">KEY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> gen_random_uuid(),</span>
+<span style="color: #F8F8F2">  tenant_id UUID </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  recipient_user_id UUID </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">REFERENCES</span><span style="color: #F8F8F2"> app_user(id),</span>
+<span style="color: #F8F8F2">  tier TEXT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">CHECK</span><span style="color: #F8F8F2"> (tier </span><span style="color: #66D9EF">IN</span><span style="color: #F8F8F2"> (</span><span style="color: #E6DB74">&#39;critical&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;operational&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;informational&#39;</span><span style="color: #F8F8F2">)),</span>
+<span style="color: #F8F8F2">  category TEXT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- &#39;ratio_breach&#39;, &#39;new_message&#39;, &#39;invoice_created&#39;, etc.</span>
+<span style="color: #F8F8F2">  title JSONB </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,    </span><span style="color: #959077">-- {&quot;en&quot;: &quot;Ratio breach in Toddlers Room&quot;, &quot;ar&quot;: &quot;...&quot;}</span>
+<span style="color: #F8F8F2">  body JSONB </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  action_url TEXT </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,    </span><span style="color: #959077">-- Deep link: &quot;/attendance?room=toddlers&quot;</span>
+<span style="color: #F8F8F2">  action_label JSONB </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">, </span><span style="color: #959077">-- {&quot;en&quot;: &quot;View Room&quot;, &quot;ar&quot;: &quot;...&quot;}</span>
+<span style="color: #F8F8F2">  related_entity_type TEXT </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- &#39;room&#39;, &#39;student&#39;, &#39;invoice&#39;, etc.</span>
+<span style="color: #F8F8F2">  related_entity_id UUID </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  idempotency_key TEXT </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- For deduplication</span>
+<span style="color: #F8F8F2">  is_read boolean </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  read_at timestamptz </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  dismissed_at timestamptz </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  expires_at timestamptz </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> (now() </span><span style="color: #FF4689">+</span><span style="color: #F8F8F2"> interval </span><span style="color: #E6DB74">&#39;90 days&#39;</span><span style="color: #F8F8F2">),</span>
+<span style="color: #F8F8F2">  </span><span style="color: #959077">-- Universal columns...</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">UNIQUE</span><span style="color: #F8F8F2"> (tenant_id, idempotency_key) </span><span style="color: #66D9EF">WHERE</span><span style="color: #F8F8F2"> idempotency_key </span><span style="color: #66D9EF">IS</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span>
+<span style="color: #F8F8F2">);</span>
+
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">INDEX</span><span style="color: #F8F8F2"> idx_notification_tenant_recipient </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> notification (tenant_id, recipient_user_id, created_at </span><span style="color: #66D9EF">DESC</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">WHERE</span><span style="color: #F8F8F2"> is_deleted </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">INDEX</span><span style="color: #F8F8F2"> idx_notification_unread </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> notification (tenant_id, recipient_user_id)</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">WHERE</span><span style="color: #F8F8F2"> is_read </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">AND</span><span style="color: #F8F8F2"> is_deleted </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">INDEX</span><span style="color: #F8F8F2"> idx_notification_expiry </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> notification (tenant_id, expires_at) </span><span style="color: #66D9EF">WHERE</span><span style="color: #F8F8F2"> is_deleted </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">;</span>
+</code></pre></div>
+
+<h3 id="32-notificationdelivery-table">3.2 <code>notification_delivery</code> Table</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TABLE</span><span style="color: #F8F8F2"> notification_delivery (</span>
+<span style="color: #F8F8F2">  id UUID </span><span style="color: #66D9EF">PRIMARY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">KEY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> gen_random_uuid(),</span>
+<span style="color: #F8F8F2">  tenant_id UUID </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  notification_id UUID </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">REFERENCES</span><span style="color: #F8F8F2"> notification(id),</span>
+<span style="color: #F8F8F2">  channel TEXT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">CHECK</span><span style="color: #F8F8F2"> (channel </span><span style="color: #66D9EF">IN</span><span style="color: #F8F8F2"> (</span><span style="color: #E6DB74">&#39;in_app&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;push&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;email&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;sms&#39;</span><span style="color: #F8F8F2">)),</span>
+<span style="color: #F8F8F2">  provider TEXT </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- &#39;fcm&#39;, &#39;ses&#39;, &#39;twilio&#39;, &#39;unifonic&#39;, &#39;in_app_signalr&#39;</span>
+<span style="color: #F8F8F2">  provider_message_id TEXT </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  status TEXT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;queued&#39;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">CHECK</span><span style="color: #F8F8F2"> (status </span><span style="color: #66D9EF">IN</span><span style="color: #F8F8F2"> (</span><span style="color: #E6DB74">&#39;queued&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;sent&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;delivered&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;failed&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;suppressed&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;cancelled&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;fallback_triggered&#39;</span><span style="color: #F8F8F2">)),</span>
+<span style="color: #F8F8F2">  attempt_count INT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  max_attempts INT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">3</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  next_attempt_at timestamptz </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  last_attempt_at timestamptz </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  delivered_at timestamptz </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  failed_at timestamptz </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  failure_reason TEXT </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  provider_response JSONB </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  fallback_triggered boolean </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  fallback_delivery_id UUID </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">REFERENCES</span><span style="color: #F8F8F2"> notification_delivery(id),  </span><span style="color: #959077">-- Link to fallback delivery</span>
+<span style="color: #F8F8F2">  </span><span style="color: #959077">-- Universal columns...</span>
+<span style="color: #F8F8F2">);</span>
+
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">INDEX</span><span style="color: #F8F8F2"> idx_notification_delivery_status </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> notification_delivery (tenant_id, status, next_attempt_at)</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">WHERE</span><span style="color: #F8F8F2"> is_deleted </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">;</span>
+<span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">INDEX</span><span style="color: #F8F8F2"> idx_notification_delivery_notification </span><span style="color: #66D9EF">ON</span><span style="color: #F8F8F2"> notification_delivery (tenant_id, notification_id);</span>
+</code></pre></div>
+
+<h3 id="33-notificationpreference-table-per-user">3.3 <code>notification_preference</code> Table (per-user)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TABLE</span><span style="color: #F8F8F2"> notification_preference (</span>
+<span style="color: #F8F8F2">  id UUID </span><span style="color: #66D9EF">PRIMARY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">KEY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> gen_random_uuid(),</span>
+<span style="color: #F8F8F2">  tenant_id UUID </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  user_id UUID </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">REFERENCES</span><span style="color: #F8F8F2"> app_user(id),</span>
+<span style="color: #F8F8F2">  category TEXT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- &#39;ratio_breach&#39;, &#39;new_message&#39;, etc.</span>
+<span style="color: #F8F8F2">  push_enabled boolean </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  email_enabled boolean </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  sms_enabled boolean </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- Only honored for Critical tier</span>
+<span style="color: #F8F8F2">  in_app_enabled boolean </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #959077">-- Universal columns...</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">UNIQUE</span><span style="color: #F8F8F2"> (tenant_id, user_id, category)</span>
+<span style="color: #F8F8F2">);</span>
+</code></pre></div>
+
+<h3 id="34-notificationtemplate-table-per-tenant-per-category">3.4 <code>notification_template</code> Table (per-tenant, per-category)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">CREATE</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">TABLE</span><span style="color: #F8F8F2"> notification_template (</span>
+<span style="color: #F8F8F2">  id UUID </span><span style="color: #66D9EF">PRIMARY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">KEY</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> gen_random_uuid(),</span>
+<span style="color: #F8F8F2">  tenant_id UUID </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  category TEXT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- &#39;ratio_breach&#39;, etc.</span>
+<span style="color: #F8F8F2">  tier TEXT </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  title_template JSONB </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- {&quot;en&quot;: &quot;Ratio breach in {{room_name}}&quot;, &quot;ar&quot;: &quot;...&quot;}</span>
+<span style="color: #F8F8F2">  body_template JSONB </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  action_url_template TEXT </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- &quot;/attendance?room={{room_id}}&quot;</span>
+<span style="color: #F8F8F2">  action_label_template JSONB </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  channels JSONB </span><span style="color: #66D9EF">NOT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">NULL</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">DEFAULT</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&#39;[&quot;in_app&quot;, &quot;push&quot;]&#39;</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">-- Default channels</span>
+<span style="color: #F8F8F2">  </span><span style="color: #959077">-- Universal columns...</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">UNIQUE</span><span style="color: #F8F8F2"> (tenant_id, category)</span>
+<span style="color: #F8F8F2">);</span>
+</code></pre></div>
+
+<hr />
+<h2 id="4-tier-specific-behavior">4. Tier-Specific Behavior</h2>
+<h3 id="41-critical-safety">4.1 Critical / Safety</h3>
+<p><strong>Examples</strong>: Ratio breach, unexpected absence, safeguarding flag, evacuation alert.</p>
+<p><strong>Channels</strong> (in order of attempt):
+1. <strong>In-app banner</strong> — red, persistent, modal-style (can't be dismissed without "Acknowledge" click).
+2. <strong>Push notification</strong> (FCM/APNs) — high priority, bypasses Do Not Disturb on iOS (with Critical Alert Entitlement).
+3. <strong>SMS</strong> (Sprint 13+, configurable per tenant) — fallback if push fails.</p>
+<p><strong>Behavior</strong>:
+- Cannot be suppressed by users (mandatory).
+- All recipients must receive (all admins + assigned staff).
+- 3 retry attempts per channel with exponential backoff (1s, 4s, 16s).
+- Channel fallback: push fail → SMS (if enabled) → email (final fallback).
+- If all channels fail → alert ops team via PagerDuty (this is a SEV-1).
+- Logged in audit trail (security-sensitive).</p>
+<p><strong>Recipients</strong>:
+- All users with role <code>super_admin</code>, <code>centre_admin</code>, or <code>it</code> in the tenant.
+- Plus: staff assigned to the affected room (for ratio breach).
+- Plus: designated safety officer (configurable per tenant).</p>
+<p><strong>Template example</strong>:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;category&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;ratio_breach&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;tier&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;critical&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;title_template&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;en&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Ratio breach in {{room_name}}&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;ar&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;تجاوز النسبة في {{room_name}}&quot;</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;body_template&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;en&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;The student-to-staff ratio in {{room_name}} has fallen below the required {{required_ratio}}. Currently {{students_present}} students and {{staff_present}} staff. Please address immediately.&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;ar&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;انخفضت نسبة الطلاب إلى الموظفين في {{room_name}} عن النسبة المطلوبة {{required_ratio}}. يوجد حاليًا {{students_present}} طالبًا و {{staff_present}} موظفًا. يرجى المعالجة فورًا.&quot;</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;action_url_template&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;/attendance?room={{room_id}}&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;action_label_template&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;en&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;View Room&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;ar&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;عرض الغرفة&quot;</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;channels&quot;</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&quot;in_app&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;push&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;sms&quot;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="42-operational">4.2 Operational</h3>
+<p><strong>Examples</strong>: Leave approved/rejected, invoice generated, message received, activity pending approval.</p>
+<p><strong>Channels</strong>:
+1. <strong>In-app notification</strong> — appears in notification bell + notification center.
+2. <strong>Push notification</strong> — standard priority (respects Do Not Disturb).</p>
+<p><strong>Behavior</strong>:
+- User can suppress push per category (in Settings → Notifications).
+- Cannot suppress in-app (always recorded).
+- 3 retry attempts for push, no fallback (if push fails, in-app is sufficient).
+- Batched delivery NOT applied (sent immediately).</p>
+<p><strong>Recipients</strong>:
+- Specific to event (e.g., leave approval → leave requester; new message → thread participants).</p>
+<p><strong>Template example</strong>:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;category&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;leave_approved&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;tier&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;operational&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;title_template&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;en&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Leave approved&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;ar&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;تمت الموافقة على الإجازة&quot;</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;body_template&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;en&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Your leave request for {{start_date}} to {{end_date}} has been approved by {{approver_name}}.&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;ar&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;تمت الموافقة على طلب الإجازة من {{start_date}} إلى {{end_date}} من قبل {{approver_name}}.&quot;</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;action_url_template&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;/leaves/{{leave_id}}&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;channels&quot;</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&quot;in_app&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;push&quot;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="43-informational-reminders">4.3 Informational / Reminders</h3>
+<p><strong>Examples</strong>: Fee reminder emails, daily report sent, upcoming birthday, newsletter published.</p>
+<p><strong>Channels</strong>:
+1. <strong>Email</strong> — primary channel.
+2. <strong>In-app</strong> — optional (user can disable).</p>
+<p><strong>Behavior</strong>:
+- User can suppress both email and in-app (unsubscribe).
+- Batched delivery (configurable frequency — immediate, daily digest, weekly digest).
+- No retry beyond provider's own (SES retries internally).
+- No fallback.</p>
+<p><strong>Recipients</strong>:
+- Specific (e.g., fee reminder → invoice's parent).
+- Or broad (e.g., newsletter → all parents with email enabled).</p>
+<p><strong>Template example</strong>:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;category&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;fee_reminder&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;tier&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;informational&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;title_template&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;en&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Invoice {{invoice_number}} due in {{days_until_due}} days&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;ar&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;الفاتورة {{invoice_number}} مستحقة خلال {{days_until_due}} يومًا&quot;</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;body_template&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;en&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Your invoice {{invoice_number}} for {{invoice_amount}} is due on {{due_date}}. Please pay before the due date to avoid late fees.&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;ar&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;فاتورتك {{invoice_number}} بمبلغ {{invoice_amount}} مستحقة في {{due_date}}. يرجى الدفع قبل تاريخ الاستحقاق لتجنب الرسوم المتأخرة.&quot;</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;action_url_template&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;/invoices/{{invoice_id}}&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;channels&quot;</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&quot;email&quot;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="5-channel-implementations">5. Channel Implementations</h2>
+<h3 id="51-in-app-signalr">5.1 In-App (SignalR)</h3>
+<ul>
+<li><strong>Delivery</strong>: SignalR pushes <code>NotificationReceived</code> event to user's connection.</li>
+<li><strong>Display</strong>: </li>
+<li>Critical: red banner overlay (full-width, dismissible only via "Acknowledge" button).</li>
+<li>Operational: toast notification (top-end, auto-dismiss after 10s).</li>
+<li>Informational: subtle indicator in notification bell.</li>
+<li><strong>Persistence</strong>: stored in <code>notification</code> table, accessible via <code>/api/v1/notifications</code>.</li>
+<li><strong>No acknowledgement</strong>: server doesn't wait for client to confirm receipt. SignalR delivery is best-effort.</li>
+<li><strong>Offline behavior</strong>: if user is offline when notification sent, they'll see it in notification center when they reconnect. Critical tier also sent via push (which works offline).</li>
+</ul>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// In NotificationDispatcher.cs</span>
+<span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">SendInAppAsync</span><span style="color: #F8F8F2">(Notification notification, NotificationDelivery delivery)</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">try</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _hubContext.Clients</span>
+<span style="color: #F8F8F2">            .Group(</span><span style="color: #E6DB74">$&quot;tenant-{notification.TenantId}-user-{notification.RecipientUserId}&quot;</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">            .SendAsync(</span><span style="color: #E6DB74">&quot;NotificationReceived&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> NotificationDto</span>
+<span style="color: #F8F8F2">            {</span>
+<span style="color: #F8F8F2">                Id </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Id,</span>
+<span style="color: #F8F8F2">                Tier </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Tier,</span>
+<span style="color: #F8F8F2">                Title </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Title,</span>
+<span style="color: #F8F8F2">                Body </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Body,</span>
+<span style="color: #F8F8F2">                ActionUrl </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.ActionUrl,</span>
+<span style="color: #F8F8F2">            });</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;delivered&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">catch</span><span style="color: #F8F8F2"> (Exception ex)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;failed&quot;</span><span style="color: #F8F8F2">, ex.Message);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">ScheduleRetry</span><span style="color: #F8F8F2">(delivery.Id);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="52-push-fcm-apns">5.2 Push (FCM + APNs)</h3>
+<ul>
+<li><strong>Provider</strong>: Firebase Cloud Messaging (FCM) — handles both Android (FCM) and iOS (APNs bridge).</li>
+<li><strong>Setup</strong>: </li>
+<li>Firebase project created.</li>
+<li>Android: <code>google-services.json</code> in mobile app.</li>
+<li>iOS: APNs key uploaded to Firebase.</li>
+<li><strong>Token management</strong>:</li>
+<li>App registers for push on launch (via <code>expo-notifications</code>).</li>
+<li>Token sent to backend via <code>POST /api/v1/devices/register</code>.</li>
+<li>Backend stores token in <code>user_device</code> table.</li>
+<li>User can have multiple devices (phone + tablet).</li>
+<li><strong>Delivery</strong>: backend calls FCM HTTP v1 API with message payload.</li>
+<li><strong>Status tracking</strong>: FCM returns message ID. Delivery status not directly available (FCM doesn't confirm device receipt). We treat "FCM accepted" as "sent".</li>
+<li><strong>Retry</strong>: 3 attempts with exponential backoff (1s, 4s, 16s).</li>
+<li><strong>Failure modes</strong>:</li>
+<li>Invalid token (user uninstalled app) → mark device as inactive, don't retry.</li>
+<li>FCM service unavailable → retry.</li>
+<li>Rate limited → retry with longer backoff.</li>
+</ul>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">SendPushAsync</span><span style="color: #F8F8F2">(Notification notification, NotificationDelivery delivery)</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> devices </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _deviceRepository.GetActiveDevicesForUser(notification.RecipientUserId);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (</span><span style="color: #FF4689">!</span><span style="color: #F8F8F2">devices.Any())</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;failed&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;No active devices&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> message </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Message</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        Notification </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> FirebaseAdmin.Messaging.Notification</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            Title </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Title[notification.RecipientUser.PreferredLanguage],</span>
+<span style="color: #F8F8F2">            Body </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Body[notification.RecipientUser.PreferredLanguage],</span>
+<span style="color: #F8F8F2">        },</span>
+<span style="color: #F8F8F2">        Data </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Dictionary</span><span style="color: #FF4689">&lt;</span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">string</span><span style="color: #FF4689">&gt;</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            { </span><span style="color: #E6DB74">&quot;notificationId&quot;</span><span style="color: #F8F8F2">, notification.Id.ToString() },</span>
+<span style="color: #F8F8F2">            { </span><span style="color: #E6DB74">&quot;tier&quot;</span><span style="color: #F8F8F2">, notification.Tier },</span>
+<span style="color: #F8F8F2">            { </span><span style="color: #E6DB74">&quot;category&quot;</span><span style="color: #F8F8F2">, notification.Category },</span>
+<span style="color: #F8F8F2">            { </span><span style="color: #E6DB74">&quot;actionUrl&quot;</span><span style="color: #F8F8F2">, notification.ActionUrl </span><span style="color: #FF4689">??</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;&quot;</span><span style="color: #F8F8F2"> },</span>
+<span style="color: #F8F8F2">            { </span><span style="color: #E6DB74">&quot;relatedEntityType&quot;</span><span style="color: #F8F8F2">, notification.RelatedEntityType </span><span style="color: #FF4689">??</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;&quot;</span><span style="color: #F8F8F2"> },</span>
+<span style="color: #F8F8F2">            { </span><span style="color: #E6DB74">&quot;relatedEntityId&quot;</span><span style="color: #F8F8F2">, notification.RelatedEntityId</span><span style="color: #FF4689">?.</span><span style="color: #F8F8F2">ToString() </span><span style="color: #FF4689">??</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;&quot;</span><span style="color: #F8F8F2"> },</span>
+<span style="color: #F8F8F2">        },</span>
+<span style="color: #F8F8F2">        Android </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> AndroidConfig</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            Priority </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Tier </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;critical&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">?</span><span style="color: #F8F8F2"> Priority.High : Priority.Normal,</span>
+<span style="color: #F8F8F2">            Notification </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> AndroidNotification</span>
+<span style="color: #F8F8F2">            {</span>
+<span style="color: #F8F8F2">                ChannelId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Tier </span><span style="color: #66D9EF">switch</span>
+<span style="color: #F8F8F2">                {</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #E6DB74">&quot;critical&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;critical&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #E6DB74">&quot;operational&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;operational&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">                    _ </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;informational&quot;</span>
+<span style="color: #F8F8F2">                },</span>
+<span style="color: #F8F8F2">                Tag </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Category,</span>
+<span style="color: #F8F8F2">            },</span>
+<span style="color: #F8F8F2">        },</span>
+<span style="color: #F8F8F2">        Apns </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> ApnsConfig</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            Headers </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Tier </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;critical&quot;</span>
+<span style="color: #F8F8F2">                </span><span style="color: #FF4689">?</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Dictionary</span><span style="color: #FF4689">&lt;</span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">string</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> { { </span><span style="color: #E6DB74">&quot;apns-priority&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;10&quot;</span><span style="color: #F8F8F2"> }, { </span><span style="color: #E6DB74">&quot;apns-push-type&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;alert&quot;</span><span style="color: #F8F8F2"> } }</span>
+<span style="color: #F8F8F2">                : </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Dictionary</span><span style="color: #FF4689">&lt;</span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">string</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> { { </span><span style="color: #E6DB74">&quot;apns-priority&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;5&quot;</span><span style="color: #F8F8F2"> } },</span>
+<span style="color: #F8F8F2">            Aps </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Aps</span>
+<span style="color: #F8F8F2">            {</span>
+<span style="color: #F8F8F2">                Sound </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Tier </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;critical&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">?</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;critical_alert.wav&quot;</span><span style="color: #F8F8F2"> : </span><span style="color: #E6DB74">&quot;default&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">                Badge </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">            },</span>
+<span style="color: #F8F8F2">        },</span>
+<span style="color: #F8F8F2">        Tokens </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> devices.Select(d </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> d.PushToken).ToList(),</span>
+<span style="color: #F8F8F2">    };</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">try</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> response </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> FirebaseMessaging.DefaultInstance.SendMulticastAsync(message);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (response.FailureCount </span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #959077">// Log per-token failures</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">for</span><span style="color: #F8F8F2"> (</span><span style="color: #66D9EF">int</span><span style="color: #F8F8F2"> i </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">; i </span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2"> response.Responses.Count; i</span><span style="color: #FF4689">++</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">            {</span>
+<span style="color: #F8F8F2">                </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> resp </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> response.Responses[i];</span>
+<span style="color: #F8F8F2">                </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (</span><span style="color: #FF4689">!</span><span style="color: #F8F8F2">resp.IsSuccess)</span>
+<span style="color: #F8F8F2">                {</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> token </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> message.Tokens[i];</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">LogPushFailure</span><span style="color: #F8F8F2">(notification.Id, token, resp.Exception.Message);</span>
+
+<span style="color: #F8F8F2">                    </span><span style="color: #959077">// If token invalid, deactivate device</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (resp.Exception.MessagingErrorCode </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> MessagingErrorCode.Unregistered)</span>
+<span style="color: #F8F8F2">                    {</span>
+<span style="color: #F8F8F2">                        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _deviceRepository.DeactivateDeviceByTokenAsync(token);</span>
+<span style="color: #F8F8F2">                    }</span>
+<span style="color: #F8F8F2">                }</span>
+<span style="color: #F8F8F2">            }</span>
+<span style="color: #F8F8F2">        }</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, response.SuccessCount </span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">?</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;sent&quot;</span><span style="color: #F8F8F2"> : </span><span style="color: #E6DB74">&quot;failed&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">catch</span><span style="color: #F8F8F2"> (Exception ex)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;failed&quot;</span><span style="color: #F8F8F2">, ex.Message);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">ScheduleRetry</span><span style="color: #F8F8F2">(delivery.Id);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="53-email-ses">5.3 Email (SES)</h3>
+<ul>
+<li><strong>Provider</strong>: AWS SES (SaaS) or customer SMTP (on-prem).</li>
+<li><strong>Templates</strong>: rendered via FluentEmail with Razor templates.</li>
+<li><strong>Recipients</strong>: verified email addresses (SES sandbox in dev/staging, production-ready in prod).</li>
+<li><strong>Delivery</strong>:</li>
+<li>Send via SES <code>SendEmailAsync</code>.</li>
+<li>SES returns message ID.</li>
+<li>SES sends delivery status via SNS → webhook → update <code>notification_delivery.status</code>.</li>
+<li><strong>Retry</strong>: 3 attempts with backoff (10s, 60s, 5min).</li>
+<li><strong>Failure modes</strong>:</li>
+<li>Invalid email → mark as <code>suppressed</code> (don't retry).</li>
+<li>Bounce → mark as <code>suppressed</code>, alert ops.</li>
+<li>Complaint → mark as <code>suppressed</code>, alert ops.</li>
+<li>SES throttled → retry.</li>
+</ul>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">SendEmailAsync</span><span style="color: #F8F8F2">(Notification notification, NotificationDelivery delivery)</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> recipient </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _userRepository.GetByIdAsync(notification.RecipientUserId);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (</span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2">.IsNullOrEmpty(recipient.Email))</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;suppressed&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;No email on file&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> email </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> Email</span>
+<span style="color: #F8F8F2">        .From(</span><span style="color: #E6DB74">&quot;notifications@nms.ae&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;NMS&quot;</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">        .To(recipient.Email)</span>
+<span style="color: #F8F8F2">        .Subject(notification.Title[recipient.PreferredLanguage])</span>
+<span style="color: #F8F8F2">        .UsingTemplate(_emailTemplate, </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> NotificationEmailModel</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            RecipientName </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> recipient.DisplayName,</span>
+<span style="color: #F8F8F2">            Body </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Body[recipient.PreferredLanguage],</span>
+<span style="color: #F8F8F2">            ActionUrl </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.ActionUrl,</span>
+<span style="color: #F8F8F2">            ActionLabel </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.ActionLabel</span><span style="color: #FF4689">?</span><span style="color: #F8F8F2">[recipient.PreferredLanguage],</span>
+<span style="color: #F8F8F2">            UnsubscribeUrl </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> GenerateUnsubscribeUrl(recipient.Id, notification.Category),</span>
+<span style="color: #F8F8F2">            TenantBranding </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> GetTenantBrandingAsync(notification.TenantId),</span>
+<span style="color: #F8F8F2">        });</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">try</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> response </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _emailSender.SendAsync(email);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;sent&quot;</span><span style="color: #F8F8F2">, providerMessageId: response.MessageId);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">catch</span><span style="color: #F8F8F2"> (Exception ex)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (ex </span><span style="color: #66D9EF">is</span><span style="color: #F8F8F2"> EmailValidationException </span><span style="color: #FF4689">||</span><span style="color: #F8F8F2"> ex.Message.Contains(</span><span style="color: #E6DB74">&quot;bounce&quot;</span><span style="color: #F8F8F2">))</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;suppressed&quot;</span><span style="color: #F8F8F2">, ex.Message);</span>
+<span style="color: #F8F8F2">        }</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">else</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;failed&quot;</span><span style="color: #F8F8F2">, ex.Message);</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">ScheduleRetry</span><span style="color: #F8F8F2">(delivery.Id);</span>
+<span style="color: #F8F8F2">        }</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="54-sms-twilio-unifonic">5.4 SMS (Twilio / Unifonic)</h3>
+<ul>
+<li><strong>Phase</strong>: Sprint 13+ (deferred from MVP).</li>
+<li><strong>Provider</strong>: </li>
+<li><strong>Twilio</strong> — international standard, good API, decent UAE coverage.</li>
+<li><strong>Unifonic</strong> — UAE-focused, better local delivery + Arabic support.</li>
+<li>Final selection in Sprint 13 kickoff.</li>
+<li><strong>Recipients</strong>: only users with verified phone numbers.</li>
+<li><strong>Critical tier only</strong>: SMS is expensive + intrusive. Only used for Critical tier fallback.</li>
+<li><strong>Configurable per tenant</strong>: tenant can disable SMS entirely (cost control).</li>
+<li><strong>Delivery</strong>: send via provider API. Provider returns message ID. Delivery status via webhook.</li>
+<li><strong>Retry</strong>: 2 attempts (SMS is fast to deliver or fail).</li>
+<li><strong>Failure modes</strong>:</li>
+<li>Invalid number → <code>suppressed</code>.</li>
+<li>Provider throttled → retry.</li>
+<li>Undeliverable → <code>failed</code>, trigger email fallback.</li>
+</ul>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">SendSmsAsync</span><span style="color: #F8F8F2">(Notification notification, NotificationDelivery delivery)</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> recipient </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _userRepository.GetByIdAsync(notification.RecipientUserId);</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (</span><span style="color: #66D9EF">string</span><span style="color: #F8F8F2">.IsNullOrEmpty(recipient.Phone))</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;suppressed&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;No phone on file&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #959077">// Check tenant SMS enabled</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> tenantSettings </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _tenantSettingsRepository.GetByTenantAsync(notification.TenantId);</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (</span><span style="color: #FF4689">!</span><span style="color: #F8F8F2">tenantSettings.SmsEnabled)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;suppressed&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;SMS disabled for tenant&quot;</span><span style="color: #F8F8F2">);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> messageBody </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">$&quot;{notification.Title[recipient.PreferredLanguage]}\n\n{notification.Body[recipient.PreferredLanguage]}&quot;</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">try</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> response </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _smsProvider.SendAsync(recipient.Phone, messageBody);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;sent&quot;</span><span style="color: #F8F8F2">, providerMessageId: response.MessageId);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">catch</span><span style="color: #F8F8F2"> (Exception ex)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">UpdateDeliveryStatus</span><span style="color: #F8F8F2">(delivery.Id, </span><span style="color: #E6DB74">&quot;failed&quot;</span><span style="color: #F8F8F2">, ex.Message);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">ScheduleRetry</span><span style="color: #F8F8F2">(delivery.Id);</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="6-retry-fallback-logic">6. Retry &amp; Fallback Logic</h2>
+<h3 id="61-retry-strategy">6.1 Retry Strategy</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">NotificationRetryService</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">static</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">readonly</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">int</span><span style="color: #F8F8F2">[] RetryBackoffSeconds </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> { </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">, </span><span style="color: #AE81FF">4</span><span style="color: #F8F8F2">, </span><span style="color: #AE81FF">16</span><span style="color: #F8F8F2">, </span><span style="color: #AE81FF">60</span><span style="color: #F8F8F2">, </span><span style="color: #AE81FF">300</span><span style="color: #F8F8F2"> };  </span><span style="color: #959077">// 1s, 4s, 16s, 1min, 5min</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">ScheduleRetryAsync</span><span style="color: #F8F8F2">(Guid deliveryId)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> delivery </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _deliveryRepository.GetByIdAsync(deliveryId);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (delivery.AttemptCount </span><span style="color: #FF4689">&gt;=</span><span style="color: #F8F8F2"> delivery.MaxAttempts)</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #959077">// Max retries reached — trigger fallback for Critical tier</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">TriggerFallbackAsync</span><span style="color: #F8F8F2">(delivery);</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        }</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> nextAttemptDelay </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> RetryBackoffSeconds[Math.Min(delivery.AttemptCount, RetryBackoffSeconds.Length </span><span style="color: #FF4689">-</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2">)];</span>
+<span style="color: #F8F8F2">        delivery.NextAttemptAt </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> DateTime.UtcNow.AddSeconds(nextAttemptDelay);</span>
+<span style="color: #F8F8F2">        delivery.AttemptCount</span><span style="color: #FF4689">++</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _deliveryRepository.UpdateAsync(delivery);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Schedule Hangfire job</span>
+<span style="color: #F8F8F2">        _backgroundJob.Schedule</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">NotificationDispatcherJob</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">(</span>
+<span style="color: #F8F8F2">            job </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> job.ProcessDeliveryAsync(deliveryId),</span>
+<span style="color: #F8F8F2">            TimeSpan.FromSeconds(nextAttemptDelay));</span>
+<span style="color: #F8F8F2">    }</span>
+
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">private</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">TriggerFallbackAsync</span><span style="color: #F8F8F2">(NotificationDelivery failedDelivery)</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> notification </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _notificationRepository.GetByIdAsync(failedDelivery.NotificationId);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (notification.Tier </span><span style="color: #FF4689">!=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;critical&quot;</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #959077">// Only Critical tier has fallback</span>
+<span style="color: #F8F8F2">            failedDelivery.Status </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;failed&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">            failedDelivery.FailedAt </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> DateTime.UtcNow;</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _deliveryRepository.UpdateAsync(failedDelivery);</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        }</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Critical tier fallback chain:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// push fail → sms → email → ops alert</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">string?</span><span style="color: #F8F8F2"> fallbackChannel </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> failedDelivery.Channel </span><span style="color: #66D9EF">switch</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #E6DB74">&quot;push&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;sms&quot;</span><span style="color: #F8F8F2">,     </span><span style="color: #959077">// push failed → try SMS</span>
+<span style="color: #F8F8F2">            </span><span style="color: #E6DB74">&quot;sms&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;email&quot;</span><span style="color: #F8F8F2">,    </span><span style="color: #959077">// SMS failed → try email</span>
+<span style="color: #F8F8F2">            </span><span style="color: #E6DB74">&quot;email&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">null</span><span style="color: #F8F8F2">,     </span><span style="color: #959077">// email failed → no more channels, alert ops</span>
+<span style="color: #F8F8F2">            _ </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">null</span>
+<span style="color: #F8F8F2">        };</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (fallbackChannel </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">null</span><span style="color: #F8F8F2">)</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #959077">// All channels exhausted — alert ops</span>
+<span style="color: #F8F8F2">            failedDelivery.Status </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;failed&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">            failedDelivery.FailedAt </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> DateTime.UtcNow;</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _deliveryRepository.UpdateAsync(failedDelivery);</span>
+
+<span style="color: #F8F8F2">            _logger.LogCritical(</span><span style="color: #E6DB74">&quot;All notification channels failed for Critical notification {NotificationId}. Recipient: {UserId}&quot;</span><span style="color: #F8F8F2">, </span>
+<span style="color: #F8F8F2">                notification.Id, notification.RecipientUserId);</span>
+
+<span style="color: #F8F8F2">            </span><span style="color: #959077">// Alert ops via PagerDuty</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _pagerDuty.TriggerIncidentAsync(</span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> PagerDutyIncident</span>
+<span style="color: #F8F8F2">            {</span>
+<span style="color: #F8F8F2">                Title </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">$&quot;Critical notification delivery failed: {notification.Category}&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">                Description </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">$&quot;Notification {notification.Id} to user {notification.RecipientUserId} failed on all channels.&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">                Urgency </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;high&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">            });</span>
+
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        }</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Create fallback delivery</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> fallbackDelivery </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> NotificationDelivery</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            NotificationId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> notification.Id,</span>
+<span style="color: #F8F8F2">            Channel </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> fallbackChannel,</span>
+<span style="color: #F8F8F2">            Status </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;queued&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">            MaxAttempts </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> fallbackChannel </span><span style="color: #FF4689">==</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;sms&quot;</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">?</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">2</span><span style="color: #F8F8F2"> : </span><span style="color: #AE81FF">3</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">// SMS: 2 attempts, email: 3</span>
+<span style="color: #F8F8F2">        };</span>
+
+<span style="color: #F8F8F2">        failedDelivery.FallbackTriggered </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">        failedDelivery.FallbackDeliveryId </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> fallbackDelivery.Id;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _deliveryRepository.UpdateAsync(failedDelivery);</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _deliveryRepository.CreateAsync(fallbackDelivery);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #959077">// Process fallback immediately</span>
+<span style="color: #F8F8F2">        _backgroundJob.Enqueue</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">NotificationDispatcherJob</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">(</span>
+<span style="color: #F8F8F2">            job </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> job.ProcessDeliveryAsync(fallbackDelivery.Id));</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="62-fallback-decision-tree-critical-tier">6.2 Fallback Decision Tree (Critical Tier)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Push attempt 1 → success? → DONE
+                ↓ fail
+Push attempt 2 (4s) → success? → DONE
+                      ↓ fail
+Push attempt 3 (16s) → success? → DONE
+                       ↓ fail
+                       ↓ (push exhausted)
+SMS enabled for tenant?
+  ↓ No
+  → Skip SMS, go to email
+  ↓ Yes
+SMS attempt 1 → success? → DONE
+               ↓ fail
+SMS attempt 2 (10s) → success? → DONE
+                    ↓ fail
+                    ↓ (SMS exhausted)
+Email attempt 1 → success? → DONE
+                  ↓ fail
+Email attempt 2 (60s) → success? → DONE
+                       ↓ fail
+Email attempt 3 (5min) → success? → DONE
+                        ↓ fail
+                        ↓ (all channels exhausted)
+Alert ops via PagerDuty (SEV-1)
+</code></pre></div>
+
+<hr />
+<h2 id="7-categories-catalog">7. Categories Catalog</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Tier</th>
+<th>Trigger</th>
+<th>Recipients</th>
+<th>Channels</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ratio_breach</code></td>
+<td>Critical</td>
+<td>Attendance module detects ratio below threshold</td>
+<td>All admins + room staff + safety officer</td>
+<td>In-app + Push + SMS</td>
+</tr>
+<tr>
+<td><code>unexpected_absence</code></td>
+<td>Critical</td>
+<td>Student marked absent who wasn't expected to be</td>
+<td>All admins + child's guardians</td>
+<td>In-app + Push + SMS</td>
+</tr>
+<tr>
+<td><code>safeguarding_flag</code></td>
+<td>Critical</td>
+<td>Observation flagged as concern (high severity)</td>
+<td>Super Admin + Centre Admin</td>
+<td>In-app + Push + SMS</td>
+</tr>
+<tr>
+<td><code>evacuation_alert</code></td>
+<td>Critical</td>
+<td>Manual trigger by admin (Phase 2)</td>
+<td>All staff + all parents</td>
+<td>In-app + Push + SMS</td>
+</tr>
+<tr>
+<td><code>leave_approved</code></td>
+<td>Operational</td>
+<td>Leave request approved</td>
+<td>Leave requester</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>leave_rejected</code></td>
+<td>Operational</td>
+<td>Leave request rejected</td>
+<td>Leave requester</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>invoice_created</code></td>
+<td>Operational</td>
+<td>Invoice generated</td>
+<td>Invoice's parent</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>invoice_overdue</code></td>
+<td>Operational</td>
+<td>Invoice past due date + grace</td>
+<td>Invoice's parent</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>payment_received</code></td>
+<td>Operational</td>
+<td>Payment recorded against invoice</td>
+<td>Invoice's parent</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>message_received</code></td>
+<td>Operational</td>
+<td>New message in thread</td>
+<td>Thread participants (except sender)</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>activity_pending_approval</code></td>
+<td>Operational</td>
+<td>Activity post needs manual approval</td>
+<td>Centre Admin</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>activity_approved</code></td>
+<td>Operational</td>
+<td>Activity post approved + visible to parent</td>
+<td>Linked parents</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>media_quarantined</code></td>
+<td>Operational</td>
+<td>Uploaded media failed content scan</td>
+<td>Uploading staff + Centre Admin</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>tour_scheduled</code></td>
+<td>Operational</td>
+<td>New tour appointment booked</td>
+<td>Assigned staff + enquiry's family</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>tour_reminder</code></td>
+<td>Operational</td>
+<td>Tour scheduled in 24 hours</td>
+<td>Assigned staff</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>enquiry_assigned</code></td>
+<td>Operational</td>
+<td>Enquiry assigned to staff member</td>
+<td>Assigned staff</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>enquiry_stage_changed</code></td>
+<td>Operational</td>
+<td>Enquiry moved to new stage</td>
+<td>Assigned staff</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>admission_step_due</code></td>
+<td>Operational</td>
+<td>Admission process step due in 3 days</td>
+<td>Parent + assigned staff</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>form_submitted</code></td>
+<td>Operational</td>
+<td>Public form submitted</td>
+<td>Assigned staff (e.g., receptionist for enquiries)</td>
+<td>In-app + Push</td>
+</tr>
+<tr>
+<td><code>daily_report_ready</code></td>
+<td>Informational</td>
+<td>Daily report generated for student</td>
+<td>Student's primary guardian</td>
+<td>Email + In-app</td>
+</tr>
+<tr>
+<td><code>fee_reminder</code></td>
+<td>Informational</td>
+<td>Invoice due in X days (per reminder schedule)</td>
+<td>Invoice's parent</td>
+<td>Email</td>
+</tr>
+<tr>
+<td><code>newsletter_published</code></td>
+<td>Informational</td>
+<td>Newsletter sent</td>
+<td>Subscribed parents</td>
+<td>Email</td>
+</tr>
+<tr>
+<td><code>upcoming_birthday</code></td>
+<td>Informational</td>
+<td>Student birthday in 7 days</td>
+<td>Centre Admin + room staff</td>
+<td>Email + In-app</td>
+</tr>
+<tr>
+<td><code>app_adoption_reminder</code></td>
+<td>Informational</td>
+<td>Parent hasn't logged in for 14 days</td>
+<td>Parent</td>
+<td>Email</td>
+</tr>
+<tr>
+<td><code>weekly_summary</code></td>
+<td>Informational</td>
+<td>Weekly digest of activity</td>
+<td>Configurable per user</td>
+<td>Email</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-user-preferences">8. User Preferences</h2>
+<h3 id="81-preference-ui">8.1 Preference UI</h3>
+<p>Settings → Notifications:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Notification Preferences
+
+Critical Alerts (cannot be disabled)
+☐ These are mandatory safety alerts. You will always receive them.
+
+Operational Notifications
+┌──────────────────────────────────────────────────────┐
+│ Notification Type              Push    Email    SMS  │
+├──────────────────────────────────────────────────────┤
+│ Leave status changes            ☑       ☐       ☐   │
+│ New invoice                     ☑       ☐       ☐   │
+│ Payment confirmation            ☑       ☐       ☐   │
+│ New message                     ☑       ☐       ☐   │
+│ Activity pending approval       ☑       ☐       ☐   │
+│ Tour reminders                  ☑       ☐       ☐   │
+│ New enquiry assigned            ☑       ☐       ☐   │
+│ Form submitted                  ☑       ☐       ☐   │
+│ Admission step due              ☑       ☐       ☐   │
+└──────────────────────────────────────────────────────┘
+
+Informational Notifications
+┌──────────────────────────────────────────────────────┐
+│ Daily report ready              ☑       ☑           │
+│ Fee reminders                   ☑       ☑           │
+│ Newsletters                     ☐       ☑           │
+│ Upcoming birthdays              ☐       ☑           │
+│ Weekly summary                  ☐       ☑           │
+└──────────────────────────────────────────────────────┘
+
+Quiet Hours (push notifications silenced)
+Start: [10:00 PM] End: [6:00 AM]
+(Exception: Critical alerts always delivered)
+</code></pre></div>
+
+<h3 id="82-preference-storage">8.2 Preference Storage</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">INSERT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">INTO</span><span style="color: #F8F8F2"> notification_preference (tenant_id, user_id, category, push_enabled, email_enabled, sms_enabled, in_app_enabled)</span>
+<span style="color: #66D9EF">VALUES</span><span style="color: #F8F8F2"> </span>
+<span style="color: #F8F8F2">  (</span><span style="color: #E6DB74">&#39;tenant-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;user-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;leave_approved&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">),</span>
+<span style="color: #F8F8F2">  (</span><span style="color: #E6DB74">&#39;tenant-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;user-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;invoice_created&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">, </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">),</span>
+<span style="color: #F8F8F2">  ...</span>
+<span style="color: #F8F8F2">;</span>
+</code></pre></div>
+
+<p>Default preferences seeded for new users based on their role (e.g., parents get <code>daily_report_ready</code> email by default; staff get <code>message_received</code> push by default).</p>
+<h3 id="83-unsubscribe-email">8.3 Unsubscribe (Email)</h3>
+<p>Every informational email includes unsubscribe link:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>https://app.nms.ae/unsubscribe?token=...&amp;category=fee_reminder
+</code></pre></div>
+
+<p>Token is signed JWT with <code>{ userId, category, expiresAt }</code>. Clicking → mark <code>email_enabled=false</code> for that user + category. Confirmation page shows "You've unsubscribed from fee reminder emails."</p>
+<p><strong>Note</strong>: Critical + Operational emails (rare) don't have unsubscribe (they're transactional, not marketing).</p>
+<hr />
+<h2 id="9-batching-digests-informational-tier">9. Batching &amp; Digests (Informational Tier)</h2>
+<h3 id="91-batch-modes">9.1 Batch Modes</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Immediate</td>
+<td>Send as soon as event occurs (default for most Informational)</td>
+</tr>
+<tr>
+<td>Daily digest</td>
+<td>Collect all day's notifications, send one email at 8 AM</td>
+</tr>
+<tr>
+<td>Weekly digest</td>
+<td>Collect all week's notifications, send one email on Monday 8 AM</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-implementation">9.2 Implementation</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">DailyDigestJob</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">ExecuteAsync</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> usersWithDigestEnabled </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _userPreferenceRepository</span>
+<span style="color: #F8F8F2">            .GetUsersWithDigestAsync(DigestMode.Daily);</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">foreach</span><span style="color: #F8F8F2"> (</span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> user </span><span style="color: #66D9EF">in</span><span style="color: #F8F8F2"> usersWithDigestEnabled)</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> pendingNotifications </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _notificationRepository</span>
+<span style="color: #F8F8F2">                .GetPendingDigestForUserAsync(user.UserId, DateTime.UtcNow.Date);</span>
+
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (</span><span style="color: #FF4689">!</span><span style="color: #F8F8F2">pendingNotifications.Any()) </span><span style="color: #66D9EF">continue</span><span style="color: #F8F8F2">;</span>
+
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> digestEmail </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _digestEmailBuilder.BuildAsync(user, pendingNotifications);</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _emailSender.SendAsync(digestEmail);</span>
+
+<span style="color: #F8F8F2">            </span><span style="color: #959077">// Mark notifications as delivered via digest</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _notificationRepository.MarkAsDigestDeliveredAsync(</span>
+<span style="color: #F8F8F2">                pendingNotifications.Select(n </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> n.Id));</span>
+<span style="color: #F8F8F2">        }</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #959077">// Hangfire recurring job</span>
+<span style="color: #F8F8F2">RecurringJob.AddOrUpdate</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">DailyDigestJob</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">(</span>
+<span style="color: #F8F8F2">    </span><span style="color: #E6DB74">&quot;daily-digest&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    job </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> job.ExecuteAsync(),</span>
+<span style="color: #F8F8F2">    </span><span style="color: #E6DB74">&quot;0 8 * * *&quot;</span><span style="color: #F8F8F2">,  </span><span style="color: #959077">// Daily at 8 AM</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> RecurringJobOptions { TimeZone </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> TimeZoneInfo.FindSystemTimeZoneById(</span><span style="color: #E6DB74">&quot;Arabian Standard Time&quot;</span><span style="color: #F8F8F2">) });</span>
+</code></pre></div>
+
+<hr />
+<h2 id="10-monitoring-observability">10. Monitoring &amp; Observability</h2>
+<h3 id="101-metrics">10.1 Metrics</h3>
+<ul>
+<li>Notification delivery rate by channel (sent / queued).</li>
+<li>Notification failure rate by channel + tier.</li>
+<li>Average delivery latency (queue → sent) by tier.</li>
+<li>Push token registration count (active devices).</li>
+<li>Email bounce + complaint rate.</li>
+<li>SMS delivery success rate.</li>
+<li>Fallback trigger rate (Critical tier).</li>
+<li>PagerDuty alert count (Critical failures).</li>
+</ul>
+<h3 id="102-grafana-dashboard">10.2 Grafana Dashboard</h3>
+<p><code>nms-notifications.json</code>:
+- Delivery rate (success / failed / suppressed) by channel — last 24h.
+- p95 delivery latency by tier.
+- Top failure reasons.
+- Active push tokens by platform (iOS / Android).
+- Email bounce rate trend.
+- Critical notification fallback rate (should be &lt; 5%).</p>
+<h3 id="103-alerts">10.3 Alerts</h3>
+<ul>
+<li>Push delivery failure rate &gt; 10% for 5 min → Slack warning.</li>
+<li>Email bounce rate &gt; 5% for 1 hour → Slack warning.</li>
+<li>SMS delivery failure rate &gt; 20% for 5 min → Slack warning.</li>
+<li>Critical notification delivery failure (any single notification) → PagerDuty critical.</li>
+<li>Fallback triggered for Critical notification → Slack info (track pattern).</li>
+</ul>
+<hr />
+<h2 id="11-tenant-configuration">11. Tenant Configuration</h2>
+<h3 id="111-per-tenant-settings">11.1 Per-Tenant Settings</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">INSERT</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">INTO</span><span style="color: #F8F8F2"> setting (tenant_id, </span><span style="color: #66D9EF">key</span><span style="color: #F8F8F2">, value)</span>
+<span style="color: #66D9EF">VALUES</span><span style="color: #F8F8F2"> </span>
+<span style="color: #F8F8F2">  (</span><span style="color: #E6DB74">&#39;tenant-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;notifications.critical.sms_enabled&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;true&#39;</span><span style="color: #F8F8F2">::jsonb),</span>
+<span style="color: #F8F8F2">  (</span><span style="color: #E6DB74">&#39;tenant-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;notifications.critical.sms_provider&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;&quot;unifonic&quot;&#39;</span><span style="color: #F8F8F2">::jsonb),</span>
+<span style="color: #F8F8F2">  (</span><span style="color: #E6DB74">&#39;tenant-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;notifications.operational.push_default&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;true&#39;</span><span style="color: #F8F8F2">::jsonb),</span>
+<span style="color: #F8F8F2">  (</span><span style="color: #E6DB74">&#39;tenant-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;notifications.informational.digest_mode&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;&quot;immediate&quot;&#39;</span><span style="color: #F8F8F2">::jsonb),</span>
+<span style="color: #F8F8F2">  (</span><span style="color: #E6DB74">&#39;tenant-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;notifications.informational.digest_time&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;&quot;08:00&quot;&#39;</span><span style="color: #F8F8F2">::jsonb),</span>
+<span style="color: #F8F8F2">  (</span><span style="color: #E6DB74">&#39;tenant-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;notifications.email.from_address&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;&quot;notifications@brightfutures.ae&quot;&#39;</span><span style="color: #F8F8F2">::jsonb),</span>
+<span style="color: #F8F8F2">  (</span><span style="color: #E6DB74">&#39;tenant-uuid&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;notifications.email.from_name&#39;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&#39;&quot;Bright Futures Nursery&quot;&#39;</span><span style="color: #F8F8F2">::jsonb);</span>
+</code></pre></div>
+
+<h3 id="112-sms-quota">11.2 SMS Quota</h3>
+<p>Per-tenant SMS quota:
+- Tier 1 (≤50 students): 100 SMS/month included, then AED 0.30/SMS.
+- Tier 2 (51-100 students): 250 SMS/month included.
+- Tier 3 (101-200 students): 500 SMS/month included.
+- Tier 4 (201+ students): 1000 SMS/month included.
+- On-prem: customer's SMS account (Twilio/Unifonic) — no quota from us.</p>
+<p>Quota usage tracked + alerted at 80%, 100%. Over-quota SMS blocked (with admin alert) unless customer opts into overage billing.</p>
+<hr />
+<h2 id="12-testing">12. Testing</h2>
+<h3 id="121-unit-tests">12.1 Unit Tests</h3>
+<ul>
+<li>Template rendering with various locales.</li>
+<li>Channel selection logic (tier + preferences + tenant config).</li>
+<li>Fallback chain (mock each channel, verify fallback order).</li>
+<li>Retry scheduling (verify backoff times).</li>
+</ul>
+<h3 id="122-integration-tests">12.2 Integration Tests</h3>
+<ul>
+<li>End-to-end: trigger event → notification created → delivery attempted → status updated.</li>
+<li>FCM sandbox: send real push to test device.</li>
+<li>SES sandbox: send real email to verified address.</li>
+<li>Twilio test mode: send SMS to test number.</li>
+</ul>
+<h3 id="123-load-testing">12.3 Load Testing</h3>
+<ul>
+<li>1000 notifications/minute for 10 minutes → verify no queue buildup.</li>
+<li>100 concurrent Critical notifications → verify all delivered within 30s.</li>
+<li>10,000 informational emails batched → verify SES throughput.</li>
+</ul>
+<hr />
+<p><strong>Next file to read</strong>: <code>16-TESTING-QUALITY.md</code> for the testing strategy, coverage gates, and quality bars.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-14-ux-ui-design.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">UX/UI Design</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-16-testing-quality.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Testing & Quality</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

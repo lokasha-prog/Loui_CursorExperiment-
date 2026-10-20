@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NMS Project PMO — Execution Dashboard</title>
+
+  <!-- ─── Nursery CRM UI DNA ─── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --c-purple: #8B5CF6;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; margin: 0;
+    }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+
+    .tab-btn { padding: 10px 16px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 13px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+
+    /* Progress bars */
+    .progress-bar { height: 8px; background: #E2E8F0; border-radius: 9999px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 9999px; transition: width 600ms var(--ease); }
+    .progress-fill-success { background: linear-gradient(90deg, #16A34A, #4ADE80); }
+    .progress-fill-warning { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+    .progress-fill-danger { background: linear-gradient(90deg, #DC2626, #F87171); }
+    .progress-fill-info { background: linear-gradient(90deg, #0EA5E9, #38BDF8); }
+    .progress-fill-purple { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+
+    /* Sprint card states */
+    .sprint-done { border-left: 4px solid var(--c-success); }
+    .sprint-active { border-left: 4px solid var(--c-primary); box-shadow: 0 4px 12px -2px rgba(224,122,95,0.25); }
+    .sprint-pending { border-left: 4px solid #CBD5E1; opacity: 0.85; }
+    .sprint-blocked { border-left: 4px solid var(--c-danger); }
+
+    /* Floating action button */
+    .fab {
+      position: fixed; bottom: 24px; right: 24px; z-index: 40;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--c-primary); color: white;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 8px 24px -4px rgba(224,122,95,0.5);
+      transition: all 200ms var(--ease);
+    }
+    .fab:hover { transform: scale(1.1) rotate(15deg); background: var(--c-primary-dark); }
+
+    /* Status colors for sprint cells */
+    .status-done { color: var(--c-success); }
+    .status-active { color: var(--c-primary); }
+    .status-pending { color: var(--c-muted); }
+    .status-blocked { color: var(--c-danger); }
+
+    /* Code block */
+    .code-block {
+      background: #0F172A; color: #F1F5F9;
+      border-radius: 12px; padding: 16px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      line-height: 1.6; overflow-x: auto;
+    }
+    .code-block .key { color: #FBBF24; }
+    .code-block .string { color: #86EFAC; }
+    .code-block .comment { color: #64748B; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ TOP HEADER BAR ═══ -->
+<div class="accent-bar h-1.5"></div>
+
+<header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 lg:px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-sm">
+        <i data-lucide="baby" class="w-5 h-5 text-amber-300"></i>
+      </div>
+      <div>
+        <h1 class="font-heading text-lg font-bold text-slate-900 flex items-center gap-2">
+          NMS Project <span class="text-amber-600">PMO</span>
+          <span class="pill pill-amber">v1.0</span>
+        </h1>
+        <p class="text-[10px] font-mono text-slate-500">Bright Futures Nursery Management System · Execution Dashboard</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs">
+        <span class="pulse-dot" style="width:8px;height:8px;background:#16A34A;border-radius:50%;animation:pulse 2s infinite;display:inline-block"></span>
+        <span class="font-mono text-emerald-700 font-bold">PROJECT ACTIVE</span>
+      </div>
+      <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i><span class="hidden sm:inline">Theme</span></button>
+      <button onclick="exportStatus()" class="btn btn-dark btn-sm"><i data-lucide="download" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">Export</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN CONTAINER ═══ -->
+<div class="max-w-7xl mx-auto px-4 lg:px-6 py-6 space-y-6">
+
+  <!-- ═══ HERO: Project Status Snapshot ═══ -->
+  <section class="nursery-card p-6 lg:p-8 bg-gradient-to-br from-white to-amber-50/30">
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="pill pill-info">PHASE 1 · MVP PILOT</span>
+          <span class="pill pill-amber">SPRINT 0 · SETUP</span>
+          <span class="pill pill-pending">NOT STARTED</span>
+        </div>
+        <h2 class="font-heading text-2xl lg:text-3xl font-bold text-slate-900 mb-1">
+          Where are we? <span class="text-amber-700">At the starting line.</span>
+        </h2>
+        <p class="text-sm text-slate-600 max-w-2xl">
+          The NMS project has <strong>62 assets ready</strong> (22 specs + 22 spec HTMLs + 25 web screens + 7 mobile + 2 phase3 + 1 PMO + 4 scripts). Next step: Sprint 0 setup — scaffold the monorepo and run the first commit.
+        </p>
+      </div>
+      <div class="text-right">
+        <div class="text-[10px] font-mono text-slate-400 uppercase">Last Updated</div>
+        <div class="font-mono text-sm font-bold text-slate-700" id="lastUpdated">2026-10-18 14:30 GST</div>
+        <div class="text-[10px] font-mono text-slate-400 mt-1">by: PMO Dashboard Init</div>
+      </div>
+    </div>
+
+    <!-- Overall progress ring + KPIs -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+      <!-- Big progress ring -->
+      <div class="lg:col-span-2 flex items-center justify-center">
+        <div class="relative w-48 h-48">
+          <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#E2E8F0" stroke-width="8"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="url(#gradOverall)" stroke-width="8" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" id="overallRing"/>
+            <defs>
+              <linearGradient id="gradOverall" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#E07A5F"/>
+                <stop offset="50%" stop-color="#E9C46A"/>
+                <stop offset="100%" stop-color="#81B29A"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">2%</div>
+            <div class="text-[10px] font-mono text-slate-500 uppercase">Overall</div>
+            <div class="text-[10px] font-mono text-slate-400">0 of 30 sprints</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI grid -->
+      <div class="lg:col-span-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div class="nursery-card p-4">
+          <div class="flex items-center justify-between mb-1">
+            <i data-lucide="folder-open" class="w-4 h-4 text-amber-600"></i>
+            <span class="pill pill-done">READY</span>
+          </div>
+          <div class="font-heading text-2xl font-bold text-slate-900">62</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Assets Built</div>
+        </div>
+        <div class="nursery-card p-4">
+          <div class="flex items-center justify-between mb-1">
+            <i data-lucide="git-branch" class="w-4 h-4 text-purple-600"></i>
+            <span class="pill pill-pending">0/30</span>
+          </div>
+          <div class="font-heading text-2xl font-bold text-slate-900">0</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Sprints Done</div>
+        </div>
+        <div class="nursery-card p-4">
+          <div class="flex items-center justify-between mb-1">
+            <i data-lucide="rocket" class="w-4 h-4 text-info-600" style="color:#0EA5E9"></i>
+            <span class="pill pill-info">0/3</span>
+          </div>
+          <div class="font-heading text-2xl font-bold text-slate-900">0</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Phases Live</div>
+        </div>
+        <div class="nursery-card p-4">
+          <div class="flex items-center justify-between mb-1">
+            <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
+            <span class="pill pill-pending">PENDING</span>
+          </div>
+          <div class="font-heading text-2xl font-bold text-slate-900">0</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Pilot Nurseries</div>
+        </div>
+        <div class="nursery-card p-4">
+          <div class="flex items-center justify-between mb-1">
+            <i data-lucide="bug" class="w-4 h-4 text-red-600"></i>
+            <span class="pill pill-done">0</span>
+          </div>
+          <div class="font-heading text-2xl font-bold text-slate-900">0</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Open Bugs</div>
+        </div>
+        <div class="nursery-card p-4">
+          <div class="flex items-center justify-between mb-1">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600"></i>
+            <span class="pill pill-amber">3 OPEN</span>
+          </div>
+          <div class="font-heading text-2xl font-bold text-slate-900">3</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Risks</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CURRENT FOCUS + WHAT'S NEXT ═══ -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- Current Focus -->
+    <div class="lg:col-span-2 nursery-card p-5 border-l-4" style="border-left-color: var(--c-primary)">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="target" class="w-5 h-5 text-amber-600"></i>
+          <h3 class="font-heading text-base font-bold text-slate-900">Current Focus · Sprint 0</h3>
+        </div>
+        <span class="pill pill-amber">IN PROGRESS</span>
+      </div>
+      <h4 class="font-heading text-lg font-bold text-slate-900 mb-2">Project Bootstrap &amp; Environment Setup</h4>
+      <p class="text-sm text-slate-600 mb-4">Scaffold the monorepo, set up Docker Compose for local dev, configure Keycloak realm, run initial EF Core migration, create first commit on main branch.</p>
+
+      <div class="space-y-2 mb-4">
+        <div class="text-[10px] font-mono text-slate-500 uppercase font-bold">Sprint 0 Checklist</div>
+        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Monorepo scaffolded: backend/ web/ mobile/ infra/ docs/</span></label>
+        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Docker Compose: PostgreSQL 16, Redis 7, RabbitMQ 3.13, Keycloak 24, MinIO, MailHog</span></label>
+        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>.cursorrules in repo root (from spec-18-cursor-rules.html)</span></label>
+        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Initial EF Core migration (tenant + app_user + role tables)</span></label>
+        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>CI/CD pipeline skeleton in GitHub Actions</span></label>
+        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Pilot nursery #1 signed (LOI or pilot agreement)</span></label>
+        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Legal counsel engaged for PDPL review</span></label>
+        <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="accent-emerald-600 w-4 h-4"> <span>Cloud provider selected (AWS ME Central recommended)</span></label>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-200">
+        <span class="text-[10px] font-mono text-slate-500 uppercase">Read First:</span>
+        <a href="spec-00-master-brief.html" class="pill pill-info">📖 Master Brief</a>
+        <a href="spec-05-tech-stack.html" class="pill pill-info">📖 Tech Stack</a>
+        <a href="spec-11-devops.html" class="pill pill-info">📖 DevOps</a>
+        <a href="spec-18-cursor-rules.html" class="pill pill-info">📖 Cursor Rules</a>
+        <a href="spec-19-roadmap-sprints.html" class="pill pill-info">📖 Roadmap</a>
+      </div>
+    </div>
+
+    <!-- What's Next -->
+    <div class="nursery-card p-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-slate-700">
+      <div class="flex items-center gap-2 mb-4">
+        <i data-lucide="arrow-right-circle" class="w-5 h-5 text-amber-300"></i>
+        <h3 class="font-heading text-base font-bold">What's Next</h3>
+      </div>
+      <div class="space-y-3">
+        <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">IMMEDIATE · THIS WEEK</div>
+          <div class="font-bold text-sm">Run Sprint 0 scaffolding commands</div>
+          <div class="text-[11px] text-slate-300 mt-1">See spec-05-tech-stack.html §11 — `dotnet new sln`, `pnpm create vite`, `npx create-expo-app`</div>
+        </div>
+        <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">SPRINT 1 · WEEKS 3-4</div>
+          <div class="font-bold text-sm">Centre Management + Auth</div>
+          <div class="text-[11px] text-slate-300 mt-1">Student, Staff, Room, Program, Group, Label, Guardian entities + Keycloak RBAC</div>
+        </div>
+        <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">SPRINT 2 · WEEKS 5-6</div>
+          <div class="font-bold text-sm">Attendance + Dashboard</div>
+          <div class="text-[11px] text-slate-300 mt-1">Barcode check-in, live ratio monitor, SignalR real-time</div>
+        </div>
+      </div>
+      <a href="spec-19-roadmap-sprints.html" class="btn btn-primary w-full mt-4 btn-sm">View Full Roadmap →</a>
+    </div>
+  </div>
+
+  <!-- ═══ PHASE PROGRESS ═══ -->
+  <section class="nursery-card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <i data-lucide="layers" class="w-5 h-5 text-amber-600"></i>
+        <h3 class="font-heading text-base font-bold text-slate-900">Phase Progress</h3>
+      </div>
+      <span class="text-[10px] font-mono text-slate-500">3 phases · 30 sprints · 62 weeks total</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <!-- MVP Pilot -->
+      <div class="p-4 rounded-xl border border-slate-200 bg-amber-50/30">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="rocket" class="w-4 h-4 text-amber-700"></i>
+            <span class="font-heading text-sm font-bold text-slate-900">MVP Pilot</span>
+          </div>
+          <span class="pill pill-amber">Sprints 0-5</span>
+        </div>
+        <div class="text-[10px] font-mono text-slate-500 mb-2">12 weeks · Pilot live at 1-2 nurseries</div>
+        <div class="progress-bar mb-2"><div class="progress-fill progress-fill-warning" style="width: 5%"></div></div>
+        <div class="flex justify-between text-[10px] font-mono"><span class="text-amber-700 font-bold">5% · Sprint 0 of 5</span><span class="text-slate-400">0/5 done</span></div>
+        <div class="mt-3 text-[10px] font-mono text-slate-500">Modules: Centre Mgmt, Attendance, Comms, Messaging, Dashboard, Audit</div>
+      </div>
+
+      <!-- Phase 1 Full -->
+      <div class="p-4 rounded-xl border border-slate-200">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="layers" class="w-4 h-4 text-purple-700"></i>
+            <span class="font-heading text-sm font-bold text-slate-900">Phase 1 Full</span>
+          </div>
+          <span class="pill pill-purple">Sprints 6-18</span>
+        </div>
+        <div class="text-[10px] font-mono text-slate-500 mb-2">26 weeks · All 13 modules live</div>
+        <div class="progress-bar mb-2"><div class="progress-fill progress-fill-purple" style="width: 0%"></div></div>
+        <div class="flex justify-between text-[10px] font-mono"><span class="text-slate-500 font-bold">0%</span><span class="text-slate-400">0/13 done</span></div>
+        <div class="mt-3 text-[10px] font-mono text-slate-500">Adds: Billing, Enquiries, Tours, Calendar, Forms, Tools, Reports</div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="p-4 rounded-xl border border-slate-200">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="book-open" class="w-4 h-4 text-blue-700"></i>
+            <span class="font-heading text-sm font-bold text-slate-900">Phase 2</span>
+          </div>
+          <span class="pill pill-info">Sprints 19-26</span>
+        </div>
+        <div class="text-[10px] font-mono text-slate-500 mb-2">16 weeks · Learning &amp; mobile maturity</div>
+        <div class="progress-bar mb-2"><div class="progress-fill progress-fill-info" style="width: 0%"></div></div>
+        <div class="flex justify-between text-[10px] font-mono"><span class="text-slate-500 font-bold">0%</span><span class="text-slate-400">0/8 done</span></div>
+        <div class="mt-3 text-[10px] font-mono text-slate-500">Adds: EYFS + Montessori, mobile offline, AI observations</div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div class="p-4 rounded-xl border border-slate-200">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="building-2" class="w-4 h-4 text-emerald-700"></i>
+            <span class="font-heading text-sm font-bold text-slate-900">Phase 3</span>
+          </div>
+          <span class="pill pill-done">Sprints 27-30</span>
+        </div>
+        <div class="text-[10px] font-mono text-slate-500 mb-2">8 weeks · Multi-centre + payments + ERP</div>
+        <div class="progress-bar mb-2"><div class="progress-fill progress-fill-success" style="width: 0%"></div></div>
+        <div class="flex justify-between text-[10px] font-mono"><span class="text-slate-500 font-bold">0%</span><span class="text-slate-400">0/4 done</span></div>
+        <div class="mt-3 text-[10px] font-mono text-slate-500">Adds: MCG, payment gateway, ERP, Open API</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SPRINT TRACKER ═══ -->
+  <section class="nursery-card p-5">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div class="flex items-center gap-2">
+        <i data-lucide="git-commit" class="w-5 h-5 text-amber-600"></i>
+        <h3 class="font-heading text-base font-bold text-slate-900">Sprint Tracker · 30 Sprints</h3>
+      </div>
+      <div class="flex items-center gap-2 text-[10px] font-mono">
+        <span class="flex items-center gap-1"><span class="dot dot-success"></span> Done</span>
+        <span class="flex items-center gap-1"><span class="dot" style="background:var(--c-primary)"></span> Active</span>
+        <span class="flex items-center gap-1"><span class="dot dot-neutral"></span> Pending</span>
+        <span class="flex items-center gap-1"><span class="dot dot-danger"></span> Blocked</span>
+      </div>
+    </div>
+
+    <!-- MVP sprints -->
+    <div class="mb-4">
+      <div class="text-[10px] font-mono text-amber-700 font-bold uppercase mb-2 flex items-center gap-2"><i data-lucide="rocket" class="w-3 h-3"></i> MVP Pilot · Sprints 0-5</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="mvpSprints"></div>
+    </div>
+
+    <!-- Phase 1 sprints -->
+    <div class="mb-4">
+      <div class="text-[10px] font-mono text-purple-700 font-bold uppercase mb-2 flex items-center gap-2"><i data-lucide="layers" class="w-3 h-3"></i> Phase 1 Full · Sprints 6-18</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="phase1Sprints"></div>
+    </div>
+
+    <!-- Phase 2 sprints -->
+    <div class="mb-4">
+      <div class="text-[10px] font-mono text-blue-700 font-bold uppercase mb-2 flex items-center gap-2"><i data-lucide="book-open" class="w-3 h-3"></i> Phase 2 · Sprints 19-26</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="phase2Sprints"></div>
+    </div>
+
+    <!-- Phase 3 sprints -->
+    <div>
+      <div class="text-[10px] font-mono text-emerald-700 font-bold uppercase mb-2 flex items-center gap-2"><i data-lucide="building-2" class="w-3 h-3"></i> Phase 3 · Sprints 27-30</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="phase3Sprints"></div>
+    </div>
+  </section>
+
+  <!-- ═══ ASSET INVENTORY + RISKS ═══ -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- Asset Inventory -->
+    <div class="lg:col-span-2 nursery-card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="package" class="w-5 h-5 text-amber-600"></i>
+          <h3 class="font-heading text-base font-bold text-slate-900">Asset Inventory · 62 Items</h3>
+        </div>
+        <span class="pill pill-done">ALL BUILT</span>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <div class="p-3 rounded-xl border border-slate-200 bg-emerald-50/30">
+          <div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono text-slate-500 uppercase">Spec .md files</span><span class="pill pill-done">22</span></div>
+          <div class="font-heading text-xl font-bold text-slate-900">22</div>
+          <div class="text-[10px] font-mono text-slate-500">/download/nms-prerequisites/</div>
+        </div>
+        <div class="p-3 rounded-xl border border-slate-200 bg-emerald-50/30">
+          <div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono text-slate-500 uppercase">Spec HTML demos</span><span class="pill pill-done">22</span></div>
+          <div class="font-heading text-xl font-bold text-slate-900">22</div>
+          <div class="text-[10px] font-mono text-slate-500">spec-*.html in /nms-all-screens/</div>
+        </div>
+        <div class="p-3 rounded-xl border border-slate-200 bg-emerald-50/30">
+          <div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono text-slate-500 uppercase">Web screen mockups</span><span class="pill pill-done">25</span></div>
+          <div class="font-heading text-xl font-bold text-slate-900">25</div>
+          <div class="text-[10px] font-mono text-slate-500">screen-*.html</div>
+        </div>
+        <div class="p-3 rounded-xl border border-slate-200 bg-emerald-50/30">
+          <div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono text-slate-500 uppercase">Mobile persona screens</span><span class="pill pill-done">7</span></div>
+          <div class="font-heading text-xl font-bold text-slate-900">7</div>
+          <div class="text-[10px] font-mono text-slate-500">mobile-*.html</div>
+        </div>
+        <div class="p-3 rounded-xl border border-slate-200 bg-emerald-50/30">
+          <div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono text-slate-500 uppercase">Phase 3 previews</span><span class="pill pill-done">2</span></div>
+          <div class="font-heading text-xl font-bold text-slate-900">2</div>
+          <div class="text-[10px] font-mono text-slate-500">phase3-*.html</div>
+        </div>
+        <div class="p-3 rounded-xl border border-slate-200 bg-amber-50/30">
+          <div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono text-slate-500 uppercase">PMO dashboard</span><span class="pill pill-amber">THIS</span></div>
+          <div class="font-heading text-xl font-bold text-slate-900">1</div>
+          <div class="text-[10px] font-mono text-slate-500">project-pmo.html</div>
+        </div>
+        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50">
+          <div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono text-slate-500 uppercase">Master index</span><span class="pill pill-done">1</span></div>
+          <div class="font-heading text-xl font-bold text-slate-900">1</div>
+          <div class="text-[10px] font-mono text-slate-500">index.html (links all 56)</div>
+        </div>
+        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50">
+          <div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono text-slate-500 uppercase">Python generator scripts</span><span class="pill pill-done">4</span></div>
+          <div class="font-heading text-xl font-bold text-slate-900">4</div>
+          <div class="text-[10px] font-mono text-slate-500">/scripts/nms_all_*.py</div>
+        </div>
+        <div class="p-3 rounded-xl border border-amber-300 bg-amber-50">
+          <div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono text-amber-700 uppercase">App code (Sprint 0+)</span><span class="pill pill-pending">0</span></div>
+          <div class="font-heading text-xl font-bold text-amber-700">0</div>
+          <div class="text-[10px] font-mono text-slate-500">.NET 8 + React + RN</div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between text-xs">
+        <span class="text-slate-500 font-mono">Total assets ready for execution: <strong class="text-slate-800">62</strong></span>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Browse All Assets</a>
+      </div>
+    </div>
+
+    <!-- Risks + Decisions -->
+    <div class="space-y-5">
+      <div class="nursery-card p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 text-red-600"></i><h3 class="font-heading text-sm font-bold text-slate-900">Top Risks</h3></div>
+          <span class="pill pill-critical">3 OPEN</span>
+        </div>
+        <div class="space-y-2 text-xs">
+          <div class="p-2.5 rounded-lg bg-red-50 border border-red-200">
+            <div class="flex items-center gap-2 mb-1"><span class="dot dot-danger"></span><span class="font-bold text-red-900">Pilot nursery not yet signed</span></div>
+            <p class="text-[11px] text-red-800">Mitigation: 2 candidates identified, LOI template ready. Owner: Sponsor.</p>
+          </div>
+          <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200">
+            <div class="flex items-center gap-2 mb-1"><span class="dot dot-warning"></span><span class="font-bold text-amber-900">Arabic RTL quality in production</span></div>
+            <p class="text-[11px] text-amber-800">Mitigation: Mandatory RTL QA every sprint + Arabic tester on team from Sprint 1.</p>
+          </div>
+          <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200">
+            <div class="flex items-center gap-2 mb-1"><span class="dot dot-warning"></span><span class="font-bold text-amber-900">PDPL legal review not started</span></div>
+            <p class="text-[11px] text-amber-800">Mitigation: Legal counsel identified. Required before go-live (Sprint 17).</p>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-xs w-full mt-3">View Full Risk Register →</button>
+      </div>
+
+      <div class="nursery-card p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2"><i data-lucide="git-pull-request" class="w-4 h-4 text-purple-600"></i><h3 class="font-heading text-sm font-bold text-slate-900">Open Decisions</h3></div>
+          <span class="pill pill-purple">9</span>
+        </div>
+        <div class="space-y-1.5 text-xs">
+          <div class="flex items-center justify-between p-2 rounded bg-slate-50"><span>UAE cloud provider</span><span class="pill pill-critical">BLOCKER</span></div>
+          <div class="flex items-center justify-between p-2 rounded bg-slate-50"><span>Payment gateway (Phase 3)</span><span class="pill pill-pending">PHASE 3</span></div>
+          <div class="flex items-center justify-between p-2 rounded bg-slate-50"><span>Data retention periods</span><span class="pill pill-pending">LEGAL</span></div>
+          <div class="flex items-center justify-between p-2 rounded bg-slate-50"><span>Production sizing</span><span class="pill pill-pending">SPRINT 17</span></div>
+          <div class="flex items-center justify-between p-2 rounded bg-slate-50"><span>SMS provider</span><span class="pill pill-pending">SPRINT 13</span></div>
+        </div>
+        <a href="spec-00-master-brief.html" class="btn btn-ghost btn-xs w-full mt-3">View All Decisions →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIBE CODER INSTRUCTIONS ═══ -->
+  <section class="nursery-card p-5 bg-slate-900 text-white border-slate-700">
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="terminal" class="w-5 h-5 text-amber-300"></i>
+      <h3 class="font-heading text-base font-bold">Vibe Coder Instructions · How to Update This Dashboard</h3>
+    </div>
+    <p class="text-xs text-slate-300 mb-4">This dashboard is self-updating. After completing a sprint or task, edit the <code class="text-amber-300 font-mono">PROJECT_STATE</code> JavaScript object below and refresh the page. All progress bars, KPIs, and sprint cards will recalculate automatically.</p>
+
+    <div class="code-block mb-4">
+<span class="comment">// ─── PROJECT STATE — EDIT THIS BLOCK TO UPDATE THE DASHBOARD ───</span>
+<span class="comment">// After each sprint, update the corresponding entry. The page recalculates on load.</span>
+
+<span class="key">const</span> PROJECT_STATE = {
+  lastUpdated: <span class="string">"2026-10-18 14:30 GST"</span>,
+  updatedBy: <span class="string">"PMO Dashboard Init"</span>,
+  overallPct: <span class="string">2</span>,            <span class="comment">// 0-100 — overall project completion</span>
+
+  sprints: {
+    <span class="comment">// status: "done" | "active" | "pending" | "blocked"</span>
+    <span class="comment">// pct: 0-100 (completion within sprint)</span>
+    0:  { status: <span class="string">"active"</span>,  pct: <span class="string">10</span>, notes: <span class="string">"Bootstrap in progress"</span> },
+    1:  { status: <span class="string">"pending"</span>, pct: <span class="string">0</span>,  notes: <span class="string">"Centre Management + Auth"</span> },
+    2:  { status: <span class="string">"pending"</span>, pct: <span class="string">0</span>,  notes: <span class="string">"Attendance + Dashboard"</span> },
+    <span class="comment">// ... sprints 3-30 follow the same pattern</span>
+    <span class="comment">// See spec-19-roadmap-sprints.html for full sprint plan</span>
+  },
+
+  risks: [
+    { severity: <span class="string">"critical"</span>, title: <span class="string">"Pilot nursery not signed"</span>, mitigation: <span class="string">"2 candidates identified"</span> },
+    { severity: <span class="string">"warning"</span>,  title: <span class="string">"Arabic RTL production quality"</span>, mitigation: <span class="string">"Mandatory RTL QA per sprint"</span> },
+    { severity: <span class="string">"warning"</span>,  title: <span class="string">"PDPL legal review not started"</span>, mitigation: <span class="string">"Counsel identified"</span> }
+  ],
+
+  pilotNurseries: <span class="string">0</span>,
+  openBugs: <span class="string">0</span>,
+  phasesLive: <span class="string">0</span>
+};
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+      <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+        <div class="text-amber-300 font-bold mb-1">✓ Mark Sprint Done</div>
+        <div class="text-slate-300">Change sprint status to <code class="text-emerald-300">"done"</code> and pct to <code class="text-emerald-300">100</code>. Update <code class="text-amber-300">overallPct</code> + <code class="text-amber-300">lastUpdated</code>.</div>
+      </div>
+      <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+        <div class="text-amber-300 font-bold mb-1">▶ Start Next Sprint</div>
+        <div class="text-slate-300">Change current sprint to <code class="text-amber-300">"done"</code>, set next sprint to <code class="text-amber-300">"active"</code> with pct 5-15.</div>
+      </div>
+      <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+        <div class="text-amber-300 font-bold mb-1">⚠ Mark Blocked</div>
+        <div class="text-slate-300">Change sprint status to <code class="text-red-300">"blocked"</code>, add explanation in <code class="text-amber-300">notes</code>. Add entry to risks array.</div>
+      </div>
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+      <div class="text-[11px] font-mono text-slate-400">📖 Full sprint plan: <a href="spec-19-roadmap-sprints.html" class="text-amber-300 hover:underline">spec-19-roadmap-sprints.html</a></div>
+      <div class="text-[11px] font-mono text-slate-400">📖 Cursor rules: <a href="spec-18-cursor-rules.html" class="text-amber-300 hover:underline">spec-18-cursor-rules.html</a></div>
+      <div class="text-[11px] font-mono text-slate-400">📖 Delivery checklist: <a href="spec-21-delivery-checklist.html" class="text-amber-300 hover:underline">spec-21-delivery-checklist.html</a></div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="text-center py-6 text-[10px] font-mono text-slate-400">
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <div class="w-6 h-6 rounded-lg bg-slate-900 flex items-center justify-center"><i data-lucide="baby" class="w-3 h-3 text-amber-300"></i></div>
+      <span class="font-heading font-bold text-slate-700">NMS Project PMO</span>
+    </div>
+    <div>Bright Futures Nursery Management System · Execution Dashboard · Built with Nursery CRM UI DNA v3.5</div>
+    <div class="mt-1">62 assets · 30 sprints · 3 phases · 62 weeks · Self-updating</div>
+  </footer>
+</div>
+
+<!-- ═══ THEME STUDIO MODAL ═══ -->
+<div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+    <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+      <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+      <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <div class="grid grid-cols-2 gap-2 text-xs">
+      <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+      <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+      <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+      <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+    </div>
+    <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+  <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+</div>
+
+<!-- ═══ FLOATING ACTION BUTTON (jump to top) ═══ -->
+<div class="fab" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="Jump to top">
+  <i data-lucide="arrow-up" class="w-6 h-6"></i>
+</div>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+  // ─── PROJECT STATE — EDIT THIS BLOCK TO UPDATE THE DASHBOARD ───
+  // After each sprint, update the corresponding entry. The page recalculates on load.
+
+  const PROJECT_STATE = {
+    lastUpdated: "2026-10-18 14:30 GST",
+    updatedBy: "PMO Dashboard Init",
+    overallPct: 2,
+
+    sprints: {
+      // MVP Pilot (0-5)
+      0:  { status: "active",  pct: 10, title: "Setup & Planning",            notes: "Monorepo + Docker + Keycloak + first commit", deliverables: "Repo, .cursorrules, CI skeleton" },
+      1:  { status: "pending", pct: 0,  title: "Centre Management + Auth",    notes: "Student, Staff, Room, Program, Group, Guardian entities + Keycloak RBAC", deliverables: "CRUD endpoints, login, RBAC" },
+      2:  { status: "pending", pct: 0,  title: "Attendance + Dashboard",      notes: "Barcode check-in, live ratio via SignalR, KPI widgets", deliverables: "Attendance module, dashboard" },
+      3:  { status: "pending", pct: 0,  title: "Parent Comms + Messaging",    notes: "Activity feed (8 types), approval workflow, shared inbox", deliverables: "Activity posts, messaging" },
+      4:  { status: "pending", pct: 0,  title: "Notifications + Audit + Emergency", notes: "3-tier notifications, audit log viewer, one-click emergency PDF", deliverables: "Notifications, audit, emergency report" },
+      5:  { status: "pending", pct: 0,  title: "Pilot Deployment + UAT + Go-Live", notes: "Production deploy, pilot nursery onboarding, go-live", deliverables: "Pilot live, feedback loop" },
+      // Phase 1 Full (6-18)
+      6:  { status: "pending", pct: 0,  title: "Pilot Feedback + Stabilization", notes: "Triage pilot bugs, performance tuning", deliverables: "Bug fixes, docs" },
+      7:  { status: "pending", pct: 0,  title: "Billing & Accounting (1/2)",   notes: "Fee plans, invoice generation, payment recording", deliverables: "Billing module" },
+      8:  { status: "pending", pct: 0,  title: "Billing & Accounting (2/2)",   notes: "Auto reminders, expenses, revenue dashboard", deliverables: "Reminders, dashboard" },
+      9:  { status: "pending", pct: 0,  title: "Enquiry + Tour + Settings",    notes: "6-stage pipeline, tour scheduling, full settings", deliverables: "CRM, tours, settings" },
+      10: { status: "pending", pct: 0,  title: "Enquiry + Tour + Settings (2/2)", notes: "Public enquiry form, follow-ups, custom roles", deliverables: "Public form, roles" },
+      11: { status: "pending", pct: 0,  title: "Calendar + Forms + Tools (1/2)", notes: "3 calendars, form builder, ID card generator", deliverables: "Calendar, forms, ID cards" },
+      12: { status: "pending", pct: 0,  title: "Calendar + Forms + Tools (2/2)", notes: "Admissions checklist, certificate generator", deliverables: "Admissions, certificates" },
+      13: { status: "pending", pct: 0,  title: "Reports + SMS + Emergency",    notes: "Full reports catalogue, SMS fallback, emergency cache", deliverables: "Reports, SMS, RTL QA" },
+      14: { status: "pending", pct: 0,  title: "Reports + RTL QA Pass",        notes: "Arabic RTL regression, performance load test", deliverables: "RTL sign-off, load test" },
+      15: { status: "pending", pct: 0,  title: "Mobile App (1/2)",             notes: "Staff app: dashboard, attendance, activities, messaging", deliverables: "Staff mobile app" },
+      16: { status: "pending", pct: 0,  title: "Mobile App (2/2)",             notes: "Parent app: feed, daily report, messaging, push", deliverables: "Parent mobile app" },
+      17: { status: "pending", pct: 0,  title: "QA + Security + UAT",          notes: "Pen test, WCAG audit, load test, UAT with pilot", deliverables: "Pen test report, sign-off" },
+      18: { status: "pending", pct: 0,  title: "Go-Live · Phase 1 Complete",   notes: "Production deploy, first paid customers", deliverables: "2 on-prem + 3 SaaS live" },
+      // Phase 2 (19-26)
+      19: { status: "pending", pct: 0,  title: "EYFS Framework (1/2)",         notes: "Curriculum, development areas, age bands, lessons", deliverables: "EYFS module" },
+      20: { status: "pending", pct: 0,  title: "EYFS Framework (2/2)",         notes: "Observations, assessments, learning journey", deliverables: "Observations, assessments" },
+      21: { status: "pending", pct: 0,  title: "Montessori + AI Observations", notes: "Montessori curriculum, AI dictation for observations", deliverables: "Montessori, AI features" },
+      22: { status: "pending", pct: 0,  title: "Assessment Reports",           notes: "5 report types, dual staff/parent views, PDF generation", deliverables: "Assessment reports" },
+      23: { status: "pending", pct: 0,  title: "Mobile Maturity (1/2)",        notes: "Offline cache, full notifications, learning journey view", deliverables: "Mobile offline" },
+      24: { status: "pending", pct: 0,  title: "Mobile Maturity (2/2)",        notes: "Push for all tiers, App Store + Play Store submission", deliverables: "Mobile apps live" },
+      25: { status: "pending", pct: 0,  title: "Performance + Service Extraction Decision", notes: "Load test, decide on Notification/Media extraction", deliverables: "Perf sign-off, ADRs" },
+      26: { status: "pending", pct: 0,  title: "Phase 2 Go-Live",              notes: "L&A module live in 3+ nurseries, 4.5+ app rating", deliverables: "Phase 2 sign-off" },
+      // Phase 3 (27-30)
+      27: { status: "pending", pct: 0,  title: "Multi-Centre Support",         notes: "MCG hierarchy, cross-centre SSO, consolidated dashboard", deliverables: "Multi-centre live" },
+      28: { status: "pending", pct: 0,  title: "Payment Gateway",              notes: "Telr/PayTabs integration, online payment flow, refunds", deliverables: "Payments live" },
+      29: { status: "pending", pct: 0,  title: "ERP + Open API",               notes: "Xero/QB adapter, webhooks, developer portal", deliverables: "ERP sync, Open API" },
+      30: { status: "pending", pct: 0,  title: "Scale + Phase 3 Go-Live",      notes: "20 centres, 500 concurrent, 99.9% uptime, SOC 2 kickoff", deliverables: "Phase 3 sign-off" }
+    },
+
+    risks: [
+      { severity: "critical", title: "Pilot nursery not yet signed", mitigation: "2 candidates identified, LOI template ready. Owner: Sponsor." },
+      { severity: "warning",  title: "Arabic RTL quality in production", mitigation: "Mandatory RTL QA every sprint + Arabic tester on team from Sprint 1." },
+      { severity: "warning",  title: "PDPL legal review not started", mitigation: "Legal counsel identified. Required before go-live (Sprint 17)." }
+    ],
+
+    pilotNurseries: 0,
+    openBugs: 0,
+    phasesLive: 0
+  };
+
+  // ─── Render Functions ───
+
+  function sprintCard(num, s) {
+    const statusCfg = {
+      done:    { dot: 'dot-success',  pill: 'pill-done',    label: 'DONE',     cls: 'sprint-done',    icon: 'check-circle', iconColor: 'text-emerald-600' },
+      active:  { dot: '',             pill: 'pill-amber',   label: 'ACTIVE',   cls: 'sprint-active',  icon: 'play-circle',  iconColor: 'text-amber-600' },
+      pending: { dot: 'dot-neutral',  pill: 'pill-neutral', label: 'PENDING',  cls: 'sprint-pending', icon: 'circle',       iconColor: 'text-slate-400' },
+      blocked: { dot: 'dot-danger',   pill: 'pill-critical',label: 'BLOCKED',  cls: 'sprint-blocked', icon: 'alert-octagon',iconColor: 'text-red-600' }
+    };
+    const cfg = statusCfg[s.status];
+    const fillClass = s.status === 'done' ? 'progress-fill-success' :
+                      s.status === 'active' ? 'progress-fill-warning' :
+                      s.status === 'blocked' ? 'progress-fill-danger' : 'progress-fill-info';
+
+    return `
+      <div class="nursery-card p-4 ${cfg.cls}">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="${cfg.icon}" class="w-4 h-4 ${cfg.iconColor}"></i>
+            <span class="font-mono text-[10px] font-bold text-slate-500">SPRINT ${num}</span>
+          </div>
+          <span class="pill ${cfg.pill}">${cfg.label}</span>
+        </div>
+        <h4 class="font-heading text-sm font-bold text-slate-900 mb-1">${s.title}</h4>
+        <p class="text-[11px] text-slate-600 mb-3 line-clamp-2">${s.notes}</p>
+        <div class="progress-bar mb-1"><div class="progress-fill ${fillClass}" style="width: ${s.pct}%"></div></div>
+        <div class="flex justify-between text-[10px] font-mono">
+          <span class="text-slate-500">${s.pct}% complete</span>
+          <span class="text-slate-400">${s.deliverables}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSprints() {
+    const containers = {
+      mvp: document.getElementById('mvpSprints'),
+      phase1: document.getElementById('phase1Sprints'),
+      phase2: document.getElementById('phase2Sprints'),
+      phase3: document.getElementById('phase3Sprints')
+    };
+    containers.mvp.innerHTML = [0,1,2,3,4,5].map(n => sprintCard(n, PROJECT_STATE.sprints[n])).join('');
+    containers.phase1.innerHTML = [6,7,8,9,10,11,12,13,14,15,16,17,18].map(n => sprintCard(n, PROJECT_STATE.sprints[n])).join('');
+    containers.phase2.innerHTML = [19,20,21,22,23,24,25,26].map(n => sprintCard(n, PROJECT_STATE.sprints[n])).join('');
+    containers.phase3.innerHTML = [27,28,29,30].map(n => sprintCard(n, PROJECT_STATE.sprints[n])).join('');
+  }
+
+  function updateOverallProgress() {
+    const ring = document.getElementById('overallRing');
+    const pct = PROJECT_STATE.overallPct;
+    const circumference = 264; // 2 * PI * 42
+    const offset = circumference - (circumference * pct / 100);
+    ring.style.strokeDashoffset = offset;
+    document.getElementById('overallPct').textContent = pct + '%';
+    document.getElementById('lastUpdated').textContent = PROJECT_STATE.lastUpdated;
+  }
+
+  // ─── Theme Studio + Toast ───
+  function toggleThemeStudio() { document.getElementById('themeStudioModal').classList.toggle('hidden'); }
+  function applyPreset(p) {
+    document.documentElement.style.setProperty('--c-primary', p);
+    document.documentElement.style.setProperty('--c-primary-dark', p);
+    showToast('Theme updated!');
+  }
+  function showToast(m) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').innerText = m;
+    t.classList.remove('translate-y-20', 'opacity-0');
+    setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+  }
+  function exportStatus() {
+    const data = JSON.stringify(PROJECT_STATE, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'nms-project-status.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Status exported as JSON');
+  }
+
+  // ─── Init ───
+  window.addEventListener('load', () => {
+    if (window.lucide) lucide.createIcons();
+    renderSprints();
+    updateOverallProgress();
+    // Re-init icons after dynamic render
+    setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 100);
+  });
+</script>
+
+</body>
+</html>

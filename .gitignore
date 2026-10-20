@@ -1,0 +1,13 @@
+node_modules/
+dist/
+bin/
+obj/
+.vs/
+*.user
+.expo/
+*.tfvars
+.env
+.env.*
+!.env.example
+coverage/
+TestResults/

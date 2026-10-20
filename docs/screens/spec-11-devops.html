@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevOps & Infrastructure — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class="active"><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-infrastructure-overview" class="toc-link" data-target="1-infrastructure-overview">1. Infrastructure Overview</a><a href="#11-saas-infrastructure-aws-uae" class="toc-link toc-h3" data-target="11-saas-infrastructure-aws-uae">1.1 SaaS Infrastructure (AWS UAE)</a><a href="#12-on-prem-infrastructure-customer-provided" class="toc-link toc-h3" data-target="12-on-prem-infrastructure-customer-provided">1.2 On-Prem Infrastructure (Customer-Provided)</a><a href="#2-kubernetes-architecture" class="toc-link" data-target="2-kubernetes-architecture">2. Kubernetes Architecture</a><a href="#21-cluster-sizing" class="toc-link toc-h3" data-target="21-cluster-sizing">2.1 Cluster Sizing</a><a href="#22-namespace-strategy" class="toc-link toc-h3" data-target="22-namespace-strategy">2.2 Namespace Strategy</a><a href="#23-pod-resources" class="toc-link toc-h3" data-target="23-pod-resources">2.3 Pod Resources</a><a href="#24-hpa-horizontal-pod-autoscaler" class="toc-link toc-h3" data-target="24-hpa-horizontal-pod-autoscaler">2.4 HPA (Horizontal Pod Autoscaler)</a><a href="#25-pod-disruption-budgets" class="toc-link toc-h3" data-target="25-pod-disruption-budgets">2.5 Pod Disruption Budgets</a><a href="#26-network-policies" class="toc-link toc-h3" data-target="26-network-policies">2.6 Network Policies</a><a href="#3-terraform-infrastructure-as-code" class="toc-link" data-target="3-terraform-infrastructure-as-code">3. Terraform Infrastructure-as-Code</a><a href="#31-structure" class="toc-link toc-h3" data-target="31-structure">3.1 Structure</a><a href="#32-example-module-rds-postgresql" class="toc-link toc-h3" data-target="32-example-module-rds-postgresql">3.2 Example Module: RDS PostgreSQL</a><a href="#33-environment-promotion-flow" class="toc-link toc-h3" data-target="33-environment-promotion-flow">3.3 Environment Promotion Flow</a><a href="#34-state-management" class="toc-link toc-h3" data-target="34-state-management">3.4 State Management</a><a href="#4-helm-charts" class="toc-link" data-target="4-helm-charts">4. Helm Charts</a><a href="#41-nms-api-chart" class="toc-link toc-h3" data-target="41-nms-api-chart">4.1 NMS API Chart</a><a href="#42-example-deploymentyaml" class="toc-link toc-h3" data-target="42-example-deploymentyaml">4.2 Example: deployment.yaml</a><a href="#43-secrets-via-aws-secrets-manager-irsa" class="toc-link toc-h3" data-target="43-secrets-via-aws-secrets-manager-irsa">4.3 Secrets via AWS Secrets Manager (IRSA)</a><a href="#5-cicd-pipeline" class="toc-link" data-target="5-cicd-pipeline">5. CI/CD Pipeline</a><a href="#51-pipeline-stages" class="toc-link toc-h3" data-target="51-pipeline-stages">5.1 Pipeline Stages</a><a href="#52-github-actions-workflow" class="toc-link toc-h3" data-target="52-github-actions-workflow">5.2 GitHub Actions Workflow</a><a href="#53-branch-protection-rules" class="toc-link toc-h3" data-target="53-branch-protection-rules">5.3 Branch Protection Rules</a><a href="#54-environment-protection-rules-github-environments" class="toc-link toc-h3" data-target="54-environment-protection-rules-github-environments">5.4 Environment Protection Rules (GitHub Enviro...</a><a href="#6-environment-strategy" class="toc-link" data-target="6-environment-strategy">6. Environment Strategy</a><a href="#61-local-development" class="toc-link toc-h3" data-target="61-local-development">6.1 Local Development</a><a href="#62-dev-environment-shared" class="toc-link toc-h3" data-target="62-dev-environment-shared">6.2 Dev Environment (Shared)</a><a href="#63-staging-environment" class="toc-link toc-h3" data-target="63-staging-environment">6.3 Staging Environment</a><a href="#64-production-environment" class="toc-link toc-h3" data-target="64-production-environment">6.4 Production Environment</a><a href="#65-environment-promotion-matrix" class="toc-link toc-h3" data-target="65-environment-promotion-matrix">6.5 Environment Promotion Matrix</a><a href="#7-observability-stack" class="toc-link" data-target="7-observability-stack">7. Observability Stack</a><a href="#71-metrics-prometheus-grafana" class="toc-link toc-h3" data-target="71-metrics-prometheus-grafana">7.1 Metrics (Prometheus + Grafana)</a><a href="#72-logs-loki-grafana" class="toc-link toc-h3" data-target="72-logs-loki-grafana">7.2 Logs (Loki + Grafana)</a><a href="#73-tracing-opentelemetry-tempo" class="toc-link toc-h3" data-target="73-tracing-opentelemetry-tempo">7.3 Tracing (OpenTelemetry + Tempo)</a><a href="#74-synthetics" class="toc-link toc-h3" data-target="74-synthetics">7.4 Synthetics</a><a href="#8-backup-recovery" class="toc-link" data-target="8-backup-recovery">8. Backup &amp; Recovery</a><a href="#81-backup-strategy" class="toc-link toc-h3" data-target="81-backup-strategy">8.1 Backup Strategy</a><a href="#82-recovery-procedures" class="toc-link toc-h3" data-target="82-recovery-procedures">8.2 Recovery Procedures</a><a href="#83-dr-drills" class="toc-link toc-h3" data-target="83-dr-drills">8.3 DR Drills</a><a href="#9-security-hardening" class="toc-link" data-target="9-security-hardening">9. Security Hardening</a><a href="#91-cluster-security" class="toc-link toc-h3" data-target="91-cluster-security">9.1 Cluster Security</a><a href="#92-network-security" class="toc-link toc-h3" data-target="92-network-security">9.2 Network Security</a><a href="#93-compliance-scanning" class="toc-link toc-h3" data-target="93-compliance-scanning">9.3 Compliance Scanning</a><a href="#10-release-management" class="toc-link" data-target="10-release-management">10. Release Management</a><a href="#101-versioning" class="toc-link toc-h3" data-target="101-versioning">10.1 Versioning</a><a href="#102-release-process" class="toc-link toc-h3" data-target="102-release-process">10.2 Release Process</a><a href="#103-lts-branches" class="toc-link toc-h3" data-target="103-lts-branches">10.3 LTS Branches</a><a href="#104-rollback" class="toc-link toc-h3" data-target="104-rollback">10.4 Rollback</a><a href="#11-local-dev-setup-detailed" class="toc-link" data-target="11-local-dev-setup-detailed">11. Local Dev Setup (Detailed)</a><a href="#111-prerequisites" class="toc-link toc-h3" data-target="111-prerequisites">11.1 Prerequisites</a><a href="#112-first-time-setup" class="toc-link toc-h3" data-target="112-first-time-setup">11.2 First-Time Setup</a><a href="#113-useful-makefile-targets" class="toc-link toc-h3" data-target="113-useful-makefile-targets">11.3 Useful Makefile Targets</a><a href="#12-runbooks" class="toc-link" data-target="12-runbooks">12. Runbooks</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="server" class="w-4 h-4 text-amber-600"></i><span>DevOps & Infrastructure</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-11-devops.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 11</span>
+          <span class="text-[10px] font-mono text-slate-400">~4,608 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">DevOps & Infrastructure</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-10-multi-tenancy.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Multi-Tenancy</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-12-web-frontend.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Web Frontend</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="11-devops-infrastructure">11 — DevOps &amp; Infrastructure</h1>
+<blockquote>
+<p>Kubernetes, Terraform, CI/CD pipeline, environment strategy, observability stack, backup/restore.</p>
+</blockquote>
+<hr />
+<h2 id="1-infrastructure-overview">1. Infrastructure Overview</h2>
+<h3 id="11-saas-infrastructure-aws-uae">1.1 SaaS Infrastructure (AWS UAE)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>AWS Account (me-central-1 region)
+├── VPC
+│   ├── Public subnets (3 AZs) — ALB, NAT Gateway
+│   ├── Private subnets (3 AZs) — EKS worker nodes
+│   └── Database subnets (3 AZs) — RDS, ElastiCache
+├── EKS Cluster (Kubernetes 1.30)
+│   ├── Node groups (multi-AZ, auto-scaling 3-10 nodes)
+│   ├── Namespaces: production, staging, dev, monitoring, keycloak
+│   └── Workloads: NMS API, NMS Web, Keycloak, RabbitMQ, etc.
+├── RDS PostgreSQL 16 (Multi-AZ, read replica)
+├── ElastiCache Redis 7 (Multi-AZ)
+├── Amazon MQ RabbitMQ 3.13 (Multi-AZ)
+├── S3 Buckets (media, backups, terraform state, logs)
+├── CloudFront (CDN with signed URLs)
+├── Route 53 (DNS)
+├── Secrets Manager (secrets)
+├── KMS (encryption keys)
+├── CloudWatch (logs, metrics, alarms)
+└── WAF (on ALB)
+</code></pre></div>
+
+<h3 id="12-on-prem-infrastructure-customer-provided">1.2 On-Prem Infrastructure (Customer-Provided)</h3>
+<p>Customer provides one of:
+- <strong>Customer's cloud account</strong> (AWS / Azure / GCP, UAE region preferred)
+- <strong>Customer's data center</strong> with K8s cluster (self-managed or via Rancher/OpenShift)
+- <strong>Single-server deployment</strong> (for small nurseries, via docker-compose — limited scale)</p>
+<p>Our Terraform modules support AWS, Azure, and generic K8s targets. Same Helm charts deploy NMS to any K8s cluster.</p>
+<hr />
+<h2 id="2-kubernetes-architecture">2. Kubernetes Architecture</h2>
+<h3 id="21-cluster-sizing">2.1 Cluster Sizing</h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Worker nodes</th>
+<th>vCPU per node</th>
+<th>Memory per node</th>
+<th>Total pods (approx)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 1 (dev/staging)</td>
+<td>2</td>
+<td>4</td>
+<td>16 GB</td>
+<td>30</td>
+</tr>
+<tr>
+<td>Phase 1 (production)</td>
+<td>3 (min) - 10 (max)</td>
+<td>8</td>
+<td>32 GB</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Phase 3 (production)</td>
+<td>5 (min) - 20 (max)</td>
+<td>16</td>
+<td>64 GB</td>
+<td>300</td>
+</tr>
+</tbody>
+</table>
+<p>Auto-scaling: K8s Cluster Autoscaler + HPA (Horizontal Pod Autoscaler) on CPU + custom metrics.</p>
+<h3 id="22-namespace-strategy">2.2 Namespace Strategy</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>production       — NMS API, Web, Keycloak, RabbitMQ (production)
+staging          — Same as production but smaller replicas
+dev              — Shared dev environment
+monitoring       — Prometheus, Grafana, Loki, Alertmanager
+keycloak         — Keycloak (separate namespace for security isolation)
+infra            — Ingress controller, cert-manager, external-dns
+</code></pre></div>
+
+<h3 id="23-pod-resources">2.3 Pod Resources</h3>
+<table>
+<thead>
+<tr>
+<th>Workload</th>
+<th>CPU req</th>
+<th>CPU limit</th>
+<th>Memory req</th>
+<th>Memory limit</th>
+<th>Replicas (prod)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NMS API</td>
+<td>500m</td>
+<td>2000m</td>
+<td>1 Gi</td>
+<td>4 Gi</td>
+<td>3 (HPA 3-10)</td>
+</tr>
+<tr>
+<td>NMS Web (nginx serving static)</td>
+<td>100m</td>
+<td>500m</td>
+<td>128 Mi</td>
+<td>256 Mi</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Keycloak</td>
+<td>1000m</td>
+<td>2000m</td>
+<td>2 Gi</td>
+<td>4 Gi</td>
+<td>2</td>
+</tr>
+<tr>
+<td>RabbitMQ</td>
+<td>500m</td>
+<td>1000m</td>
+<td>1 Gi</td>
+<td>2 Gi</td>
+<td>3 (cluster)</td>
+</tr>
+<tr>
+<td>Hangfire workers</td>
+<td>500m</td>
+<td>2000m</td>
+<td>1 Gi</td>
+<td>2 Gi</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Media Processing consumer</td>
+<td>500m</td>
+<td>2000m</td>
+<td>1 Gi</td>
+<td>2 Gi</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Prometheus</td>
+<td>500m</td>
+<td>1000m</td>
+<td>2 Gi</td>
+<td>4 Gi</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Grafana</td>
+<td>100m</td>
+<td>500m</td>
+<td>256 Mi</td>
+<td>512 Mi</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Loki</td>
+<td>500m</td>
+<td>1000m</td>
+<td>2 Gi</td>
+<td>4 Gi</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-hpa-horizontal-pod-autoscaler">2.4 HPA (Horizontal Pod Autoscaler)</h3>
+<p>NMS API HPA:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">apiVersion</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">autoscaling/v2</span>
+<span style="color: #FF4689">kind</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">HorizontalPodAutoscaler</span>
+<span style="color: #FF4689">metadata</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">nms-api</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">namespace</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">production</span>
+<span style="color: #FF4689">spec</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">scaleTargetRef</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">apiVersion</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">apps/v1</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">kind</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Deployment</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">nms-api</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">minReplicas</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">3</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">maxReplicas</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">10</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">metrics</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  - </span><span style="color: #FF4689">type</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Resource</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">resource</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">cpu</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">target</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">type</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Utilization</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">averageUtilization</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">70</span>
+<span style="color: #F8F8F2">  - </span><span style="color: #FF4689">type</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Resource</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">resource</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">memory</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">target</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">type</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Utilization</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">averageUtilization</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">80</span>
+<span style="color: #F8F8F2">  - </span><span style="color: #FF4689">type</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Pods</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">pods</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">metric</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">http_requests_per_second</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">target</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">type</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">AverageValue</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">averageValue</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;100&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">behavior</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">scaleUp</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">stabilizationWindowSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">30</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">policies</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      - </span><span style="color: #FF4689">type</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Percent</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">value</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">100</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">periodSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">30</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">scaleDown</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">stabilizationWindowSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">300</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">policies</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      - </span><span style="color: #FF4689">type</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Percent</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">value</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">50</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">periodSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">60</span>
+</code></pre></div>
+
+<h3 id="25-pod-disruption-budgets">2.5 Pod Disruption Budgets</h3>
+<p>Ensure minimum availability during node drains:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">apiVersion</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">policy/v1</span>
+<span style="color: #FF4689">kind</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">PodDisruptionBudget</span>
+<span style="color: #FF4689">metadata</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">nms-api</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">namespace</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">production</span>
+<span style="color: #FF4689">spec</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">minAvailable</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">2</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">selector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">matchLabels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">app</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">nms-api</span>
+</code></pre></div>
+
+<h3 id="26-network-policies">2.6 Network Policies</h3>
+<p>Default deny, allow explicitly:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">apiVersion</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">networking.k8s.io/v1</span>
+<span style="color: #FF4689">kind</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">NetworkPolicy</span>
+<span style="color: #FF4689">metadata</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">nms-api</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">namespace</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">production</span>
+<span style="color: #FF4689">spec</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">podSelector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">matchLabels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">app</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">nms-api</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">policyTypes</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  - </span><span style="color: #AE81FF">Ingress</span>
+<span style="color: #F8F8F2">  - </span><span style="color: #AE81FF">Egress</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">ingress</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  - </span><span style="color: #FF4689">from</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">namespaceSelector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">matchLabels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">infra</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">podSelector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">matchLabels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">app</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ingress-nginx</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">ports</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">protocol</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">TCP</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">port</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">8080</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">egress</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  - </span><span style="color: #FF4689">to</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">namespaceSelector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">matchLabels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">production</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">podSelector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">matchLabels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">app</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">postgres</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">ports</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">protocol</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">TCP</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">port</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">5432</span>
+<span style="color: #F8F8F2">  - </span><span style="color: #FF4689">to</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">namespaceSelector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">matchLabels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">production</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">podSelector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">matchLabels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">app</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">redis</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">ports</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">protocol</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">TCP</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">port</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">6379</span>
+<span style="color: #F8F8F2">  </span><span style="color: #959077"># ... etc</span>
+</code></pre></div>
+
+<hr />
+<h2 id="3-terraform-infrastructure-as-code">3. Terraform Infrastructure-as-Code</h2>
+<h3 id="31-structure">3.1 Structure</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>infra/terraform/
+├── modules/
+│   ├── vpc/                   # VPC, subnets, NAT gateway, IGW
+│   ├── eks/                   # EKS cluster, node groups, IRSA
+│   ├── rds/                   # RDS PostgreSQL, parameter groups, secrets
+│   ├── elasticache/           # ElastiCache Redis
+│   ├── amazon-mq/             # Amazon MQ RabbitMQ
+│   ├── s3/                    # S3 buckets with policies
+│   ├── cloudfront/            # CloudFront distributions
+│   ├── route53/               # DNS records
+│   ├── kms/                   # KMS keys
+│   ├── secrets_manager/       # Secrets Manager secrets
+│   ├── waf/                   # WAF Web ACLs
+│   └── monitoring/            # CloudWatch alarms, dashboards
+├── environments/
+│   ├── dev/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   ├── terraform.tfvars   # gitignored, per-env values
+│   │   └── backend.tf         # S3 backend config
+│   ├── staging/
+│   └── production/
+└── shared/
+    └── backend.tf             # S3 + DynamoDB state locking
+</code></pre></div>
+
+<h3 id="32-example-module-rds-postgresql">3.2 Example Module: RDS PostgreSQL</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># infra/terraform/modules/rds/main.tf</span>
+<span style="color: #66D9EF">resource</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">&quot;aws_db_subnet_group&quot;</span><span style="color: #F8F8F2"> &quot;this&quot; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">name</span><span style="color: #F8F8F2">       </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;${var.name_prefix}-db-subnet-group&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">subnet_ids</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.subnet_ids</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">tags</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.tags</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #66D9EF">resource</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">&quot;aws_security_group&quot;</span><span style="color: #F8F8F2"> &quot;this&quot; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">name</span><span style="color: #F8F8F2">        </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;${var.name_prefix}-rds-sg&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">description</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;RDS PostgreSQL security group&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">vpc_id</span><span style="color: #F8F8F2">      </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.vpc_id</span>
+
+<span style="color: #F8F8F2">  ingress {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">from_port</span><span style="color: #F8F8F2">   </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">5432</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">to_port</span><span style="color: #F8F8F2">     </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">5432</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">protocol</span><span style="color: #F8F8F2">    </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;tcp&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">security_groups</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.allowed_security_groups</span>
+<span style="color: #F8F8F2">  }</span>
+
+<span style="color: #F8F8F2">  egress {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">from_port</span><span style="color: #F8F8F2">   </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">to_port</span><span style="color: #F8F8F2">     </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">0</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">protocol</span><span style="color: #F8F8F2">    </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;-1&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">cidr_blocks</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> [</span><span style="color: #E6DB74">&quot;0.0.0.0/0&quot;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #66D9EF">resource</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">&quot;aws_db_instance&quot;</span><span style="color: #F8F8F2"> &quot;this&quot; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">identifier</span><span style="color: #F8F8F2">                 </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;${var.name_prefix}-postgres&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">engine</span><span style="color: #F8F8F2">                     </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;postgres&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">engine_version</span><span style="color: #F8F8F2">             </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;16&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">instance_class</span><span style="color: #F8F8F2">             </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.instance_class</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">allocated_storage</span><span style="color: #F8F8F2">          </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.allocated_storage</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">storage_encrypted</span><span style="color: #F8F8F2">          </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">kms_key_id</span><span style="color: #F8F8F2">                 </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.kms_key_id</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">multi_az</span><span style="color: #F8F8F2">                   </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">db_subnet_group_name</span><span style="color: #F8F8F2">       </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> aws_db_subnet_group.this.name</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">vpc_security_group_ids</span><span style="color: #F8F8F2">     </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> [aws_security_group.this.id]</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">backup_retention_period</span><span style="color: #F8F8F2">    </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">35</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">backup_window</span><span style="color: #F8F8F2">              </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;03:00-04:00&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">maintenance_window</span><span style="color: #F8F8F2">         </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;sun:04:00-sun:05:00&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">enhanced_monitoring_role_arn</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> aws_iam_role.enhanced_monitoring.arn</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">monitoring_interval</span><span style="color: #F8F8F2">        </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">60</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">enabled_cloudwatch_logs_exports</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> [</span><span style="color: #E6DB74">&quot;postgresql&quot;, &quot;upgrade&quot;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">auto_minor_version_upgrade</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">apply_immediately</span><span style="color: #F8F8F2">          </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">deletion_protection</span><span style="color: #F8F8F2">        </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.environment == </span><span style="color: #E6DB74">&quot;production&quot;</span><span style="color: #F8F8F2"> ? </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2"> : </span><span style="color: #66D9EF">false</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">skip_final_snapshot</span><span style="color: #F8F8F2">        </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">false</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">final_snapshot_identifier</span><span style="color: #F8F8F2">  </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;${var.name_prefix}-final-snapshot&quot;</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">parameter_group_name</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> aws_db_parameter_group.this.name</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">tags</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">merge</span><span style="color: #F8F8F2">(var.tags, {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">Name</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;${var.name_prefix}-postgres&quot;</span>
+<span style="color: #F8F8F2">  })</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #66D9EF">resource</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">&quot;aws_db_parameter_group&quot;</span><span style="color: #F8F8F2"> &quot;this&quot; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">name</span><span style="color: #F8F8F2">   </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;${var.name_prefix}-pg-params&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">family</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;postgres16&quot;</span>
+
+<span style="color: #F8F8F2">  parameter {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">name</span><span style="color: #F8F8F2">  </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;log_connections&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">value</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;1&quot;</span>
+<span style="color: #F8F8F2">  }</span>
+
+<span style="color: #F8F8F2">  parameter {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">name</span><span style="color: #F8F8F2">  </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;log_disconnections&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">value</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;1&quot;</span>
+<span style="color: #F8F8F2">  }</span>
+
+<span style="color: #F8F8F2">  parameter {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">name</span><span style="color: #F8F8F2">  </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;log_min_duration_statement&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">value</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;1000&quot;</span><span style="color: #959077">  # Log queries slower than 1s</span>
+<span style="color: #F8F8F2">  }</span>
+
+<span style="color: #F8F8F2">  parameter {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">name</span><span style="color: #F8F8F2">  </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;shared_preload_libraries&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">value</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;pg_stat_statements&quot;</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #66D9EF">resource</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">&quot;aws_db_instance&quot;</span><span style="color: #F8F8F2"> &quot;read_replica&quot; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">count</span><span style="color: #F8F8F2">                  </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.environment == </span><span style="color: #E6DB74">&quot;production&quot;</span><span style="color: #F8F8F2"> ? </span><span style="color: #AE81FF">1</span><span style="color: #F8F8F2"> : </span><span style="color: #AE81FF">0</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">identifier</span><span style="color: #F8F8F2">             </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;${var.name_prefix}-postgres-replica&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">replicate_source_db</span><span style="color: #F8F8F2">    </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> aws_db_instance.this.id</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">instance_class</span><span style="color: #F8F8F2">         </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.instance_class</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">db_subnet_group_name</span><span style="color: #F8F8F2">   </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> aws_db_subnet_group.this.name</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">vpc_security_group_ids</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> [aws_security_group.this.id]</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">storage_encrypted</span><span style="color: #F8F8F2">      </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">kms_key_id</span><span style="color: #F8F8F2">             </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.kms_key_id</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #66D9EF">resource</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">&quot;aws_secretsmanager_secret&quot;</span><span style="color: #F8F8F2"> &quot;db_credentials&quot; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">name</span><span style="color: #F8F8F2">        </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;${var.name_prefix}/database/master&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">description</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Master credentials for RDS PostgreSQL&quot;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">kms_key_id</span><span style="color: #F8F8F2">  </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> var.kms_key_id</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #66D9EF">resource</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">&quot;aws_secretsmanager_secret_version&quot;</span><span style="color: #F8F8F2"> &quot;db_credentials&quot; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">secret_id</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> aws_secretsmanager_secret.db_credentials.id</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">secret_string</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">jsonencode</span><span style="color: #F8F8F2">({</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">username</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;nms_admin&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">password</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> random_password.db_password.result</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">engine</span><span style="color: #F8F8F2">   </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;postgres&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">host</span><span style="color: #F8F8F2">     </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> aws_db_instance.this.address</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">port</span><span style="color: #F8F8F2">     </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">5432</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">dbname</span><span style="color: #F8F8F2">   </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;nms&quot;</span>
+<span style="color: #F8F8F2">  })</span>
+<span style="color: #F8F8F2">}</span>
+
+<span style="color: #66D9EF">resource</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">&quot;random_password&quot;</span><span style="color: #F8F8F2"> &quot;db_password&quot; {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">length</span><span style="color: #F8F8F2">           </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">32</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">special</span><span style="color: #F8F8F2">          </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span>
+<span style="color: #F8F8F2">  </span><span style="color: #A6E22E">override_special</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;!#$%&amp;*()-_=+[]{}&lt;&gt;:?&quot;</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="33-environment-promotion-flow">3.3 Environment Promotion Flow</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>dev (auto-apply on push to develop branch)
+  ↓ manual approval
+staging (auto-apply on merge to main branch, after approval)
+  ↓ manual approval + tech lead sign-off
+production (manual apply, tech lead sign-off required)
+</code></pre></div>
+
+<p>Terraform plan runs in CI on every PR. Apply requires manual approval for staging + production.</p>
+<h3 id="34-state-management">3.4 State Management</h3>
+<ul>
+<li>State stored in S3 backend with DynamoDB locking.</li>
+<li>State file per environment (<code>dev.tfstate</code>, <code>staging.tfstate</code>, <code>production.tfstate</code>).</li>
+<li>State contains secrets — S3 bucket encrypted, access restricted to CI/CD IAM role.</li>
+<li>State never committed to git.</li>
+</ul>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># infra/terraform/environments/production/backend.tf</span>
+<span style="color: #F8F8F2">terraform {</span>
+<span style="color: #F8F8F2">  </span><span style="color: #66D9EF">backend</span><span style="color: #F8F8F2"> &quot;s3&quot; {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">bucket</span><span style="color: #F8F8F2">         </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;nms-terraform-state-prod&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">key</span><span style="color: #F8F8F2">            </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;production/terraform.tfstate&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">region</span><span style="color: #F8F8F2">         </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;me-central-1&quot;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">encrypt</span><span style="color: #F8F8F2">        </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">true</span>
+<span style="color: #F8F8F2">    </span><span style="color: #A6E22E">dynamodb_table</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;nms-terraform-locks&quot;</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="4-helm-charts">4. Helm Charts</h2>
+<h3 id="41-nms-api-chart">4.1 NMS API Chart</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>infra/helm/nms-api/
+├── Chart.yaml
+├── values.yaml              # Default values
+├── values-dev.yaml          # Dev overrides
+├── values-staging.yaml
+├── values-production.yaml
+└── templates/
+    ├── deployment.yaml
+    ├── service.yaml
+    ├── ingress.yaml
+    ├── hpa.yaml
+    ├── pdb.yaml
+    ├── networkpolicy.yaml
+    ├── serviceaccount.yaml
+    ├── configmap.yaml
+    ├── secret.yaml          # References AWS Secrets Manager via IRSA
+    └── _helpers.tpl
+</code></pre></div>
+
+<h3 id="42-example-deploymentyaml">4.2 Example: deployment.yaml</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">apiVersion</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">apps/v1</span>
+<span style="color: #FF4689">kind</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Deployment</span>
+<span style="color: #FF4689">metadata</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: {{ include &quot;nms-api.fullname&quot; . }}</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">labels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    {{- include &quot;nms-api.labels&quot; . | nindent 4 }}</span>
+<span style="color: #FF4689">spec</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">replicas</span><span style="color: #F8F8F2">: {{ .Values.replicaCount }}</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">selector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">matchLabels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      {{- include &quot;nms-api.selectorLabels&quot; . | nindent 6 }}</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">template</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">metadata</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">annotations</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">checksum/config</span><span style="color: #F8F8F2">: {{ include (print $.Template.BasePath &quot;/configmap.yaml&quot;) . | sha256sum }}</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">prometheus.io/scrape</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;true&quot;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">prometheus.io/port</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;8080&quot;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">prometheus.io/path</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;/metrics&quot;</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">labels</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        {{- include &quot;nms-api.selectorLabels&quot; . | nindent 8 }}</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">spec</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">serviceAccountName</span><span style="color: #F8F8F2">: {{ include &quot;nms-api.serviceAccountName&quot; . }}</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">securityContext</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">runAsNonRoot</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">true</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">runAsUser</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1000</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">fsGroup</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">1000</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">containers</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">api</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">image</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;{{</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">.Values.image.repository</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">}}:{{</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">.Values.image.tag</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">|</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">default</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">.Chart.AppVersion</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">}}&quot;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">imagePullPolicy</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">IfNotPresent</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">ports</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">http</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">containerPort</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">8080</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">protocol</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">TCP</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">envFrom</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        - </span><span style="color: #FF4689">configMapRef</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: {{ include &quot;nms-api.fullname&quot; . }}</span><span style="color: #AE81FF">-config</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">env</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ASPNETCORE_ENVIRONMENT</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">value</span><span style="color: #F8F8F2">: {{ .Values.environment | quote }}</span>
+<span style="color: #F8F8F2">        - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">DATABASE__CONNECTIONSTRING</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">valueFrom</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">secretKeyRef</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">              </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: {{ include &quot;nms-api.fullname&quot; . }}</span><span style="color: #AE81FF">-secrets</span>
+<span style="color: #F8F8F2">              </span><span style="color: #FF4689">key</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">database-connection</span>
+<span style="color: #F8F8F2">        </span><span style="color: #959077"># ... more secrets</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">resources</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          {{- toYaml .Values.resources | nindent 10 }}</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">livenessProbe</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">httpGet</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">path</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">/health/live</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">port</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">http</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">initialDelaySeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">30</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">periodSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">10</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">timeoutSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">5</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">readinessProbe</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">httpGet</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">path</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">/health/ready</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">port</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">http</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">initialDelaySeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">10</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">periodSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">5</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">timeoutSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">3</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">startupProbe</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">httpGet</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">path</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">/health/startup</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">port</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">http</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">failureThreshold</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">30</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">periodSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">10</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">volumeMounts</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">tmp</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">mountPath</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">/tmp</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">volumes</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">tmp</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">emptyDir</span><span style="color: #F8F8F2">: {}</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">affinity</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">podAntiAffinity</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">preferredDuringSchedulingIgnoredDuringExecution</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          - </span><span style="color: #FF4689">weight</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">100</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">podAffinityTerm</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">              </span><span style="color: #FF4689">labelSelector</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">                </span><span style="color: #FF4689">matchExpressions</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">                - </span><span style="color: #FF4689">key</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">app.kubernetes.io/name</span>
+<span style="color: #F8F8F2">                  </span><span style="color: #FF4689">operator</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">In</span>
+<span style="color: #F8F8F2">                  </span><span style="color: #FF4689">values</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">                  - {{ include &quot;nms-api.name&quot; . }}</span>
+<span style="color: #F8F8F2">              </span><span style="color: #FF4689">topologyKey</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">kubernetes.io/hostname</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">tolerations</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      - </span><span style="color: #FF4689">key</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;node.kubernetes.io/not-ready&quot;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">operator</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Exists&quot;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">effect</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;NoExecute&quot;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">tolerationSeconds</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">30</span>
+</code></pre></div>
+
+<h3 id="43-secrets-via-aws-secrets-manager-irsa">4.3 Secrets via AWS Secrets Manager (IRSA)</h3>
+<p>Avoid Kubernetes secrets (limited rotation, audit gaps). Instead, use AWS Secrets Manager + IAM Roles for Service Accounts (IRSA):</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># serviceaccount.yaml</span>
+<span style="color: #FF4689">apiVersion</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">v1</span>
+<span style="color: #FF4689">kind</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ServiceAccount</span>
+<span style="color: #FF4689">metadata</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: {{ include &quot;nms-api.serviceAccountName&quot; . }}</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">annotations</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">eks.amazonaws.com/role-arn</span><span style="color: #F8F8F2">: {{ .Values.iam.roleArn | quote }}</span>
+</code></pre></div>
+
+<p>The .NET app uses AWS SDK to fetch secrets at startup:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// Program.cs</span>
+<span style="color: #F8F8F2">builder.Services.AddSingleton</span><span style="color: #FF4689">&lt;</span><span style="color: #F8F8F2">ISecretsProvider</span><span style="color: #FF4689">&gt;</span><span style="color: #F8F8F2">(sp </span><span style="color: #FF4689">=&gt;</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">AwsSecretsManagerProvider</span><span style="color: #F8F8F2">(</span>
+<span style="color: #F8F8F2">        region: builder.Configuration[</span><span style="color: #E6DB74">&quot;AWS:Region&quot;</span><span style="color: #F8F8F2">],</span>
+<span style="color: #F8F8F2">        fallbackToEnv: builder.Environment.IsDevelopment()</span>
+<span style="color: #F8F8F2">    );</span>
+<span style="color: #F8F8F2">});</span>
+
+<span style="color: #959077">// Custom configuration provider</span>
+<span style="color: #F8F8F2">builder.Configuration.AddSecretsManager(config </span><span style="color: #FF4689">=&gt;</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    config.SecretArn </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;nms/prod/database&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">    config.Key </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Database&quot;</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">});</span>
+</code></pre></div>
+
+<hr />
+<h2 id="5-cicd-pipeline">5. CI/CD Pipeline</h2>
+<h3 id="51-pipeline-stages">5.1 Pipeline Stages</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>PR Check → Build → Test → Security Scan → Docker Build → Push to Registry
+  ↓ (merge to develop)
+Deploy to Dev → Smoke Tests
+  ↓ (merge to main)
+Deploy to Staging → E2E Tests → Performance Benchmarks
+  ↓ (manual approval + tech lead sign-off)
+Deploy to Production (Blue/Green) → Health Checks → Live
+</code></pre></div>
+
+<h3 id="52-github-actions-workflow">5.2 GitHub Actions Workflow</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># .github/workflows/ci.yml</span>
+<span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">CI</span>
+
+<span style="color: #FF4689">on</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">push</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">branches</span><span style="color: #F8F8F2">: [develop, main]</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">pull_request</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">branches</span><span style="color: #F8F8F2">: [develop, main]</span>
+
+<span style="color: #FF4689">env</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">DOTNET_VERSION</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;8.0.x&#39;</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">NODE_VERSION</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;20.x&#39;</span>
+
+<span style="color: #FF4689">jobs</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">  </span><span style="color: #959077"># ---------- BACKEND ----------</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">backend-test</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">runs-on</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ubuntu-latest</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">services</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">postgres</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">image</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">postgres:16</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">env</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">          </span><span style="color: #FF4689">POSTGRES_PASSWORD</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">test</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">options</span><span style="color: #F8F8F2">: &gt;-</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--health-cmd pg_isready</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--health-interval 10s</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--health-timeout 5s</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--health-retries 5</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">ports</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&#39;5432:5432&#39;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">redis</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">image</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">redis:7</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">ports</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&#39;6379:6379&#39;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">rabbitmq</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">image</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">rabbitmq:3.13-management</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">ports</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&#39;5672:5672&#39;</span><span style="color: #F8F8F2">]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">steps</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/checkout@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/setup-dotnet@v4</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">dotnet-version</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">${{ env.DOTNET_VERSION }}</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">dotnet restore backend/NMS.sln</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">dotnet build backend/NMS.sln --configuration Release --no-restore</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">dotnet test backend/NMS.sln --configuration Release --no-build --verbosity normal --collect:&quot;XPlat Code Coverage&quot; --logger &quot;trx;LogFileName=test-results.trx&quot;</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">codecov/codecov-action@v4</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">files</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">./backend/**/coverage.cobertura.xml</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">flags</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">backend</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">SonarSource/sonarcloud-github-action@master</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">env</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">SONAR_TOKEN</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">${{ secrets.SONAR_TOKEN }}</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">projectBaseDir</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">backend</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">OWASP Dependency Check</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">dependency-check/Dependency-Check_Action@main</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">project</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;NMS</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">Backend&#39;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">path</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;backend&#39;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">format</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;HTML&#39;</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077"># ---------- FRONTEND (Web) ----------</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">web-test</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">runs-on</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ubuntu-latest</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">steps</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/checkout@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm/action-setup@v4</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">version</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">9</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/setup-node@v4</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">node-version</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">${{ env.NODE_VERSION }}</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">cache</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;pnpm&#39;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">cache-dependency-path</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">web/pnpm-lock.yaml</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm install --frozen-lockfile</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">working-directory</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">web</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm lint</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">working-directory</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">web</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm typecheck</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">working-directory</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">web</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm test:unit -- --coverage</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">working-directory</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">web</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">codecov/codecov-action@v4</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">files</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">./web/coverage/lcov.info</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">flags</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">web</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077"># ---------- MOBILE ----------</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">mobile-test</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">runs-on</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ubuntu-latest</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">steps</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/checkout@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm/action-setup@v4</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">version</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">9</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/setup-node@v4</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">node-version</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">${{ env.NODE_VERSION }}</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">cache</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;pnpm&#39;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">cache-dependency-path</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">mobile/pnpm-lock.yaml</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm install --frozen-lockfile</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">working-directory</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">mobile</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm lint</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">working-directory</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">mobile</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm typecheck</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">working-directory</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">mobile</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">pnpm test:unit</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">working-directory</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">mobile</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077"># ---------- DOCKER BUILD ----------</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">docker-build</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">needs</span><span style="color: #F8F8F2">: [backend-test, web-test, mobile-test]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">runs-on</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ubuntu-latest</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">if</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">github.event_name == &#39;push&#39;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">strategy</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">matrix</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">target</span><span style="color: #F8F8F2">: [api, web]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">steps</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/checkout@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">docker/setup-buildx-action@v3</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">docker/login-action@v3</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">registry</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ghcr.io</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">username</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">${{ github.actor }}</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">password</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">${{ secrets.GITHUB_TOKEN }}</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">docker/build-push-action@v5</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">context</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">.</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">file</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">infra/docker/${{ matrix.target }}.Dockerfile</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">push</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">true</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">tags</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">ghcr.io/${{ github.repository }}/nms-${{ matrix.target }}:latest</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">ghcr.io/${{ github.repository }}/nms-${{ matrix.target }}:${{ github.sha }}</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">cache-from</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">type=gha</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">cache-to</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">type=gha,mode=max</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">aquasecurity/trivy-action@master</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">image-ref</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ghcr.io/${{ github.repository }}/nms-${{ matrix.target }}:${{ github.sha }}</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">format</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;sarif&#39;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">output</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;trivy-results.sarif&#39;</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">github/codeql-action/upload-sarif@v3</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">with</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">sarif_file</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&#39;trivy-results.sarif&#39;</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077"># ---------- DEPLOY TO DEV ----------</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">deploy-dev</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">needs</span><span style="color: #F8F8F2">: [docker-build]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">runs-on</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ubuntu-latest</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">if</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">github.ref == &#39;refs/heads/develop&#39;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">environment</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">dev</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">steps</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/checkout@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">azure/setup-kubectl@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">azure/setup-helm@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">aws eks update-kubeconfig --name nms-dev --region me-central-1</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">helm upgrade --install nms-api infra/helm/nms-api \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--namespace dev \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--values infra/helm/nms-api/values-dev.yaml \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--set image.tag=${{ github.sha }} \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--wait --timeout 5m</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">helm upgrade --install nms-web infra/helm/nms-web \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--namespace dev \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--values infra/helm/nms-web/values-dev.yaml \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--set image.tag=${{ github.sha }} \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--wait --timeout 5m</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Smoke tests</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">kubectl -n dev rollout status deployment/nms-api --timeout=5m</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">kubectl -n dev rollout status deployment/nms-web --timeout=5m</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">curl -f https://dev-api.nms.ae/health/ready</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077"># ---------- DEPLOY TO STAGING ----------</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">deploy-staging</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">needs</span><span style="color: #F8F8F2">: [docker-build]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">runs-on</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ubuntu-latest</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">if</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">github.ref == &#39;refs/heads/main&#39;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">environment</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">staging</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">steps</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/checkout@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">azure/setup-kubectl@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">azure/setup-helm@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">aws eks update-kubeconfig --name nms-staging --region me-central-1</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">helm upgrade --install nms-api infra/helm/nms-api \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--namespace staging \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--values infra/helm/nms-api/values-staging.yaml \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--set image.tag=${{ github.sha }} \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--wait --timeout 10m</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">helm upgrade --install nms-web infra/helm/nms-web \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--namespace staging \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--values infra/helm/nms-web/values-staging.yaml \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--set image.tag=${{ github.sha }} \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--wait --timeout 10m</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Run E2E tests (Playwright)</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">cd web &amp;&amp; pnpm test:e2e -- --base-url=https://staging.nms.ae</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Performance benchmark (k6)</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">k6 run infra/load-tests/dashboard-load.js --env BASE_URL=https://staging.nms.ae</span>
+
+<span style="color: #F8F8F2">  </span><span style="color: #959077"># ---------- DEPLOY TO PRODUCTION ----------</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">deploy-production</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">needs</span><span style="color: #F8F8F2">: [deploy-staging]</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">runs-on</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">ubuntu-latest</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">if</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">github.ref == &#39;refs/heads/main&#39;</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">environment</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">production</span><span style="color: #F8F8F2">  </span><span style="color: #959077"># Requires manual approval in GitHub Environment settings</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">steps</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">actions/checkout@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">azure/setup-kubectl@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">uses</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">azure/setup-helm@v4</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">aws eks update-kubeconfig --name nms-production --region me-central-1</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Pre-deploy DB backup</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">aws rds create-db-snapshot \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--db-instance-identifier nms-production-postgres \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--db-snapshot-identifier nms-pre-deploy-$(date +%Y%m%d%H%M%S)</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Blue/Green deploy</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF"># Deploy to green (new) slots</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">helm upgrade --install nms-api-green infra/helm/nms-api \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--namespace production \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--values infra/helm/nms-api/values-production.yaml \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--set image.tag=${{ github.sha }} \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--set deployment.slot=green \</span>
+<span style="color: #F8F8F2">          </span><span style="color: #66D9EF">--wait --timeout 15m</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF"># Run health checks on green</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">kubectl -n production exec deploy/nms-api-green -- curl -f http://localhost:8080/health/ready</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF"># Switch service selector to green</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">kubectl -n production patch service nms-api -p &#39;{&quot;spec&quot;:{&quot;selector&quot;:{&quot;slot&quot;:&quot;green&quot;}}}&#39;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF"># Wait 5 minutes, then keep or rollback</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">sleep 300</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF"># Scale down blue (old) after successful green</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">kubectl -n production scale deploy/nms-api-blue --replicas=0</span>
+<span style="color: #F8F8F2">    - </span><span style="color: #FF4689">name</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">Rollback on failure</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">if</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">failure()</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">run</span><span style="color: #F8F8F2">: |</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">kubectl -n production patch service nms-api -p &#39;{&quot;spec&quot;:{&quot;selector&quot;:{&quot;slot&quot;:&quot;blue&quot;}}}&#39;</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">kubectl -n production scale deploy/nms-api-green --replicas=0</span>
+</code></pre></div>
+
+<h3 id="53-branch-protection-rules">5.3 Branch Protection Rules</h3>
+<ul>
+<li><code>main</code>: requires PR review (2 approvals), status checks pass, branches up to date.</li>
+<li><code>develop</code>: requires PR review (1 approval), status checks pass.</li>
+<li>No force pushes to main or develop.</li>
+<li>No direct commits to main or develop (must come via PR).</li>
+</ul>
+<h3 id="54-environment-protection-rules-github-environments">5.4 Environment Protection Rules (GitHub Environments)</h3>
+<ul>
+<li><code>dev</code>: No approval required. Auto-deploy on merge to develop.</li>
+<li><code>staging</code>: Auto-deploy on merge to main, but required reviewers (Tech Lead + 1) for any manual deploy.</li>
+<li><code>production</code>: Required reviewers (Tech Lead + Ops Lead). Manual approval required before deploy.</li>
+</ul>
+<hr />
+<h2 id="6-environment-strategy">6. Environment Strategy</h2>
+<h3 id="61-local-development">6.1 Local Development</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>docker compose up  # From infra/docker/docker-compose.yml
+  → PostgreSQL on :5432
+  → Redis on :6379
+  → RabbitMQ on :5672 (mgmt :15672)
+  → Keycloak on :8080
+  → MinIO on :9000 (console :9001)
+  → MailHog on :1025 (UI :8025)
+
+dotnet watch run --project backend/src/NMS.Api  # Backend hot reload on :5000
+pnpm dev  # In web/ — Vite dev server on :5173
+pnpm start  # In mobile/ — Expo dev server on :8081
+</code></pre></div>
+
+<h3 id="62-dev-environment-shared">6.2 Dev Environment (Shared)</h3>
+<ul>
+<li>K8s <code>dev</code> namespace.</li>
+<li>1 replica per service (cost-optimized).</li>
+<li>Shared PostgreSQL dev database (separate schemas per developer optional, or shared schema with seed data).</li>
+<li>Seed data: 1 test tenant, 3 staff users (admin, teacher, receptionist), 5 students with guardians, 2 rooms, 2 programs.</li>
+<li>Auto-deployed on merge to <code>develop</code> branch.</li>
+<li>Reset weekly (Monday 3 AM).</li>
+<li>Accessible at <code>dev.nms.ae</code> (auth required).</li>
+</ul>
+<h3 id="63-staging-environment">6.3 Staging Environment</h3>
+<ul>
+<li>Full production mirror (3 replicas, multi-AZ).</li>
+<li>Anonymized production data snapshot (refreshed monthly).</li>
+<li>All integrations active: FCM sandbox, SES sandbox, Twilio test mode.</li>
+<li>Auto-deployed on merge to <code>main</code> branch.</li>
+<li>UAT environment for stakeholders.</li>
+<li>Accessible at <code>staging.nms.ae</code>.</li>
+</ul>
+<h3 id="64-production-environment">6.4 Production Environment</h3>
+<ul>
+<li>Full HA: 3+ replicas, multi-AZ, auto-scaling.</li>
+<li>All monitoring + alerting active.</li>
+<li>Manual approval gate in GitHub Actions.</li>
+<li>Tech Lead sign-off required.</li>
+<li>Blue/green deployment for zero-downtime.</li>
+<li>Accessible at <code>app.nms.ae</code> (web), <code>api.nms.ae</code> (API).</li>
+</ul>
+<h3 id="65-environment-promotion-matrix">6.5 Environment Promotion Matrix</h3>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Source</th>
+<th>Trigger</th>
+<th>Approval required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local → Dev</td>
+<td>Push to <code>develop</code> branch</td>
+<td>Automatic</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Dev → Staging</td>
+<td>Merge <code>develop</code> to <code>main</code></td>
+<td>Automatic</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Staging → Production</td>
+<td>Manual trigger from <code>main</code></td>
+<td>Manual</td>
+<td>Yes (Tech Lead + Ops)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-observability-stack">7. Observability Stack</h2>
+<h3 id="71-metrics-prometheus-grafana">7.1 Metrics (Prometheus + Grafana)</h3>
+<p><strong>Prometheus</strong> scrapes metrics from:
+- NMS API (<code>/metrics</code> endpoint via <code>prometheus-net.AspNetCore</code>): HTTP rate, latency histogram, error rate, EF Core pool, RabbitMQ publisher/consumer, Hangfire jobs.
+- NMS Web (via <code>nginx-prometheus-exporter</code> sidecar): request rate, response time.
+- PostgreSQL (<code>postgres_exporter</code>): connections, cache hit rate, slow queries.
+- Redis (<code>redis_exporter</code>): memory, hit rate, ops/sec.
+- RabbitMQ (built-in Prometheus endpoint): queue depth, publish rate, consume rate.
+- K8s (<code>kube-state-metrics</code> + <code>node_exporter</code>): pod count, node CPU/memory, pod restarts.
+- Keycloak (built-in metrics): active sessions, logins/sec, errors.</p>
+<p><strong>Grafana dashboards</strong> (committed in <code>infra/monitoring/dashboards/</code>):
+- <code>nms-overview.json</code> — Top-level system health (uptime, error rate, request rate, p99 latency).
+- <code>nms-business-kpis.json</code> — Daily attendance rate, active users, overdue invoices, ratio breaches.
+- <code>nms-api-performance.json</code> — Endpoint-by-endpoint latency heatmap, error rate by status code.
+- <code>nms-infrastructure.json</code> — K8s cluster, pods, nodes, PVCs.
+- <code>nms-database.json</code> — PostgreSQL connections, slow queries, cache hit rate.
+- <code>nms-notifications.json</code> — Notification delivery rate by channel, retry rate, DLQ depth.</p>
+<p><strong>Alert rules</strong> (in <code>infra/monitoring/alerts/</code>):
+- HTTP 5xx rate &gt; 1% for 5 min → PagerDuty (critical).
+- p99 latency &gt; 3s for 5 min → PagerDuty (critical).
+- DB pool &gt; 80% for 5 min → Slack #ops-alerts (warning).
+- RabbitMQ queue depth &gt; 500 for 5 min → Slack #ops-alerts (warning).
+- K8s pod restart loop (5 restarts in 10 min) → PagerDuty (critical).
+- Backup failed → PagerDuty (critical).
+- Certificate expiring in 7 days → Slack #ops-alerts (warning).
+- Disk usage &gt; 80% → Slack #ops-alerts (warning).</p>
+<h3 id="72-logs-loki-grafana">7.2 Logs (Loki + Grafana)</h3>
+<ul>
+<li>Backend: Serilog with JSON sink → Promtail → Loki → Grafana.</li>
+<li>Frontend: Sentry (errors + performance monitoring).</li>
+<li>Mobile: Sentry (crashes + performance).</li>
+<li>K8s: Loki collects all pod logs via Promtail daemonset.</li>
+<li>Log retention: 90 days hot (Loki), 365 days cold (S3).</li>
+</ul>
+<p><strong>Structured logging</strong> in .NET:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">_logger.LogInformation(</span><span style="color: #E6DB74">&quot;Student checked in. StudentId: {StudentId}, RoomId: {RoomId}, Method: {Method}&quot;</span><span style="color: #F8F8F2">, </span>
+<span style="color: #F8F8F2">    studentId, roomId, method);</span>
+</code></pre></div>
+
+<p>All logs include: <code>timestamp</code>, <code>level</code>, <code>message_template</code>, <code>request_id</code>, <code>tenant_id</code>, <code>user_id</code>, <code>entity_type</code>, <code>entity_id</code> (where applicable).</p>
+<h3 id="73-tracing-opentelemetry-tempo">7.3 Tracing (OpenTelemetry + Tempo)</h3>
+<ul>
+<li>OpenTelemetry .NET SDK instruments: ASP.NET Core, EF Core, HttpClient, StackExchange.Redis, RabbitMQ.</li>
+<li>Traces exported to OpenTelemetry Collector → Tempo.</li>
+<li>Cross-service tracing critical when Notification + Media Processing services extract in Phase 3.</li>
+<li>Sampling: 100% for errors, 10% for normal requests in production (100% in dev/staging).</li>
+</ul>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// Program.cs</span>
+<span style="color: #F8F8F2">builder.Services.AddOpenTelemetry()</span>
+<span style="color: #F8F8F2">    .WithTracing(tracing </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> tracing</span>
+<span style="color: #F8F8F2">        .AddAspNetCoreInstrumentation()</span>
+<span style="color: #F8F8F2">        .AddHttpClientInstrumentation()</span>
+<span style="color: #F8F8F2">        .AddEntityFrameworkCoreInstrumentation()</span>
+<span style="color: #F8F8F2">        .AddStackExchangeRedisInstrumentation()</span>
+<span style="color: #F8F8F2">        .AddOtlpExporter(opt </span><span style="color: #FF4689">=&gt;</span><span style="color: #F8F8F2"> opt.Endpoint </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> Uri(builder.Configuration[</span><span style="color: #E6DB74">&quot;OpenTelemetry:Endpoint&quot;</span><span style="color: #F8F8F2">])));</span>
+</code></pre></div>
+
+<h3 id="74-synthetics">7.4 Synthetics</h3>
+<p>Grafana Synthetics (or AWS CloudWatch Synthetics) monitors:
+- Login flow (every 5 min from UAE region).
+- Dashboard load (every 5 min).
+- Parent portal load (every 5 min).
+- API health endpoint (every 1 min).
+- SignalR connection (every 5 min).</p>
+<p>Alert if any synthetic fails 3x in a row.</p>
+<hr />
+<h2 id="8-backup-recovery">8. Backup &amp; Recovery</h2>
+<h3 id="81-backup-strategy">8.1 Backup Strategy</h3>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Frequency</th>
+<th>Method</th>
+<th>Retention</th>
+<th>RPO</th>
+<th>RTO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostgreSQL (SaaS)</td>
+<td>Daily snapshot + WAL (5 min)</td>
+<td>RDS automated</td>
+<td>35 days</td>
+<td>5 min</td>
+<td>1 hour</td>
+</tr>
+<tr>
+<td>PostgreSQL (on-prem)</td>
+<td>Daily + WAL</td>
+<td>pgBackRest</td>
+<td>Customer-defined</td>
+<td>Customer-defined</td>
+<td>Customer-defined</td>
+</tr>
+<tr>
+<td>Object storage (S3)</td>
+<td>Continuous cross-region replication</td>
+<td>S3 CRR</td>
+<td>Lifecycle (move to Glacier after 90d, delete after 7y)</td>
+<td>0</td>
+<td>15 min</td>
+</tr>
+<tr>
+<td>Object storage (MinIO)</td>
+<td>Daily replication</td>
+<td>MinIO bucket replication</td>
+<td>Customer-defined</td>
+<td>Customer-defined</td>
+<td>Customer-defined</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>Not backed up (cache only)</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>RabbitMQ</td>
+<td>Not backed up (transient)</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Keycloak DB</td>
+<td>Daily snapshot + WAL</td>
+<td>Same as PostgreSQL</td>
+<td>35 days</td>
+<td>5 min</td>
+<td>1 hour</td>
+</tr>
+<tr>
+<td>Terraform state</td>
+<td>Continuous (git + S3)</td>
+<td>Git + S3 versioning</td>
+<td>Indefinite</td>
+<td>0</td>
+<td>15 min</td>
+</tr>
+<tr>
+<td>Container images</td>
+<td>ECR lifecycle policy</td>
+<td>ECR</td>
+<td>Last 20 per repo</td>
+<td>0</td>
+<td>15 min</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-recovery-procedures">8.2 Recovery Procedures</h3>
+<p><code>infra/docs/disaster-recovery.md</code> documents:</p>
+<p><strong>PostgreSQL point-in-time recovery:</strong>
+1. Identify recovery timestamp.
+2. <code>aws rds restore-db-instance-to-point-in-time --source-db-instance-identifier nms-production-postgres --target-db-instance-identifier nms-restored --restore-time 2026-05-17T10:00:00Z</code>
+3. Wait for restore (15-60 min depending on size).
+4. Update connection string to restored instance.
+5. Restart API pods.
+6. Verify data integrity.
+7. Switch DNS to restored instance.</p>
+<p><strong>Object storage recovery:</strong>
+- S3 versioning enables per-object restore (previous version).
+- Bulk restore: S3 Batch Operations job.</p>
+<p><strong>Keycloak realm recovery:</strong>
+- Keycloak supports realm export/import.
+- Export realm JSON, import to fresh Keycloak instance.</p>
+<h3 id="83-dr-drills">8.3 DR Drills</h3>
+<p>Quarterly DR drill:
+1. Pick a date (off-hours, weekend).
+2. Notify stakeholders.
+3. Restore full stack to DR environment (AWS eu-central-1 if multi-region, or staging if single-region).
+4. Run smoke tests against DR environment.
+5. Verify critical flows (login, check-in, post activity, send invoice).
+6. Document time-to-restore.
+7. Tear down DR environment.
+8. Post-mortem: what worked, what didn't, action items.</p>
+<hr />
+<h2 id="9-security-hardening">9. Security Hardening</h2>
+<h3 id="91-cluster-security">9.1 Cluster Security</h3>
+<ul>
+<li>EKS cluster endpoint: private (no public access).</li>
+<li>Worker nodes: private subnets only.</li>
+<li>IAM roles for service accounts (IRSA) — no long-lived AWS credentials in pods.</li>
+<li>Secrets Manager for all secrets — no Kubernetes Secrets (limited rotation, audit gaps).</li>
+<li>Network policies: default deny, allow explicitly.</li>
+<li>Pod Security Standards: <code>restricted</code> profile enforced via PodSecurityPolicy / Kyverno.</li>
+<li>Image scanning: Trivy on every image push, fail build on CRITICAL vulnerabilities.</li>
+<li>Image registry: private (ghcr.io or ECR), no public images in production.</li>
+<li>Image immutability: production tags are immutable (registry config).</li>
+</ul>
+<h3 id="92-network-security">9.2 Network Security</h3>
+<ul>
+<li>WAF on ALB (OWASP Top 10 rules + custom rules for known attack patterns).</li>
+<li>CloudFront in front of S3 (signed URLs only).</li>
+<li>DDoS protection: AWS Shield Standard (free, automatic).</li>
+<li>TLS 1.2+ everywhere (TLS 1.3 where supported).</li>
+<li>mTLS between pods (via Istio service mesh in Phase 2+).</li>
+<li>Rate limiting at ALB + application level.</li>
+</ul>
+<h3 id="93-compliance-scanning">9.3 Compliance Scanning</h3>
+<ul>
+<li><code>kube-bench</code> weekly (CIS Kubernetes Benchmark).</li>
+<li><code>kube-hunter</code> weekly (known vulnerabilities).</li>
+<li><code>tfsec</code> on every Terraform PR.</li>
+<li><code>checkov</code> on every Terraform PR.</li>
+<li>AWS Security Hub: enabled, findings triaged weekly.</li>
+<li>AWS GuardDuty: enabled, alerts to PagerDuty.</li>
+</ul>
+<hr />
+<h2 id="10-release-management">10. Release Management</h2>
+<h3 id="101-versioning">10.1 Versioning</h3>
+<ul>
+<li><strong>Semantic versioning</strong>: <code>MAJOR.MINOR.PATCH</code> (e.g., <code>1.4.2</code>).</li>
+<li>MAJOR: breaking changes (rare, with v2 API version).</li>
+<li>MINOR: new features (backward compatible).</li>
+<li>PATCH: bug fixes.</li>
+<li>Pre-release: <code>1.0.0-rc.1</code>, <code>1.0.0-beta.1</code>.</li>
+</ul>
+<h3 id="102-release-process">10.2 Release Process</h3>
+<ol>
+<li><strong>Release branch</strong>: <code>release/1.4.0</code> cut from <code>main</code>.</li>
+<li><strong>Release candidate</strong>: build, deploy to staging, run full E2E + performance tests.</li>
+<li><strong>Bug fixes</strong>: cherry-pick to release branch.</li>
+<li><strong>Release</strong>: tag <code>v1.4.0</code>, build Docker images with tag, deploy to production.</li>
+<li><strong>Post-release</strong>: merge release branch back to <code>main</code> + <code>develop</code>.</li>
+<li><strong>Release notes</strong>: generated from PR titles, published to <code>docs/releases/</code> + emailed to customers.</li>
+</ol>
+<h3 id="103-lts-branches">10.3 LTS Branches</h3>
+<p>For on-prem customers who don't want bleeding edge:
+- Maintain 2 LTS versions (e.g., <code>1.x</code> and <code>2.x</code>).
+- LTS branches receive security + critical bug fixes only (no new features).
+- LTS support: 18 months after next major release.</p>
+<h3 id="104-rollback">10.4 Rollback</h3>
+<ul>
+<li>Blue/green deployment: switch service selector back to blue (old) slot.</li>
+<li>Database migrations: each has <code>Down</code> method. Tested in staging.</li>
+<li>Helm rollback: <code>helm rollback nms-api &lt;previous-revision&gt;</code> (manual).</li>
+<li>Automatic rollback: if health checks fail within 5 min post-deploy, Helm rolls back automatically.</li>
+</ul>
+<hr />
+<h2 id="11-local-dev-setup-detailed">11. Local Dev Setup (Detailed)</h2>
+<h3 id="111-prerequisites">11.1 Prerequisites</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># Install required tools</span>
+brew<span style="color: #F8F8F2"> </span>install<span style="color: #F8F8F2"> </span>dotnet<span style="color: #F8F8F2"> </span>node<span style="color: #F8F8F2"> </span>pnpm<span style="color: #F8F8F2"> </span>git<span style="color: #F8F8F2"> </span>docker<span style="color: #F8F8F2"> </span>kubectl<span style="color: #F8F8F2"> </span>helm<span style="color: #F8F8F2"> </span>terraform<span style="color: #F8F8F2"> </span>awscli
+<span style="color: #959077"># OR on Linux:</span>
+<span style="color: #959077"># apt install dotnet-sdk-8.0 nodejs npm git docker.io kubectl terraform awscli</span>
+<span style="color: #959077"># install pnpm: npm install -g pnpm</span>
+<span style="color: #959077"># install helm: https://helm.sh/docs/intro/install/</span>
+
+<span style="color: #959077"># Install Expo CLI</span>
+pnpm<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>-g<span style="color: #F8F8F2"> </span>expo-cli
+
+<span style="color: #959077"># Verify versions</span>
+dotnet<span style="color: #F8F8F2"> </span>--version<span style="color: #F8F8F2">  </span><span style="color: #959077"># 8.0.x</span>
+node<span style="color: #F8F8F2"> </span>--version<span style="color: #F8F8F2">    </span><span style="color: #959077"># v20.x</span>
+pnpm<span style="color: #F8F8F2"> </span>--version<span style="color: #F8F8F2">    </span><span style="color: #959077"># 9.x</span>
+docker<span style="color: #F8F8F2"> </span>--version<span style="color: #F8F8F2">  </span><span style="color: #959077"># 24.x</span>
+kubectl<span style="color: #F8F8F2"> </span>version<span style="color: #F8F8F2"> </span>--client
+helm<span style="color: #F8F8F2"> </span>version
+terraform<span style="color: #F8F8F2"> </span>version<span style="color: #F8F8F2">  </span><span style="color: #959077"># 1.9+</span>
+</code></pre></div>
+
+<h3 id="112-first-time-setup">11.2 First-Time Setup</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># Clone repo</span>
+git<span style="color: #F8F8F2"> </span>clone<span style="color: #F8F8F2"> </span>https://github.com/&lt;org&gt;/nms.git
+<span style="color: #F8F8F2">cd </span>nms
+
+<span style="color: #959077"># Start local infrastructure</span>
+<span style="color: #F8F8F2">cd </span>infra/docker
+docker<span style="color: #F8F8F2"> </span>compose<span style="color: #F8F8F2"> </span>up<span style="color: #F8F8F2"> </span>-d
+<span style="color: #959077"># Wait for services to be healthy (check: docker compose ps)</span>
+
+<span style="color: #959077"># Initialize Keycloak</span>
+<span style="color: #959077"># Open http://localhost:8080, login admin/admin</span>
+<span style="color: #959077"># Import realm from infra/keycloak/nms-realm.json</span>
+
+<span style="color: #959077"># Backend</span>
+<span style="color: #F8F8F2">cd </span>../../backend
+dotnet<span style="color: #F8F8F2"> </span>restore
+dotnet<span style="color: #F8F8F2"> </span>tool<span style="color: #F8F8F2"> </span>install<span style="color: #F8F8F2"> </span>--global<span style="color: #F8F8F2"> </span>dotnet-ef
+dotnet<span style="color: #F8F8F2"> </span>ef<span style="color: #F8F8F2"> </span>database<span style="color: #F8F8F2"> </span>update<span style="color: #F8F8F2"> </span>--project<span style="color: #F8F8F2"> </span>src/NMS.Infrastructure<span style="color: #F8F8F2"> </span>--startup-project<span style="color: #F8F8F2"> </span>src/NMS.Api
+dotnet<span style="color: #F8F8F2"> </span>seed-data<span style="color: #F8F8F2">  </span><span style="color: #959077"># Custom command to seed dev data</span>
+dotnet<span style="color: #F8F8F2"> </span>watch<span style="color: #F8F8F2"> </span>run<span style="color: #F8F8F2"> </span>--project<span style="color: #F8F8F2"> </span>src/NMS.Api
+<span style="color: #959077"># API available at http://localhost:5000</span>
+
+<span style="color: #959077"># Web</span>
+<span style="color: #F8F8F2">cd </span>../web
+pnpm<span style="color: #F8F8F2"> </span>install
+cp<span style="color: #F8F8F2"> </span>.env.example<span style="color: #F8F8F2"> </span>.env<span style="color: #F8F8F2">  </span><span style="color: #959077"># Configure API URL</span>
+pnpm<span style="color: #F8F8F2"> </span>dev
+<span style="color: #959077"># Web available at http://localhost:5173</span>
+
+<span style="color: #959077"># Mobile (optional)</span>
+<span style="color: #F8F8F2">cd </span>../mobile
+pnpm<span style="color: #F8F8F2"> </span>install
+cp<span style="color: #F8F8F2"> </span>.env.example<span style="color: #F8F8F2"> </span>.env
+pnpm<span style="color: #F8F8F2"> </span>start
+<span style="color: #959077"># Scan QR code with Expo Go app</span>
+</code></pre></div>
+
+<h3 id="113-useful-makefile-targets">11.3 Useful Makefile Targets</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># Makefile</span>
+<span style="color: #A6E22E">.PHONY</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> help</span> <span style="color: #F8F8F2">setup</span> <span style="color: #F8F8F2">dev</span> <span style="color: #F8F8F2">test</span> <span style="color: #F8F8F2">clean</span>
+
+<span style="color: #A6E22E">help</span><span style="color: #FF4689">:</span>
+<span style="color: #F8F8F2">    </span>@echo<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Available targets:&quot;</span>
+<span style="color: #F8F8F2">    </span>@echo<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;  setup    - First-time setup&quot;</span>
+<span style="color: #F8F8F2">    </span>@echo<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;  dev      - Start local dev (backend + web + infra)&quot;</span>
+<span style="color: #F8F8F2">    </span>@echo<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;  test     - Run all tests&quot;</span>
+<span style="color: #F8F8F2">    </span>@echo<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;  clean    - Clean all build artifacts&quot;</span>
+
+<span style="color: #A6E22E">setup</span><span style="color: #FF4689">:</span>
+<span style="color: #F8F8F2">    cd </span>infra/docker<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> </span>docker<span style="color: #F8F8F2"> </span>compose<span style="color: #F8F8F2"> </span>up<span style="color: #F8F8F2"> </span>-d
+<span style="color: #F8F8F2">    </span>dotnet<span style="color: #F8F8F2"> </span>tool<span style="color: #F8F8F2"> </span>install<span style="color: #F8F8F2"> </span>--global<span style="color: #F8F8F2"> </span>dotnet-ef
+<span style="color: #F8F8F2">    cd </span>backend<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> </span>dotnet<span style="color: #F8F8F2"> </span>restore
+<span style="color: #F8F8F2">    cd </span>web<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> </span>pnpm<span style="color: #F8F8F2"> </span>install
+<span style="color: #F8F8F2">    cd </span>mobile<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> </span>pnpm<span style="color: #F8F8F2"> </span>install
+
+<span style="color: #A6E22E">dev</span><span style="color: #FF4689">:</span>
+<span style="color: #959077">    # Terminal 1: infrastructure (already running from setup)</span>
+<span style="color: #959077">    # Terminal 2: backend</span>
+<span style="color: #F8F8F2">    cd </span>backend<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> </span>dotnet<span style="color: #F8F8F2"> </span>watch<span style="color: #F8F8F2"> </span>run<span style="color: #F8F8F2"> </span>--project<span style="color: #F8F8F2"> </span>src/NMS.Api
+<span style="color: #959077">    # Terminal 3: web</span>
+<span style="color: #F8F8F2">    cd </span>web<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> </span>pnpm<span style="color: #F8F8F2"> </span>dev
+
+<span style="color: #A6E22E">test</span><span style="color: #FF4689">:</span>
+<span style="color: #F8F8F2">    cd </span>backend<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> </span>dotnet<span style="color: #F8F8F2"> test</span>
+<span style="color: #F8F8F2">    cd </span>web<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> </span>pnpm<span style="color: #F8F8F2"> test</span>
+<span style="color: #F8F8F2">    cd </span>mobile<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> </span>pnpm<span style="color: #F8F8F2"> test</span>
+
+<span style="color: #A6E22E">clean</span><span style="color: #FF4689">:</span>
+<span style="color: #F8F8F2">    </span>find<span style="color: #F8F8F2"> </span>.<span style="color: #F8F8F2"> </span>-type<span style="color: #F8F8F2"> </span>d<span style="color: #F8F8F2"> </span>-name<span style="color: #F8F8F2"> </span>bin<span style="color: #F8F8F2"> </span>-prune<span style="color: #F8F8F2"> </span>-exec<span style="color: #F8F8F2"> </span>rm<span style="color: #F8F8F2"> </span>-rf<span style="color: #F8F8F2"> </span><span style="color: #FF4689">{}</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\;</span>
+<span style="color: #F8F8F2">    </span>find<span style="color: #F8F8F2"> </span>.<span style="color: #F8F8F2"> </span>-type<span style="color: #F8F8F2"> </span>d<span style="color: #F8F8F2"> </span>-name<span style="color: #F8F8F2"> </span>obj<span style="color: #F8F8F2"> </span>-prune<span style="color: #F8F8F2"> </span>-exec<span style="color: #F8F8F2"> </span>rm<span style="color: #F8F8F2"> </span>-rf<span style="color: #F8F8F2"> </span><span style="color: #FF4689">{}</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\;</span>
+<span style="color: #F8F8F2">    </span>find<span style="color: #F8F8F2"> </span>.<span style="color: #F8F8F2"> </span>-type<span style="color: #F8F8F2"> </span>d<span style="color: #F8F8F2"> </span>-name<span style="color: #F8F8F2"> </span>node_modules<span style="color: #F8F8F2"> </span>-prune<span style="color: #F8F8F2"> </span>-exec<span style="color: #F8F8F2"> </span>rm<span style="color: #F8F8F2"> </span>-rf<span style="color: #F8F8F2"> </span><span style="color: #FF4689">{}</span><span style="color: #F8F8F2"> </span><span style="color: #AE81FF">\;</span>
+<span style="color: #F8F8F2">    </span>rm<span style="color: #F8F8F2"> </span>-rf<span style="color: #F8F8F2"> </span>web/dist<span style="color: #F8F8F2"> </span>web/coverage
+<span style="color: #F8F8F2">    </span>rm<span style="color: #F8F8F2"> </span>-rf<span style="color: #F8F8F2"> </span>mobile/.expo
+</code></pre></div>
+
+<hr />
+<h2 id="12-runbooks">12. Runbooks</h2>
+<p><code>infra/docs/runbooks/</code> contains operational runbooks for common scenarios:</p>
+<ul>
+<li><code>incident-response.md</code> — How to handle SEV-1/SEV-2 incidents.</li>
+<li><code>disaster-recovery.md</code> — Full DR procedures.</li>
+<li><code>database-maintenance.md</code> — Vacuum, index rebuild, partition management.</li>
+<li><code>keycloak-realm-management.md</code> — Creating/migrating realms, user federation setup.</li>
+<li><code>tenant-provisioning.md</code> — Manual tenant provisioning (when self-service fails).</li>
+<li><code>tenant-suspension.md</code> — Suspending a tenant (non-payment, abuse).</li>
+<li><code>backup-restore.md</code> — Restoring from backups (per data type).</li>
+<li><code>certificate-renewal.md</code> — Manual TLS cert renewal (if cert-manager fails).</li>
+<li><code>secrets-rotation.md</code> — Rotating secrets (DB password, API keys).</li>
+<li><code>k8s-node-replacement.md</code> — Replacing a failed K8s node.</li>
+<li><code>performance-debugging.md</code> — Diagnosing slow API / slow dashboard.</li>
+</ul>
+<p>Each runbook includes: when to use, prerequisites, step-by-step, verification, rollback, escalation.</p>
+<hr />
+<p><strong>Next file to read</strong>: <code>12-WEB-FRONTEND.md</code> for React architecture, routing, i18n, and component patterns.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-10-multi-tenancy.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Multi-Tenancy</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-12-web-frontend.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Web Frontend</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cursor Rules — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class="active"><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#how-to-use-this-file" class="toc-link" data-target="how-to-use-this-file">How to Use This File</a><a href="#begin-cursorrules-contents" class="toc-link" data-target="begin-cursorrules-contents">─── BEGIN .cursorrules CONTENTS ───</a><a href="#end-cursorrules-contents" class="toc-link" data-target="end-cursorrules-contents">─── END .cursorrules CONTENTS ───</a><a href="#how-to-use-these-rules" class="toc-link" data-target="how-to-use-these-rules">How to Use These Rules</a><a href="#step-1-bootstrap-the-repo" class="toc-link toc-h3" data-target="step-1-bootstrap-the-repo">Step 1: Bootstrap the Repo</a><a href="#step-2-open-in-cursor" class="toc-link toc-h3" data-target="step-2-open-in-cursor">Step 2: Open in Cursor</a><a href="#step-3-start-building" class="toc-link toc-h3" data-target="step-3-start-building">Step 3: Start Building</a><a href="#step-4-iterate" class="toc-link toc-h3" data-target="step-4-iterate">Step 4: Iterate</a><a href="#step-5-cross-cutting-changes" class="toc-link toc-h3" data-target="step-5-cross-cutting-changes">Step 5: Cross-Cutting Changes</a><a href="#why-these-rules-matter" class="toc-link" data-target="why-these-rules-matter">Why These Rules Matter</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4 text-amber-600"></i><span>Cursor Rules</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Workflow · spec-18-cursor-rules.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Workflow</span>
+          <span class="pill pill-done">DOC 18</span>
+          <span class="text-[10px] font-mono text-slate-400">~3,388 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Cursor Rules</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-17-compliance-legal.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Compliance & Legal</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-19-roadmap-sprints.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Roadmap & Sprints</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="18-cursor-rules">18 — Cursor Rules</h1>
+<blockquote>
+<p><strong>Paste the entire contents of this file into <code>.cursorrules</code> at the root of your NMS repo.</strong> This tells the Cursor agent how to work on this project: what to read, what conventions to follow, what to avoid.</p>
+</blockquote>
+<hr />
+<h2 id="how-to-use-this-file">How to Use This File</h2>
+<ol>
+<li>Create your NMS repo: <code>mkdir nms &amp;&amp; cd nms &amp;&amp; git init</code>.</li>
+<li>Copy this entire <code>nms-prerequisites/</code> directory into <code>docs/prerequisites/</code>.</li>
+<li>Create <code>.cursorrules</code> at the repo root (NOT inside docs).</li>
+<li>Paste the <strong>entire contents below the line</strong> into <code>.cursorrules</code>.</li>
+<li>Open the repo in Cursor. The agent now has the project context.</li>
+</ol>
+<hr />
+<h2 id="begin-cursorrules-contents">─── BEGIN .cursorrules CONTENTS ───</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2"># NMS — Cursor Rules</span>
+
+You are working on the Nursery Management System (NMS), a full-stack platform for UAE early childhood centres. The product is built with .NET 8 (backend) + React + Vite (web) + React Native + Expo (mobile), deployed both on-prem (single-tenant) and SaaS (multi-tenant).
+
+<span style="color: #959077">## Mandatory Reading</span>
+
+Before writing any code on this project, you MUST read these files in <span style="color: #E6DB74">`/docs/prerequisites/`</span>:
+
+<span style="color: #66D9EF">1.</span> <span style="color: #E6DB74">`00-MASTER-BRIEF.md`</span> — Project overview, file map, decisions already made.
+<span style="color: #66D9EF">2.</span> <span style="color: #E6DB74">`01-PRODUCT-VISION.md`</span> — Vision, personas, commercial model.
+<span style="color: #66D9EF">3.</span> <span style="color: #E6DB74">`02-PRD-MVP.md`</span> — If building MVP. The MVP scope is the only valid starting scope.
+<span style="color: #66D9EF">4.</span> <span style="color: #E6DB74">`03-PRD-PHASE1-FULL.md`</span> — If expanding beyond MVP.
+<span style="color: #66D9EF">5.</span> <span style="color: #E6DB74">`05-TECH-STACK.md`</span> — Concrete stack details.
+<span style="color: #66D9EF">6.</span> <span style="color: #E6DB74">`06-ARCHITECTURE.md`</span> — Modular monolith, module boundaries.
+<span style="color: #66D9EF">7.</span> <span style="color: #E6DB74">`07-DATABASE-SCHEMA.md`</span> — Entities, RLS, JSONB i18n, audit log.
+<span style="color: #66D9EF">8.</span> <span style="color: #E6DB74">`08-API-SPEC.md`</span> — REST conventions, OpenAPI, SignalR.
+<span style="color: #66D9EF">9.</span> <span style="color: #E6DB74">`09-AUTH-SECURITY.md`</span> — Keycloak, RBAC, parent-child ownership.
+<span style="color: #66D9EF">10.</span> <span style="color: #E6DB74">`10-MULTI-TENANCY.md`</span> — Shared schema + RLS, on-prem vs SaaS.
+<span style="color: #66D9EF">11.</span> <span style="color: #E6DB74">`12-WEB-FRONTEND.md`</span> — If working on web.
+<span style="color: #66D9EF">12.</span> <span style="color: #E6DB74">`13-MOBILE-APP.md`</span> — If working on mobile.
+<span style="color: #66D9EF">13.</span> <span style="color: #E6DB74">`14-UX-UI-DESIGN.md`</span> — Design system, color, typography, RTL.
+<span style="color: #66D9EF">14.</span> <span style="color: #E6DB74">`18-CURSOR-RULES.md`</span> — This file.
+
+When asked to implement a feature, ALWAYS read the relevant PRD section + the relevant technical file before writing code. Do NOT rely on memory of similar projects — these specs are project-specific.
+
+<span style="color: #959077">## Tech Stack (Locked)</span>
+
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Backend**</span>: .NET 8 (ASP.NET Core Minimal APIs where possible, controllers for complex endpoints), C# 12, EF Core 8, MediatR (CQRS), FluentValidation, AutoMapper/Mapster, Serilog.
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Database**</span>: PostgreSQL 16 with RLS for multi-tenancy, JSONB for i18n, partitioning for audit_log + attendance_record.
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Cache + Real-time**</span>: Redis 7 (StackExchange.Redis), SignalR with Redis backplane.
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Message Queue**</span>: RabbitMQ 3.13 via MassTransit.
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Object Storage**</span>: S3-compatible (AWS S3 for SaaS, MinIO for on-prem).
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Identity**</span>: Keycloak 24 (OAuth 2.0 / OIDC).
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Web Frontend**</span>: React 18 + Vite + TypeScript + shadcn/ui + Tailwind CSS + TanStack Query v5 + Zustand + React Hook Form + Zod + react-i18next.
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Mobile**</span>: React Native 0.74 + Expo SDK 51 (Bare) + NativeWind + Expo Router + WatermelonDB (offline).
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Containerization**</span>: Docker + Kubernetes + Helm + Terraform.
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**CI/CD**</span>: GitHub Actions.
+<span style="color: #66D9EF">-</span><span style="color: #F8F8F2"> </span><span style="color: #F8F8F2; font-weight: bold">**Observability**</span>: OpenTelemetry + Prometheus + Grafana + Loki + Sentry.
+
+DO NOT suggest alternative technologies. DO NOT use Spring Boot, Laravel, Django, Vue, Angular, Flutter, or any other tech. The stack is locked per <span style="color: #E6DB74">`20-ADRs.md`</span>.
+
+<span style="color: #959077">## Project Structure</span>
+</code></pre></div>
+
+<p>nms/
+├── backend/                    # .NET 8 solution
+│   ├── src/
+│   │   ├── NMS.Api/            # ASP.NET Core API entry
+│   │   ├── NMS.Domain/         # Domain entities
+│   │   ├── NMS.Application/    # Use cases, CQRS handlers, DTOs
+│   │   ├── NMS.Infrastructure/ # EF Core, RabbitMQ, S3, external services
+│   │   ├── NMS.Modules/        # Module-specific code (modular monolith)
+│   │   │   ├── Dashboard/
+│   │   │   ├── CentreManagement/
+│   │   │   ├── Attendance/
+│   │   │   ├── ParentCommunication/
+│   │   │   ├── Messaging/
+│   │   │   ├── Billing/
+│   │   │   ├── Enquiry/
+│   │   │   ├── Tours/
+│   │   │   ├── Calendar/
+│   │   │   ├── Forms/
+│   │   │   ├── Tools/
+│   │   │   ├── Reports/
+│   │   │   ├── Settings/
+│   │   │   ├── Notifications/
+│   │   │   ├── Learning/       # Phase 2
+│   │   │   └── Payments/       # Phase 3
+│   │   └── NMS.Shared/         # Shared kernel
+│   ├── tests/
+│   └── NMS.sln
+├── web/                        # React + Vite frontend
+│   ├── src/
+│   │   ├── api/                # Generated from OpenAPI
+│   │   ├── modules/            # Feature folders
+│   │   ├── components/         # Shared components (ui/, layout/, shared/)
+│   │   ├── hooks/
+│   │   ├── stores/             # Zustand
+│   │   ├── lib/
+│   │   └── styles/
+│   └── package.json
+├── mobile/                     # React Native + Expo
+│   ├── app/                    # Expo Router (file-based)
+│   ├── src/
+│   └── package.json
+├── infra/                      # DevOps
+│   ├── terraform/
+│   ├── helm/
+│   ├── k8s/
+│   ├── docker/
+│   └── docs/
+└── docs/
+    └── prerequisites/          # This pack — DO NOT MODIFY</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>## Coding Conventions
+
+### Backend (.NET / C#)
+
+- **File-scoped namespaces**: `namespace NMS.Modules.Attendance;` (not block-scoped).
+- **Nullable reference types**: enabled in csproj. All reference types explicitly `?` or non-null.
+- **var**: use for local variables when type is obvious. Use explicit type for clarity.
+- **Async/await**: all I/O is async. Suffix async methods with `Async`. Use `CancellationToken` everywhere.
+- **Naming**:
+  - Public: PascalCase (`StudentService`, `GetByIdAsync`).
+  - Private: _camelCase (`_logger`, `_dbContext`).
+  - Local: camelCase (`studentId`, `result`).
+  - Constants: PascalCase (`MaxRetryAttempts`).
+  - Interfaces: I-prefix (`IStudentRepository`).
+- **Records for DTOs + events**: `public record StudentDto(Guid Id, string FirstName, ...)`.
+- **Records for commands + queries**: `public record CheckInStudentCommand(string Barcode, CheckInMethod Method) : IRequest&lt;Result&lt;AttendanceDto&gt;&gt;;`.
+- **Result pattern**: `Result&lt;T&gt;` for return types (not exceptions for flow control). `Result.Success(value)` or `Result.Failure(error)`.
+- **EF Core**:
+  - Code-first with migrations.
+  - `IEntityTypeConfiguration&lt;T&gt;` for entity configs (one file per entity in `Configurations/`).
+  - `AsNoTracking()` for read-only queries.
+  - `Include()` only when needed (avoid cartesian explosion).
+  - Global query filters for tenant + soft delete.
+- **Validation**: FluentValidation on every command/query. Validation runs in MediatR pipeline.
+- **Logging**: Serilog structured logging. Use `_logger.LogInformation(&quot;Student checked in. StudentId: {StudentId}&quot;, studentId);` (template, not string interpolation).
+- **Error handling**: Global exception middleware. Custom exceptions (`NotFoundException`, `ValidationException`, `ForbiddenException`) map to HTTP status codes.
+- **Tests**: xUnit + FluentAssertions + Moq. Test file per class, method-per-fact. Use `Arrange/Act/Assert` comments.
+
+### Web Frontend (React + TypeScript)
+
+- **Functional components only**. No class components.
+- **TypeScript strict mode**. No `any` (use `unknown` if truly unknown).
+- **File naming**: kebab-case for files (`student-form.tsx`), PascalCase for components (`StudentForm`).
+- **Imports**: use `@/` alias for `src/` (configured in tsconfig.json + vite.config.ts).
+- **Components**:
+  - One component per file.
+  - Default export for pages, named export for components.
+  - Props interface above component.
+  - Destructure props in function signature.
+- **Hooks**:
+  - Custom hooks in `hooks/` or co-located in feature folder.
+  - Prefix with `use`: `useAuth`, `useStudents`.
+- **State**:
+  - Server state: TanStack Query (always).
+  - Global client state: Zustand (only if truly global — auth, theme, locale).
+  - Local state: useState (component-local).
+  - URL state: useSearchParams (filters, pagination).
+- **Forms**: React Hook Form + Zod. Schema-first: define Zod schema, infer type, use form.
+- **Styling**: Tailwind utility classes. CSS logical properties only (`ms-*`, `me-*`, `text-start` — never `ml-*`, `mr-*`, `text-left`). Custom CSS only for complex animations.
+- **shadcn/ui**: copy-paste components into `src/components/ui/`. Customize as needed. Don&#39;t install as dependency.
+- **API calls**: always via TanStack Query hooks (`useStudents`, `useCreateStudent`). Never `fetch` directly in components.
+- **i18n**: `useTranslation()` hook. All user-facing strings via `t(&#39;key&#39;)`. Never hardcoded English.
+- **Accessibility**: semantic HTML, ARIA labels on icon-only buttons, keyboard navigation. Run `axe` in tests.
+- **Testing**: Vitest + React Testing Library. One test file per component.
+
+### Mobile (React Native + Expo)
+
+- Same conventions as web where applicable (TypeScript, naming, structure).
+- **Navigation**: Expo Router (file-based). One file per screen in `app/`.
+- **Styling**: NativeWind (Tailwind for RN). Same utility classes as web where possible.
+- **State**: same as web (TanStack Query + Zustand).
+- **Offline**: WatermelonDB for local DB. All offline-capable features write to WatermelonDB + queue for sync.
+- **Push**: `expo-notifications`. Register token on login. Handle deep links on tap.
+- **Camera**: `react-native-vision-camera` + MLKit for barcode.
+- **Secure storage**: `expo-secure-store` for refresh token. NEVER localStorage or AsyncStorage for sensitive data.
+- **Testing**: Jest + React Native Testing Library. Detox for E2E.
+
+### Infrastructure (Terraform / Helm / K8s)
+
+- **Terraform**:
+  - One module per resource type (`vpc/`, `eks/`, `rds/`, etc.).
+  - `variables.tf` for inputs, `outputs.tf` for outputs.
+  - `terraform.tfvars` gitignored (per-env values).
+  - Always set `tags` on resources.
+  - Use `terraform fmt` + `terraform validate` in CI.
+- **Helm**:
+  - One chart per service (`nms-api/`, `nms-web/`).
+  - `values.yaml` for defaults, `values-{env}.yaml` for overrides.
+  - Use `_helpers.tpl` for shared template functions.
+- **K8s manifests**:
+  - Always set resource requests + limits.
+  - Always set liveness/readiness/startup probes.
+  - Always set PodDisruptionBudget for HA workloads.
+  - Always set NetworkPolicy (default deny).
+
+## Multi-Tenancy Rules (CRITICAL)
+
+EVERY entity has `tenant_id`. EVERY query is tenant-scoped. These are NON-NEGOTIABLE:
+
+1. **Every entity inherits from `TenantEntity`** (has `TenantId` property).
+2. **EF Core global query filter** in `OnModelCreating`: `HasQueryFilter(e =&gt; e.TenantId == _tenantContext.TenantId)`.
+3. **RLS policy on every table** in PostgreSQL (defense-in-depth).
+4. **Tenant context middleware** sets `app.tenant_id` PostgreSQL setting per request from JWT claim.
+5. **Background jobs** must explicitly set tenant context before any DB query.
+6. **RabbitMQ consumers** must explicitly set tenant context before processing.
+7. **Never write raw SQL** that bypasses tenant filter without explicit code review.
+8. **Never expose `tenant_id` in API responses** (it&#39;s implicit from JWT).
+
+If you write code that touches the database without respecting `tenant_id`, you have introduced a CRITICAL security bug. Fix immediately.
+
+## Parent-Child Ownership Rules (CRITICAL)
+
+Parents MUST NEVER see another parent&#39;s child data. This is NON-NEGOTIABLE:
+
+1. **Every parent-facing endpoint** must verify parent owns the requested child.
+2. **Ownership check** in the handler (not just controller): `if (!await IsParentOfStudent(parentId, studentId)) return Result.NotFound();`.
+3. **Return 404, NOT 403** for ownership denial — prevents ID enumeration.
+4. **List endpoints** must filter by ownership: parents only see their own children.
+5. **Tests required**: every parent-facing endpoint must have a test for &quot;parent A tries to access parent B&#39;s child → 404&quot;.
+
+If you write a parent-facing endpoint without ownership check, you have introduced a CRITICAL security bug. Fix immediately.
+
+## RTL (Arabic) Rules (CRITICAL)
+
+Arabic is a first-class language. RTL is not an afterthought. NON-NEGOTIABLE:
+
+1. **All CSS uses logical properties**: `margin-inline-start`, `padding-inline-end`, `text-align: start`, `border-inline-start`. NEVER `margin-left`, `padding-right`, `text-align: left/right`.
+2. **Tailwind logical utilities**: `ms-*`, `me-*`, `ps-*`, `pe-*`, `text-start`, `text-end`. NEVER `ml-*`, `mr-*`, `pl-*`, `pr-*`, `text-left`, `text-right`.
+3. **Directional icons flip**: `ChevronRight` → `className=&quot;rtl:rotate-180&quot;`.
+4. **All translatable strings** via `t(&#39;key&#39;)` in `react-i18next`. NEVER hardcoded English in components.
+5. **All DB translatable fields** as JSONB: `{&quot;en&quot;: &quot;...&quot;, &quot;ar&quot;: &quot;...&quot;}`.
+6. **Test every screen in both LTR and RTL**. Visual regression tests in both directions.
+7. **ESLint rule** forbids physical properties — code won&#39;t merge if violated.
+
+## API Conventions
+
+1. **URI versioning**: `/api/v1/...`.
+2. **Cursor pagination**: `?cursor=&lt;base64&gt;&amp;limit=50`. Max limit 100. Never OFFSET.
+3. **Response envelope**: `{ success, data, meta, errors }`. Always.
+4. **HTTP status codes**: 200, 201, 202, 204, 400, 401, 403, 404, 409, 422, 429, 500, 503.
+5. **Idempotency**: all mutating ops support `Idempotency-Key` header.
+6. **Auth**: JWT in `Authorization: Bearer &lt;token&gt;` header.
+7. **File uploads**: presigned S3 URLs. Never multipart form data to API.
+8. **Errors**: `{ success: false, errors: [{ code, message, field? }] }`.
+9. **OpenAPI 3.0**: spec auto-generated from code annotations.
+10. **Rate limiting**: 100 req/min/user (authenticated), 10 req/min/IP (unauthenticated).
+
+## Database Conventions
+
+1. **All tables have**: `id` (UUID v4), `tenant_id`, `created_at`, `updated_at`, `created_by`, `updated_by`, `is_deleted`, `deleted_at`.
+2. **Soft delete** for persistent entities (Student, Staff, Invoice, etc.). Hard delete only for transient data.
+3. **Immutable tables** (`attendance_event`, `audit_log`): trigger rejects UPDATE/DELETE.
+4. **Money**: integer fils (1 AED = 100 fils). NEVER `numeric`, `decimal`, `float` for money.
+5. **JSONB for i18n fields**: `{&quot;en&quot;: &quot;...&quot;, &quot;ar&quot;: &quot;...&quot;}`.
+6. **Partitioning**: `attendance_record` and `audit_log` partitioned by month.
+7. **RLS**: every table with `tenant_id` has RLS policy.
+8. **Indexes**: composite on `(tenant_id, created_at DESC)` and `(tenant_id, status)` for high-traffic entities. Partial: `WHERE is_deleted = false`.
+9. **Migrations**: EF Core code-first. Each migration is immutable once published. New migration to change.
+10. **Audit log**: every mutation writes to `audit_log` via interceptor.
+
+## Notifications Conventions
+
+1. **3 tiers**: Critical (push + in-app + SMS), Operational (push + in-app), Informational (email + optional in-app).
+2. **No recipient acknowledgement required** — per source planning doc §7. We record delivery attempts but don&#39;t require user confirmation.
+3. **Critical tier**: 3 retries with exponential backoff, then fallback (push → SMS → email).
+4. **Operational tier**: 3 retries, no fallback.
+5. **Informational tier**: no retry beyond provider&#39;s own.
+6. **Every delivery attempt** logged in `notification_delivery` table.
+
+## Testing Requirements
+
+1. **Unit tests** for every business logic function. Mock external dependencies.
+2. **Integration tests** for every API endpoint. Use Testcontainers (real PostgreSQL + Redis).
+3. **E2E tests** for critical user journeys (login, check-in, post activity, send message, generate invoice).
+4. **Coverage**: backend 80%, web 75%, mobile 70%.
+5. **Accessibility**: axe tests in every component test. E2E tests run axe on every page.
+6. **RTL**: every screen tested in both LTR and RTL.
+7. **Performance**: k6 load tests on every PR (smoke), nightly (full load).
+8. **Security**: SAST (SonarCloud), SCA (OWASP Dependency Check), DAST (ZAP weekly), container scan (Trivy), IaC scan (tfsec).
+
+## Commit + PR Conventions
+
+1. **Commit message**: `&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;` — e.g., `feat(attendance): add barcode check-in endpoint`.
+   - Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `style`, `ci`.
+   - Scope: module name (e.g., `attendance`, `billing`, `web`, `mobile`).
+   - Subject: imperative, lowercase, no period.
+2. **PR title**: same format as commit message.
+3. **PR description**: includes summary, related issue, testing notes, screenshots (if UI).
+4. **PR size**: target &lt; 500 lines. Split larger PRs.
+5. **2 approvals required** for merge to main (1 for develop).
+6. **All CI checks must pass** before merge.
+7. **Squash + merge** to main (clean history).
+
+## Forbidden Patterns
+
+DO NOT do any of these:
+
+1. ❌ Suggest alternative tech stack (Spring Boot, Laravel, Vue, Flutter, etc.).
+2. ❌ Use `any` in TypeScript (use `unknown` if truly unknown).
+3. ❌ Use physical CSS properties (`margin-left`, `text-align: left`, etc.).
+4. ❌ Hardcode user-facing English strings (use `t(&#39;key&#39;)`).
+5. ❌ Use floating-point for money (use integer cents/fils).
+6. ❌ Bypass tenant context (always set + respect `tenant_id`).
+7. ❌ Skip parent-child ownership check on parent-facing endpoints.
+8. ❌ Use `localStorage` for tokens (use HttpOnly cookie or SecureStore).
+9. ❌ Use `dangerouslySetInnerHTML` without DOMPurify.
+10. ❌ Disable RLS or remove audit log trigger.
+11. ❌ Use `OFFSET` pagination (use cursor).
+12. ❌ Use `console.log` in production code (use structured logging via Serilog or `logger`).
+13. ❌ Skip tests for new features.
+14. ❌ Use class components in React.
+15. ❌ Install heavy dependencies without justification (bundle size matters).
+16. ❌ Add features beyond the requested sprint scope (refer to `19-ROADMAP-SPRINTS.md`).
+17. ❌ Modify files in `docs/prerequisites/` (these are immutable specs).
+18. ❌ Skip code review for any change &gt; 10 lines.
+19. ❌ Use raw SQL without parameterization (EF Core LINQ or parameterized queries only).
+20. ❌ Hardcode secrets, API keys, or passwords in code.
+
+## How to Approach a Task
+
+When given a task, follow this process:
+
+1. **Read the relevant spec files** in `/docs/prerequisites/`. Always cite which files you read in your first response.
+2. **Understand the scope**. If unclear, ask clarifying questions before coding.
+3. **Plan the implementation**. Outline the files you&#39;ll touch + changes you&#39;ll make.
+4. **Write the code** following the conventions above.
+5. **Write tests** alongside the code (TDD preferred for complex logic).
+6. **Run tests locally** before considering the task done.
+7. **Update documentation** if the change affects API, schema, or architecture.
+8. **Write a clear commit message** following the convention.
+9. **Summarize what you did** + flag any concerns or follow-ups.
+
+## When Unsure
+
+- **Ask the human** — don&#39;t guess on architecture decisions.
+- **Read more spec files** — the answer is probably there.
+- **Look at existing code** — follow established patterns.
+- **Write a test first** — clarify the expected behavior before implementing.
+- **Add an ADR** — if making a non-trivial decision, document it in `/docs/adr/`.
+
+## Useful Aliases
+
+- `npm run dev` — start dev environment (web + mobile).
+- `dotnet watch run --project backend/src/NMS.Api` — backend hot reload.
+- `cd web &amp;&amp; pnpm dev` — web dev server.
+- `cd mobile &amp;&amp; pnpm start` — Expo dev server.
+- `dotnet test backend/NMS.sln` — run backend tests.
+- `cd web &amp;&amp; pnpm test` — run web tests.
+- `cd web &amp;&amp; pnpm test:e2e` — run web E2E tests.
+- `cd web &amp;&amp; pnpm lint` — lint web.
+- `cd web &amp;&amp; pnpm typecheck` — typecheck web.
+
+## Reference Files
+
+- `/docs/prerequisites/00-MASTER-BRIEF.md` — start here.
+- `/docs/prerequisites/19-ROADMAP-SPRINTS.md` — what to build in what sprint.
+- `/docs/prerequisites/20-ADRs.md` — why each major decision was made.
+- `/docs/adr/` — new ADRs go here (Nygard format, see ADR template in `20-ADRs.md`).
+- `/infra/docs/runbooks/` — operational runbooks.
+
+You are an experienced engineer working on a high-quality, production-grade, AI-built product. Hold yourself to that standard.
+</code></pre></div>
+
+<h2 id="end-cursorrules-contents">─── END .cursorrules CONTENTS ───</h2>
+<hr />
+<h2 id="how-to-use-these-rules">How to Use These Rules</h2>
+<h3 id="step-1-bootstrap-the-repo">Step 1: Bootstrap the Repo</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>mkdir<span style="color: #F8F8F2"> </span>nms<span style="color: #F8F8F2"> </span><span style="color: #FF4689">&amp;&amp;</span><span style="color: #F8F8F2"> cd </span>nms
+git<span style="color: #F8F8F2"> </span>init
+
+<span style="color: #959077"># Create directory structure</span>
+mkdir<span style="color: #F8F8F2"> </span>-p<span style="color: #F8F8F2"> </span>backend<span style="color: #F8F8F2"> </span>web<span style="color: #F8F8F2"> </span>mobile<span style="color: #F8F8F2"> </span>infra<span style="color: #F8F8F2"> </span>docs/prerequisites
+
+<span style="color: #959077"># Copy the prerequisites pack</span>
+cp<span style="color: #F8F8F2"> </span>-r<span style="color: #F8F8F2"> </span>/path/to/downloaded/nms-prerequisites/*<span style="color: #F8F8F2"> </span>docs/prerequisites/
+
+<span style="color: #959077"># Create .cursorrules with the content above</span>
+<span style="color: #959077"># (paste the &quot;BEGIN .cursorrules CONTENTS&quot; through &quot;END .cursorrules CONTENTS&quot; block)</span>
+
+<span style="color: #959077"># Initial commit</span>
+git<span style="color: #F8F8F2"> </span>add<span style="color: #F8F8F2"> </span>-A
+git<span style="color: #F8F8F2"> </span>commit<span style="color: #F8F8F2"> </span>-m<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Sprint 0: Initial repo with prerequisites + cursor rules&quot;</span>
+</code></pre></div>
+
+<h3 id="step-2-open-in-cursor">Step 2: Open in Cursor</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>cursor<span style="color: #F8F8F2"> </span>.
+</code></pre></div>
+
+<p>Cursor will automatically read <code>.cursorrules</code> on every interaction.</p>
+<h3 id="step-3-start-building">Step 3: Start Building</h3>
+<p>Use prompts like this to guide Cursor:</p>
+<p><strong>For Sprint 0 setup:</strong></p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Read /docs/prerequisites/00-MASTER-BRIEF.md, /docs/prerequisites/05-TECH-STACK.md,
+and /docs/prerequisites/11-DEVOPS-INFRASTRUCTURE.md.
+
+Then perform Sprint 0 setup per /docs/prerequisites/19-ROADMAP-SPRINTS.md:
+1. Scaffold the monorepo (backend .NET 8, web Vite+React+TS, mobile Expo+RN+TS).
+2. Set up Docker Compose for local dev (Postgres, Redis, RabbitMQ, Keycloak, MinIO, MailHog).
+3. Create initial .gitignore, .editorconfig, .vscode/extensions.json.
+4. Run the scaffolding commands from 05-TECH-STACK.md §11.
+5. Initial commit.
+</code></pre></div>
+
+<p><strong>For Sprint 1 (Centre Management):</strong></p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Read /docs/prerequisites/02-PRD-MVP.md (sections on Centre Management),
+/docs/prerequisites/07-DATABASE-SCHEMA.md (Student, Staff, Room entities),
+/docs/prerequisites/08-API-SPEC.md (Student/Staff/Room endpoints),
+and /docs/prerequisites/06-ARCHITECTURE.md (Module: Centre Management).
+
+Then implement Sprint 1 deliverables:
+- Student entity with full lifecycle (6 statuses) + EF Core config + migration
+- Staff entity
+- Room entity with capacity + ratio config
+- Program entity
+- Group entity
+- Label entity
+- Guardian entity (primary + secondary)
+- CRUD endpoints for each
+- RBAC enforcement (only Centre Admin+ can create)
+- Audit log via interceptor
+- Unit tests for each entity
+- Integration tests for each endpoint
+
+Follow the conventions in .cursorrules. Use the directory structure specified.
+</code></pre></div>
+
+<p><strong>For adding a feature:</strong></p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Read /docs/prerequisites/[relevant files].
+
+I need to add [feature description].
+
+Per [file:section], the requirements are:
+- [requirement 1]
+- [requirement 2]
+
+Implement:
+- [entity changes]
+- [endpoint changes]
+- [UI changes]
+- [tests]
+
+Follow conventions in .cursorrules.
+</code></pre></div>
+
+<h3 id="step-4-iterate">Step 4: Iterate</h3>
+<p>When Cursor produces code:
+1. Review it for spec compliance (did it follow the conventions?).
+2. Run tests locally.
+3. If issues: tell Cursor what's wrong + ask for fix. Be specific.
+4. If correct: commit + move to next task.</p>
+<h3 id="step-5-cross-cutting-changes">Step 5: Cross-Cutting Changes</h3>
+<p>For changes that affect multiple files (e.g., "add a new notification type"):</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>I need to add a new notification category: &#39;tour_reminder&#39; (Operational tier).
+
+Read:
+- /docs/prerequisites/15-NOTIFICATIONS.md (categories catalog, tier rules)
+- /docs/prerequisites/08-API-SPEC.md (notification endpoints)
+- Existing notification code in backend/src/NMS.Modules/Notifications/
+
+Implement:
+1. Add &#39;tour_reminder&#39; to notification categories enum.
+2. Add template to notification_template table (migration).
+3. Update Tour Management module to publish TourReminderEvent 24h before tour.
+4. Update Notification module to consume event + create notifications.
+5. Add notification preference entry for staff.
+6. Test: integration test that creates tour, fast-forwards time, verifies notification sent.
+
+Follow conventions in .cursorrules.
+</code></pre></div>
+
+<hr />
+<h2 id="why-these-rules-matter">Why These Rules Matter</h2>
+<ol>
+<li><strong>Consistency</strong> — every file follows the same conventions. Easier to read, review, maintain.</li>
+<li><strong>Security</strong> — tenant isolation + parent-child ownership are non-negotiable. The rules make violations obvious.</li>
+<li><strong>RTL parity</strong> — Arabic is first-class. The rules enforce RTL from the start, not as retrofit.</li>
+<li><strong>Spec adherence</strong> — Cursor reads the spec files before coding. Reduces drift from requirements.</li>
+<li><strong>Quality gates</strong> — coverage, accessibility, security scans all enforced in CI.</li>
+<li><strong>Onboarding</strong> — new developers (or AI agents) can be productive immediately by reading <code>.cursorrules</code>.</li>
+</ol>
+<hr />
+<p><strong>Next file to read</strong>: <code>19-ROADMAP-SPRINTS.md</code> — the sprint-by-sprint breakdown of what to build when.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-17-compliance-legal.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Compliance & Legal</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-19-roadmap-sprints.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Roadmap & Sprints</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,2249 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Specification — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class="active"><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-api-design-principles" class="toc-link" data-target="1-api-design-principles">1. API Design Principles</a><a href="#2-url-structure" class="toc-link" data-target="2-url-structure">2. URL Structure</a><a href="#3-requestresponse-envelope" class="toc-link" data-target="3-requestresponse-envelope">3. Request/Response Envelope</a><a href="#31-success-response" class="toc-link toc-h3" data-target="31-success-response">3.1 Success Response</a><a href="#32-error-response" class="toc-link toc-h3" data-target="32-error-response">3.2 Error Response</a><a href="#33-async-response-202-accepted" class="toc-link toc-h3" data-target="33-async-response-202-accepted">3.3 Async Response (202 Accepted)</a><a href="#4-http-status-codes" class="toc-link" data-target="4-http-status-codes">4. HTTP Status Codes</a><a href="#5-error-codes" class="toc-link" data-target="5-error-codes">5. Error Codes</a><a href="#6-pagination" class="toc-link" data-target="6-pagination">6. Pagination</a><a href="#61-request-parameters" class="toc-link toc-h3" data-target="61-request-parameters">6.1 Request Parameters</a><a href="#62-cursor-format" class="toc-link toc-h3" data-target="62-cursor-format">6.2 Cursor Format</a><a href="#63-example" class="toc-link toc-h3" data-target="63-example">6.3 Example</a><a href="#7-filtering" class="toc-link" data-target="7-filtering">7. Filtering</a><a href="#8-sorting" class="toc-link" data-target="8-sorting">8. Sorting</a><a href="#9-authentication" class="toc-link" data-target="9-authentication">9. Authentication</a><a href="#91-jwt-bearer-token" class="toc-link toc-h3" data-target="91-jwt-bearer-token">9.1 JWT Bearer Token</a><a href="#92-token-refresh" class="toc-link toc-h3" data-target="92-token-refresh">9.2 Token Refresh</a><a href="#93-token-revocation" class="toc-link toc-h3" data-target="93-token-revocation">9.3 Token Revocation</a><a href="#94-service-to-service-phase-3" class="toc-link toc-h3" data-target="94-service-to-service-phase-3">9.4 Service-to-Service (Phase 3+)</a><a href="#10-idempotency" class="toc-link" data-target="10-idempotency">10. Idempotency</a><a href="#11-localization" class="toc-link" data-target="11-localization">11. Localization</a><a href="#111-accept-language-header" class="toc-link toc-h3" data-target="111-accept-language-header">11.1 Accept-Language Header</a><a href="#112-resource-localization" class="toc-link toc-h3" data-target="112-resource-localization">11.2 Resource Localization</a><a href="#113-datetime-localization" class="toc-link toc-h3" data-target="113-datetime-localization">11.3 DateTime Localization</a><a href="#12-rate-limiting" class="toc-link" data-target="12-rate-limiting">12. Rate Limiting</a><a href="#121-per-user-limits" class="toc-link toc-h3" data-target="121-per-user-limits">12.1 Per-User Limits</a><a href="#122-implementation" class="toc-link toc-h3" data-target="122-implementation">12.2 Implementation</a><a href="#123-tenant-level-limits-saas-phase-3" class="toc-link toc-h3" data-target="123-tenant-level-limits-saas-phase-3">12.3 Tenant-Level Limits (SaaS Phase 3)</a><a href="#13-signalr-real-time" class="toc-link" data-target="13-signalr-real-time">13. SignalR Real-Time</a><a href="#131-hub-url" class="toc-link toc-h3" data-target="131-hub-url">13.1 Hub URL</a><a href="#132-authentication" class="toc-link toc-h3" data-target="132-authentication">13.2 Authentication</a><a href="#133-client-server-methods" class="toc-link toc-h3" data-target="133-client-server-methods">13.3 Client → Server Methods</a><a href="#134-server-client-methods" class="toc-link toc-h3" data-target="134-server-client-methods">13.4 Server → Client Methods</a><a href="#135-reconnection" class="toc-link toc-h3" data-target="135-reconnection">13.5 Reconnection</a><a href="#14-file-uploads" class="toc-link" data-target="14-file-uploads">14. File Uploads</a><a href="#141-presigned-url-flow" class="toc-link toc-h3" data-target="141-presigned-url-flow">14.1 Presigned URL Flow</a><a href="#142-file-constraints" class="toc-link toc-h3" data-target="142-file-constraints">14.2 File Constraints</a><a href="#15-endpoint-catalog-phase-1-mvp" class="toc-link" data-target="15-endpoint-catalog-phase-1-mvp">15. Endpoint Catalog (Phase 1 MVP)</a><a href="#151-auth-identity" class="toc-link toc-h3" data-target="151-auth-identity">15.1 Auth &amp; Identity</a><a href="#152-students" class="toc-link toc-h3" data-target="152-students">15.2 Students</a><a href="#153-staff" class="toc-link toc-h3" data-target="153-staff">15.3 Staff</a><a href="#154-rooms-programs-groups-labels" class="toc-link toc-h3" data-target="154-rooms-programs-groups-labels">15.4 Rooms / Programs / Groups / Labels</a><a href="#155-attendance" class="toc-link toc-h3" data-target="155-attendance">15.5 Attendance</a><a href="#156-leaves" class="toc-link toc-h3" data-target="156-leaves">15.6 Leaves</a><a href="#157-activity-posts-parent-communication" class="toc-link toc-h3" data-target="157-activity-posts-parent-communication">15.7 Activity Posts (Parent Communication)</a><a href="#158-messaging" class="toc-link toc-h3" data-target="158-messaging">15.8 Messaging</a><a href="#159-media" class="toc-link toc-h3" data-target="159-media">15.9 Media</a><a href="#1510-notifications" class="toc-link toc-h3" data-target="1510-notifications">15.10 Notifications</a><a href="#1511-dashboard" class="toc-link toc-h3" data-target="1511-dashboard">15.11 Dashboard</a><a href="#1512-settings-audit-log" class="toc-link toc-h3" data-target="1512-settings-audit-log">15.12 Settings &amp; Audit Log</a><a href="#16-endpoint-catalog-phase-1-full-beyond-mvp" class="toc-link" data-target="16-endpoint-catalog-phase-1-full-beyond-mvp">16. Endpoint Catalog (Phase 1 Full — Beyond MVP)</a><a href="#161-billing-sprint-78" class="toc-link toc-h3" data-target="161-billing-sprint-78">16.1 Billing (Sprint 7–8)</a><a href="#162-enquiries-tours-sprint-910" class="toc-link toc-h3" data-target="162-enquiries-tours-sprint-910">16.2 Enquiries &amp; Tours (Sprint 9–10)</a><a href="#163-calendar-sprint-1112" class="toc-link toc-h3" data-target="163-calendar-sprint-1112">16.3 Calendar (Sprint 11–12)</a><a href="#164-forms-admissions-sprint-1112" class="toc-link toc-h3" data-target="164-forms-admissions-sprint-1112">16.4 Forms &amp; Admissions (Sprint 11–12)</a><a href="#165-tools-sprint-1112" class="toc-link toc-h3" data-target="165-tools-sprint-1112">16.5 Tools (Sprint 11–12)</a><a href="#166-reports-analytics-sprint-1314" class="toc-link toc-h3" data-target="166-reports-analytics-sprint-1314">16.6 Reports &amp; Analytics (Sprint 13–14)</a><a href="#167-newsletter-resource-centre-sprint-56-full" class="toc-link toc-h3" data-target="167-newsletter-resource-centre-sprint-56-full">16.7 Newsletter &amp; Resource Centre (Sprint 5–6 f...</a><a href="#17-endpoint-catalog-phase-2-learning-assessment" class="toc-link" data-target="17-endpoint-catalog-phase-2-learning-assessment">17. Endpoint Catalog (Phase 2 — Learning &amp; Asse...</a><a href="#18-endpoint-catalog-phase-3-multi-centre-payments-erp-open-api" class="toc-link" data-target="18-endpoint-catalog-phase-3-multi-centre-payments-erp-open-api">18. Endpoint Catalog (Phase 3 — Multi-Centre, P...</a><a href="#19-openapi-generation" class="toc-link" data-target="19-openapi-generation">19. OpenAPI Generation</a><a href="#191-net-openapi-setup" class="toc-link toc-h3" data-target="191-net-openapi-setup">19.1 .NET OpenAPI Setup</a><a href="#192-frontend-client-generation" class="toc-link toc-h3" data-target="192-frontend-client-generation">19.2 Frontend Client Generation</a><a href="#193-api-documentation-ui" class="toc-link toc-h3" data-target="193-api-documentation-ui">19.3 API Documentation UI</a><a href="#20-versioning-deprecation" class="toc-link" data-target="20-versioning-deprecation">20. Versioning &amp; Deprecation</a><a href="#201-versioning-strategy" class="toc-link toc-h3" data-target="201-versioning-strategy">20.1 Versioning Strategy</a><a href="#202-backward-compatibility" class="toc-link toc-h3" data-target="202-backward-compatibility">20.2 Backward Compatibility</a><a href="#21-caching-headers" class="toc-link" data-target="21-caching-headers">21. Caching Headers</a><a href="#22-health-diagnostic-endpoints" class="toc-link" data-target="22-health-diagnostic-endpoints">22. Health &amp; Diagnostic Endpoints</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="code-2" class="w-4 h-4 text-amber-600"></i><span>API Specification</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-08-api-spec.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 08</span>
+          <span class="text-[10px] font-mono text-slate-400">~4,551 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">API Specification</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-07-database-schema.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Database Schema</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-09-auth-security.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Auth & Security</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="08-api-specification">08 — API Specification</h1>
+<blockquote>
+<p>REST API conventions, OpenAPI 3.0, pagination, error handling, SignalR real-time, and the endpoint catalog.</p>
+</blockquote>
+<hr />
+<h2 id="1-api-design-principles">1. API Design Principles</h2>
+<ol>
+<li><strong>RESTful</strong> — Resources are nouns, HTTP methods are verbs. URL structure reflects domain model.</li>
+<li><strong>Versioned</strong> — URI-based versioning: <code>/api/v1/</code>. v2 introduced only for breaking changes, with parallel support period.</li>
+<li><strong>Consistent envelope</strong> — All responses wrapped in <code>{ success, data, meta, errors }</code> for predictability.</li>
+<li><strong>Cursor pagination</strong> — All list endpoints use cursor-based pagination. No OFFSET.</li>
+<li><strong>Idempotency</strong> — All mutating operations support <code>Idempotency-Key</code> header for safe retries.</li>
+<li><strong>Stateless</strong> — Server stores no per-request state. JWT in <code>Authorization</code> header for auth.</li>
+<li><strong>OpenAPI-first</strong> — OpenAPI 3.0 spec is the source of truth. Frontend/mobile clients generated from it.</li>
+<li><strong>HTTPS only</strong> — No HTTP. TLS 1.2+ enforced at load balancer.</li>
+<li><strong>UTF-8 everywhere</strong> — All requests/responses UTF-8 encoded.</li>
+<li><strong>ISO 8601 dates</strong> — All dates in UTC with timezone offset: <code>2026-05-17T10:30:00+04:00</code>.</li>
+</ol>
+<hr />
+<h2 id="2-url-structure">2. URL Structure</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Base URL (SaaS):   https://api.nms.ae/api/v1
+Base URL (On-prem): https://api.&lt;nursery-domain&gt;/api/v1
+</code></pre></div>
+
+<p>Resource URLs follow this pattern:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Method</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>List</td>
+<td>GET</td>
+<td><code>/api/v1/students</code></td>
+</tr>
+<tr>
+<td>Create</td>
+<td>POST</td>
+<td><code>/api/v1/students</code></td>
+</tr>
+<tr>
+<td>Get one</td>
+<td>GET</td>
+<td><code>/api/v1/students/{id}</code></td>
+</tr>
+<tr>
+<td>Replace</td>
+<td>PUT</td>
+<td><code>/api/v1/students/{id}</code></td>
+</tr>
+<tr>
+<td>Partial update</td>
+<td>PATCH</td>
+<td><code>/api/v1/students/{id}</code></td>
+</tr>
+<tr>
+<td>Delete (soft)</td>
+<td>DELETE</td>
+<td><code>/api/v1/students/{id}</code></td>
+</tr>
+<tr>
+<td>Sub-resource list</td>
+<td>GET</td>
+<td><code>/api/v1/students/{id}/guardians</code></td>
+</tr>
+<tr>
+<td>Action (verb)</td>
+<td>POST</td>
+<td><code>/api/v1/students/{id}/actions/check-in</code></td>
+</tr>
+<tr>
+<td>Async action</td>
+<td>POST</td>
+<td><code>/api/v1/reports/attendance/monthly</code> → 202 + job_id</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-requestresponse-envelope">3. Request/Response Envelope</h2>
+<h3 id="31-success-response">3.1 Success Response</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;success&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;data&quot;</span><span style="color: #F8F8F2">: { </span><span style="color: #959077">/* the resource or array of resources */</span><span style="color: #F8F8F2"> },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;meta&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;pagination&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;cursor&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;eyJpZCI6IjEyMyIsImNyZWF0ZWRfYXQiOiIyMDI2LTA1LTE3VDEwOjMwOjAwWiJ9&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;next_cursor&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;eyJpZCI6IjEyNCIsImNyZWF0ZWRfYXQiOiIyMDI2LTA1LTE3VDEwOjMxOjAwWiJ9&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;has_more&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;limit&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">50</span>
+<span style="color: #F8F8F2">    },</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;request_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;req_abc123&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;timestamp&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;2026-05-17T10:30:00.123Z&quot;</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="32-error-response">3.2 Error Response</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;success&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">false</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;errors&quot;</span><span style="color: #F8F8F2">: [</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;code&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;VALIDATION_ERROR&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;message&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;The field &#39;email&#39; is required.&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;field&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;email&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;details&quot;</span><span style="color: #F8F8F2">: { </span><span style="color: #FF4689">&quot;locale&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;en&quot;</span><span style="color: #F8F8F2"> }</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">  ],</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;meta&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;request_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;req_abc123&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;timestamp&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;2026-05-17T10:30:00.123Z&quot;</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="33-async-response-202-accepted">3.3 Async Response (202 Accepted)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;success&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;data&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;job_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;job_xyz789&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;status&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;queued&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;status_url&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;/api/v1/jobs/job_xyz789&quot;</span>
+<span style="color: #F8F8F2">  },</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;meta&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;request_id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;req_abc123&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;timestamp&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;2026-05-17T10:30:00.123Z&quot;</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p>Client polls <code>status_url</code> until status is <code>completed</code> or <code>failed</code>. Or subscribes via SignalR for <code>JobCompleted</code> event.</p>
+<hr />
+<h2 id="4-http-status-codes">4. HTTP Status Codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+<th>When used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200 OK</td>
+<td>Success</td>
+<td>GET, PATCH, PUT, DELETE success</td>
+</tr>
+<tr>
+<td>201 Created</td>
+<td>Resource created</td>
+<td>POST that creates a new resource</td>
+</tr>
+<tr>
+<td>202 Accepted</td>
+<td>Async job accepted</td>
+<td>POST that triggers long-running work</td>
+</tr>
+<tr>
+<td>204 No Content</td>
+<td>Success, no body</td>
+<td>DELETE success</td>
+</tr>
+<tr>
+<td>400 Bad Request</td>
+<td>Validation error</td>
+<td>Invalid input, schema mismatch</td>
+</tr>
+<tr>
+<td>401 Unauthorized</td>
+<td>Not authenticated</td>
+<td>Missing or invalid JWT</td>
+</tr>
+<tr>
+<td>403 Forbidden</td>
+<td>Not authorized</td>
+<td>Authenticated but lacks permission</td>
+</tr>
+<tr>
+<td>404 Not Found</td>
+<td>Resource doesn't exist</td>
+<td>ID not found (also used for parent-child ownership denial — prevents ID enumeration)</td>
+</tr>
+<tr>
+<td>409 Conflict</td>
+<td>Duplicate or state conflict</td>
+<td>E.g., email already exists</td>
+</tr>
+<tr>
+<td>410 Gone</td>
+<td>Resource permanently gone</td>
+<td>E.g., expired invitation token</td>
+</tr>
+<tr>
+<td>422 Unprocessable Entity</td>
+<td>Semantic validation error</td>
+<td>E.g., trying to check out a student not checked in</td>
+</tr>
+<tr>
+<td>429 Too Many Requests</td>
+<td>Rate limited</td>
+<td>Rate limit exceeded</td>
+</tr>
+<tr>
+<td>500 Internal Server Error</td>
+<td>Server bug</td>
+<td>Unhandled exception</td>
+</tr>
+<tr>
+<td>503 Service Unavailable</td>
+<td>Temporary</td>
+<td>Maintenance, dependency outage</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-error-codes">5. Error Codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>HTTP</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VALIDATION_ERROR</code></td>
+<td>400</td>
+<td>Field validation failed</td>
+</tr>
+<tr>
+<td><code>MISSING_FIELD</code></td>
+<td>400</td>
+<td>Required field missing</td>
+</tr>
+<tr>
+<td><code>INVALID_FORMAT</code></td>
+<td>400</td>
+<td>Field format invalid (e.g., bad UUID)</td>
+</tr>
+<tr>
+<td><code>UNAUTHORIZED</code></td>
+<td>401</td>
+<td>JWT missing or expired</td>
+</tr>
+<tr>
+<td><code>INSUFFICIENT_PERMISSION</code></td>
+<td>403</td>
+<td>User lacks required role/permission</td>
+</tr>
+<tr>
+<td><code>RESOURCE_NOT_FOUND</code></td>
+<td>404</td>
+<td>Resource doesn't exist</td>
+</tr>
+<tr>
+<td><code>PARENT_CHILD_OWNERSHIP_DENIED</code></td>
+<td>404</td>
+<td>Parent tried to access another parent's child (404 not 403 to prevent enumeration)</td>
+</tr>
+<tr>
+<td><code>DUPLICATE_RESOURCE</code></td>
+<td>409</td>
+<td>Unique constraint violation</td>
+</tr>
+<tr>
+<td><code>INVALID_STATE_TRANSITION</code></td>
+<td>422</td>
+<td>E.g., checking out a student who isn't checked in</td>
+</tr>
+<tr>
+<td><code>IMMUTABLE_RECORD</code></td>
+<td>422</td>
+<td>Trying to update attendance_event or audit_log</td>
+</tr>
+<tr>
+<td><code>RATE_LIMIT_EXCEEDED</code></td>
+<td>429</td>
+<td>Too many requests</td>
+</tr>
+<tr>
+<td><code>TENANT_SUSPENDED</code></td>
+<td>403</td>
+<td>Tenant's subscription lapsed</td>
+</tr>
+<tr>
+<td><code>EXTERNAL_SERVICE_ERROR</code></td>
+<td>502</td>
+<td>Upstream service (FCM, SES, etc.) failed</td>
+</tr>
+<tr>
+<td><code>INTERNAL_ERROR</code></td>
+<td>500</td>
+<td>Unhandled server error</td>
+</tr>
+</tbody>
+</table>
+<p>Each error includes a <code>message</code> (English) and may include <code>message_i18n</code> with translations when relevant. Validation errors include <code>field</code> for form binding.</p>
+<hr />
+<h2 id="6-pagination">6. Pagination</h2>
+<p>All list endpoints use cursor-based pagination.</p>
+<h3 id="61-request-parameters">6.1 Request Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cursor</code></td>
+<td>string (base64)</td>
+<td>(none)</td>
+<td>Cursor from previous response's <code>next_cursor</code></td>
+</tr>
+<tr>
+<td><code>limit</code></td>
+<td>int</td>
+<td>50</td>
+<td>Page size (max 100)</td>
+</tr>
+<tr>
+<td><code>sort</code></td>
+<td>string</td>
+<td><code>created_at:desc</code></td>
+<td>Sort field + direction</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-cursor-format">6.2 Cursor Format</h3>
+<p>Cursor is base64-encoded JSON containing the sort field value + ID of the last item:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;id&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;uuid-of-last-item&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;created_at&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;2026-05-17T10:30:00Z&quot;</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p>Server decodes cursor, queries <code>WHERE (created_at, id) &lt; (cursor_created_at, cursor_id) ORDER BY created_at DESC, id DESC LIMIT N+1</code>. If N+1 rows returned, <code>has_more=true</code>.</p>
+<h3 id="63-example">6.3 Example</h3>
+<p>Request:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>GET /api/v1/students?limit=50&amp;cursor=eyJpZCI6...
+</code></pre></div>
+
+<p>Response:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;success&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;data&quot;</span><span style="color: #F8F8F2">: [ </span><span style="color: #959077">/* 50 student objects */</span><span style="color: #F8F8F2"> ],</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;meta&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;pagination&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;limit&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #AE81FF">50</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;has_more&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #66D9EF">true</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;next_cursor&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;eyJpZCI6...&quot;</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p>Final page: <code>has_more=false</code>, <code>next_cursor=null</code>.</p>
+<hr />
+<h2 id="7-filtering">7. Filtering</h2>
+<p>List endpoints support filtering via query params. Conventions:</p>
+<ul>
+<li><strong>Exact match</strong>: <code>?status=active</code></li>
+<li><strong>Multiple values</strong>: <code>?status=active&amp;status=on_hold</code> (OR logic)</li>
+<li><strong>Range</strong>: <code>?created_after=2026-05-01&amp;created_before=2026-06-01</code></li>
+<li><strong>Search</strong>: <code>?q=ahmed</code> (server decides which fields to search)</li>
+<li><strong>Nested</strong>: <code>?room_id=uuid-1&amp;program_id=uuid-2</code></li>
+</ul>
+<p>Filters are documented per endpoint in OpenAPI spec.</p>
+<hr />
+<h2 id="8-sorting">8. Sorting</h2>
+<p><code>?sort=field:direction</code> where direction is <code>asc</code> or <code>desc</code>.</p>
+<ul>
+<li>Multiple sort fields: <code>?sort=last_name:asc,first_name:asc</code></li>
+<li>Allowed sort fields documented per endpoint.</li>
+<li>Default sort: <code>created_at:desc</code>.</li>
+</ul>
+<hr />
+<h2 id="9-authentication">9. Authentication</h2>
+<h3 id="91-jwt-bearer-token">9.1 JWT Bearer Token</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6...
+</code></pre></div>
+
+<ul>
+<li>Issued by Keycloak.</li>
+<li>Access token: 15-minute lifetime.</li>
+<li>Refresh token: 7-day lifetime (stored in HttpOnly cookie for web, Secure Keychain for iOS, EncryptedSharedPreferences for Android).</li>
+<li>Claims include: <code>sub</code> (user_id), <code>tenant_id</code>, <code>realm_access.roles</code>, <code>email</code>, <code>name</code>, <code>preferred_language</code>.</li>
+</ul>
+<h3 id="92-token-refresh">9.2 Token Refresh</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>POST /api/v1/auth/refresh
+Cookie: refresh_token=&lt;refresh-jwt&gt;
+</code></pre></div>
+
+<p>Returns new access token. Refresh token rotated on each use (detects theft).</p>
+<h3 id="93-token-revocation">9.3 Token Revocation</h3>
+<ul>
+<li>Logout: revoke refresh token immediately.</li>
+<li>Password change: revoke all user's refresh tokens.</li>
+<li>Account suspension: revoke all user's refresh tokens.</li>
+</ul>
+<h3 id="94-service-to-service-phase-3">9.4 Service-to-Service (Phase 3+)</h3>
+<p>For Open API + extracted services:
+- OAuth 2.0 client credentials flow.
+- Separate client_id + client_secret per integration.
+- Tokens have scopes (e.g., <code>students:read</code>, <code>invoices:write</code>).</p>
+<hr />
+<h2 id="10-idempotency">10. Idempotency</h2>
+<p>All mutating operations (POST, PUT, PATCH, DELETE) support <code>Idempotency-Key</code> header:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>POST /api/v1/students
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Type: application/json
+
+{ &quot;first_name&quot;: &quot;Ahmed&quot;, ... }
+</code></pre></div>
+
+<ul>
+<li>Server stores Idempotency-Key + response for 24 hours.</li>
+<li>Same key + same request body → server returns cached response (no duplicate side effects).</li>
+<li>Same key + different request body → 422 Unprocessable Entity (idempotency conflict).</li>
+<li>Different key → normal processing.</li>
+</ul>
+<p>Implemented via <code>IdempotencyMiddleware</code> in .NET pipeline.</p>
+<hr />
+<h2 id="11-localization">11. Localization</h2>
+<h3 id="111-accept-language-header">11.1 Accept-Language Header</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Accept-Language: ar
+</code></pre></div>
+
+<ul>
+<li>Server returns translated content for static messages (error messages, validation messages).</li>
+<li>Resource fields (e.g., <code>room.name</code>) return JSONB with both <code>en</code> and <code>ar</code> keys — client picks.</li>
+<li>Default: <code>en</code> if no Accept-Language header.</li>
+</ul>
+<h3 id="112-resource-localization">11.2 Resource Localization</h3>
+<p>For resources with i18n fields, response includes full JSONB:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;name&quot;</span><span style="color: #F8F8F2">: { </span><span style="color: #FF4689">&quot;en&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;Toddlers Room&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #FF4689">&quot;ar&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;غرفة الأطفال&quot;</span><span style="color: #F8F8F2"> }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p>Client displays based on user's preferred language, falling back to English if missing.</p>
+<h3 id="113-datetime-localization">11.3 DateTime Localization</h3>
+<p>All DateTimes returned in ISO 8601 with UTC + offset. Client formats per user's locale + timezone.</p>
+<p>For dates displayed to users (e.g., "May 17, 2026"), client uses <code>Intl.DateTimeFormat</code> with locale + timezone.</p>
+<hr />
+<h2 id="12-rate-limiting">12. Rate Limiting</h2>
+<h3 id="121-per-user-limits">12.1 Per-User Limits</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint type</th>
+<th>Limit</th>
+<th>Window</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authenticated API</td>
+<td>100 requests</td>
+<td>1 minute</td>
+</tr>
+<tr>
+<td>Unauthenticated API (e.g., public enquiry form)</td>
+<td>10 requests</td>
+<td>1 minute</td>
+</tr>
+<tr>
+<td>Login endpoint</td>
+<td>5 attempts</td>
+<td>1 minute (then 15-min lockout)</td>
+</tr>
+<tr>
+<td>Password reset</td>
+<td>3 requests</td>
+<td>1 hour</td>
+</tr>
+<tr>
+<td>File upload presign</td>
+<td>20 requests</td>
+<td>1 minute</td>
+</tr>
+</tbody>
+</table>
+<h3 id="122-implementation">12.2 Implementation</h3>
+<ul>
+<li>Redis-based sliding window counter.</li>
+<li>Headers returned: <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code>.</li>
+<li>429 response includes <code>Retry-After</code> header (seconds until reset).</li>
+<li>Blocked IPs logged + surfaced in Grafana dashboard.</li>
+</ul>
+<h3 id="123-tenant-level-limits-saas-phase-3">12.3 Tenant-Level Limits (SaaS Phase 3)</h3>
+<p>Each tenant has a daily API call quota based on subscription tier:
+- Tier 1: 10,000 calls/day
+- Tier 2: 25,000 calls/day
+- Tier 3: 50,000 calls/day
+- Tier 4: 100,000 calls/day
+- On-prem: unlimited</p>
+<p>Quota exceeded → 429 with upgrade prompt.</p>
+<hr />
+<h2 id="13-signalr-real-time">13. SignalR Real-Time</h2>
+<h3 id="131-hub-url">13.1 Hub URL</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>wss://api.nms.ae/hubs/tenant
+</code></pre></div>
+
+<h3 id="132-authentication">13.2 Authentication</h3>
+<p>JWT passed as query string on connect (SignalR requirement):</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>wss://api.nms.ae/hubs/tenant?access_token=&lt;jwt&gt;
+</code></pre></div>
+
+<p>Server validates JWT on connection, extracts <code>tenant_id</code> + <code>user_id</code> + <code>roles</code>, adds to groups.</p>
+<h3 id="133-client-server-methods">13.3 Client → Server Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Payload</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>JoinRoom</code></td>
+<td><code>{ roomId: "uuid" }</code></td>
+<td>Subscribe to room-specific updates</td>
+</tr>
+<tr>
+<td><code>LeaveRoom</code></td>
+<td><code>{ roomId: "uuid" }</code></td>
+<td>Unsubscribe</td>
+</tr>
+<tr>
+<td><code>MarkNotificationRead</code></td>
+<td><code>{ notificationId: "uuid" }</code></td>
+<td>Acknowledge notification (UX only, not delivery ack)</td>
+</tr>
+<tr>
+<td><code>Ping</code></td>
+<td><code>{ timestamp: "..." }</code></td>
+<td>Keep-alive</td>
+</tr>
+</tbody>
+</table>
+<h3 id="134-server-client-methods">13.4 Server → Client Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Payload</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AttendanceUpdated</code></td>
+<td><code>{ personId, personType, status, roomId, timestamp }</code></td>
+<td>Check-in/out event</td>
+</tr>
+<tr>
+<td><code>RatioUpdated</code></td>
+<td><code>{ roomId, studentsPresent, staffPresent, requiredRatio, isBreaching }</code></td>
+<td>Ratio change</td>
+</tr>
+<tr>
+<td><code>NotificationReceived</code></td>
+<td><code>{ notification: NotificationDto }</code></td>
+<td>New notification for user</td>
+</tr>
+<tr>
+<td><code>MessageReceived</code></td>
+<td><code>{ threadId, message: MessageDto }</code></td>
+<td>New message in thread</td>
+</tr>
+<tr>
+<td><code>ActivityPosted</code></td>
+<td><code>{ activityPost: ActivityPostDto }</code></td>
+<td>New approved activity (parents)</td>
+</tr>
+<tr>
+<td><code>DashboardRefreshed</code></td>
+<td><code>{ widget: "kpi_card" | "ratio" | "pending_actions", data: {...} }</code></td>
+<td>Dashboard widget update</td>
+</tr>
+<tr>
+<td><code>BillingUpdated</code></td>
+<td><code>{ invoiceId, status, amountPaidFils }</code></td>
+<td>Billing event</td>
+</tr>
+<tr>
+<td><code>JobCompleted</code></td>
+<td><code>{ jobId, status, resultUrl? }</code></td>
+<td>Async job finished</td>
+</tr>
+<tr>
+<td><code>Connected</code></td>
+<td><code>{ connectionId, groups: [...] }</code></td>
+<td>Connection confirmation</td>
+</tr>
+<tr>
+<td><code>Error</code></td>
+<td><code>{ message, code }</code></td>
+<td>Connection error</td>
+</tr>
+</tbody>
+</table>
+<h3 id="135-reconnection">13.5 Reconnection</h3>
+<p>Client uses <code>@microsoft/signalr</code> automatic reconnect:
+- Retry delays: 0, 2, 10, 30 seconds (then stop).
+- On reconnect: client re-fetches state for changed widgets (server doesn't replay missed events).
+- Refresh token flow before reconnect if JWT expired.</p>
+<hr />
+<h2 id="14-file-uploads">14. File Uploads</h2>
+<h3 id="141-presigned-url-flow">14.1 Presigned URL Flow</h3>
+<p>Direct-to-S3 upload bypasses API server for binary data:</p>
+<ol>
+<li>
+<p><strong>Client requests presigned URL</strong>:
+   <code>POST /api/v1/media/presign
+   {
+     "files": [
+       { "contentType": "image/jpeg", "sizeBytes": 1234567 },
+       { "contentType": "video/mp4", "sizeBytes": 23456789 }
+     ],
+     "purpose": "activity_post"  // or "student_photo", "document", "invoice_pdf", etc.
+   }</code></p>
+</li>
+<li>
+<p><strong>Server validates + returns presigned URLs</strong>:
+   <code>json
+   {
+     "success": true,
+     "data": [
+       {
+         "mediaId": "uuid-1",
+         "uploadUrl": "https://s3.me-central-1.amazonaws.com/nms-media/uploads/uuid-1?X-Amz-...",
+         "expiresAt": "2026-05-17T10:31:00Z",
+         "objectKey": "uploads/uuid-1"
+       },
+       { ... }
+     ]
+   }</code></p>
+</li>
+<li>
+<p><strong>Client uploads directly to S3</strong>:
+   ```
+   PUT <uploadUrl>
+   Content-Type: image/jpeg
+   x-amz-server-side-encryption: AES256</p>
+</li>
+</ol>
+<p><binary data>
+   ```</p>
+<ol start="4">
+<li>
+<p><strong>Client references media in subsequent API call</strong>:
+   <code>POST /api/v1/activities
+   {
+     "type": "photo",
+     "mediaIds": ["uuid-1", "uuid-2"],
+     "caption": { "en": "First day!", "ar": "..." },
+     "studentIds": ["uuid-3"]
+   }</code></p>
+</li>
+<li>
+<p><strong>Server creates activity_post + media records, triggers scan</strong>:
+   - <code>media.scan_status = "pending"</code>
+   - RabbitMQ event <code>MediaUploaded</code> published
+   - Media Processing module scans file → updates <code>scan_status</code></p>
+</li>
+</ol>
+<h3 id="142-file-constraints">14.2 File Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Purpose</th>
+<th>Allowed types</th>
+<th>Max size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Student/staff photo</td>
+<td>image/jpeg, image/png, image/heic</td>
+<td>5 MB</td>
+</tr>
+<tr>
+<td>Activity post photo</td>
+<td>image/jpeg, image/png, image/heic</td>
+<td>10 MB</td>
+</tr>
+<tr>
+<td>Activity post video</td>
+<td>video/mp4, video/quicktime</td>
+<td>100 MB</td>
+</tr>
+<tr>
+<td>Document (resource centre, form upload)</td>
+<td>application/pdf, application/vnd.openxmlformats-<em>, application/vnd.ms-excel, image/</em></td>
+<td>25 MB</td>
+</tr>
+<tr>
+<td>Invoice PDF (system-generated)</td>
+<td>application/pdf</td>
+<td>5 MB</td>
+</tr>
+<tr>
+<td>Newsletter attachment</td>
+<td>application/pdf, image/*</td>
+<td>10 MB</td>
+</tr>
+</tbody>
+</table>
+<p>Server enforces type + size in <code>/media/presign</code> endpoint. S3 bucket policy also enforces (defense-in-depth).</p>
+<hr />
+<h2 id="15-endpoint-catalog-phase-1-mvp">15. Endpoint Catalog (Phase 1 MVP)</h2>
+<blockquote>
+<p>Complete OpenAPI spec generated from code annotations. Below is the human-readable catalog of MVP endpoints.</p>
+</blockquote>
+<h3 id="151-auth-identity">15.1 Auth &amp; Identity</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/login</code></td>
+<td>Login (returns access + refresh tokens)</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/refresh</code></td>
+<td>Refresh access token</td>
+<td>Authenticated (refresh cookie)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/logout</code></td>
+<td>Logout (revoke refresh token)</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/forgot-password</code></td>
+<td>Request password reset email</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/reset-password</code></td>
+<td>Reset password with token</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/verify-email</code></td>
+<td>Verify email with token</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/bootstrap-super-admin</code></td>
+<td>First Super Admin creation (one-time)</td>
+<td>Public (with token)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/auth/me</code></td>
+<td>Get current user + permissions</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/auth/me</code></td>
+<td>Update own profile (language, avatar, etc.)</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/change-password</code></td>
+<td>Change password</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/invite-parent</code></td>
+<td>Send parent invitation (creates guardian with <code>invited</code> status)</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/accept-invitation</code></td>
+<td>Accept parent invitation (creates app_user + links guardian)</td>
+<td>Public (with token)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="152-students">15.2 Students</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/students</code></td>
+<td>List students (filter, paginate)</td>
+<td>Staff (room-scoped), Parent (own children only)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/students</code></td>
+<td>Create student</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/students/{id}</code></td>
+<td>Get student details</td>
+<td>Staff (room-scoped), Parent (own child)</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/students/{id}</code></td>
+<td>Update student</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/students/{id}</code></td>
+<td>Soft-delete student</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/students/{id}/actions/transition-status</code></td>
+<td>Transition status (signed_up→active→on_hold→withdrawn)</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/students/{id}/guardians</code></td>
+<td>List guardians</td>
+<td>Staff (room-scoped), Parent (own child)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/students/{id}/guardians</code></td>
+<td>Add guardian</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/students/{id}/guardians/{guardianId}</code></td>
+<td>Update guardian</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/students/{id}/guardians/{guardianId}</code></td>
+<td>Remove guardian</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/students/{id}/emergency-report</code></td>
+<td>Generate emergency child report PDF</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/students/{id}/activities</code></td>
+<td>List activities for student</td>
+<td>Staff (room-scoped), Parent (own child)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/students/{id}/attendance</code></td>
+<td>Get student attendance history</td>
+<td>Staff (room-scoped), Parent (own child)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="153-staff">15.3 Staff</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/staff</code></td>
+<td>List staff</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/staff</code></td>
+<td>Create staff</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/staff/{id}</code></td>
+<td>Get staff details</td>
+<td>Centre Admin+ (or self)</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/staff/{id}</code></td>
+<td>Update staff</td>
+<td>Centre Admin+ (or self for own profile)</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/staff/{id}</code></td>
+<td>Soft-delete staff</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/staff/{id}/room-assignments</code></td>
+<td>List room assignments</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/staff/{id}/room-assignments</code></td>
+<td>Assign staff to room (with time slot)</td>
+<td>Centre Admin+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="154-rooms-programs-groups-labels">15.4 Rooms / Programs / Groups / Labels</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/rooms</code></td>
+<td>List rooms</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/rooms</code></td>
+<td>Create room</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/rooms/{id}</code></td>
+<td>Get room with current ratio</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/rooms/{id}</code></td>
+<td>Update room</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/rooms/{id}</code></td>
+<td>Soft-delete room</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/programs</code></td>
+<td>List programs</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/programs</code></td>
+<td>Create program</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/programs/{id}</code></td>
+<td>Update program</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/groups</code></td>
+<td>List groups</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/groups</code></td>
+<td>Create group</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/labels</code></td>
+<td>List labels</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/labels</code></td>
+<td>Create label</td>
+<td>Centre Admin+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="155-attendance">15.5 Attendance</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/attendance</code></td>
+<td>List attendance records (filter by date, room, person_type)</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/attendance/actions/check-in</code></td>
+<td>Check in student/staff (barcode or manual)</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/attendance/actions/check-out</code></td>
+<td>Check out student/staff</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/attendance/actions/mark-absent</code></td>
+<td>Mark student absent</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/attendance/{id}</code></td>
+<td>Edit attendance (supervisor override after 24h)</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/attendance/ratio/live</code></td>
+<td>Get live ratios for all rooms</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/attendance/ratio/history</code></td>
+<td>Get ratio breach history</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/attendance/forecast</code></td>
+<td>Get attendance forecast by program</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/attendance/export</code></td>
+<td>Export sign-in sheet PDF/Excel</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/attendance/report/monthly</code></td>
+<td>Monthly attendance report</td>
+<td>Centre Admin+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="156-leaves">15.6 Leaves</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/leaves</code></td>
+<td>List leave requests</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/leaves</code></td>
+<td>Create leave request</td>
+<td>Staff+ (for self or students in room)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/leaves/{id}</code></td>
+<td>Get leave request</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/leaves/{id}/actions/approve</code></td>
+<td>Approve leave</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/leaves/{id}/actions/reject</code></td>
+<td>Reject leave</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/leaves/{id}/actions/cancel</code></td>
+<td>Cancel leave (requester)</td>
+<td>Staff+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="157-activity-posts-parent-communication">15.7 Activity Posts (Parent Communication)</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/activities</code></td>
+<td>List activity posts (filter by room, student, type, status)</td>
+<td>Staff (room-scoped), Parent (own child)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/activities</code></td>
+<td>Create activity post (requires approval before parent visibility)</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/activities/{id}</code></td>
+<td>Get activity post</td>
+<td>Staff (room-scoped), Parent (if linked)</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/activities/{id}</code></td>
+<td>Update activity post (only if not yet approved)</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/activities/{id}</code></td>
+<td>Soft-delete activity post</td>
+<td>Staff+ (own) or Centre Admin+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/activities/{id}/actions/approve</code></td>
+<td>Approve for parent visibility</td>
+<td>Centre Admin+ (or auto by content moderation)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/activities/{id}/actions/reject</code></td>
+<td>Reject with reason</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/activities/daily-report/{studentId}/{date}</code></td>
+<td>Get daily report for student</td>
+<td>Staff (room-scoped), Parent (own child)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/activities/daily-report/generate</code></td>
+<td>Manually trigger daily report generation (auto at 3:30 PM)</td>
+<td>Centre Admin+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="158-messaging">15.8 Messaging</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/threads</code></td>
+<td>List message threads (inbox)</td>
+<td>Staff+, Parent</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/threads</code></td>
+<td>Create thread (parent-staff, staff-staff)</td>
+<td>Staff+, Parent</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/threads/{id}</code></td>
+<td>Get thread with messages (paginated)</td>
+<td>Staff+, Parent (participant)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/threads/{id}/messages</code></td>
+<td>Send message</td>
+<td>Staff+, Parent (participant)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/threads/{id}/actions/mark-read</code></td>
+<td>Mark thread read for current user</td>
+<td>Staff+, Parent (participant)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/threads/{id}/actions/archive</code></td>
+<td>Archive thread</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/threads/broadcast</code></td>
+<td>Send broadcast announcement</td>
+<td>Centre Admin+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="159-media">15.9 Media</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/media/presign</code></td>
+<td>Get presigned upload URLs</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/media/{id}/download-url</code></td>
+<td>Get signed download URL (5-min expiry)</td>
+<td>Authenticated (with ownership check)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/media/{id}</code></td>
+<td>Get media metadata</td>
+<td>Authenticated (with ownership check)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1510-notifications">15.10 Notifications</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/notifications</code></td>
+<td>List current user's notifications</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/notifications/{id}/actions/mark-read</code></td>
+<td>Mark notification read</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/notifications/{id}/actions/dismiss</code></td>
+<td>Dismiss notification</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/notifications/actions/mark-all-read</code></td>
+<td>Mark all read</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/notifications/unread-count</code></td>
+<td>Get unread count (for badge)</td>
+<td>Authenticated</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/notifications/preferences</code></td>
+<td>Update notification preferences</td>
+<td>Authenticated</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1511-dashboard">15.11 Dashboard</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/dashboard/kpis</code></td>
+<td>Get KPI cards data</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/dashboard/attendance-summary</code></td>
+<td>Today's attendance summary</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/dashboard/pending-actions</code></td>
+<td>Pending actions count</td>
+<td>Staff+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/dashboard/billing-snapshot</code></td>
+<td>Billing snapshot widget data</td>
+<td>Centre Admin+, Accounts</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/dashboard/enquiry-pipeline</code></td>
+<td>Enquiry pipeline widget data</td>
+<td>Centre Admin+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1512-settings-audit-log">15.12 Settings &amp; Audit Log</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/settings</code></td>
+<td>Get all settings</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/settings</code></td>
+<td>Update settings</td>
+<td>Centre Admin+</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/settings/roles</code></td>
+<td>List roles</td>
+<td>Super Admin</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/settings/roles</code></td>
+<td>Create custom role</td>
+<td>Super Admin</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/settings/roles/{id}</code></td>
+<td>Update role permissions</td>
+<td>Super Admin</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/settings/audit-log</code></td>
+<td>Query audit log</td>
+<td>Super Admin</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/settings/audit-log/export</code></td>
+<td>Export audit log to Excel</td>
+<td>Super Admin</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="16-endpoint-catalog-phase-1-full-beyond-mvp">16. Endpoint Catalog (Phase 1 Full — Beyond MVP)</h2>
+<p>The following endpoints are added in Phase 1 sprints after MVP. Full specs generated from code.</p>
+<h3 id="161-billing-sprint-78">16.1 Billing (Sprint 7–8)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>GET    /api/v1/fee-plans
+POST   /api/v1/fee-plans
+GET    /api/v1/fee-plans/{id}
+PATCH  /api/v1/fee-plans/{id}
+DELETE /api/v1/fee-plans/{id}
+POST   /api/v1/fee-plans/{id}/components
+PATCH  /api/v1/fee-plans/{id}/components/{componentId}
+
+GET    /api/v1/invoices
+POST   /api/v1/invoices                  # Manual creation (auto-gen uses /api/v1/invoices/actions/generate)
+GET    /api/v1/invoices/{id}
+PATCH  /api/v1/invoices/{id}
+POST   /api/v1/invoices/{id}/actions/cancel
+POST   /api/v1/invoices/{id}/actions/send  # Email invoice to parent
+POST   /api/v1/invoices/{id}/payments     # Record manual payment
+GET    /api/v1/invoices/{id}/payments
+POST   /api/v1/invoices/actions/generate  # Trigger batch generation (Hangfire job)
+
+GET    /api/v1/expenses
+POST   /api/v1/expenses
+PATCH  /api/v1/expenses/{id}
+DELETE /api/v1/expenses/{id}
+
+GET    /api/v1/billing/dashboard
+
+# Templates
+GET    /api/v1/email-templates
+POST   /api/v1/email-templates
+PATCH  /api/v1/email-templates/{id}
+</code></pre></div>
+
+<h3 id="162-enquiries-tours-sprint-910">16.2 Enquiries &amp; Tours (Sprint 9–10)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>GET    /api/v1/enquiries
+POST   /api/v1/enquiries
+GET    /api/v1/enquiries/{id}
+PATCH  /api/v1/enquiries/{id}
+POST   /api/v1/enquiries/{id}/actions/transition-stage
+POST   /api/v1/enquiries/{id}/actions/convert-to-student
+POST   /api/v1/enquiries/{id}/actions/archive
+GET    /api/v1/enquiries/{id}/stage-history
+GET    /api/v1/enquiries/analytics/conversion-rate
+
+GET    /api/v1/tours
+POST   /api/v1/tours
+GET    /api/v1/tours/{id}
+PATCH  /api/v1/tours/{id}
+POST   /api/v1/tours/{id}/actions/complete
+POST   /api/v1/tours/{id}/actions/cancel
+POST   /api/v1/tours/{id}/actions/no-show
+GET    /api/v1/tours/calendar  # Calendar view
+GET    /api/v1/tours/print     # PDF export
+
+GET    /api/v1/staff/{id}/block-offs
+POST   /api/v1/staff/{id}/block-offs
+DELETE /api/v1/staff/{id}/block-offs/{blockOffId}
+</code></pre></div>
+
+<h3 id="163-calendar-sprint-1112">16.3 Calendar (Sprint 11–12)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>GET    /api/v1/calendar/school?month=2026-05
+GET    /api/v1/calendar/admin?month=2026-05
+GET    /api/v1/calendar/staff/{staffId}?month=2026-05
+GET    /api/v1/calendar/birthdays?month=2026-05&amp;type=student|staff
+GET    /api/v1/calendar/staff-leaves?month=2026-05
+GET    /api/v1/calendar/student-schedule?studentId=...&amp;month=...
+
+POST   /api/v1/calendar/events
+GET    /api/v1/calendar/events/{id}
+PATCH  /api/v1/calendar/events/{id}
+DELETE /api/v1/calendar/events/{id}
+POST   /api/v1/calendar/actions/import-holidays  # ICS import
+GET    /api/v1/calendar/ics-feed  # iCal subscription URL (per-user)
+</code></pre></div>
+
+<h3 id="164-forms-admissions-sprint-1112">16.4 Forms &amp; Admissions (Sprint 11–12)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>GET    /api/v1/forms
+POST   /api/v1/forms
+GET    /api/v1/forms/{id}
+PATCH  /api/v1/forms/{id}
+POST   /api/v1/forms/{id}/actions/publish
+POST   /api/v1/forms/{id}/actions/archive
+GET    /api/v1/forms/{id}/analytics
+
+# Public form submission (no auth)
+POST   /api/v1/public/forms/{slug}/submit
+
+# Authenticated form submission
+GET    /api/v1/forms/{id}/submissions
+GET    /api/v1/forms/{id}/submissions/{submissionId}
+
+# Admissions
+GET    /api/v1/admissions/processes
+POST   /api/v1/admissions/processes
+PATCH  /api/v1/admissions/processes/{id}
+POST   /api/v1/admissions/processes/{id}/actions/complete-step
+</code></pre></div>
+
+<h3 id="165-tools-sprint-1112">16.5 Tools (Sprint 11–12)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>GET    /api/v1/tools/id-card-templates
+POST   /api/v1/tools/id-cards/actions/generate  # Bulk PDF generation (async)
+GET    /api/v1/tools/certificate-templates
+POST   /api/v1/tools/certificates/actions/generate  # Bulk PDF generation (async)
+</code></pre></div>
+
+<h3 id="166-reports-analytics-sprint-1314">16.6 Reports &amp; Analytics (Sprint 13–14)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>POST   /api/v1/reports/attendance/monthly          # Async generation
+POST   /api/v1/reports/billing/summary
+POST   /api/v1/reports/enquiry/conversion
+POST   /api/v1/reports/app-adoption/parent
+POST   /api/v1/reports/app-adoption/staff
+POST   /api/v1/reports/audit-log/export
+POST   /api/v1/reports/sign-in-sheet
+
+GET    /api/v1/reports/history  # Recently generated reports
+GET    /api/v1/reports/{jobId}/download
+</code></pre></div>
+
+<h3 id="167-newsletter-resource-centre-sprint-56-full">16.7 Newsletter &amp; Resource Centre (Sprint 5–6 full)</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>GET    /api/v1/newsletters
+POST   /api/v1/newsletters
+GET    /api/v1/newsletters/{id}
+PATCH  /api/v1/newsletters/{id}
+POST   /api/v1/newsletters/{id}/actions/schedule
+POST   /api/v1/newsletters/{id}/actions/publish
+POST   /api/v1/newsletters/{id}/actions/ai-generate-draft  # AI-assisted content
+
+GET    /api/v1/resource-centre/folders
+POST   /api/v1/resource-centre/folders
+PATCH  /api/v1/resource-centre/folders/{id}
+GET    /api/v1/resource-centre/documents
+POST   /api/v1/resource-centre/documents
+GET    /api/v1/resource-centre/documents/{id}
+PATCH  /api/v1/resource-centre/documents/{id}
+GET    /api/v1/resource-centre/documents/{id}/versions
+GET    /api/v1/resource-centre/documents/{id}/download-log
+</code></pre></div>
+
+<hr />
+<h2 id="17-endpoint-catalog-phase-2-learning-assessment">17. Endpoint Catalog (Phase 2 — Learning &amp; Assessment)</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code># Curriculum
+GET    /api/v1/curriculum/frameworks
+GET    /api/v1/curriculum/frameworks/{id}/development-areas
+GET    /api/v1/curriculum/frameworks/{id}/age-bands
+GET    /api/v1/curriculum/milestones?frameworkId=...&amp;areaId=...&amp;ageBandId=...
+
+# Lessons
+GET    /api/v1/lessons
+POST   /api/v1/lessons
+GET    /api/v1/lessons/{id}
+PATCH  /api/v1/lessons/{id}
+DELETE /api/v1/lessons/{id}
+
+# Observations
+GET    /api/v1/observations?studentId=...
+POST   /api/v1/observations
+GET    /api/v1/observations/{id}
+PATCH  /api/v1/observations/{id}
+POST   /api/v1/observations/{id}/actions/flag-concern
+POST   /api/v1/observations/actions/ai-transcribe  # Voice-to-text dictation
+
+# Assessments
+GET    /api/v1/assessment-templates
+POST   /api/v1/assessments
+GET    /api/v1/assessments/{id}
+PATCH  /api/v1/assessments/{id}
+POST   /api/v1/assessments/{id}/actions/approve-parent-view
+GET    /api/v1/assessments/{id}/staff-view
+GET    /api/v1/assessments/{id}/parent-view
+POST   /api/v1/assessments/{id}/actions/generate-pdf
+
+# Learning Journey
+GET    /api/v1/students/{id}/learning-journey?from=...&amp;to=...
+GET    /api/v1/students/{id}/learning-journey/export  # PDF
+
+# Reports
+POST   /api/v1/reports/assessment/progress
+POST   /api/v1/reports/assessment/snapshot
+POST   /api/v1/reports/assessment/comparison
+POST   /api/v1/reports/assessment/class-milestone
+POST   /api/v1/reports/assessment/student-milestone
+</code></pre></div>
+
+<hr />
+<h2 id="18-endpoint-catalog-phase-3-multi-centre-payments-erp-open-api">18. Endpoint Catalog (Phase 3 — Multi-Centre, Payments, ERP, Open API)</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code># Multi-centre (MCG)
+GET    /api/v1/mcg                          # Multi-centre group info
+GET    /api/v1/mcg/centres                  # List centres in group
+POST   /api/v1/mcg/centres                  # Provision new centre
+PATCH  /api/v1/mcg/centres/{centreId}
+POST   /api/v1/mcg/centres/{centreId}/actions/suspend
+GET    /api/v1/mcg/dashboard                # Consolidated dashboard
+GET    /api/v1/mcg/reports/consolidated-attendance
+GET    /api/v1/mcg/reports/consolidated-revenue
+
+# Payments
+POST   /api/v1/payments/initiate            # Create payment session with gateway
+GET    /api/v1/payments/{id}/status
+POST   /api/v1/payments/webhook             # Gateway webhook receiver (signed)
+POST   /api/v1/payments/{id}/actions/refund
+GET    /api/v1/payments/methods             # List saved payment methods (per parent)
+
+# ERP Integration
+GET    /api/v1/integrations/erp/status
+POST   /api/v1/integrations/erp/sync        # Manual sync trigger
+GET    /api/v1/integrations/erp/chart-of-accounts-mapping
+PATCH  /api/v1/integrations/erp/chart-of-accounts-mapping
+
+# Open API (third-party)
+POST   /api/v1/oauth/token                  # Client credentials flow
+GET    /api/v1/open-api/students            # Same as /students but with OAuth scope check
+GET    /api/v1/open-api/invoices
+POST   /api/v1/open-api/webhooks            # Register webhook URL
+DELETE /api/v1/open-api/webhooks/{id}
+</code></pre></div>
+
+<hr />
+<h2 id="19-openapi-generation">19. OpenAPI Generation</h2>
+<h3 id="191-net-openapi-setup">19.1 .NET OpenAPI Setup</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// Program.cs</span>
+<span style="color: #F8F8F2">builder.Services.AddOpenApi(options </span><span style="color: #FF4689">=&gt;</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    options.AddDocumentTransformer((document, context, ct) </span><span style="color: #FF4689">=&gt;</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        document.Info </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> OpenApiInfo</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            Title </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;NMS API&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">            Version </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;v1&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">            Description </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;Nursery Management System API&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">            Contact </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> OpenApiContact { Email </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;api@nms.ae&quot;</span><span style="color: #F8F8F2"> }</span>
+<span style="color: #F8F8F2">        };</span>
+<span style="color: #F8F8F2">        document.Components.SecuritySchemes[</span><span style="color: #E6DB74">&quot;bearer&quot;</span><span style="color: #F8F8F2">] </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">new</span><span style="color: #F8F8F2"> OpenApiSecurityScheme</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            Type </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> SecuritySchemeType.Http,</span>
+<span style="color: #F8F8F2">            Scheme </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;bearer&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">            BearerFormat </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;JWT&quot;</span>
+<span style="color: #F8F8F2">        };</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">return</span><span style="color: #F8F8F2"> Task.CompletedTask;</span>
+<span style="color: #F8F8F2">    });</span>
+<span style="color: #F8F8F2">});</span>
+
+<span style="color: #959077">// In production</span>
+<span style="color: #66D9EF">if</span><span style="color: #F8F8F2"> (app.Environment.IsProduction())</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    app.MapOpenApi(</span><span style="color: #E6DB74">&quot;/openapi.json&quot;</span><span style="color: #F8F8F2">);  </span><span style="color: #959077">// Served at /openapi.json</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="192-frontend-client-generation">19.2 Frontend Client Generation</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># Generate TypeScript client from OpenAPI</span>
+pnpm<span style="color: #F8F8F2"> exec </span>openapi-typescript-codegen<span style="color: #F8F8F2"> </span>--input<span style="color: #F8F8F2"> </span>http://localhost:5000/openapi.json<span style="color: #F8F8F2"> </span>--output<span style="color: #F8F8F2"> </span>src/api/generated<span style="color: #F8F8F2"> </span>--client<span style="color: #F8F8F2"> </span>axios
+</code></pre></div>
+
+<p>Run as a script in <code>web/package.json</code>:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;scripts&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;generate:api&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;openapi-typescript-codegen --input http://localhost:5000/openapi.json --output src/api/generated --client axios&quot;</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<p>Run after every API change. Commit generated code.</p>
+<h3 id="193-api-documentation-ui">19.3 API Documentation UI</h3>
+<p>Use Scalar (modern, beautiful alternative to Swagger UI):</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">app.MapScalarApiReference(</span><span style="color: #E6DB74">&quot;/api-docs&quot;</span><span style="color: #F8F8F2">);</span>
+</code></pre></div>
+
+<p>Available at <code>/api-docs</code> in dev + staging. Not exposed in production.</p>
+<hr />
+<h2 id="20-versioning-deprecation">20. Versioning &amp; Deprecation</h2>
+<h3 id="201-versioning-strategy">20.1 Versioning Strategy</h3>
+<ul>
+<li>URI-based: <code>/api/v1/</code>, <code>/api/v2/</code>.</li>
+<li>v2 introduced only for breaking changes (removed fields, changed semantics).</li>
+<li>v1 + v2 run in parallel for at least 6 months.</li>
+<li>Deprecation: <code>Sunset</code> HTTP header on deprecated endpoints with deprecation date.</li>
+<li>Internal API + mobile API versioned together.</li>
+<li>Open API (Phase 3) versioned independently.</li>
+</ul>
+<h3 id="202-backward-compatibility">20.2 Backward Compatibility</h3>
+<p>The following changes are non-breaking (no version bump):
+- Adding new endpoint.
+- Adding optional field to request body.
+- Adding new field to response body.
+- Adding new enum value (clients should handle unknown values gracefully).
+- Changing field order in response.
+- Adding optional query parameter.</p>
+<p>The following ARE breaking (require version bump):
+- Removing endpoint.
+- Removing/renaming field in request or response.
+- Changing field type.
+- Changing field semantics.
+- Making optional field required.
+- Changing error response structure.</p>
+<hr />
+<h2 id="21-caching-headers">21. Caching Headers</h2>
+<table>
+<thead>
+<tr>
+<th>Endpoint type</th>
+<th>Cache-Control</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET list (mutable)</td>
+<td><code>no-cache</code></td>
+<td>Always fresh</td>
+</tr>
+<tr>
+<td>GET list (immutable reference data, e.g., rooms)</td>
+<td><code>private, max-age=60</code></td>
+<td>1 min cache</td>
+</tr>
+<tr>
+<td>GET single (mutable)</td>
+<td><code>no-cache</code></td>
+<td>Always fresh</td>
+</tr>
+<tr>
+<td>GET single (immutable, e.g., audit log entry)</td>
+<td><code>private, max-age=300</code></td>
+<td>5 min cache</td>
+</tr>
+<tr>
+<td>Generated PDFs / reports</td>
+<td><code>private, max-age=3600</code></td>
+<td>1 hour (signed URLs anyway)</td>
+</tr>
+<tr>
+<td>Static assets (images, JS, CSS)</td>
+<td><code>public, max-age=31536000, immutable</code></td>
+<td>1 year (filename hashed)</td>
+</tr>
+</tbody>
+</table>
+<p>All responses include <code>ETag</code> for conditional requests (<code>If-None-Match</code> → 304 Not Modified).</p>
+<hr />
+<h2 id="22-health-diagnostic-endpoints">22. Health &amp; Diagnostic Endpoints</h2>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>GET /health/live     # 200 if process is alive (no DB check)
+GET /health/ready    # 200 if can serve traffic (DB + Redis + RabbitMQ connected)
+GET /health/startup  # 200 if startup completed (used by K8s startup probe)
+GET /metrics         # Prometheus metrics (auth: admin only, or mTLS)
+GET /version         # { &quot;version&quot;: &quot;1.0.0&quot;, &quot;commit&quot;: &quot;abc123&quot;, &quot;build_time&quot;: &quot;...&quot; }
+</code></pre></div>
+
+<hr />
+<p><strong>Next file to read</strong>: <code>09-AUTH-SECURITY.md</code> for Keycloak realms, RBAC matrix, and security details.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-07-database-schema.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Database Schema</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-09-auth-security.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Auth & Security</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

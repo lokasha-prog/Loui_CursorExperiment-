@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NMS Cursor Execution Prompt — Master</title>
+
+  <!-- ─── Nursery CRM UI DNA ─── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; margin: 0;
+    }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; display: inline-block; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    /* Code block */
+    .code-block {
+      background: #0F172A; color: #F1F5F9;
+      border-radius: 12px; padding: 16px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      line-height: 1.6; overflow-x: auto; position: relative;
+      margin: 12px 0;
+    }
+    .code-block .key { color: #FBBF24; }
+    .code-block .string { color: #86EFAC; }
+    .code-block .comment { color: #64748B; }
+    .code-block .number { color: #FCA5A5; }
+    .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .code-block:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+
+    /* Prompt block */
+    .prompt-block {
+      background: #FFF8F3; border: 2px solid var(--c-primary);
+      border-radius: 12px; padding: 16px; margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      line-height: 1.6; white-space: pre-wrap; color: #1E293B;
+      position: relative;
+    }
+    .prompt-block .copy-btn { opacity: 1; }
+
+    /* Step card */
+    .step-card {
+      background: white; border: 1px solid var(--c-border);
+      border-radius: 12px; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      margin: 8px 0; transition: all 200ms var(--ease);
+    }
+    .step-card:hover { border-left-color: var(--c-amber); box-shadow: 0 4px 12px -2px rgba(0,0,0,0.06); }
+    .step-card.done { border-left-color: var(--c-success); }
+    .step-card.active { border-left-color: var(--c-primary); background: #FFF8F3; }
+    .step-card.pending { border-left-color: #CBD5E1; opacity: 0.7; }
+
+    /* Section anchors */
+    h2, h3 { scroll-margin-top: 80px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ TOP HEADER ═══ -->
+<div class="accent-bar h-1.5"></div>
+
+<header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+  <div class="max-w-5xl mx-auto px-4 lg:px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-sm">
+        <i data-lucide="terminal" class="w-5 h-5 text-amber-300"></i>
+      </div>
+      <div>
+        <h1 class="font-heading text-lg font-bold text-slate-900 flex items-center gap-2">
+          NMS <span class="text-amber-600">Cursor Execution Prompt</span>
+          <span class="pill pill-amber">MASTER</span>
+        </h1>
+        <p class="text-[10px] font-mono text-slate-500">Paste into Cursor chat to bootstrap + execute the project step-by-step</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="project-pmo.html" class="btn btn-secondary btn-sm"><i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">PMO</span></a>
+      <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">Index</span></a>
+      <button onclick="copyFullPrompt()" class="btn btn-dark btn-sm"><i data-lucide="copy" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">Copy All</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<div class="max-w-5xl mx-auto px-4 lg:px-6 py-6 space-y-6">
+
+  <!-- HERO -->
+  <section class="nursery-card p-6 lg:p-8 bg-gradient-to-br from-white to-amber-50/30 relative overflow-hidden">
+    <div class="floating-blob animate-float" style="background:#E07A5F;width:300px;height:300px;top:-100px;right:-50px;"></div>
+    <div class="floating-blob animate-float" style="background:#81B29A;width:250px;height:250px;bottom:-80px;left:-50px;animation-delay:-3s;"></div>
+
+    <div class="relative z-10">
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <span class="pill pill-info">READY TO EXECUTE</span>
+        <span class="pill pill-done">58 ASSETS</span>
+        <span class="pill pill-purple">30 SPRINTS</span>
+        <span class="pill pill-amber">3 PHASES</span>
+      </div>
+
+      <h2 class="font-heading text-2xl lg:text-3xl font-bold text-slate-900 mb-3">
+        The complete prompt to turn <span class="text-amber-700">specs into working code.</span>
+      </h2>
+
+      <p class="text-sm text-slate-600 leading-relaxed max-w-3xl mb-6">
+        This page contains the master execution prompt for the NMS project. Paste it into Cursor's chat (or use as <code class="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">@</code> context) and the agent will bootstrap the monorepo, execute sprint-by-sprint, and update the PMO dashboard as it progresses.
+      </p>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="nursery-card p-3 text-center">
+          <div class="font-heading text-2xl font-bold text-slate-900">22</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Spec Docs</div>
+        </div>
+        <div class="nursery-card p-3 text-center">
+          <div class="font-heading text-2xl font-bold text-slate-900">34</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Visual Mockups</div>
+        </div>
+        <div class="nursery-card p-3 text-center">
+          <div class="font-heading text-2xl font-bold text-slate-900">30</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Sprints</div>
+        </div>
+        <div class="nursery-card p-3 text-center">
+          <div class="font-heading text-2xl font-bold text-slate-900 flex items-center justify-center gap-1"><span class="pulse-dot"></span>Live</div>
+          <div class="text-[10px] font-mono text-slate-500 uppercase">Self-Updating</div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-3">
+        <button onclick="copyFullPrompt()" class="btn btn-primary btn-lg"><i data-lucide="copy" class="w-4 h-4"></i> Copy Full Prompt</button>
+        <a href="#step-0" class="btn btn-dark btn-lg"><i data-lucide="arrow-down" class="w-4 h-4"></i> Start Reading</a>
+        <a href="project-pmo.html" class="btn btn-secondary btn-lg"><i data-lucide="clipboard-list" class="w-4 h-4"></i> View PMO Dashboard</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ HOW TO USE ═══ -->
+  <section class="nursery-card p-5">
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="info" class="w-5 h-5 text-amber-600"></i>
+      <h3 class="font-heading text-base font-bold text-slate-900">How to Use This Prompt</h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+        <div class="flex items-center gap-2 mb-2"><span class="font-heading font-bold text-amber-800">1</span><i data-lucide="copy" class="w-4 h-4 text-amber-600"></i><span class="font-bold text-xs text-slate-800">Copy the prompt</span></div>
+        <p class="text-[11px] text-slate-600">Click "Copy Full Prompt" button above. The entire prompt is copied to your clipboard.</p>
+      </div>
+      <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+        <div class="flex items-center gap-2 mb-2"><span class="font-heading font-bold text-amber-800">2</span><i data-lucide="cursor" class="w-4 h-4 text-amber-600"></i><span class="font-bold text-xs text-slate-800">Paste in Cursor</span></div>
+        <p class="text-[11px] text-slate-600">Open Cursor in your NMS repo. Paste the prompt into the chat. Cursor will read the specs and start executing.</p>
+      </div>
+      <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+        <div class="flex items-center gap-2 mb-2"><span class="font-heading font-bold text-amber-800">3</span><i data-lucide="clipboard-list" class="w-4 h-4 text-amber-600"></i><span class="font-bold text-xs text-slate-800">Monitor PMO</span></div>
+        <p class="text-[11px] text-slate-600">After each sprint, Cursor updates <code class="font-mono text-[10px]">project-pmo.html</code>. Open it to see live progress.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PROJECT CONTEXT ═══ -->
+  <section class="nursery-card p-5">
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="book-open" class="w-5 h-5 text-amber-600"></i>
+      <h3 class="font-heading text-base font-bold text-slate-900">Project Context</h3>
+    </div>
+    <p class="text-sm text-slate-700 mb-4">You are about to build the <strong>Nursery Management System (NMS) — Bright Futures</strong>, a full-stack platform for UAE early childhood centres. The project is <strong>completely specified</strong> — your job is to execute, not design.</p>
+
+    <div class="overflow-x-auto custom-scrollbar">
+      <table class="w-full text-xs">
+        <thead class="bg-slate-50 border-b border-slate-200 text-[10px] font-mono text-slate-500 uppercase">
+          <tr><th class="text-left p-2">Asset Type</th><th class="text-center p-2">Count</th><th class="text-left p-2">Location</th><th class="text-left p-2">Purpose</th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr><td class="p-2 font-bold">.md spec files</td><td class="p-2 text-center">22</td><td class="p-2 font-mono">docs/prerequisites/*.md</td><td class="p-2 text-slate-600">Build-ready specifications</td></tr>
+          <tr><td class="p-2 font-bold">Spec HTML demos</td><td class="p-2 text-center">22</td><td class="p-2 font-mono">docs/screens/spec-*.html</td><td class="p-2 text-slate-600">Same specs, rendered</td></tr>
+          <tr><td class="p-2 font-bold">Web screen mockups</td><td class="p-2 text-center">25</td><td class="p-2 font-mono">docs/screens/screen-*.html</td><td class="p-2 text-slate-600">Visual target for UI</td></tr>
+          <tr><td class="p-2 font-bold">Mobile persona mockups</td><td class="p-2 text-center">7</td><td class="p-2 font-mono">docs/screens/mobile-*.html</td><td class="p-2 text-slate-600">Phone mockups per role</td></tr>
+          <tr><td class="p-2 font-bold">Phase 3 previews</td><td class="p-2 text-center">2</td><td class="p-2 font-mono">docs/screens/phase3-*.html</td><td class="p-2 text-slate-600">Multi-centre + payments</td></tr>
+          <tr class="bg-amber-50/50"><td class="p-2 font-bold">PMO dashboard</td><td class="p-2 text-center">1</td><td class="p-2 font-mono">docs/screens/project-pmo.html</td><td class="p-2 text-slate-600"><strong>Status tracker — UPDATE after every sprint</strong></td></tr>
+          <tr><td class="p-2 font-bold">Cursor rules</td><td class="p-2 text-center">1</td><td class="p-2 font-mono">.cursorrules</td><td class="p-2 text-slate-600">Coding conventions</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-4 p-4 rounded-xl bg-slate-900 text-white">
+      <div class="text-[10px] font-mono text-amber-300 uppercase mb-2 font-bold">Tech Stack — LOCKED (Do Not Suggest Alternatives)</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] font-mono">
+        <div><span class="text-slate-400">Backend:</span> .NET 8 + C# 12 + EF Core 8</div>
+        <div><span class="text-slate-400">DB:</span> PostgreSQL 16 + RLS</div>
+        <div><span class="text-slate-400">Real-time:</span> SignalR + Redis</div>
+        <div><span class="text-slate-400">Queue:</span> RabbitMQ + MassTransit</div>
+        <div><span class="text-slate-400">Identity:</span> Keycloak 24</div>
+        <div><span class="text-slate-400">Web:</span> React 18 + Vite + TS</div>
+        <div><span class="text-slate-400">Mobile:</span> RN 0.74 + Expo 51</div>
+        <div><span class="text-slate-400">Infra:</span> K8s + Terraform + GHA</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STEP 0: BOOTSTRAP ═══ -->
+  <section class="nursery-card p-5" id="step-0">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <i data-lucide="rocket" class="w-5 h-5 text-amber-600"></i>
+        <h3 class="font-heading text-base font-bold text-slate-900">Step 0: Bootstrap (do this ONCE)</h3>
+      </div>
+      <button onclick="copyStep0()" class="btn btn-secondary btn-sm"><i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy</button>
+    </div>
+    <p class="text-xs text-slate-600 mb-4">Before any coding, the agent must read the specs, scaffold the repo, and set up the local environment.</p>
+
+    <div class="prompt-block" id="step0Prompt">You are about to execute the NMS (Nursery Management System) Bright Futures project. This is a fully specified project — your job is to execute, not design.
+
+STEP 0: BOOTSTRAP
+
+1. Read these mandatory spec files (in docs/screens/ — open as HTML OR read .md in docs/prerequisites/):
+   - spec-00-master-brief.html (project overview, locked decisions)
+   - spec-02-prd-mvp.html (MVP scope — build this first!)
+   - spec-05-tech-stack.html (concrete stack + scaffolding commands §11)
+   - spec-06-architecture.html (modular monolith, module boundaries)
+   - spec-07-database-schema.html (entities, RLS, JSONB i18n, audit log)
+   - spec-09-auth-security.html (Keycloak, RBAC, parent-child ownership)
+   - spec-10-multi-tenancy.html (shared schema + RLS, on-prem vs SaaS)
+   - spec-18-cursor-rules.html (PASTE content into .cursorrules at repo root)
+   - spec-19-roadmap-sprints.html (sprint-by-sprint plan, 30 sprints)
+   - project-pmo.html (current status dashboard — you will update this)
+
+2. Confirm local toolchain:
+   - dotnet 8 SDK, Node.js 20 + pnpm 9, Docker Desktop, Expo CLI
+
+3. Create monorepo:
+   mkdir nms && cd nms && git init
+   mkdir -p backend web mobile infra docs/prerequisites docs/screens
+
+4. Copy assets:
+   - docs/prerequisites/*.md (22 files)
+   - docs/screens/*.html (58 files including project-pmo.html)
+   - Paste spec-18-cursor-rules.html content into .cursorrules
+
+5. Run scaffolding commands from spec-05-tech-stack.html §11:
+   - dotnet new sln -n NMS
+   - dotnet new webapi, classlib for NMS.Api, NMS.Domain, NMS.Application, NMS.Infrastructure, NMS.Modules, NMS.Shared
+   - pnpm create vite web --template react-ts
+   - npx create-expo-app mobile --template typescript
+   - Install all deps from spec-05-tech-stack.html §1
+
+6. Set up Docker Compose (spec-11-devops.html §11.2):
+   PostgreSQL 16, Redis 7, RabbitMQ 3.13, Keycloak 24, MinIO, MailHog
+
+7. Initial commit: "Sprint 0: Initial monorepo scaffold with prerequisites + cursor rules"
+
+8. UPDATE PMO DASHBOARD (docs/screens/project-pmo.html):
+   Edit PROJECT_STATE object at bottom:
+   - sprints[0].status = "done", sprints[0].pct = 100
+   - sprints[1].status = "active", sprints[1].pct = 5
+   - overallPct = 5
+   - lastUpdated = current timestamp
+   Commit: "docs(pmo): Sprint 0 complete, Sprint 1 started"
+
+Confirm when Step 0 is done, then proceed to Sprint 1.
+<button class="copy-btn" onclick="copyStep0()">Copy</button></div>
+  </section>
+
+  <!-- ═══ SPRINT EXECUTION LOOP ═══ -->
+  <section class="nursery-card p-5">
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="repeat" class="w-5 h-5 text-amber-600"></i>
+      <h3 class="font-heading text-base font-bold text-slate-900">Sprint Execution Loop (Steps 1-30)</h3>
+    </div>
+    <p class="text-xs text-slate-600 mb-4">For each sprint, follow this exact 7-step loop. Do NOT batch sprints.</p>
+
+    <div class="space-y-2">
+      <div class="step-card active">
+        <div class="flex items-center gap-2 mb-1"><span class="font-heading font-bold text-amber-700">1</span><i data-lucide="book-open" class="w-3.5 h-3.5 text-amber-600"></i><span class="font-bold text-xs text-slate-800">READ THE SPEC</span></div>
+        <p class="text-[11px] text-slate-600">Open spec-19-roadmap-sprints.html, find Sprint N, read deliverables + linked spec files.</p>
+      </div>
+      <div class="step-card active">
+        <div class="flex items-center gap-2 mb-1"><span class="font-heading font-bold text-amber-700">2</span><i data-lucide="eye" class="w-3.5 h-3.5 text-amber-600"></i><span class="font-bold text-xs text-slate-800">READ THE VISUAL TARGET</span></div>
+        <p class="text-[11px] text-slate-600">Open corresponding screen-*.html or mobile-*.html. Match layout, components, data, interactions.</p>
+      </div>
+      <div class="step-card active">
+        <div class="flex items-center gap-2 mb-1"><span class="font-heading font-bold text-amber-700">3</span><i data-lucide="code" class="w-3.5 h-3.5 text-amber-600"></i><span class="font-bold text-xs text-slate-800">IMPLEMENT</span></div>
+        <p class="text-[11px] text-slate-600">Follow .cursorrules conventions. Backend: entities → EF config → migration → DTOs → handlers → controllers → tests. Frontend: OpenAPI client → TanStack hooks → components matching mockup → tests.</p>
+      </div>
+      <div class="step-card active">
+        <div class="flex items-center gap-2 mb-1"><span class="font-heading font-bold text-amber-700">4</span><i data-lucide="shield-check" class="w-3.5 h-3.5 text-red-600"></i><span class="font-bold text-xs text-slate-800">ENFORCE NON-NEGOTIABLES</span></div>
+        <p class="text-[11px] text-slate-600">tenant_id + RLS on every entity. Parent-child ownership (404 not 403). CSS logical properties only. All strings via t('key'). Money as integer fils. Audit log on every mutation. 80/75/70% test coverage.</p>
+      </div>
+      <div class="step-card active">
+        <div class="flex items-center gap-2 mb-1"><span class="font-heading font-bold text-amber-700">5</span><i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i><span class="font-bold text-xs text-slate-800">RUN TESTS</span></div>
+        <p class="text-[11px] text-slate-600">dotnet test, pnpm test (web + mobile). All must pass before commit.</p>
+      </div>
+      <div class="step-card active">
+        <div class="flex items-center gap-2 mb-1"><span class="font-heading font-bold text-amber-700">6</span><i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-amber-600"></i><span class="font-bold text-xs text-slate-800">UPDATE PMO DASHBOARD</span></div>
+        <p class="text-[11px] text-slate-600">Edit PROJECT_STATE in project-pmo.html: mark sprint done, set next active, update overallPct. Commit.</p>
+      </div>
+      <div class="step-card active">
+        <div class="flex items-center gap-2 mb-1"><span class="font-heading font-bold text-amber-700">7</span><i data-lucide="git-commit" class="w-3.5 h-3.5 text-amber-600"></i><span class="font-bold text-xs text-slate-800">GIT COMMIT + SUMMARY</span></div>
+        <p class="text-[11px] text-slate-600">Conventional commit: feat(&lt;module&gt;): &lt;desc&gt;. Summarize what was built, files changed, tests added, next sprint preview.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SPRINT 1 PROMPT ═══ -->
+  <section class="nursery-card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <i data-lucide="git-branch" class="w-5 h-5 text-amber-600"></i>
+        <h3 class="font-heading text-base font-bold text-slate-900">Sprint 1 Prompt — Centre Management + Auth</h3>
+      </div>
+      <button onclick="copySprint1()" class="btn btn-secondary btn-sm"><i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy</button>
+    </div>
+
+    <div class="prompt-block" id="sprint1Prompt">SPRINT 1: CENTRE MANAGEMENT + AUTH (Weeks 3-4)
+
+Read these files:
+- docs/screens/spec-19-roadmap-sprints.html (Sprint 1 section)
+- docs/screens/spec-02-prd-mvp.html (§3.2 Centre Management)
+- docs/screens/spec-07-database-schema.html (§2.1 Tenant, §2.2 Centre Management entities)
+- docs/screens/spec-08-api-spec.html (§15.1 Auth, §15.2-15.4 Students/Staff/Rooms)
+- docs/screens/spec-09-auth-security.html (§1 Identity, §2 RBAC, §3 Permission matrix)
+- docs/screens/spec-10-multi-tenancy.html (§3 Tenant context, §4 RLS setup)
+- docs/screens/screen-login.html (visual target for login)
+- docs/screens/screen-student-profile.html (visual target for student detail)
+- docs/screens/screen-staff-list.html (visual target for staff list)
+- docs/screens/screen-rooms-programs.html (visual target for rooms)
+
+Implement Sprint 1 per spec-19:
+1. Keycloak integration in backend (JWT validation, role-based auth)
+2. Keycloak JS adapter in web frontend
+3. Login page (match screen-login.html) + auth flow (login, logout, refresh)
+4. 5 roles: super_admin, centre_admin, teacher, parent, receptionist
+5. Tenant context middleware + RLS setup on all tenant tables
+6. EF Core entities: Student, Staff, Room, Program, StudentGroup, Label, Guardian, StudentGuardian, AppUser, Role, UserRole
+7. EF Core migrations for all entities + RLS policies
+8. Audit log interceptor + audit_log table (append-only trigger)
+9. API endpoints: students CRUD, staff CRUD, rooms CRUD, programs CRUD, groups CRUD, labels CRUD, guardians CRUD
+10. Web frontend: login page, dashboard shell, students list+create, rooms list+create, staff list+create
+11. i18n setup (EN + AR), language switcher, RTL support
+12. shadcn/ui setup with theme (match the DNA: terracotta #E07A5F + sage #81B29A + amber #E9C46A, Fredoka + Nunito + JetBrains Mono fonts)
+13. Unit tests for all entities + handlers (target 80% coverage)
+14. Integration tests for all endpoints
+15. Parent-child ownership tests (parent A cannot access parent B's child → 404)
+16. Cross-tenant isolation tests (staff A tenant A cannot access tenant B → 404)
+
+Follow conventions in .cursorrules. Use the directory structure specified in spec-05-tech-stack.html §4.
+Match the visual design in the screen-*.html mockups EXACTLY.
+
+After completing, update docs/screens/project-pmo.html PROJECT_STATE:
+- sprints[1].status = "done", pct = 100
+- sprints[2].status = "active", pct = 5
+- overallPct = 10
+- lastUpdated = current timestamp
+
+Commit: "feat(centre-mgmt): Sprint 1 — student/staff/room/program/guardian CRUD with RBAC, RLS, audit, tests"
+<button class="copy-btn" onclick="copySprint1()">Copy</button></div>
+  </section>
+
+  <!-- ═══ SPRINTS 2-5 PROMPTS (collapsible) ═══ -->
+  <section class="nursery-card p-5">
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="layers" class="w-5 h-5 text-amber-600"></i>
+      <h3 class="font-heading text-base font-bold text-slate-900">Sprints 2-5 Prompts (MVP Pilot)</h3>
+    </div>
+
+    <div class="space-y-3">
+      <details class="nursery-card p-4 border-l-4 border-amber-500">
+        <summary class="cursor-pointer font-bold text-sm text-slate-800 flex items-center gap-2">
+          <span class="pill pill-amber">SPRINT 2</span> Attendance + Dashboard (Weeks 5-6)
+          <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
+        </summary>
+        <div class="mt-3 text-xs text-slate-600 space-y-2">
+          <p><strong>Read:</strong> spec-19 (Sprint 2), spec-02 §3.3, spec-07 §2.3 + §4, spec-08 §15.5-15.6, spec-06 §4.2 + §5</p>
+          <p><strong>Visual targets:</strong> screen-attendance.html, screen-dashboard.html</p>
+          <p><strong>Implement:</strong> AttendanceRecord (partitioned), AttendanceEvent (immutable), LeaveRequest. Barcode check-in. SignalR hub + Redis backplane. Live ratio calculation + breach detection. Dashboard with KPIs, live ratio widget, pending actions, quick actions. Materialized views. Hangfire. Leave workflow.</p>
+          <p><strong>Performance:</strong> Dashboard p95 &lt; 2s (k6 smoke test)</p>
+          <p><strong>PMO update:</strong> sprints[2] done, sprints[3] active, overallPct = 15</p>
+          <p><strong>Commit:</strong> feat(attendance): Sprint 2 — barcode check-in, live ratio via SignalR, dashboard, leaves</p>
+        </div>
+      </details>
+
+      <details class="nursery-card p-4 border-l-4 border-amber-500">
+        <summary class="cursor-pointer font-bold text-sm text-slate-800 flex items-center gap-2">
+          <span class="pill pill-amber">SPRINT 3</span> Parent Communication + Messaging (Weeks 7-8)
+          <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
+        </summary>
+        <div class="mt-3 text-xs text-slate-600 space-y-2">
+          <p><strong>Read:</strong> spec-19 (Sprint 3), spec-02 §3.4-3.5, spec-07 §2.4-2.5, spec-08 §15.7-15.9</p>
+          <p><strong>Visual targets:</strong> screen-activity-feed.html, screen-messaging.html</p>
+          <p><strong>Implement:</strong> Media, ActivityPost (8 types: photo, video, diary, food, toilet, medical, mood, announcement), approval workflow. Presigned URL upload. Content moderation (ClamAV + Rekognition). Daily report generation (Hangfire 3:30 PM). Messaging: shared inbox, threads, read receipts, broadcast.</p>
+          <p><strong>PMO update:</strong> sprints[3] done, sprints[4] active, overallPct = 20</p>
+          <p><strong>Commit:</strong> feat(parent-comms): Sprint 3 — activity feed, approval workflow, media pipeline, messaging</p>
+        </div>
+      </details>
+
+      <details class="nursery-card p-4 border-l-4 border-amber-500">
+        <summary class="cursor-pointer font-bold text-sm text-slate-800 flex items-center gap-2">
+          <span class="pill pill-amber">SPRINT 4</span> Notifications + Audit + Emergency (Weeks 9-10)
+          <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
+        </summary>
+        <div class="mt-3 text-xs text-slate-600 space-y-2">
+          <p><strong>Read:</strong> spec-19 (Sprint 4), spec-02 §3.7-3.8, spec-07 §2.7-2.8, spec-08 §15.10+15.12, spec-15 (full notification spec)</p>
+          <p><strong>Visual targets:</strong> screen-notifications.html, screen-emergency-report.html, screen-settings-audit.html</p>
+          <p><strong>Implement:</strong> 3-tier notification system (Critical/Operational/Informational). FCM push, SES email, in-app. Retry + fallback. Audit log viewer (Super Admin). Emergency child report (QuestPDF, one-click + bulk). Mobile app skeleton (login, dashboard, attendance, feed, messaging, push).</p>
+          <p><strong>PMO update:</strong> sprints[4] done, sprints[5] active, overallPct = 25</p>
+          <p><strong>Commit:</strong> feat(notifications): Sprint 4 — 3-tier system, audit viewer, emergency reports, mobile skeleton</p>
+        </div>
+      </details>
+
+      <details class="nursery-card p-4 border-l-4 border-amber-500">
+        <summary class="cursor-pointer font-bold text-sm text-slate-800 flex items-center gap-2">
+          <span class="pill pill-amber">SPRINT 5</span> Pilot Deployment + Go-Live (Weeks 11-12)
+          <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
+        </summary>
+        <div class="mt-3 text-xs text-slate-600 space-y-2">
+          <p><strong>Read:</strong> spec-19 (Sprint 5), spec-02 §4-5, spec-11 (full DevOps), spec-21 (delivery checklist)</p>
+          <p><strong>Implement:</strong> Production Terraform (EKS, RDS, ElastiCache, MQ, S3, CloudFront, Route53, KMS, Secrets, WAF). Helm charts. CI/CD pipeline. Observability stack. Backups. Staging deploy. UAT (1 week). Pilot nursery onboarding. Go-live. Feedback loop.</p>
+          <p><strong>Exit criteria:</strong> ≥10 staff + ≥30 parents active, ≥80% attendance logged, 0 critical bugs, p95 &lt; 2.5s, ratio alert &lt; 30s, NPS ≥ 30</p>
+          <p><strong>PMO update:</strong> sprints[5] done, sprints[6] active, overallPct = 35, pilotNurseries = 1, phasesLive = 1</p>
+          <p><strong>Commit:</strong> feat(pilot): Sprint 5 — production deploy, pilot live, MVP complete</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ═══ SPRINTS 6-30 TEMPLATE ═══ -->
+  <section class="nursery-card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <i data-lucide="file-code" class="w-5 h-5 text-amber-600"></i>
+        <h3 class="font-heading text-base font-bold text-slate-900">Sprints 6-30 Template (Phase 1 Full + Phase 2 + Phase 3)</h3>
+      </div>
+      <button onclick="copyTemplate()" class="btn btn-secondary btn-sm"><i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy</button>
+    </div>
+
+    <div class="prompt-block" id="templatePrompt">SPRINT N: <SPRINT TITLE> (Weeks X-Y)
+
+Read these files:
+- docs/screens/spec-19-roadmap-sprints.html (Sprint N section)
+- docs/screens/spec-03-prd-phase1.html (relevant module section)  [or spec-04 for Phase 2/3]
+- docs/screens/spec-08-api-spec.html (relevant endpoints)
+- docs/screens/screen-<MODULE>.html (visual target — match EXACTLY)
+
+Implement Sprint N per spec-19:
+1. <deliverable 1 from spec-19>
+2. <deliverable 2>
+3. <etc.>
+
+Match the visual target in screen-<MODULE>.html.
+Follow conventions in .cursorrules.
+Enforce non-negotiables: tenant_id + RLS, parent-child ownership (404), CSS logical properties, t() for all strings, JSONB i18n, integer fils, audit log, 80% test coverage.
+
+After completing, update docs/screens/project-pmo.html PROJECT_STATE:
+- sprints[N].status = "done", pct = 100
+- sprints[N+1].status = "active", pct = 5
+- overallPct = <(N+1)/30 * 100, rounded>
+- lastUpdated = current timestamp
+
+Commit: "feat(<module>): Sprint N — <description>"
+<button class="copy-btn" onclick="copyTemplate()">Copy</button></div>
+
+    <div class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+      <div class="text-[10px] font-mono text-slate-500 uppercase font-bold mb-2">Sprint → Visual Mockup Mapping</div>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-[11px] font-mono">
+        <div><span class="pill pill-purple">S7-8</span> screen-billing.html</div>
+        <div><span class="pill pill-purple">S9-10</span> screen-enquiry-pipeline.html</div>
+        <div><span class="pill pill-purple">S9-10</span> screen-tour-management.html</div>
+        <div><span class="pill pill-purple">S11-12</span> screen-calendar.html</div>
+        <div><span class="pill pill-purple">S11-12</span> screen-forms-builder.html</div>
+        <div><span class="pill pill-purple">S11-12</span> screen-admissions-process.html</div>
+        <div><span class="pill pill-purple">S11-12</span> screen-id-cards.html</div>
+        <div><span class="pill pill-purple">S11-12</span> screen-certificates.html</div>
+        <div><span class="pill pill-purple">S13-14</span> screen-reports-analytics.html</div>
+        <div><span class="pill pill-purple">S13-14</span> screen-notification-preferences.html</div>
+        <div><span class="pill pill-purple">S15-16</span> mobile-teacher.html</div>
+        <div><span class="pill pill-purple">S15-16</span> mobile-parent-feed.html</div>
+        <div><span class="pill pill-purple">S15-16</span> mobile-admin.html</div>
+        <div><span class="pill pill-purple">S15-16</span> mobile-accounts.html</div>
+        <div><span class="pill pill-purple">S15-16</span> mobile-receptionist.html</div>
+        <div><span class="pill pill-info">S19-22</span> spec-04 §2 (EYFS)</div>
+        <div><span class="pill pill-info">S23-24</span> spec-04 §2 (Montessori)</div>
+        <div><span class="pill pill-done">S27</span> phase3-multi-centre.html</div>
+        <div><span class="pill pill-done">S28</span> phase3-payment-flow.html</div>
+        <div><span class="pill pill-done">S28</span> mobile-parent-payments.html</div>
+        <div><span class="pill pill-done">S27</span> mobile-superadmin.html</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CRITICAL RULES ═══ -->
+  <section class="nursery-card p-5 bg-red-50/30 border-red-200">
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+      <h3 class="font-heading text-base font-bold text-slate-900">Critical Rules (Do Not Violate)</h3>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="p-3 rounded-xl bg-white border border-red-200">
+        <div class="font-bold text-xs text-red-900 mb-1">📚 Read Before You Code</div>
+        <p class="text-[11px] text-slate-600">Always read the relevant spec file + visual mockup before implementing. Specs are authoritative.</p>
+      </div>
+      <div class="p-3 rounded-xl bg-white border border-red-200">
+        <div class="font-bold text-xs text-red-900 mb-1">📊 Update PMO After Every Sprint</div>
+        <p class="text-[11px] text-slate-600">Open project-pmo.html, edit PROJECT_STATE, commit. Dashboard is source of truth.</p>
+      </div>
+      <div class="p-3 rounded-xl bg-white border border-red-200">
+        <div class="font-bold text-xs text-red-900 mb-1">🏃 One Sprint at a Time</div>
+        <p class="text-[11px] text-slate-600">Never batch. Complete one fully (tests + PMO + commit) before starting next.</p>
+      </div>
+      <div class="p-3 rounded-xl bg-white border border-red-200">
+        <div class="font-bold text-xs text-red-900 mb-1">🎨 Match the Visual DNA</div>
+        <p class="text-[11px] text-slate-600">Terracotta + sage + amber. Fredoka + Nunito + JetBrains Mono. Match screen-*.html mockups.</p>
+      </div>
+      <div class="p-3 rounded-xl bg-white border border-red-200">
+        <div class="font-bold text-xs text-red-900 mb-1">🌐 Bilingual + RTL First-Class</div>
+        <p class="text-[11px] text-slate-600">t() for all strings. CSS logical properties. JSONB i18n. Test LTR + RTL.</p>
+      </div>
+      <div class="p-3 rounded-xl bg-white border border-red-200">
+        <div class="font-bold text-xs text-red-900 mb-1">🔐 Multi-Tenancy + Ownership</div>
+        <p class="text-[11px] text-slate-600">tenant_id + RLS on every entity. Parent-child ownership → 404 not 403.</p>
+      </div>
+      <div class="p-3 rounded-xl bg-white border border-red-200">
+        <div class="font-bold text-xs text-red-900 mb-1">✅ Tests Required</div>
+        <p class="text-[11px] text-slate-600">80% backend, 75% web, 70% mobile. Unit + integration + E2E. All pass before commit.</p>
+      </div>
+      <div class="p-3 rounded-xl bg-white border border-red-200">
+        <div class="font-bold text-xs text-red-900 mb-1">📝 Conventional Commits</div>
+        <p class="text-[11px] text-slate-600">feat(&lt;module&gt;): &lt;desc&gt;. test(), docs(pmo), fix().</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PMO UPDATE PATTERN ═══ -->
+  <section class="nursery-card p-5">
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="clipboard-list" class="w-5 h-5 text-amber-600"></i>
+      <h3 class="font-heading text-base font-bold text-slate-900">PMO Update Pattern (after every sprint)</h3>
+    </div>
+    <p class="text-xs text-slate-600 mb-3">Edit the <code class="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">PROJECT_STATE</code> object at the bottom of <code class="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">docs/screens/project-pmo.html</code>:</p>
+
+    <div class="code-block">
+<span class="key">const</span> PROJECT_STATE = {
+  lastUpdated: <span class="string">"2026-XX-XX HH:MM GST"</span>,  <span class="comment">// current timestamp</span>
+  updatedBy: <span class="string">"Cursor Agent"</span>,
+  overallPct: <span class="number">&lt;NEW_PERCENT&gt;</span>,  <span class="comment">// (completedSprints / 30) * 100</span>
+
+  sprints: {
+    <span class="comment">// ... previous sprints unchanged ...</span>
+    <span class="number">&lt;N&gt;</span>:   { status: <span class="string">"done"</span>,    pct: <span class="number">100</span>, title: <span class="string">"..."</span>, notes: <span class="string">"..."</span>, deliverables: <span class="string">"..."</span> },
+    <span class="number">&lt;N+1&gt;</span>: { status: <span class="string">"active"</span>,  pct: <span class="number">5</span>,   title: <span class="string">"..."</span>, notes: <span class="string">"..."</span>, deliverables: <span class="string">"..."</span> },
+    <span class="comment">// ... remaining sprints unchanged ...</span>
+  },
+
+  risks: [
+    <span class="comment">// update if new risks emerge or old ones resolve</span>
+  ],
+
+  pilotNurseries: <span class="number">&lt;COUNT&gt;</span>,  <span class="comment">// increment at Sprint 5</span>
+  openBugs: <span class="number">&lt;COUNT&gt;</span>,
+  phasesLive: <span class="number">&lt;COUNT&gt;</span>  <span class="comment">// 0=none, 1=MVP, 2=Phase 1, 3=Phase 2, 4=Phase 3</span>
+};
+    </div>
+
+    <p class="text-xs text-slate-600 mt-3">Then commit: <code class="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">docs(pmo): sprint N complete, sprint N+1 started</code></p>
+  </section>
+
+  <!-- ═══ START HERE ═══ -->
+  <section class="nursery-card p-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-slate-700">
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="play-circle" class="w-5 h-5 text-amber-300"></i>
+      <h3 class="font-heading text-base font-bold">Start Here</h3>
+    </div>
+    <p class="text-xs text-slate-300 mb-4">If you're seeing this prompt for the first time in Cursor, respond with:</p>
+
+    <div class="code-block">
+<span class="comment">✓ Acknowledged. I will execute the NMS project per this protocol.</span>
+
+<span class="comment">Starting Step 0 (Bootstrap):</span>
+<span class="comment">1. Reading mandatory spec files...</span>
+<span class="comment">2. Confirming local toolchain...</span>
+<span class="comment">3. Scaffolding monorepo...</span>
+<span class="comment">4. Copying assets...</span>
+<span class="comment">5. Setting up Docker Compose...</span>
+<span class="comment">6. Initial commit...</span>
+<span class="comment">7. Updating PMO dashboard...</span>
+
+<span class="comment">Proceed? (y/n)</span>
+    </div>
+
+    <p class="text-xs text-slate-300 mt-3">Then wait for user confirmation before proceeding.</p>
+
+    <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+      <div class="text-[11px] font-mono text-slate-400">📖 Full sprint plan: <a href="spec-19-roadmap-sprints.html" class="text-amber-300 hover:underline">spec-19-roadmap-sprints.html</a></div>
+      <div class="text-[11px] font-mono text-slate-400">📖 Cursor rules: <a href="spec-18-cursor-rules.html" class="text-amber-300 hover:underline">spec-18-cursor-rules.html</a></div>
+      <div class="text-[11px] font-mono text-slate-400">📊 PMO: <a href="project-pmo.html" class="text-amber-300 hover:underline">project-pmo.html</a></div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="text-center py-6 text-[10px] font-mono text-slate-400">
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <div class="w-6 h-6 rounded-lg bg-slate-900 flex items-center justify-center"><i data-lucide="terminal" class="w-3 h-3 text-amber-300"></i></div>
+      <span class="font-heading font-bold text-slate-700">NMS Cursor Execution Prompt</span>
+    </div>
+    <div>Bright Futures Nursery Management System · Built with Nursery CRM UI DNA v3.5</div>
+    <div class="mt-1">Paste into Cursor · Execute step-by-step · Update PMO after every sprint</div>
+  </footer>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+  <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Copied!</span>
+</div>
+
+<script>
+  function showToast(m) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').innerText = m;
+    t.classList.remove('translate-y-20', 'opacity-0');
+    setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+  }
+
+  function copyText(text, label) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(label + ' copied to clipboard!');
+    }).catch(() => {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); showToast(label + ' copied!'); }
+      catch(e) { showToast('Copy failed'); }
+      document.body.removeChild(ta);
+    });
+  }
+
+  function copyStep0() {
+    const text = document.getElementById('step0Prompt').innerText.replace('Copy', '').trim();
+    copyText(text, 'Step 0 prompt');
+  }
+
+  function copySprint1() {
+    const text = document.getElementById('sprint1Prompt').innerText.replace('Copy', '').trim();
+    copyText(text, 'Sprint 1 prompt');
+  }
+
+  function copyTemplate() {
+    const text = document.getElementById('templatePrompt').innerText.replace('Copy', '').trim();
+    copyText(text, 'Sprint template');
+  }
+
+  function copyFullPrompt() {
+    // Combine all prompts into one
+    const step0 = document.getElementById('step0Prompt').innerText.replace('Copy', '').trim();
+    const sprint1 = document.getElementById('sprint1Prompt').innerText.replace('Copy', '').trim();
+    const template = document.getElementById('templatePrompt').innerText.replace('Copy', '').trim();
+
+    const fullPrompt = `NMS PROJECT — MASTER CURSOR EXECUTION PROMPT
+
+You are about to execute the NMS (Nursery Management System) Bright Futures project.
+This is a fully specified project — your job is to execute, not design.
+
+PROJECT CONTEXT:
+- Tech stack: .NET 8 + React 18 + React Native + PostgreSQL 16 + Redis + Keycloak + RabbitMQ
+- 22 spec files in docs/prerequisites/*.md (also rendered as docs/screens/spec-*.html)
+- 34 visual mockups in docs/screens/ (screen-*.html, mobile-*.html, phase3-*.html)
+- PMO dashboard at docs/screens/project-pmo.html (UPDATE after every sprint)
+- Cursor rules in .cursorrules (paste from spec-18-cursor-rules.html)
+
+CRITICAL RULES:
+1. Read the spec + visual mockup BEFORE coding
+2. Update PMO dashboard after EVERY sprint (edit PROJECT_STATE, commit)
+3. One sprint at a time — never batch
+4. Match the visual DNA (terracotta + sage + amber, Fredoka + Nunito + JetBrains Mono)
+5. Bilingual + RTL first-class (t() for strings, CSS logical properties, JSONB i18n)
+6. Multi-tenancy + parent-child ownership (tenant_id + RLS, 404 not 403)
+7. Tests required (80% backend, 75% web, 70% mobile)
+8. Conventional commits (feat(module): desc)
+
+═══════════════════════════════════════════════════
+STEP 0: BOOTSTRAP
+═══════════════════════════════════════════════════
+
+${step0}
+
+═══════════════════════════════════════════════════
+SPRINT 1: CENTRE MANAGEMENT + AUTH
+═══════════════════════════════════════════════════
+
+${sprint1}
+
+═══════════════════════════════════════════════════
+SPRINTS 2-30: USE THIS TEMPLATE
+═══════════════════════════════════════════════════
+
+${template}
+
+Sprint → Visual Mockup Mapping:
+- Sprint 2: screen-attendance.html, screen-dashboard.html
+- Sprint 3: screen-activity-feed.html, screen-messaging.html
+- Sprint 4: screen-notifications.html, screen-emergency-report.html, screen-settings-audit.html
+- Sprint 5: Production deploy + pilot go-live
+- Sprint 6-18 (Phase 1 Full): screen-billing, screen-enquiry-pipeline, screen-tour-management, screen-calendar, screen-forms-builder, screen-admissions-process, screen-id-cards, screen-certificates, screen-reports-analytics, screen-notification-preferences, mobile-teacher, mobile-parent-feed, mobile-admin, mobile-accounts, mobile-receptionist
+- Sprint 19-26 (Phase 2): spec-04-prd-phase2-3.html §1-3 (EYFS + Montessori + mobile maturity)
+- Sprint 27-30 (Phase 3): phase3-multi-centre.html, phase3-payment-flow.html, mobile-parent-payments.html, mobile-superadmin.html
+
+START:
+If seeing this for the first time, respond:
+"✓ Acknowledged. Starting Step 0 (Bootstrap). Proceed? (y/n)"
+Then wait for confirmation.
+
+Begin.`;
+
+    copyText(fullPrompt, 'Full master prompt');
+  }
+
+  window.onload = function() { if (window.lucide) lucide.createIcons(); };
+</script>
+
+</body>
+</html>

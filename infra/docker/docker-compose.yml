@@ -1,0 +1,41 @@
+name: nms
+services:
+  postgres:
+    image: postgres:16.4
+    environment: { POSTGRES_USER: nms, POSTGRES_PASSWORD: nms_dev, POSTGRES_DB: nms }
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data, ./init-keycloak-schema.sql:/docker-entrypoint-initdb.d/10-keycloak.sql:ro]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U nms"], interval: 5s, timeout: 5s, retries: 10 }
+  redis:
+    image: redis:7.2
+    ports: ["6379:6379"]
+    healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 5s, timeout: 3s, retries: 10 }
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    environment: { RABBITMQ_DEFAULT_USER: nms, RABBITMQ_DEFAULT_PASS: nms_dev }
+    ports: ["5672:5672", "15672:15672"]
+    healthcheck: { test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"], interval: 10s, timeout: 10s, retries: 10 }
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/nms
+      KC_DB_SCHEMA: keycloak
+      KC_DB_USERNAME: nms
+      KC_DB_PASSWORD: nms_dev
+      KC_HEALTH_ENABLED: "true"
+    ports: ["8080:8080"]
+    depends_on: { postgres: { condition: service_healthy } }
+  s3:
+    # MinIO no longer publishes free container images; SeaweedFS is a local-dev S3-compatible stand-in (see ADR-0002).
+    image: chrislusf/seaweedfs:latest
+    command: server -s3 -s3.port=8333 -dir=/data
+    ports: ["9000:8333", "9333:9333"]
+    volumes: [s3data:/data]
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports: ["1025:1025", "8025:8025"]
+volumes: { pgdata: {}, s3data: {} }

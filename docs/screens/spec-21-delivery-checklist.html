@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delivery Checklist — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class=""><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class="active"><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-mvp-pilot-go-live-checklist-sprint-5" class="toc-link" data-target="1-mvp-pilot-go-live-checklist-sprint-5">1. MVP Pilot Go-Live Checklist (Sprint 5)</a><a href="#11-code-quality" class="toc-link toc-h3" data-target="11-code-quality">1.1 Code Quality</a><a href="#12-infrastructure" class="toc-link toc-h3" data-target="12-infrastructure">1.2 Infrastructure</a><a href="#13-observability" class="toc-link toc-h3" data-target="13-observability">1.3 Observability</a><a href="#14-security" class="toc-link toc-h3" data-target="14-security">1.4 Security</a><a href="#15-compliance" class="toc-link toc-h3" data-target="15-compliance">1.5 Compliance</a><a href="#16-pilot-nursery-readiness" class="toc-link toc-h3" data-target="16-pilot-nursery-readiness">1.6 Pilot Nursery Readiness</a><a href="#17-support-incident-response" class="toc-link toc-h3" data-target="17-support-incident-response">1.7 Support + Incident Response</a><a href="#18-documentation" class="toc-link toc-h3" data-target="18-documentation">1.8 Documentation</a><a href="#19-final-pre-go-live-checks" class="toc-link toc-h3" data-target="19-final-pre-go-live-checks">1.9 Final Pre-Go-Live Checks</a><a href="#110-go-live-day" class="toc-link toc-h3" data-target="110-go-live-day">1.10 Go-Live Day</a><a href="#2-phase-1-full-go-live-checklist-sprint-18" class="toc-link" data-target="2-phase-1-full-go-live-checklist-sprint-18">2. Phase 1 Full Go-Live Checklist (Sprint 18)</a><a href="#21-all-mvp-checklist-items-re-verified" class="toc-link toc-h3" data-target="21-all-mvp-checklist-items-re-verified">2.1 All MVP Checklist Items (Re-Verified)</a><a href="#22-phase-1-additional-modules" class="toc-link toc-h3" data-target="22-phase-1-additional-modules">2.2 Phase 1 Additional Modules</a><a href="#23-mobile-app-live" class="toc-link toc-h3" data-target="23-mobile-app-live">2.3 Mobile App Live</a><a href="#24-quality-gates" class="toc-link toc-h3" data-target="24-quality-gates">2.4 Quality Gates</a><a href="#25-compliance" class="toc-link toc-h3" data-target="25-compliance">2.5 Compliance</a><a href="#26-commercial-readiness" class="toc-link toc-h3" data-target="26-commercial-readiness">2.6 Commercial Readiness</a><a href="#27-marketing-sales" class="toc-link toc-h3" data-target="27-marketing-sales">2.7 Marketing + Sales</a><a href="#28-final-sign-off" class="toc-link toc-h3" data-target="28-final-sign-off">2.8 Final Sign-Off</a><a href="#3-phase-2-go-live-checklist-sprint-26" class="toc-link" data-target="3-phase-2-go-live-checklist-sprint-26">3. Phase 2 Go-Live Checklist (Sprint 26)</a><a href="#31-all-phase-1-items-re-verified" class="toc-link toc-h3" data-target="31-all-phase-1-items-re-verified">3.1 All Phase 1 Items (Re-Verified)</a><a href="#32-learning-assessment-module" class="toc-link toc-h3" data-target="32-learning-assessment-module">3.2 Learning &amp; Assessment Module</a><a href="#33-mobile-app-maturity" class="toc-link toc-h3" data-target="33-mobile-app-maturity">3.3 Mobile App Maturity</a><a href="#34-performance-reliability" class="toc-link toc-h3" data-target="34-performance-reliability">3.4 Performance + Reliability</a><a href="#35-service-extraction-decision" class="toc-link toc-h3" data-target="35-service-extraction-decision">3.5 Service Extraction Decision</a><a href="#36-phase-2-sign-off" class="toc-link toc-h3" data-target="36-phase-2-sign-off">3.6 Phase 2 Sign-Off</a><a href="#4-phase-3-go-live-checklist-sprint-30" class="toc-link" data-target="4-phase-3-go-live-checklist-sprint-30">4. Phase 3 Go-Live Checklist (Sprint 30)</a><a href="#41-all-phase-2-items-re-verified" class="toc-link toc-h3" data-target="41-all-phase-2-items-re-verified">4.1 All Phase 2 Items (Re-Verified)</a><a href="#42-multi-centre-group-mcg-support" class="toc-link toc-h3" data-target="42-multi-centre-group-mcg-support">4.2 Multi-Centre Group (MCG) Support</a><a href="#43-payment-gateway-integration" class="toc-link toc-h3" data-target="43-payment-gateway-integration">4.3 Payment Gateway Integration</a><a href="#44-erp-integration" class="toc-link toc-h3" data-target="44-erp-integration">4.4 ERP Integration</a><a href="#45-open-api" class="toc-link toc-h3" data-target="45-open-api">4.5 Open API</a><a href="#46-scale-reliability" class="toc-link toc-h3" data-target="46-scale-reliability">4.6 Scale + Reliability</a><a href="#47-extracted-services-if-applicable" class="toc-link toc-h3" data-target="47-extracted-services-if-applicable">4.7 Extracted Services (If Applicable)</a><a href="#48-compliance-security" class="toc-link toc-h3" data-target="48-compliance-security">4.8 Compliance + Security</a><a href="#49-phase-3-sign-off" class="toc-link toc-h3" data-target="49-phase-3-sign-off">4.9 Phase 3 Sign-Off</a><a href="#5-handover-to-operations" class="toc-link" data-target="5-handover-to-operations">5. Handover to Operations</a><a href="#51-documentation-handover" class="toc-link toc-h3" data-target="51-documentation-handover">5.1 Documentation Handover</a><a href="#52-access-handover" class="toc-link toc-h3" data-target="52-access-handover">5.2 Access Handover</a><a href="#53-process-handover" class="toc-link toc-h3" data-target="53-process-handover">5.3 Process Handover</a><a href="#54-knowledge-transfer" class="toc-link toc-h3" data-target="54-knowledge-transfer">5.4 Knowledge Transfer</a><a href="#6-post-launch-monitoring-first-30-days" class="toc-link" data-target="6-post-launch-monitoring-first-30-days">6. Post-Launch Monitoring (First 30 Days)</a><a href="#61-daily-checks-tech-lead" class="toc-link toc-h3" data-target="61-daily-checks-tech-lead">6.1 Daily Checks (Tech Lead)</a><a href="#62-weekly-reviews" class="toc-link toc-h3" data-target="62-weekly-reviews">6.2 Weekly Reviews</a><a href="#63-30-day-retrospective" class="toc-link toc-h3" data-target="63-30-day-retrospective">6.3 30-Day Retrospective</a><a href="#7-quick-reference-severity-definitions" class="toc-link" data-target="7-quick-reference-severity-definitions">7. Quick Reference: Severity Definitions</a><a href="#8-quick-reference-go-live-gates-summary" class="toc-link" data-target="8-quick-reference-go-live-gates-summary">8. Quick Reference: Go-Live Gates Summary</a><a href="#9-final-word" class="toc-link" data-target="9-final-word">9. Final Word</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="clipboard-check" class="w-4 h-4 text-amber-600"></i><span>Delivery Checklist</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Workflow · spec-21-delivery-checklist.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Workflow</span>
+          <span class="pill pill-done">DOC 21</span>
+          <span class="text-[10px] font-mono text-slate-400">~3,579 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Delivery Checklist</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-20-adrs.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Architecture Decisions</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="21-delivery-checklist">21 — Delivery Checklist</h1>
+<blockquote>
+<p>Go-live readiness + handover checklist for each phase. Print this. Check every box before signing off.</p>
+</blockquote>
+<hr />
+<h2 id="1-mvp-pilot-go-live-checklist-sprint-5">1. MVP Pilot Go-Live Checklist (Sprint 5)</h2>
+<h3 id="11-code-quality">1.1 Code Quality</h3>
+<ul>
+<li>[ ] All Sprint 1–4 deliverables complete + tested.</li>
+<li>[ ] Backend test coverage ≥ 80%.</li>
+<li>[ ] Web test coverage ≥ 75%.</li>
+<li>[ ] Mobile test coverage ≥ 70%.</li>
+<li>[ ] 0 critical SonarCloud issues.</li>
+<li>[ ] 0 high SonarCloud issues.</li>
+<li>[ ] All security hotspots reviewed + marked "safe" or fixed.</li>
+<li>[ ] E2E tests for critical journeys pass: login, check-in, post activity, send message, generate daily report, view emergency report.</li>
+<li>[ ] Lighthouse Performance ≥ 90 on dashboard, attendance, parent feed.</li>
+<li>[ ] Lighthouse Accessibility ≥ 90 on parent portal.</li>
+<li>[ ] axe-core tests pass on all MVP screens.</li>
+<li>[ ] Visual regression tests pass in both LTR + RTL.</li>
+</ul>
+<h3 id="12-infrastructure">1.2 Infrastructure</h3>
+<ul>
+<li>[ ] Production AWS ME Central account provisioned.</li>
+<li>[ ] Terraform applies cleanly to production.</li>
+<li>[ ] EKS cluster healthy (3+ worker nodes, multi-AZ).</li>
+<li>[ ] RDS PostgreSQL Multi-AZ + automated backups + WAL archiving.</li>
+<li>[ ] ElastiCache Redis Multi-AZ.</li>
+<li>[ ] Amazon MQ RabbitMQ Multi-AZ.</li>
+<li>[ ] S3 buckets created with correct policies (private, versioned, encrypted).</li>
+<li>[ ] CloudFront distribution configured with signed URLs.</li>
+<li>[ ] Route53 DNS records configured (app.nms.ae, api.nms.ae).</li>
+<li>[ ] KMS keys created for encryption.</li>
+<li>[ ] Secrets Manager populated with all secrets.</li>
+<li>[ ] WAF rules active on ALB.</li>
+<li>[ ] TLS certificates valid (Let's Encrypt via cert-manager).</li>
+<li>[ ] Helm charts deployed: nms-api, nms-web, Keycloak.</li>
+<li>[ ] HPA configured for nms-api (3-10 replicas).</li>
+<li>[ ] PodDisruptionBudgets configured.</li>
+<li>[ ] NetworkPolicies: default deny + explicit allow.</li>
+<li>[ ] Backups tested (restore to staging, verify data).</li>
+</ul>
+<h3 id="13-observability">1.3 Observability</h3>
+<ul>
+<li>[ ] Prometheus scraping all pods.</li>
+<li>[ ] Grafana dashboards imported (NMS Overview, API Performance, Business KPIs, Infrastructure, Database, Notifications).</li>
+<li>[ ] Alertmanager routes: PagerDuty (critical), Slack #ops-alerts (warning), email (info).</li>
+<li>[ ] Alerts configured: HTTP 5xx &gt; 1%, p99 &gt; 3s, DB pool &gt; 80%, RabbitMQ queue &gt; 500, pod restart loop, backup failed, cert expiring.</li>
+<li>[ ] Loki collecting logs from all pods.</li>
+<li>[ ] OpenTelemetry traces flowing.</li>
+<li>[ ] Sentry integrated (web + mobile).</li>
+<li>[ ] Synthetic checks running (login, dashboard, parent portal every 5 min).</li>
+<li>[ ] Status page configured (status.nms.ae).</li>
+</ul>
+<h3 id="14-security">1.4 Security</h3>
+<ul>
+<li>[ ] OWASP Top 10 internal review complete.</li>
+<li>[ ] SAST (SonarCloud) clean.</li>
+<li>[ ] SCA (OWASP Dependency Check) clean.</li>
+<li>[ ] Container scan (Trivy) clean.</li>
+<li>[ ] IaC scan (tfsec + checkov) clean.</li>
+<li>[ ] Secrets scan (GitGuardian) clean.</li>
+<li>[ ] All secrets in Secrets Manager (none in code/env).</li>
+<li>[ ] RLS policies verified on all tenant tables.</li>
+<li>[ ] Parent-child ownership tests pass.</li>
+<li>[ ] Cross-tenant isolation tests pass.</li>
+<li>[ ] JWT validation enforced on all endpoints (except public).</li>
+<li>[ ] Rate limiting active (100 req/min/user).</li>
+<li>[ ] WAF rules active.</li>
+<li>[ ] TLS 1.2+ enforced.</li>
+<li>[ ] HSTS header set.</li>
+<li>[ ] CSP header set.</li>
+<li>[ ] All other security headers set (<code>X-Content-Type-Options</code>, <code>X-Frame-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>).</li>
+</ul>
+<h3 id="15-compliance">1.5 Compliance</h3>
+<ul>
+<li>[ ] Privacy Policy published at nms.ae/privacy (EN + AR).</li>
+<li>[ ] Terms of Service published at nms.ae/terms (EN + AR).</li>
+<li>[ ] Parent consent flow reviewed by legal.</li>
+<li>[ ] Data retention schedule confirmed with legal counsel.</li>
+<li>[ ] UAE data residency confirmed (all personal data in AWS me-central-1).</li>
+<li>[ ] Sub-processor list documented (AWS, FCM, SES).</li>
+<li>[ ] Breach response runbook documented.</li>
+<li>[ ] DPA template ready for pilot nursery.</li>
+<li>[ ] KHDA alignment confirmed (basic — full reporting in Phase 1 Sprint 13).</li>
+<li>[ ] Legal counsel sign-off (written).</li>
+</ul>
+<h3 id="16-pilot-nursery-readiness">1.6 Pilot Nursery Readiness</h3>
+<ul>
+<li>[ ] Pilot agreement signed (covers data ownership, pilot duration, support SLA, exit terms).</li>
+<li>[ ] Pilot nursery director + 2-3 staff identified as primary users.</li>
+<li>[ ] Pilot nursery staff trained (1-hour onboarding session).</li>
+<li>[ ] Pilot nursery data migrated from existing system (if any) — manual entry or scripted.</li>
+<li>[ ] Pilot nursery rooms, programs, groups configured in system.</li>
+<li>[ ] Pilot nursery staff accounts created + invitations sent.</li>
+<li>[ ] Pilot nursery student records created.</li>
+<li>[ ] Pilot nursery parent invitations sent (5-10 parents minimum).</li>
+<li>[ ] Barcode cards printed for students + staff.</li>
+<li>[ ] USB/Bluetooth barcode scanners confirmed working with web app.</li>
+<li>[ ] Pilot nursery WiFi stable (test in their actual environment).</li>
+<li>[ ] In-app feedback button tested.</li>
+</ul>
+<h3 id="17-support-incident-response">1.7 Support + Incident Response</h3>
+<ul>
+<li>[ ] On-call rotation defined (Tech Lead + 1 engineer).</li>
+<li>[ ] PagerDuty schedule configured.</li>
+<li>[ ] Incident response runbook documented (<code>infra/docs/incident-response.md</code>).</li>
+<li>[ ] Severity definitions documented (SEV-1 through SEV-4).</li>
+<li>[ ] Communication templates ready (customer email, status page update).</li>
+<li>[ ] Escalation matrix documented.</li>
+<li>[ ] Slack channel for ops alerts (#ops-alerts).</li>
+<li>[ ] Support email monitored (support@nms.ae).</li>
+<li>[ ] In-app support request flow tested.</li>
+</ul>
+<h3 id="18-documentation">1.8 Documentation</h3>
+<ul>
+<li>[ ] Admin guide (Centre Admin + Super Admin) — <code>docs/user-guides/admin.md</code>.</li>
+<li>[ ] Teacher quick-start — <code>docs/user-guides/teacher.md</code>.</li>
+<li>[ ] Parent guide — <code>docs/user-guides/parent.md</code> (bilingual).</li>
+<li>[ ] API documentation (Scalar UI in staging).</li>
+<li>[ ] Runbooks for common ops tasks — <code>infra/docs/runbooks/</code>.</li>
+<li>[ ] Disaster recovery plan — <code>infra/docs/disaster-recovery.md</code>.</li>
+<li>[ ] Architecture overview — <code>docs/architecture.md</code> (summary of <code>06-ARCHITECTURE.md</code>).</li>
+</ul>
+<h3 id="19-final-pre-go-live-checks">1.9 Final Pre-Go-Live Checks</h3>
+<ul>
+<li>[ ] Staging environment passes full UAT with internal team.</li>
+<li>[ ] Bug bash with entire team (1 day) — critical bugs fixed.</li>
+<li>[ ] Load test passed: 100 concurrent users, p95 &lt; 2s.</li>
+<li>[ ] Smoke test in production after deployment (login, check-in, post activity, send message, generate report).</li>
+<li>[ ] DNS propagated (check from multiple locations).</li>
+<li>[ ] Pilot nursery director confirms ready.</li>
+<li>[ ] Tech Lead sign-off.</li>
+<li>[ ] Product Owner sign-off.</li>
+</ul>
+<h3 id="110-go-live-day">1.10 Go-Live Day</h3>
+<ul>
+<li>[ ] Deploy to production (manual approval in CI/CD).</li>
+<li>[ ] Smoke test in production.</li>
+<li>[ ] Notify pilot nursery: "We're live!"</li>
+<li>[ ] Daily check-in with pilot nursery (Week 1: daily, Week 2: every other day).</li>
+<li>[ ] Monitor Grafana dashboards closely for first 48 hours.</li>
+<li>[ ] Ready to roll back if critical issues.</li>
+<li>[ ] Send pilot user survey link after Week 1.</li>
+<li>[ ] Pilot retrospective at end of Sprint 5.</li>
+</ul>
+<hr />
+<h2 id="2-phase-1-full-go-live-checklist-sprint-18">2. Phase 1 Full Go-Live Checklist (Sprint 18)</h2>
+<h3 id="21-all-mvp-checklist-items-re-verified">2.1 All MVP Checklist Items (Re-Verified)</h3>
+<ul>
+<li>[ ] All §1 items re-verified (some may have evolved).</li>
+</ul>
+<h3 id="22-phase-1-additional-modules">2.2 Phase 1 Additional Modules</h3>
+<ul>
+<li>[ ] Billing &amp; Accounting module complete + tested.</li>
+<li>[ ] Enquiry Management module complete + tested.</li>
+<li>[ ] Tour Management module complete + tested.</li>
+<li>[ ] Calendar module complete + tested.</li>
+<li>[ ] Forms &amp; Admissions module complete + tested.</li>
+<li>[ ] Tools (ID Card + Certificate generators) complete + tested.</li>
+<li>[ ] Reports &amp; Analytics module complete + tested.</li>
+<li>[ ] Settings module full (all categories) complete + tested.</li>
+<li>[ ] Newsletter builder + Resource Centre complete + tested.</li>
+<li>[ ] SMS notifications (Critical tier) live with Unifonic or Twilio.</li>
+</ul>
+<h3 id="23-mobile-app-live">2.3 Mobile App Live</h3>
+<ul>
+<li>[ ] iOS app submitted + approved by App Store.</li>
+<li>[ ] Android app submitted + approved by Google Play.</li>
+<li>[ ] iOS app available in UAE App Store.</li>
+<li>[ ] Android app available in UAE Google Play.</li>
+<li>[ ] EAS Build + OTA updates configured.</li>
+<li>[ ] Push notifications verified on iOS + Android.</li>
+<li>[ ] Mobile crash reporting (Sentry) active.</li>
+<li>[ ] Mobile analytics (PostHog) active.</li>
+<li>[ ] App Store screenshots in EN + AR.</li>
+<li>[ ] App Store description in EN + AR.</li>
+<li>[ ] App Store privacy labels completed.</li>
+</ul>
+<h3 id="24-quality-gates">2.4 Quality Gates</h3>
+<ul>
+<li>[ ] Backend test coverage ≥ 80%.</li>
+<li>[ ] Web test coverage ≥ 75%.</li>
+<li>[ ] Mobile test coverage ≥ 70%.</li>
+<li>[ ] 0 critical + 0 high SonarCloud issues.</li>
+<li>[ ] E2E tests for all critical journeys across all modules.</li>
+<li>[ ] Visual regression tests for all screens in LTR + RTL.</li>
+<li>[ ] Load test: 500 concurrent users, p95 &lt; 2s, p99 &lt; 3s, error rate &lt; 0.1%.</li>
+<li>[ ] WCAG 2.1 AA audit passed (external).</li>
+<li>[ ] Arabic RTL full regression (native Arabic speaker QA).</li>
+<li>[ ] External penetration test passed (OWASP Top 10 + business logic).</li>
+<li>[ ] All critical + high findings from pen test remediated.</li>
+</ul>
+<h3 id="25-compliance">2.5 Compliance</h3>
+<ul>
+<li>[ ] PDPL compliance review complete (legal counsel sign-off).</li>
+<li>[ ] KHDA reporting alignment confirmed.</li>
+<li>[ ] ADEK reporting alignment confirmed (if Abu Dhabi customer).</li>
+<li>[ ] Data retention schedule legally confirmed.</li>
+<li>[ ] Privacy Policy updated for full Phase 1 features.</li>
+<li>[ ] Terms of Service updated.</li>
+<li>[ ] DPA template finalized.</li>
+<li>[ ] Sub-processor list updated (now includes SMS provider, content moderation service).</li>
+</ul>
+<h3 id="26-commercial-readiness">2.6 Commercial Readiness</h3>
+<ul>
+<li>[ ] Pricing page published (nms.ae/pricing).</li>
+<li>[ ] Self-service trial signup flow tested.</li>
+<li>[ ] Stripe (or equivalent) billing integration for SaaS subscriptions.</li>
+<li>[ ] On-prem license agreement template finalized.</li>
+<li>[ ] Implementation services SOW template finalized.</li>
+<li>[ ] Customer success process documented.</li>
+<li>[ ] Support SLA documented (response times per severity).</li>
+<li>[ ] First 3 SaaS customers identified (pipeline).</li>
+<li>[ ] First 2 on-prem customers identified (pipeline).</li>
+</ul>
+<h3 id="27-marketing-sales">2.7 Marketing + Sales</h3>
+<ul>
+<li>[ ] Website live (nms.ae) with EN + AR versions.</li>
+<li>[ ] Product demo video recorded.</li>
+<li>[ ] Case study from pilot nursery (with permission).</li>
+<li>[ ] Sales deck ready.</li>
+<li>[ ] Demo environment ready (staging with seed data).</li>
+<li>[ ] Sales team trained (if applicable).</li>
+<li>[ ] Partner program documented (if applicable).</li>
+</ul>
+<h3 id="28-final-sign-off">2.8 Final Sign-Off</h3>
+<ul>
+<li>[ ] Tech Lead sign-off.</li>
+<li>[ ] Product Owner sign-off.</li>
+<li>[ ] Legal counsel sign-off.</li>
+<li>[ ] Security sign-off (pen test remediation verified).</li>
+<li>[ ] Compliance sign-off.</li>
+<li>[ ] Operations sign-off (runbooks tested, on-call ready).</li>
+<li>[ ] Sponsor sign-off.</li>
+</ul>
+<hr />
+<h2 id="3-phase-2-go-live-checklist-sprint-26">3. Phase 2 Go-Live Checklist (Sprint 26)</h2>
+<h3 id="31-all-phase-1-items-re-verified">3.1 All Phase 1 Items (Re-Verified)</h3>
+<ul>
+<li>[ ] All §2 items re-verified.</li>
+</ul>
+<h3 id="32-learning-assessment-module">3.2 Learning &amp; Assessment Module</h3>
+<ul>
+<li>[ ] EYFS framework fully implemented (7 development areas, all age bands, all milestones).</li>
+<li>[ ] Montessori framework fully implemented.</li>
+<li>[ ] Lessons module complete + tested.</li>
+<li>[ ] Observation records (formal, informal, concern) complete + tested.</li>
+<li>[ ] AI-assisted observation capture (voice-to-text) live + tested.</li>
+<li>[ ] Assessment templates + runs complete + tested.</li>
+<li>[ ] Dual report views (Staff + Parent) complete + tested.</li>
+<li>[ ] Parent report approval workflow complete + tested.</li>
+<li>[ ] Learning Journey view complete + tested.</li>
+<li>[ ] All 5 assessment report types complete + tested.</li>
+<li>[ ] L&amp;A reports PDF generation works (QuestPDF).</li>
+<li>[ ] L&amp;A module live in ≥3 pilot nurseries.</li>
+<li>[ ] 80%+ of pilot teachers using digital observations weekly.</li>
+</ul>
+<h3 id="33-mobile-app-maturity">3.3 Mobile App Maturity</h3>
+<ul>
+<li>[ ] Mobile app: full offline support (attendance queue, activity post queue, messaging queue).</li>
+<li>[ ] Mobile app: Learning Journey view.</li>
+<li>[ ] Mobile app: observation capture with AI dictation.</li>
+<li>[ ] Mobile app: push notifications for all 3 tiers (Critical + Operational + Informational).</li>
+<li>[ ] Mobile app: 4.5+ star rating on iOS App Store.</li>
+<li>[ ] Mobile app: 4.5+ star rating on Google Play.</li>
+<li>[ ] Mobile app: crash-free rate &gt; 99.5%.</li>
+</ul>
+<h3 id="34-performance-reliability">3.4 Performance + Reliability</h3>
+<ul>
+<li>[ ] p99 API latency &lt; 500ms at 500 concurrent users.</li>
+<li>[ ] 99.5% uptime over 3-month measurement window.</li>
+<li>[ ] Database query performance reviewed (slow query log analyzed).</li>
+<li>[ ] Index optimization pass complete.</li>
+<li>[ ] Materialized view refresh tuned.</li>
+<li>[ ] Connection pool sizing reviewed.</li>
+<li>[ ] Redis memory usage reviewed.</li>
+<li>[ ] RabbitMQ queue depth monitored + alerts tuned.</li>
+</ul>
+<h3 id="35-service-extraction-decision">3.5 Service Extraction Decision</h3>
+<ul>
+<li>[ ] Notification Service extraction decision documented (ADR-015 if extracted).</li>
+<li>[ ] Media Processing Service extraction decision documented (ADR-016 if extracted).</li>
+<li>[ ] If extracted: new service deployed + tested + monitored.</li>
+</ul>
+<h3 id="36-phase-2-sign-off">3.6 Phase 2 Sign-Off</h3>
+<ul>
+<li>[ ] Tech Lead sign-off.</li>
+<li>[ ] Product Owner sign-off.</li>
+<li>[ ] Pilot teacher feedback collected + analyzed (NPS).</li>
+<li>[ ] External pen test for new modules (L&amp;A + mobile).</li>
+<li>[ ] Compliance review for AI features (OpenAI DPA, data anonymization).</li>
+</ul>
+<hr />
+<h2 id="4-phase-3-go-live-checklist-sprint-30">4. Phase 3 Go-Live Checklist (Sprint 30)</h2>
+<h3 id="41-all-phase-2-items-re-verified">4.1 All Phase 2 Items (Re-Verified)</h3>
+<ul>
+<li>[ ] All §3 items re-verified.</li>
+</ul>
+<h3 id="42-multi-centre-group-mcg-support">4.2 Multi-Centre Group (MCG) Support</h3>
+<ul>
+<li>[ ] Multi-realm Keycloak configured.</li>
+<li>[ ] MCG entity + parent_tenant_id hierarchy live.</li>
+<li>[ ] Group-level roles (group_owner, group_director, group_it) live.</li>
+<li>[ ] Cross-centre SSO verified (login once, access all centres).</li>
+<li>[ ] Tenant provisioning UI live (Group Owner can create new centres).</li>
+<li>[ ] MCG consolidated dashboard live.</li>
+<li>[ ] Cross-centre reports live.</li>
+<li>[ ] Student transfer between centres tested.</li>
+<li>[ ] Staff assignment to multiple centres tested.</li>
+<li>[ ] 1 MCG customer with 5+ centres live.</li>
+</ul>
+<h3 id="43-payment-gateway-integration">4.3 Payment Gateway Integration</h3>
+<ul>
+<li>[ ] Gateway selected (Telr / PayTabs / Network International).</li>
+<li>[ ] Gateway integration tested (sandbox → production).</li>
+<li>[ ] Parent payment flow tested end-to-end.</li>
+<li>[ ] Webhook signature verification tested.</li>
+<li>[ ] Idempotent webhook handler tested.</li>
+<li>[ ] Refund flow tested.</li>
+<li>[ ] Saved cards (tokenization) tested.</li>
+<li>[ ] Apple Pay / Google Pay tested.</li>
+<li>[ ] Reconciliation job verified.</li>
+<li>[ ] PCI DSS scope confirmed (we're SAQ-A — gateway handles cardholder data).</li>
+<li>[ ] 100+ online payments processed in production.</li>
+</ul>
+<h3 id="44-erp-integration">4.4 ERP Integration</h3>
+<ul>
+<li>[ ] At least 1 ERP adapter implemented (Xero / QuickBooks / Zoho Books).</li>
+<li>[ ] Chart of accounts mapping UI live.</li>
+<li>[ ] Sync: invoices → ERP verified.</li>
+<li>[ ] Sync: payments → ERP verified.</li>
+<li>[ ] Sync: expenses → ERP verified.</li>
+<li>[ ] Sync: payment status ← ERP verified.</li>
+<li>[ ] 1 customer with active ERP sync.</li>
+</ul>
+<h3 id="45-open-api">4.5 Open API</h3>
+<ul>
+<li>[ ] Open API endpoints live (students, attendance, invoices, payments, reports).</li>
+<li>[ ] OAuth 2.0 client credentials flow tested.</li>
+<li>[ ] Rate limiting per application (1000 req/hour).</li>
+<li>[ ] Webhook publishing live (all major events).</li>
+<li>[ ] Webhook signing (HMAC-SHA256) verified.</li>
+<li>[ ] Webhook retry (exponential backoff, max 5 attempts over 24h) tested.</li>
+<li>[ ] Developer portal live (docs + sandbox + code samples).</li>
+<li>[ ] 1 third-party integration built by external developer.</li>
+</ul>
+<h3 id="46-scale-reliability">4.6 Scale + Reliability</h3>
+<ul>
+<li>[ ] 20 centres live.</li>
+<li>[ ] 500 concurrent users sustained (peak).</li>
+<li>[ ] 10,000 total users.</li>
+<li>[ ] 99.9% uptime over 3-month measurement window.</li>
+<li>[ ] p99 API latency &lt; 3s at 500 concurrent + 20 centres.</li>
+<li>[ ] Multi-region DR tested (quarterly DR drill).</li>
+</ul>
+<h3 id="47-extracted-services-if-applicable">4.7 Extracted Services (If Applicable)</h3>
+<ul>
+<li>[ ] Notification Service extracted (if ADR-015 decided yes).</li>
+<li>[ ] Notification Service: independently scalable, monitored.</li>
+<li>[ ] Media Processing Service extracted (if ADR-016 decided yes).</li>
+<li>[ ] Media Processing Service: independently scalable, monitored.</li>
+<li>[ ] Distributed tracing across all services (OpenTelemetry + Tempo).</li>
+</ul>
+<h3 id="48-compliance-security">4.8 Compliance + Security</h3>
+<ul>
+<li>[ ] External pen test for Phase 3 (payment + multi-tenancy + Open API focus).</li>
+<li>[ ] All critical + high findings remediated.</li>
+<li>[ ] SOC 2 Type II audit initiated (target: 6 months post-launch).</li>
+<li>[ ] PCI DSS SAQ-A completed.</li>
+<li>[ ] Privacy Policy updated for Phase 3 features.</li>
+<li>[ ] Sub-processor list updated (payment gateway, ERP).</li>
+<li>[ ] Open API Terms of Service published.</li>
+</ul>
+<h3 id="49-phase-3-sign-off">4.9 Phase 3 Sign-Off</h3>
+<ul>
+<li>[ ] Tech Lead sign-off.</li>
+<li>[ ] Product Owner sign-off.</li>
+<li>[ ] Legal counsel sign-off (payment + Open API + multi-tenant compliance).</li>
+<li>[ ] Security sign-off.</li>
+<li>[ ] Operations sign-off.</li>
+<li>[ ] Sponsor sign-off.</li>
+<li>[ ] SOC 2 audit kickoff scheduled.</li>
+</ul>
+<hr />
+<h2 id="5-handover-to-operations">5. Handover to Operations</h2>
+<p>After each phase go-live, formal handover to operations team:</p>
+<h3 id="51-documentation-handover">5.1 Documentation Handover</h3>
+<ul>
+<li>[ ] All runbooks reviewed + updated.</li>
+<li>[ ] Architecture diagrams updated.</li>
+<li>[ ] ADRs up to date.</li>
+<li>[ ] Operational metrics + SLOs documented.</li>
+<li>[ ] On-call runbook tested (dry run).</li>
+<li>[ ] Knowledge transfer sessions recorded.</li>
+</ul>
+<h3 id="52-access-handover">5.2 Access Handover</h3>
+<ul>
+<li>[ ] Ops team has AWS access (read + limited write).</li>
+<li>[ ] Ops team has K8s access (kubectl + Helm).</li>
+<li>[ ] Ops team has Grafana + Loki + Alertmanager access.</li>
+<li>[ ] Ops team has PagerDuty access.</li>
+<li>[ ] Ops team has Sentry access.</li>
+<li>[ ] Ops team has status page admin access.</li>
+<li>[ ] Secrets rotation schedule documented.</li>
+<li>[ ] Access review process documented (quarterly).</li>
+</ul>
+<h3 id="53-process-handover">5.3 Process Handover</h3>
+<ul>
+<li>[ ] Incident response process documented + tested.</li>
+<li>[ ] Change management process documented (who approves prod changes).</li>
+<li>[ ] Backup verification process documented.</li>
+<li>[ ] DR drill process documented (quarterly).</li>
+<li>[ ] Capacity planning process documented.</li>
+<li>[ ] Cost monitoring process documented.</li>
+</ul>
+<h3 id="54-knowledge-transfer">5.4 Knowledge Transfer</h3>
+<ul>
+<li>[ ] 2-hour knowledge transfer session with ops team.</li>
+<li>[ ] Q&amp;A document from KT session.</li>
+<li>[ ] Ops team shadows dev team for 1 week (on-call).</li>
+<li>[ ] Ops team takes primary on-call (dev team secondary).</li>
+<li>[ ] Dev team available for escalation (Slack #eng-oncall).</li>
+</ul>
+<hr />
+<h2 id="6-post-launch-monitoring-first-30-days">6. Post-Launch Monitoring (First 30 Days)</h2>
+<p>For the first 30 days after each phase go-live:</p>
+<h3 id="61-daily-checks-tech-lead">6.1 Daily Checks (Tech Lead)</h3>
+<ul>
+<li>[ ] Review Grafana dashboards (any anomalies?).</li>
+<li>[ ] Review Sentry errors (any new patterns?).</li>
+<li>[ ] Review customer support tickets.</li>
+<li>[ ] Review Slack #ops-alerts.</li>
+<li>[ ] Daily standup with team (15 min) — any issues?</li>
+</ul>
+<h3 id="62-weekly-reviews">6.2 Weekly Reviews</h3>
+<ul>
+<li>[ ] Weekly customer feedback review (Product Owner).</li>
+<li>[ ] Weekly uptime + performance review.</li>
+<li>[ ] Weekly bug triage (new bugs from launch).</li>
+<li>[ ] Weekly retrospective (what went well, what didn't).</li>
+</ul>
+<h3 id="63-30-day-retrospective">6.3 30-Day Retrospective</h3>
+<ul>
+<li>[ ] Full team retrospective.</li>
+<li>[ ] Customer NPS survey results.</li>
+<li>[ ] Uptime report.</li>
+<li>[ ] Performance report (p50/p95/p99 latency over 30 days).</li>
+<li>[ ] Bug report (count by severity, time-to-resolve).</li>
+<li>[ ] Lessons learned document.</li>
+<li>[ ] Action items for next phase.</li>
+</ul>
+<hr />
+<h2 id="7-quick-reference-severity-definitions">7. Quick Reference: Severity Definitions</h2>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th>Definition</th>
+<th>Response Time</th>
+<th>Resolution Target</th>
+<th>Notify</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SEV-1</td>
+<td>Production down, data loss, security breach, child safety incident</td>
+<td>15 min</td>
+<td>4 hours</td>
+<td>PagerDuty + Sponsor</td>
+</tr>
+<tr>
+<td>SEV-2</td>
+<td>Major functionality broken, no workaround, &gt;10 users affected</td>
+<td>1 hour</td>
+<td>24 hours</td>
+<td>PagerDuty</td>
+</tr>
+<tr>
+<td>SEV-3</td>
+<td>Feature partially broken, workaround exists, &gt;1 user affected</td>
+<td>4 hours</td>
+<td>1 week</td>
+<td>Slack</td>
+</tr>
+<tr>
+<td>SEV-4</td>
+<td>Minor bug, single user impact</td>
+<td>1 business day</td>
+<td>Next sprint</td>
+<td>GitHub Issue</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-quick-reference-go-live-gates-summary">8. Quick Reference: Go-Live Gates Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Coverage</th>
+<th>Performance</th>
+<th>Uptime</th>
+<th>Security</th>
+<th>Compliance</th>
+<th>Customers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MVP</td>
+<td>80/75/70</td>
+<td>p95 &lt; 2s, 100 users</td>
+<td>99%</td>
+<td>SAST + SCA clean</td>
+<td>PDPL review</td>
+<td>1 pilot live</td>
+</tr>
+<tr>
+<td>Phase 1</td>
+<td>80/75/70</td>
+<td>p95 &lt; 2s, 500 users</td>
+<td>99.5%</td>
+<td>+ External pen test</td>
+<td>+ KHDA + ADEK</td>
+<td>2 on-prem + 3 SaaS</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>80/75/70</td>
+<td>p99 &lt; 500ms, 500 users</td>
+<td>99.5%</td>
+<td>+ Mobile pen test</td>
+<td>+ AI features review</td>
+<td>10 SaaS + 2 on-prem</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>80/75/70</td>
+<td>p99 &lt; 3s, 500 users, 20 centres</td>
+<td>99.9%</td>
+<td>+ Payment + multi-tenant pen test</td>
+<td>+ SOC 2 kickoff</td>
+<td>20 SaaS, multi-centre groups</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9-final-word">9. Final Word</h2>
+<p>This checklist is exhaustive but not exhaustive enough. Use judgment. If something feels wrong, stop and investigate. Don't go-live with unresolved critical issues. Don't skip steps because "we're late." Late is better than broken.</p>
+<p><strong>When in doubt, ask.</strong> Tech Lead, Product Owner, Legal, Security — all available for go-live decisions.</p>
+<p>Good luck. Build something parents + teachers + nursery owners love.</p>
+<hr />
+<p><strong>End of NMS Prerequisites Pack.</strong></p>
+<p>You now have everything needed to start building NMS with Cursor:
+1. Read <code>00-MASTER-BRIEF.md</code> first.
+2. Paste <code>18-CURSOR-RULES.md</code> contents into <code>.cursorrules</code>.
+3. Follow <code>19-ROADMAP-SPRINTS.md</code> sprint by sprint.
+4. Reference other files as needed.
+5. Use <code>21-DELIVERY-CHECKLIST.md</code> before each go-live.</p>
+<p>Welcome to the project.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-20-adrs.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Architecture Decisions</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>

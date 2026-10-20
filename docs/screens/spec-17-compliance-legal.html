@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compliance & Legal — NMS Prerequisites</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{heading:['Fredoka','IBM Plex Sans Arabic','sans-serif'],sans:['Nunito','IBM Plex Sans Arabic','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --c-primary: #E07A5F; --c-primary-dark: #C86146;
+      --c-secondary: #3D405B; --c-sage: #81B29A; --c-amber: #E9C46A;
+      --c-bg: #F8F9FA; --c-card: #FFFFFF; --c-border: #E2E8F0;
+      --c-text: #1E293B; --c-muted: #64748B;
+      --c-success: #16A34A; --c-warning: #F59E0B; --c-danger: #DC2626; --c-info: #0EA5E9;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', 'IBM Plex Sans Arabic', sans-serif;
+      background-color: var(--c-bg); color: var(--c-text);
+      line-height: 1.6; overflow-x: hidden; margin: 0;
+    }
+    html[dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', 'Nunito', sans-serif; }
+    .font-heading { font-family: 'Fredoka', 'IBM Plex Sans Arabic', cursive, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .nursery-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px 0 rgba(0,0,0,0.02);
+      transition: all 0.25s var(--ease);
+    }
+    .nursery-card-hover:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--c-primary) 40%, var(--c-border));
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #F1F5F9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Sidebar nav */
+    .sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--c-muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border-radius: 10px; margin: 2px 6px;
+      transition: all 150ms var(--ease);
+    }
+    .sidebar nav a:hover { background: color-mix(in srgb, var(--c-primary) 8%, transparent); color: var(--c-text); }
+    .sidebar nav a.active {
+      background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+      color: var(--c-primary-dark); font-weight: 700;
+    }
+    .sidebar nav a .badge {
+      margin-left: auto; font-size: 9.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 6px; border-radius: 9999px; background: var(--c-primary); color: white; font-weight: 700;
+    }
+    /* TOC links (spec pages) */
+    .sidebar nav a.toc-link {
+      font-size: 11.5px; padding: 4px 8px 4px 24px;
+      font-weight: 500; color: var(--c-muted);
+      border-left: 2px solid transparent; border-radius: 0; margin: 1px 6px;
+    }
+    .sidebar nav a.toc-link:hover {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary); background: transparent;
+    }
+    .sidebar nav a.toc-link.active {
+      color: var(--c-primary-dark); border-left-color: var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+    }
+    .sidebar nav a.toc-h3 { padding-left: 36px; font-size: 11px; }
+
+    /* Pills */
+    .pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; display: inline-block; }
+    .pill-done { background: #E6F4ED; color: #2B7A58; border: 1px solid #A8D5C1; }
+    .pill-pending { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+    .pill-critical { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-sage { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .pill-neutral { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
+    .pill-purple { background: #F3E8FF; color: #6B21A8; border: 1px solid #DDD6FE; }
+
+    /* Status dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-success { background: var(--c-success); box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+    .dot-warning { background: var(--c-warning); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+    .dot-danger { background: var(--c-danger); animation: pulse-danger 1.5s infinite; }
+    .dot-info { background: var(--c-info); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .dot-neutral { background: #94A3B8; }
+    @keyframes pulse-danger {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(220,38,38,0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.05); }
+    }
+
+    /* Avatar */
+    .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', cursive; font-weight: 600; color: white; flex-shrink: 0; overflow: hidden; }
+    .avatar-xs { width: 24px; height: 24px; font-size: 10px; }
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-md { width: 40px; height: 40px; font-size: 14px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 18px; }
+    .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 150ms var(--ease); border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn-primary { background: var(--c-primary); color: white; }
+    .btn-primary:hover { background: var(--c-primary-dark); transform: translateY(-1px); }
+    .btn-dark { background: #0F172A; color: white; }
+    .btn-dark:hover { background: #1E293B; }
+    .btn-secondary { background: white; color: var(--c-text); border-color: var(--c-border); }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-ghost { background: transparent; color: var(--c-muted); }
+    .btn-ghost:hover { background: #F1F5F9; }
+    .btn-success { background: var(--c-success); color: white; }
+    .btn-danger { background: var(--c-danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11.5px; }
+    .btn-xs { padding: 4px 8px; font-size: 10.5px; }
+    .btn-lg { padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+
+    /* Inputs */
+    .input { width: 100%; padding: 8px 12px; border: 1px solid var(--c-border); border-radius: 10px; background: white; color: var(--c-text); font-family: 'Nunito', sans-serif; font-size: 13px; transition: all 150ms ease; }
+    .input:focus { outline: none; border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 15%, transparent); }
+
+    /* Tabs */
+    .tab-btn { padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 600; font-size: 12.5px; color: var(--c-muted); border-bottom: 2px solid transparent; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .tab-btn:hover { color: var(--c-text); }
+    .tab-btn.active { color: var(--c-primary-dark); border-bottom-color: var(--c-primary); font-weight: 700; }
+
+    /* ═══ FIXED: Markdown rendered content (no overlap bug) ═══ */
+    .prose-nms { color: var(--c-text); font-size: 14px; line-height: 1.7; max-width: 100%; }
+    .prose-nms h1 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 700; font-size: 30px;
+      color: #0F172A; margin: 0 0 16px 0; padding-bottom: 12px;
+      border-bottom: 2px solid var(--c-border); letter-spacing: -0.01em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h2 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 22px;
+      color: #1E293B; margin: 36px 0 12px 0; padding-bottom: 8px;
+      border-bottom: 1px solid var(--c-border); letter-spacing: -0.005em;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h3 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 17px;
+      color: #334155; margin: 24px 0 8px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms h4 {
+      font-family: 'Fredoka', cursive, sans-serif; font-weight: 600; font-size: 14px;
+      color: #475569; margin: 18px 0 6px 0;
+      scroll-margin-top: 90px;
+    }
+    .prose-nms p { margin: 10px 0; }
+    .prose-nms ul, .prose-nms ol { margin: 10px 0; padding-left: 24px; }
+    .prose-nms li { margin: 4px 0; }
+    .prose-nms ul li { list-style-type: disc; }
+    .prose-nms ol li { list-style-type: decimal; }
+    .prose-nms strong { font-weight: 700; color: #0F172A; }
+    .prose-nms em { font-style: italic; color: #475569; }
+    .prose-nms a { color: var(--c-primary-dark); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .prose-nms blockquote {
+      margin: 16px 0; padding: 12px 16px;
+      border-left: 4px solid var(--c-primary);
+      background: color-mix(in srgb, var(--c-primary) 5%, #FFFFFF);
+      border-radius: 0 12px 12px 0; color: #475569; font-style: italic;
+    }
+    .prose-nms blockquote p { margin: 4px 0; }
+    .prose-nms hr { border: none; border-top: 1px solid var(--c-border); margin: 28px 0; }
+    .prose-nms code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #F1F5F9; color: #DB2777; padding: 2px 6px;
+      border-radius: 4px; font-weight: 500;
+    }
+    .prose-nms pre {
+      margin: 14px 0; border-radius: 12px; border: 1px solid #334155;
+      background: #0F172A; color: #F8FAFC; overflow: hidden; position: relative;
+    }
+    .prose-nms pre code {
+      display: block; padding: 14px 16px; background: transparent;
+      color: #F1F5F9; font-size: 11.5px; line-height: 1.6; overflow-x: auto; font-weight: 400;
+    }
+    .prose-nms pre .copy-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 5;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #475569;
+      background: #1E293B; color: #CBD5E1; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; font-weight: 600;
+      transition: all 150ms ease; opacity: 0;
+    }
+    .prose-nms pre:hover .copy-btn { opacity: 1; }
+    .prose-nms pre .copy-btn:hover { background: var(--c-primary); color: #FFFFFF; border-color: var(--c-primary); }
+    .prose-nms table {
+      width: 100%; border-collapse: collapse; margin: 14px 0;
+      font-size: 12.5px; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--c-border); background: var(--c-card);
+      display: block; overflow-x: auto;
+    }
+    .prose-nms thead { background: #F1F5F9; border-bottom: 1px solid var(--c-border); }
+    .prose-nms th {
+      padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px; font-weight: 700; color: var(--c-muted);
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--c-border);
+      white-space: nowrap;
+    }
+    .prose-nms td {
+      padding: 10px 12px; border-bottom: 1px solid var(--c-border);
+      color: var(--c-text); vertical-align: top;
+    }
+    .prose-nms tbody tr:last-child td { border-bottom: none; }
+    .prose-nms tbody tr:hover { background: #F8FAFC; }
+    .prose-nms td code, .prose-nms th code { font-size: 11px; }
+
+    /* Mobile responsive sidebar */
+    @media (max-width: 1024px) {
+      .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; z-index: 50; transition: left 200ms var(--ease); }
+      .sidebar.open { left: 0; }
+      .sidebar-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+      .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+    }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid var(--c-border); }
+    @media (max-width: 1024px) {
+      html[dir="rtl"] .sidebar { left: auto; right: -280px; }
+      html[dir="rtl"] .sidebar.open { right: 0; left: auto; }
+    }
+
+    /* Phone mockup */
+    .phone-frame { width: 390px; max-width: calc(100vw - 32px); height: 780px; max-height: 90vh; background: #0F172A; border-radius: 48px; padding: 14px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3), 0 0 0 2px #1E293B; position: relative; margin: 0 auto; }
+    .phone-screen { width: 100%; height: 100%; background: #F8F9FA; border-radius: 36px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+    .phone-notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px; height: 28px; background: #0F172A; border-radius: 0 0 18px 18px; z-index: 10; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+    .bar { flex: 1; background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-amber) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: all 200ms ease; }
+    .bar.dim { background: #E2E8F0; }
+
+    /* Image placeholder */
+    .img-gradient { background: linear-gradient(135deg, #FED7AA 0%, #FECDD3 50%, #FBCFE8 100%); display: flex; align-items: center; justify-content: center; }
+
+    /* Kanban */
+    .kanban-col { flex: 1; min-width: 240px; background: #F1F5F9; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card { background: white; border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: all 150ms ease; }
+    .kanban-card:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: 0 4px 8px -2px rgba(0,0,0,0.06); }
+
+    /* Calendar */
+    .cal-day { aspect-ratio: 1; min-height: 80px; border: 1px solid var(--c-border); padding: 6px; font-size: 11px; cursor: pointer; transition: all 150ms ease; background: white; }
+    .cal-day:hover { background: #F8FAFC; border-color: var(--c-primary); }
+    .cal-day.today { background: color-mix(in srgb, var(--c-primary) 8%, white); border-color: var(--c-primary); font-weight: 700; }
+    .cal-day.other-month { background: #F8FAFC; color: #CBD5E1; }
+    .cal-event { font-size: 9px; padding: 2px 4px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Floating blob (only for landing pages, contained) */
+    .floating-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; pointer-events: none; z-index: 0; }
+    @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-30px); } }
+    .animate-float { animation: float 8s ease-in-out infinite; }
+    .pulse-dot { width: 8px; height: 8px; background: #16A34A; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.4); } 70% { box-shadow: 0 0 0 12px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+
+    .accent-bar { background: linear-gradient(90deg, #E07A5F 0%, #E9C46A 50%, #81B29A 100%); }
+  </style>
+
+</head>
+<body class="min-h-screen">
+  <div class="layout flex h-screen max-w-full overflow-hidden">
+    
+    <aside id="sidebar" class="sidebar flex-shrink-0 w-64 h-screen overflow-y-auto custom-scrollbar bg-white border-r border-slate-200 z-30 flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 p-4 border-b border-slate-200 hover:bg-slate-50 transition">
+        <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm"><i data-lucide="baby" class="w-5 h-5 text-amber-300"></i></div>
+        <div><div class="font-heading font-extrabold text-base tracking-tight text-slate-800">NMS<span class="text-amber-600">PRE</span></div><p class="text-[10px] text-slate-500 font-mono">Prerequisites Pack</p></div>
+      </a>
+      <div class="lg:hidden p-3 border-b border-slate-200"><button onclick="toggleSidebar(false)" class="w-full btn btn-secondary btn-sm">← Close Menu</button></div>
+      <nav class="flex-1 py-3">
+        <div class="px-4 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Specs · 22 Docs</div>
+        <a href="index.html"><i data-lucide="layout-grid" class="w-4 h-4"></i><span>All Screens</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Start</div><a href="spec-00-master-brief.html" class=""><i data-lucide="sparkles" class="w-4 h-4"></i><span>Master Brief</span></a><a href="spec-01-product-vision.html" class=""><i data-lucide="target" class="w-4 h-4"></i><span>Product Vision</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Product</div><a href="spec-02-prd-mvp.html" class=""><i data-lucide="rocket" class="w-4 h-4"></i><span>PRD: MVP Pilot</span></a><a href="spec-03-prd-phase1.html" class=""><i data-lucide="layers" class="w-4 h-4"></i><span>PRD: Phase 1 Full</span></a><a href="spec-04-prd-phase2-3.html" class=""><i data-lucide="git-branch" class="w-4 h-4"></i><span>PRD: Phase 2 & 3</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Engineering</div><a href="spec-05-tech-stack.html" class=""><i data-lucide="cpu" class="w-4 h-4"></i><span>Tech Stack</span></a><a href="spec-06-architecture.html" class=""><i data-lucide="git-fork" class="w-4 h-4"></i><span>Architecture</span></a><a href="spec-07-database-schema.html" class=""><i data-lucide="database" class="w-4 h-4"></i><span>Database Schema</span></a><a href="spec-08-api-spec.html" class=""><i data-lucide="code-2" class="w-4 h-4"></i><span>API Specification</span></a><a href="spec-09-auth-security.html" class=""><i data-lucide="shield-check" class="w-4 h-4"></i><span>Auth & Security</span></a><a href="spec-10-multi-tenancy.html" class=""><i data-lucide="building-2" class="w-4 h-4"></i><span>Multi-Tenancy</span></a><a href="spec-11-devops.html" class=""><i data-lucide="server" class="w-4 h-4"></i><span>DevOps & Infrastructure</span></a><a href="spec-12-web-frontend.html" class=""><i data-lucide="monitor" class="w-4 h-4"></i><span>Web Frontend</span></a><a href="spec-13-mobile-app.html" class=""><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile App</span></a><a href="spec-14-ux-ui-design.html" class=""><i data-lucide="palette" class="w-4 h-4"></i><span>UX/UI Design</span></a><a href="spec-15-notifications.html" class=""><i data-lucide="bell" class="w-4 h-4"></i><span>Notifications</span></a><a href="spec-16-testing-quality.html" class=""><i data-lucide="check-circle" class="w-4 h-4"></i><span>Testing & Quality</span></a><a href="spec-17-compliance-legal.html" class="active"><i data-lucide="scale" class="w-4 h-4"></i><span>Compliance & Legal</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Workflow</div><a href="spec-18-cursor-rules.html" class=""><i data-lucide="terminal" class="w-4 h-4"></i><span>Cursor Rules</span></a><a href="spec-19-roadmap-sprints.html" class=""><i data-lucide="map" class="w-4 h-4"></i><span>Roadmap & Sprints</span></a><a href="spec-20-adrs.html" class=""><i data-lucide="git-commit" class="w-4 h-4"></i><span>Architecture Decisions</span></a><a href="spec-21-delivery-checklist.html" class=""><i data-lucide="clipboard-check" class="w-4 h-4"></i><span>Delivery Checklist</span></a><div class="px-4 py-1 mt-3 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Live Mockups</div><a href="screen-dashboard.html"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Web Screens</span></a><a href="mobile-teacher.html"><i data-lucide="smartphone" class="w-4 h-4"></i><span>Mobile Apps</span></a>
+        <div class="mt-6 pt-4 border-t border-slate-200">
+          <div class="px-2 py-1 text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase mb-1">On This Page</div>
+          <div id="tocNav" class="space-y-0.5"><a href="#1-compliance-scope" class="toc-link" data-target="1-compliance-scope">1. Compliance Scope</a><a href="#2-uae-pdpl-compliance" class="toc-link" data-target="2-uae-pdpl-compliance">2. UAE PDPL Compliance</a><a href="#21-pdpl-overview" class="toc-link toc-h3" data-target="21-pdpl-overview">2.1 PDPL Overview</a><a href="#22-personal-data-we-process" class="toc-link toc-h3" data-target="22-personal-data-we-process">2.2 Personal Data We Process</a><a href="#23-parent-consent" class="toc-link toc-h3" data-target="23-parent-consent">2.3 Parent Consent</a><a href="#24-data-subject-rights-implementation" class="toc-link toc-h3" data-target="24-data-subject-rights-implementation">2.4 Data Subject Rights Implementation</a><a href="#25-sensitive-data-handling" class="toc-link toc-h3" data-target="25-sensitive-data-handling">2.5 Sensitive Data Handling</a><a href="#3-khda-compliance-dubai" class="toc-link" data-target="3-khda-compliance-dubai">3. KHDA Compliance (Dubai)</a><a href="#31-khda-requirements-for-nurseries" class="toc-link toc-h3" data-target="31-khda-requirements-for-nurseries">3.1 KHDA Requirements for Nurseries</a><a href="#32-khda-aligned-reports-phase-1-sprint-13" class="toc-link toc-h3" data-target="32-khda-aligned-reports-phase-1-sprint-13">3.2 KHDA-Aligned Reports (Phase 1 Sprint 13)</a><a href="#33-inspection-readiness" class="toc-link toc-h3" data-target="33-inspection-readiness">3.3 Inspection Readiness</a><a href="#4-adek-compliance-abu-dhabi" class="toc-link" data-target="4-adek-compliance-abu-dhabi">4. ADEK Compliance (Abu Dhabi)</a><a href="#5-data-residency" class="toc-link" data-target="5-data-residency">5. Data Residency</a><a href="#51-saas-default" class="toc-link toc-h3" data-target="51-saas-default">5.1 SaaS Default</a><a href="#52-on-prem" class="toc-link toc-h3" data-target="52-on-prem">5.2 On-Prem</a><a href="#53-cross-border-transfer-restrictions" class="toc-link toc-h3" data-target="53-cross-border-transfer-restrictions">5.3 Cross-Border Transfer Restrictions</a><a href="#6-data-retention" class="toc-link" data-target="6-data-retention">6. Data Retention</a><a href="#61-retention-schedule-proposed-confirm-with-legal" class="toc-link toc-h3" data-target="61-retention-schedule-proposed-confirm-with-legal">6.1 Retention Schedule (Proposed — Confirm with...</a><a href="#62-retention-implementation" class="toc-link toc-h3" data-target="62-retention-implementation">6.2 Retention Implementation</a><a href="#63-legal-hold" class="toc-link toc-h3" data-target="63-legal-hold">6.3 Legal Hold</a><a href="#7-privacy-policy-terms-of-service" class="toc-link" data-target="7-privacy-policy-terms-of-service">7. Privacy Policy + Terms of Service</a><a href="#71-privacy-policy-summary" class="toc-link toc-h3" data-target="71-privacy-policy-summary">7.1 Privacy Policy (Summary)</a><a href="#72-terms-of-service" class="toc-link toc-h3" data-target="72-terms-of-service">7.2 Terms of Service</a><a href="#73-data-processing-agreement-dpa" class="toc-link toc-h3" data-target="73-data-processing-agreement-dpa">7.3 Data Processing Agreement (DPA)</a><a href="#8-breach-response" class="toc-link" data-target="8-breach-response">8. Breach Response</a><a href="#81-breach-definition" class="toc-link toc-h3" data-target="81-breach-definition">8.1 Breach Definition</a><a href="#82-breach-response-plan" class="toc-link toc-h3" data-target="82-breach-response-plan">8.2 Breach Response Plan</a><a href="#83-breach-notification-template" class="toc-link toc-h3" data-target="83-breach-notification-template">8.3 Breach Notification Template</a><a href="#9-sub-processors" class="toc-link" data-target="9-sub-processors">9. Sub-Processors</a><a href="#10-cookies-tracking" class="toc-link" data-target="10-cookies-tracking">10. Cookies + Tracking</a><a href="#101-cookies-used" class="toc-link toc-h3" data-target="101-cookies-used">10.1 Cookies Used</a><a href="#102-what-we-dont-use" class="toc-link toc-h3" data-target="102-what-we-dont-use">10.2 What We Don&#x27;t Use</a><a href="#103-analytics-privacy-preserving" class="toc-link toc-h3" data-target="103-analytics-privacy-preserving">10.3 Analytics (Privacy-Preserving)</a><a href="#11-compliance-audit" class="toc-link" data-target="11-compliance-audit">11. Compliance Audit</a><a href="#111-internal-audits" class="toc-link toc-h3" data-target="111-internal-audits">11.1 Internal Audits</a><a href="#112-external-audits" class="toc-link toc-h3" data-target="112-external-audits">11.2 External Audits</a><a href="#113-customer-audit-rights" class="toc-link toc-h3" data-target="113-customer-audit-rights">11.3 Customer Audit Rights</a><a href="#12-international-expansion-considerations-phase-4" class="toc-link" data-target="12-international-expansion-considerations-phase-4">12. International Expansion Considerations (Pha...</a><a href="#13-legal-sign-off-checklist-before-each-phase-go-live" class="toc-link" data-target="13-legal-sign-off-checklist-before-each-phase-go-live">13. Legal Sign-Off Checklist (Before Each Phase...</a><a href="#phase-1-go-live" class="toc-link toc-h3" data-target="phase-1-go-live">Phase 1 Go-Live</a><a href="#phase-2-go-live" class="toc-link toc-h3" data-target="phase-2-go-live">Phase 2 Go-Live</a><a href="#phase-3-go-live" class="toc-link toc-h3" data-target="phase-3-go-live">Phase 3 Go-Live</a></div>
+        </div>
+      </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop lg:hidden" onclick="toggleSidebar(false)"></div>
+    
+    <div class="workspace flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      
+    <header class="h-16 flex-shrink-0 flex items-center justify-between px-4 lg:px-6 bg-white border-b border-slate-200 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" class="lg:hidden p-2 rounded-lg hover:bg-slate-100"><i data-lucide="menu" class="w-4 h-4 text-slate-600"></i></button>
+        <div>
+          <h1 class="font-heading text-base font-bold text-slate-800 flex items-center gap-2"><i data-lucide="scale" class="w-4 h-4 text-amber-600"></i><span>Compliance & Legal</span></h1>
+          <div class="text-[11px] font-mono text-slate-400">Engineering · spec-17-compliance-legal.html</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="langToggle" onclick="toggleLanguage()" class="btn btn-secondary btn-sm">ع</button>
+        <button onclick="toggleThemeStudio()" class="btn btn-secondary btn-sm"><i data-lucide="palette" class="w-3.5 h-3.5 text-amber-600"></i></button>
+        <a href="index.html" class="btn btn-secondary btn-sm"><i data-lucide="layout-grid" class="w-3.5 h-3.5"></i></a>
+      </div>
+    </header>
+    
+      <main class="flex-1 overflow-y-auto custom-scrollbar">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+      <div class="nursery-card p-6 mb-6 bg-gradient-to-br from-white to-slate-50">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="pill pill-info">Engineering</span>
+          <span class="pill pill-done">DOC 17</span>
+          <span class="text-[10px] font-mono text-slate-400">~3,230 words</span>
+        </div>
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Compliance & Legal</h2>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-slate-200">
+          <a href="spec-16-testing-quality.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Testing & Quality</div></a>
+          <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i><div class="text-[10px] font-mono text-slate-400 mt-1">Index</div></a>
+          <a href="spec-18-cursor-rules.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Cursor Rules</div></a>
+        </div>
+      </div>
+      <article class="prose-nms"><h1 id="17-compliance-legal">17 — Compliance &amp; Legal</h1>
+<blockquote>
+<p>UAE PDPL, KHDA/ADEK regulatory alignment, data residency, retention policies, parent consent, breach response.</p>
+</blockquote>
+<hr />
+<h2 id="1-compliance-scope">1. Compliance Scope</h2>
+<p>NMS operates in the UAE and must comply with:</p>
+<table>
+<thead>
+<tr>
+<th>Regulation</th>
+<th>Scope</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UAE PDPL</strong> (Federal Decree-Law No. 45 of 2021)</td>
+<td>All personal data of UAE residents</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td><strong>KHDA</strong> (Dubai: Knowledge and Human Development Authority)</td>
+<td>Nurseries in Dubai</td>
+<td>Mandatory for Dubai customers</td>
+</tr>
+<tr>
+<td><strong>ADEK</strong> (Abu Dhabi: Department of Education and Knowledge)</td>
+<td>Nurseries in Abu Dhabi</td>
+<td>Mandatory for Abu Dhabi customers</td>
+</tr>
+<tr>
+<td><strong>GDPR-aligned</strong> (EU/UK data subjects)</td>
+<td>If EU/UK parents enrolled</td>
+<td>Optional, good practice</td>
+</tr>
+<tr>
+<td><strong>UAE Federal Law No. 2 of 2016</strong> (Cybercrime)</td>
+<td>All UAE digital activity</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td><strong>UAE Consumer Protection Law</strong></td>
+<td>Commercial relationships</td>
+<td>Mandatory</td>
+</tr>
+</tbody>
+</table>
+<p>This file is <strong>not legal advice</strong>. It's our compliance approach based on current understanding. <strong>Legal counsel must review and sign off before each phase go-live.</strong></p>
+<hr />
+<h2 id="2-uae-pdpl-compliance">2. UAE PDPL Compliance</h2>
+<h3 id="21-pdpl-overview">2.1 PDPL Overview</h3>
+<p>The UAE Personal Data Protection Law (Federal Decree-Law No. 45 of 2021) governs the processing of personal data in the UAE. Key obligations:</p>
+<table>
+<thead>
+<tr>
+<th>Obligation</th>
+<th>How NMS Complies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lawful basis for processing</td>
+<td>Contract (providing nursery services) + legal obligation (KHDA record retention) + consent (for non-essential processing)</td>
+</tr>
+<tr>
+<td>Data subject rights (access, correction, deletion, portability)</td>
+<td>Implemented as admin-only functions (per source SRS §5); parents can request via messaging</td>
+</tr>
+<tr>
+<td>Consent management</td>
+<td>Captured at parent invitation acceptance; configurable per data category</td>
+</tr>
+<tr>
+<td>Data minimization</td>
+<td>Only collect data needed for nursery operations</td>
+</tr>
+<tr>
+<td>Purpose limitation</td>
+<td>Data used only for nursery operations; not shared without consent</td>
+</tr>
+<tr>
+<td>Data residency</td>
+<td>UAE-hosted infrastructure (SaaS default); on-prem at customer's UAE infra</td>
+</tr>
+<tr>
+<td>Cross-border transfer restrictions</td>
+<td>No cross-border transfer without explicit consent + adequate protection</td>
+</tr>
+<tr>
+<td>Breach notification</td>
+<td>Notify UAE Data Office within 72 hours of breach discovery</td>
+</tr>
+<tr>
+<td>Data Protection Officer (DPO)</td>
+<td>Customer designates DPO; we provide tools (audit log, consent mgmt)</td>
+</tr>
+<tr>
+<td>Children's data</td>
+<td>Special protection: encryption, access controls, audit, retention limits</td>
+</tr>
+<tr>
+<td>Sensitive data (medical, biometric)</td>
+<td>Higher protection: column-level encryption, restricted access, audit</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-personal-data-we-process">2.2 Personal Data We Process</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Examples</th>
+<th>Lawful basis</th>
+<th>Retention (proposed)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Identity</strong></td>
+<td>Name, DOB, gender, photo, nationality</td>
+<td>Contract</td>
+<td>7 years after withdrawal</td>
+</tr>
+<tr>
+<td><strong>Contact</strong></td>
+<td>Email, phone, address</td>
+<td>Contract</td>
+<td>7 years after withdrawal</td>
+</tr>
+<tr>
+<td><strong>Government IDs</strong></td>
+<td>Emirates ID, passport number</td>
+<td>Legal obligation (KHDA)</td>
+<td>10 years</td>
+</tr>
+<tr>
+<td><strong>Attendance</strong></td>
+<td>Check-in/out times, absences</td>
+<td>Contract</td>
+<td>7 years</td>
+</tr>
+<tr>
+<td><strong>Medical</strong></td>
+<td>Allergies, medications, conditions</td>
+<td>Contract + vital interests</td>
+<td>10 years</td>
+</tr>
+<tr>
+<td><strong>Safeguarding</strong></td>
+<td>Custody notes, safeguarding flags</td>
+<td>Legal obligation</td>
+<td>10 years (or longer if legal hold)</td>
+</tr>
+<tr>
+<td><strong>Assessment</strong></td>
+<td>Observations, milestones, progress</td>
+<td>Contract</td>
+<td>5 years after withdrawal</td>
+</tr>
+<tr>
+<td><strong>Billing</strong></td>
+<td>Invoices, payments, expenses</td>
+<td>Legal obligation (tax)</td>
+<td>7 years (UAE tax law)</td>
+</tr>
+<tr>
+<td><strong>Communications</strong></td>
+<td>Messages, activity posts</td>
+<td>Contract</td>
+<td>3 years</td>
+</tr>
+<tr>
+<td><strong>Audit log</strong></td>
+<td>All system mutations</td>
+<td>Legal obligation</td>
+<td>7 years</td>
+</tr>
+<tr>
+<td><strong>Device/usage</strong></td>
+<td>Push token, IP, user agent</td>
+<td>Legitimate interest</td>
+<td>1 year</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-parent-consent">2.3 Parent Consent</h3>
+<p>At parent invitation acceptance:</p>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Welcome to NMS!
+
+By creating your account, you consent to:
+
+✓ Receiving daily reports about your child via the app and email
+✓ Receiving notifications about your child&#39;s activities, attendance, and invoices
+✓ Photos and videos of your child being posted by nursery staff for you to view
+✓ Your child&#39;s data being stored securely on UAE-hosted servers
+
+You can:
+- Withdraw consent for non-essential processing at any time (Settings → Privacy)
+- Request a copy of your child&#39;s data (Contact nursery admin)
+- Request correction of inaccurate data (Contact nursery admin)
+- Request deletion of data (subject to legal retention requirements)
+
+View full Privacy Policy: https://nms.ae/privacy
+View Terms of Service: https://nms.ae/terms
+
+[Accept] [Decline]
+</code></pre></div>
+
+<h3 id="24-data-subject-rights-implementation">2.4 Data Subject Rights Implementation</h3>
+<table>
+<thead>
+<tr>
+<th>Right</th>
+<th>How user exercises</th>
+<th>How we fulfill</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access</td>
+<td>Email/message nursery admin → admin exports student record</td>
+<td>Admin uses "Export Student Data" function (generates JSON + PDF of all data)</td>
+</tr>
+<tr>
+<td>Correction</td>
+<td>Email/message nursery admin → admin edits record</td>
+<td>Admin edits via UI, audit logged</td>
+</tr>
+<tr>
+<td>Deletion</td>
+<td>Email/message nursery admin → admin soft-deletes</td>
+<td>Soft-delete applied; hard delete after retention period (or with legal sign-off if earlier)</td>
+</tr>
+<tr>
+<td>Portability</td>
+<td>Email/message nursery admin → admin exports in machine-readable format</td>
+<td>JSON export (full data) + PDF export (human-readable)</td>
+</tr>
+<tr>
+<td>Objection</td>
+<td>Settings → Privacy → Disable specific processing</td>
+<td>E.g., disable photo sharing → no more activity posts visible to that parent</td>
+</tr>
+<tr>
+<td>Withdraw consent</td>
+<td>Settings → Privacy → Withdraw consent</td>
+<td>Data processing stops; data retained per legal minimum; parent account deactivated</td>
+</tr>
+</tbody>
+</table>
+<h3 id="25-sensitive-data-handling">2.5 Sensitive Data Handling</h3>
+<p><strong>Encrypted at column level</strong> (via pgcrypto, see <code>09-AUTH-SECURITY.md</code> §4.3):
+- Student medical notes
+- Student allergy info
+- Student dietary requirements
+- Student custody notes
+- Student safeguarding flags
+- Student passport number
+- Student Emirates ID
+- Staff salary
+- Staff Emirates ID
+- Staff passport number
+- Staff visa info</p>
+<p><strong>Access restrictions</strong>:
+- Only Centre Admin+ can view medical/safeguarding fields.
+- Only Accounts role can view salary.
+- Access logged in audit log (who viewed what, when).</p>
+<p><strong>Emergency access</strong>: Teacher can view emergency-relevant fields (allergies, medical conditions, emergency contacts) for students in their room — but only via the Emergency Report flow, which is heavily audited.</p>
+<hr />
+<h2 id="3-khda-compliance-dubai">3. KHDA Compliance (Dubai)</h2>
+<h3 id="31-khda-requirements-for-nurseries">3.1 KHDA Requirements for Nurseries</h3>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>How NMS Complies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Student enrollment records</td>
+<td>Student entity with full lifecycle tracking</td>
+</tr>
+<tr>
+<td>Attendance records</td>
+<td>Daily attendance, immutable after 24h, retained 7+ years</td>
+</tr>
+<tr>
+<td>Staff qualifications</td>
+<td>Staff.qualifications JSONB field, reportable</td>
+</tr>
+<tr>
+<td>Staff-to-student ratios per age band</td>
+<td>Configurable per room, real-time enforcement, breach alerting</td>
+</tr>
+<tr>
+<td>Child safety</td>
+<td>Safeguarding flags, custody notes, emergency contacts, audit trail</td>
+</tr>
+<tr>
+<td>Parent communication records</td>
+<td>Activity feed + messaging + daily reports all retained</td>
+</tr>
+<tr>
+<td>Inspection readiness</td>
+<td>Reports module generates KHDA-aligned reports (Phase 1 Sprint 13)</td>
+</tr>
+<tr>
+<td>Curriculum (EYFS)</td>
+<td>Phase 2: full EYFS framework support</td>
+</tr>
+<tr>
+<td>Incident reporting</td>
+<td>Forms module (Incident Form type), audit logged</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-khda-aligned-reports-phase-1-sprint-13">3.2 KHDA-Aligned Reports (Phase 1 Sprint 13)</h3>
+<table>
+<thead>
+<tr>
+<th>Report</th>
+<th>Purpose</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Student Enrollment Report</td>
+<td>Active students by age, room, program</td>
+<td>Excel</td>
+</tr>
+<tr>
+<td>Staff Qualifications Report</td>
+<td>Staff with their qualifications, certifications</td>
+<td>Excel</td>
+</tr>
+<tr>
+<td>Attendance Compliance Report</td>
+<td>Daily attendance vs. expected, ratio compliance history</td>
+<td>Excel + PDF</td>
+</tr>
+<tr>
+<td>Incident Summary Report</td>
+<td>Incidents logged in the period</td>
+<td>Excel + PDF</td>
+</tr>
+<tr>
+<td>Safeguarding Register</td>
+<td>Active safeguarding flags + custody notes (redacted for non-admin)</td>
+<td>PDF (admin-only)</td>
+</tr>
+<tr>
+<td>Audit Trail Export (per KHDA request)</td>
+<td>All mutations in date range</td>
+<td>Excel + JSON</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-inspection-readiness">3.3 Inspection Readiness</h3>
+<p>KHDA inspections happen annually (typically). NMS supports inspection via:
+- <strong>Audit log</strong>: Append-only, filterable by entity/date/action. Inspector can verify any data change.
+- <strong>Reports</strong>: Pre-built KHDA-aligned reports, one-click generation.
+- <strong>Document storage</strong>: Resource Centre stores inspection-relevant documents (policies, certifications).
+- <strong>Read-only inspector access</strong>: Super Admin can create a temporary "Inspector" role with read-only access to relevant modules (Sprint 14+).</p>
+<hr />
+<h2 id="4-adek-compliance-abu-dhabi">4. ADEK Compliance (Abu Dhabi)</h2>
+<p>Similar to KHDA but for Abu Dhabi nurseries. Same reports + audit capabilities apply. ADEK-specific reporting templates added in Phase 1 Sprint 14 based on customer feedback.</p>
+<hr />
+<h2 id="5-data-residency">5. Data Residency</h2>
+<h3 id="51-saas-default">5.1 SaaS Default</h3>
+<ul>
+<li><strong>Region</strong>: AWS ME Central (me-central-1) — Bahrain, but UAE-compliant under UAE PDPL (AWS has UAE data residency certification).</li>
+<li><strong>Alternative</strong>: AWS UAE (when available, expected 2026-2027) — migrate when launched.</li>
+<li><strong>Data stored in region</strong>:</li>
+<li>PostgreSQL (RDS).</li>
+<li>Object storage (S3) for media, documents, backups.</li>
+<li>Redis (ElastiCache).</li>
+<li>RabbitMQ (Amazon MQ).</li>
+<li>Keycloak (EKS pod + RDS).</li>
+<li>All backups.</li>
+<li>All audit logs.</li>
+<li><strong>Data NOT stored in region</strong> (but doesn't contain personal data):</li>
+<li>CloudFront edge cache (cached at global edge PoPs, but content is signed URLs + already-encrypted media).</li>
+<li>Container images (ghcr.io or ECR — public registry for open-source base images, private for our images).</li>
+<li>Terraform state (S3 in same region).</li>
+<li>GitHub Actions artifacts (US, but no PII).</li>
+</ul>
+<h3 id="52-on-prem">5.2 On-Prem</h3>
+<p>Customer's responsibility to host in UAE:
+- Customer chooses UAE cloud (AWS UAE, Azure UAE, local provider) or on-prem data center.
+- We provide Terraform modules for AWS, Azure, generic K8s.
+- We DON'T support non-UAE hosting for on-prem customers (per PDPL).</p>
+<h3 id="53-cross-border-transfer-restrictions">5.3 Cross-Border Transfer Restrictions</h3>
+<p>Per PDPL, personal data cannot leave UAE without:
+- Explicit consent from data subject.
+- Adequate protection in destination country.
+- Approved transfer mechanism.</p>
+<p><strong>NMS policy</strong>: No cross-border transfer of personal data. All personal data stays in UAE region.</p>
+<p><strong>Exception</strong>: If customer explicitly requests international hosting (rare), we require:
+- Written acknowledgement from customer's legal counsel.
+- Written consent from all data subjects (parents).
+- Documentation of adequate protection measures.</p>
+<p>This exception is documented per customer in their data processing agreement.</p>
+<hr />
+<h2 id="6-data-retention">6. Data Retention</h2>
+<h3 id="61-retention-schedule-proposed-confirm-with-legal">6.1 Retention Schedule (Proposed — Confirm with Legal)</h3>
+<table>
+<thead>
+<tr>
+<th>Data type</th>
+<th>Retention period</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Student attendance</td>
+<td>7 years after withdrawal</td>
+<td>KHDA requirement</td>
+</tr>
+<tr>
+<td>Student medical/safeguarding</td>
+<td>10 years after withdrawal</td>
+<td>Legal protection (potential claims)</td>
+</tr>
+<tr>
+<td>Student assessment</td>
+<td>5 years after withdrawal</td>
+<td>Educational continuity</td>
+</tr>
+<tr>
+<td>Student identity (name, DOB)</td>
+<td>7 years after withdrawal</td>
+<td>KHDA + legal</td>
+</tr>
+<tr>
+<td>Student government IDs (Emirates ID, passport)</td>
+<td>10 years</td>
+<td>Legal obligation</td>
+</tr>
+<tr>
+<td>Staff records</td>
+<td>7 years after termination</td>
+<td>UAE labor law</td>
+</tr>
+<tr>
+<td>Billing/invoices</td>
+<td>7 years</td>
+<td>UAE tax law (Federal Decree-Law No. 28 of 2022)</td>
+</tr>
+<tr>
+<td>Audit log</td>
+<td>7 years</td>
+<td>Compliance</td>
+</tr>
+<tr>
+<td>Activity posts</td>
+<td>3 years</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td>Messages</td>
+<td>3 years</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td>Notifications</td>
+<td>90 days</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td>Device tokens</td>
+<td>1 year after last use</td>
+<td>Operational</td>
+</tr>
+<tr>
+<td>Backups</td>
+<td>35 days</td>
+<td>Operational</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-retention-implementation">6.2 Retention Implementation</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">// Background job (Hangfire, daily at 2 AM)</span>
+<span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">class</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">DataRetentionJob</span>
+<span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">    </span><span style="color: #66D9EF">public</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">async</span><span style="color: #F8F8F2"> Task </span><span style="color: #A6E22E">ExecuteAsync</span><span style="color: #F8F8F2">()</span>
+<span style="color: #F8F8F2">    {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> retentionPolicies </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _settingRepository</span>
+<span style="color: #F8F8F2">            .GetRetentionPoliciesAsync();</span>
+
+<span style="color: #F8F8F2">        </span><span style="color: #66D9EF">foreach</span><span style="color: #F8F8F2"> (</span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> policy </span><span style="color: #66D9EF">in</span><span style="color: #F8F8F2"> retentionPolicies)</span>
+<span style="color: #F8F8F2">        {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">var</span><span style="color: #F8F8F2"> cutoffDate </span><span style="color: #FF4689">=</span><span style="color: #F8F8F2"> DateTimeOffset.UtcNow.AddYears(</span><span style="color: #FF4689">-</span><span style="color: #F8F8F2">policy.Years);</span>
+
+<span style="color: #F8F8F2">            </span><span style="color: #66D9EF">switch</span><span style="color: #F8F8F2"> (policy.EntityType)</span>
+<span style="color: #F8F8F2">            {</span>
+<span style="color: #F8F8F2">                </span><span style="color: #66D9EF">case</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;attendance_record&quot;</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _attendanceRepo.HardDeleteBeforeAsync(cutoffDate);</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #66D9EF">break</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">                </span><span style="color: #66D9EF">case</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;audit_log&quot;</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _auditLogRepo.ArchiveBeforeAsync(cutoffDate);  </span><span style="color: #959077">// Move to archive partition</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #66D9EF">break</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">                </span><span style="color: #66D9EF">case</span><span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;notification&quot;</span><span style="color: #F8F8F2">:</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #66D9EF">await</span><span style="color: #F8F8F2"> _notificationRepo.HardDeleteExpiredAsync();</span>
+<span style="color: #F8F8F2">                    </span><span style="color: #66D9EF">break</span><span style="color: #F8F8F2">;</span>
+<span style="color: #F8F8F2">                </span><span style="color: #959077">// ... etc</span>
+<span style="color: #F8F8F2">            }</span>
+
+<span style="color: #F8F8F2">            _logger.LogInformation(</span><span style="color: #E6DB74">&quot;Retention policy applied: {EntityType} deleted before {Cutoff}&quot;</span><span style="color: #F8F8F2">, </span>
+<span style="color: #F8F8F2">                policy.EntityType, cutoffDate);</span>
+<span style="color: #F8F8F2">        }</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+
+<h3 id="63-legal-hold">6.3 Legal Hold</h3>
+<p>When a legal hold is placed (e.g., safeguarding investigation, litigation):
+- Super Admin marks tenant or specific entities as "legal hold".
+- Retention jobs skip entities on legal hold.
+- Legal hold records the reason, start date, and requesting authority.
+- Legal hold release requires Super Admin + documented legal sign-off.</p>
+<hr />
+<h2 id="7-privacy-policy-terms-of-service">7. Privacy Policy + Terms of Service</h2>
+<h3 id="71-privacy-policy-summary">7.1 Privacy Policy (Summary)</h3>
+<p>Hosted at <code>https://nms.ae/privacy</code>. Covers:
+- What data we collect (per §2.2 above).
+- Why we collect it (lawful basis).
+- Where it's stored (UAE).
+- How long we keep it (retention schedule).
+- Who can access it (nursery staff, our ops team, AWS as processor).
+- Data subject rights.
+- Cookie usage (minimal — auth + locale only, no tracking).
+- Breach notification commitment.
+- Contact info for privacy questions.</p>
+<p>Bilingual (English + Arabic), reviewed by legal counsel before each phase go-live.</p>
+<h3 id="72-terms-of-service">7.2 Terms of Service</h3>
+<p>Hosted at <code>https://nms.ae/terms</code>. Covers:
+- Service description.
+- Acceptable use policy.
+- Payment terms (for SaaS).
+- SLA commitments.
+- Limitation of liability.
+- Termination terms.
+- Data ownership (customer owns their data; we're processor).
+- Sub-processor disclosure (AWS, FCM, SES, etc.).
+- Governing law (UAE).
+- Dispute resolution (UAE courts or arbitration).</p>
+<h3 id="73-data-processing-agreement-dpa">7.3 Data Processing Agreement (DPA)</h3>
+<p>Signed with each customer (especially on-prem and enterprise SaaS):
+- Defines roles (customer = controller, we = processor).
+- Permitted processing activities.
+- Sub-processor list (with notification of changes).
+- Security obligations.
+- Breach notification timeline.
+- Data return/deletion on termination.
+- Audit rights.</p>
+<p>Template: <code>docs/legal/dpa-template.pdf</code> (created by legal counsel).</p>
+<hr />
+<h2 id="8-breach-response">8. Breach Response</h2>
+<h3 id="81-breach-definition">8.1 Breach Definition</h3>
+<p>A "personal data breach" means any breach of security leading to the accidental or unlawful destruction, loss, alteration, unauthorized disclosure of, or access to, personal data.</p>
+<p>Examples:
+- Unauthorized access to database (e.g., SQL injection).
+- Lost/stolen device with cached personal data.
+- Misdirected email containing personal data.
+- Insider data exfiltration.
+- Ransomware attack.
+- Accidental public S3 bucket.</p>
+<h3 id="82-breach-response-plan">8.2 Breach Response Plan</h3>
+<p><code>infra/docs/incident-response.md</code> documents:</p>
+<p><strong>Phase 1: Detection + Triage (0-1 hour)</strong>
+1. Anyone who suspects a breach immediately notifies Tech Lead + DPO (customer's or our internal).
+2. Tech Lead assesses: Is this a real breach? What data is affected? How many users?
+3. If confirmed: declare incident (SEV-1).</p>
+<p><strong>Phase 2: Containment (1-4 hours)</strong>
+1. Stop the bleeding: revoke compromised credentials, block IP, take service offline if needed.
+2. Preserve evidence: snapshot DB, capture logs, don't destroy anything.
+3. Notify legal counsel.</p>
+<p><strong>Phase 3: Assessment (4-24 hours)</strong>
+1. Determine scope: which records, which users, what data categories.
+2. Determine root cause.
+3. Determine if breach is "notifiable" per PDPL (likely yes if personal data involved).</p>
+<p><strong>Phase 4: Notification (24-72 hours)</strong>
+1. Notify UAE Data Office within 72 hours of discovery.
+2. Notify affected individuals "without undue delay" if high risk.
+3. Customer notification (if customer is controller, they notify their users; we support).</p>
+<p><strong>Phase 5: Recovery (ongoing)</strong>
+1. Implement fixes to prevent recurrence.
+2. Restore service from clean backups if needed.
+3. Monitor for further unauthorized access.</p>
+<p><strong>Phase 6: Post-Mortem (5 business days)</strong>
+1. Blameless post-mortem document.
+2. Root cause analysis (5 Whys).
+3. Action items with owners + due dates.
+4. Update security controls + runbooks.</p>
+<h3 id="83-breach-notification-template">8.3 Breach Notification Template</h3>
+<div class="codehilite" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>Subject: Security Incident Notification — [Date]
+
+Dear [Customer/User],
+
+We are writing to inform you of a security incident that may have affected your personal data.
+
+What Happened:
+[Description of incident]
+
+When It Happened:
+[Date/time of incident and discovery]
+
+What Data Was Affected:
+[List of data categories]
+
+What We Are Doing:
+[Remediation actions]
+
+What You Should Do:
+[Recommended actions for user, if any]
+
+For More Information:
+[Contact details]
+
+We sincerely apologize for this incident and are committed to...
+
+Sincerely,
+[Name]
+[Title]
+</code></pre></div>
+
+<hr />
+<h2 id="9-sub-processors">9. Sub-Processors</h2>
+<p>We use the following sub-processors (all UAE-region or with adequate protection):</p>
+<table>
+<thead>
+<tr>
+<th>Sub-processor</th>
+<th>Purpose</th>
+<th>Region</th>
+<th>DPA status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AWS (Amazon Web Services)</strong></td>
+<td>Hosting, DB, storage, cache, queue</td>
+<td>UAE (me-central-1)</td>
+<td>Standard AWS DPA</td>
+</tr>
+<tr>
+<td><strong>Google Firebase (FCM)</strong></td>
+<td>Push notifications</td>
+<td>Global (no PII stored)</td>
+<td>Google Cloud DPA</td>
+</tr>
+<tr>
+<td><strong>AWS SES</strong></td>
+<td>Transactional email</td>
+<td>UAE</td>
+<td>Standard AWS DPA</td>
+</tr>
+<tr>
+<td><strong>Twilio / Unifonic</strong></td>
+<td>SMS (Critical tier)</td>
+<td>UAE (Unifonic) / Global (Twilio)</td>
+<td>Provider DPA</td>
+</tr>
+<tr>
+<td><strong>AWS Rekognition / Azure Content Safety</strong></td>
+<td>Content moderation</td>
+<td>UAE or adjacent</td>
+<td>Provider DPA</td>
+</tr>
+<tr>
+<td><strong>OpenAI</strong> (Phase 2+)</td>
+<td>AI features (newsletter, observation transcription)</td>
+<td>Global — anonymized data only</td>
+<td>OpenAI DPA</td>
+</tr>
+<tr>
+<td><strong>Sentry</strong></td>
+<td>Error monitoring</td>
+<td>EU — anonymized data only</td>
+<td>Sentry DPA</td>
+</tr>
+<tr>
+<td><strong>GitHub</strong></td>
+<td>Source code, CI/CD</td>
+<td>US — no PII</td>
+<td>GitHub DPA</td>
+</tr>
+<tr>
+<td><strong>Stripe / Telr / PayTabs</strong> (Phase 3)</td>
+<td>Payment gateway</td>
+<td>UAE</td>
+<td>Provider DPA</td>
+</tr>
+</tbody>
+</table>
+<p>Customers notified 30 days before adding new sub-processors. Customer can object (rare).</p>
+<hr />
+<h2 id="10-cookies-tracking">10. Cookies + Tracking</h2>
+<h3 id="101-cookies-used">10.1 Cookies Used</h3>
+<table>
+<thead>
+<tr>
+<th>Cookie</th>
+<th>Purpose</th>
+<th>Lifetime</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nms_refresh_token</code></td>
+<td>Auth refresh token</td>
+<td>7 days</td>
+<td>HttpOnly, Secure, SameSite=Strict</td>
+</tr>
+<tr>
+<td><code>nms_language</code></td>
+<td>User's preferred language</td>
+<td>1 year</td>
+<td>SameSite=Strict</td>
+</tr>
+<tr>
+<td><code>nms_theme</code></td>
+<td>UI theme preference</td>
+<td>1 year</td>
+<td>SameSite=Strict</td>
+</tr>
+</tbody>
+</table>
+<h3 id="102-what-we-dont-use">10.2 What We Don't Use</h3>
+<ul>
+<li>❌ Google Analytics (privacy-invasive).</li>
+<li>❌ Facebook Pixel.</li>
+<li>❌ Third-party tracking cookies.</li>
+<li>❌ Advertising cookies.</li>
+<li>❌ Cross-site tracking.</li>
+</ul>
+<h3 id="103-analytics-privacy-preserving">10.3 Analytics (Privacy-Preserving)</h3>
+<p>We use <strong>PostHog</strong> (self-hosted or EU region) for product analytics:
+- Anonymous usage patterns (which features are used).
+- No PII collected.
+- No cross-site tracking.
+- Opt-out available in Settings → Privacy.</p>
+<hr />
+<h2 id="11-compliance-audit">11. Compliance Audit</h2>
+<h3 id="111-internal-audits">11.1 Internal Audits</h3>
+<p>Quarterly internal audit:
+- Review access controls (who has access to what).
+- Review audit log for suspicious patterns.
+- Review data retention compliance.
+- Review DPA compliance with sub-processors.
+- Review breach response readiness (DR drill).</p>
+<h3 id="112-external-audits">11.2 External Audits</h3>
+<ul>
+<li>Annual external compliance audit (third-party firm).</li>
+<li>SOC 2 Type II (target: Phase 3).</li>
+<li>ISO 27001 (target: Phase 3+, if customer demand).</li>
+</ul>
+<h3 id="113-customer-audit-rights">11.3 Customer Audit Rights</h3>
+<p>Enterprise customers (on-prem + Tier 4 SaaS) have audit rights per DPA:
+- Annual audit (customer bears cost).
+- Or: rely on our SOC 2 report (we provide).</p>
+<hr />
+<h2 id="12-international-expansion-considerations-phase-4">12. International Expansion Considerations (Phase 4+)</h2>
+<p>When expanding beyond UAE (Saudi Arabia, Qatar, etc.):</p>
+<table>
+<thead>
+<tr>
+<th>Country</th>
+<th>Additional compliance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Saudi Arabia</td>
+<td>SAMA + PDPL (KSA) — separate data residency</td>
+</tr>
+<tr>
+<td>Qatar</td>
+<td>PDPL (Qatar)</td>
+</tr>
+<tr>
+<td>Kuwait</td>
+<td>Pending data protection law</td>
+</tr>
+<tr>
+<td>Bahrain</td>
+<td>PDPL (Bahrain)</td>
+</tr>
+<tr>
+<td>Oman</td>
+<td>PDPL (Oman)</td>
+</tr>
+</tbody>
+</table>
+<p>Each country requires:
+- Local data residency.
+- Local language support (Arabic dialects).
+- Local payment gateway.
+- Local regulatory alignment (e.g., Saudi VAT 15% vs UAE 5%).</p>
+<p><strong>Architecture must support multi-region deployment</strong> (Phase 4+). Current architecture (single-region SaaS) is fit for UAE-only Phase 1-3.</p>
+<hr />
+<h2 id="13-legal-sign-off-checklist-before-each-phase-go-live">13. Legal Sign-Off Checklist (Before Each Phase Go-Live)</h2>
+<h3 id="phase-1-go-live">Phase 1 Go-Live</h3>
+<ul>
+<li>[ ] Privacy Policy reviewed + updated.</li>
+<li>[ ] Terms of Service reviewed + updated.</li>
+<li>[ ] DPA template finalized.</li>
+<li>[ ] Retention schedule confirmed with legal counsel.</li>
+<li>[ ] Breach response plan tested (tabletop exercise).</li>
+<li>[ ] Sub-processor list confirmed.</li>
+<li>[ ] KHDA reporting alignment confirmed.</li>
+<li>[ ] ADEK reporting alignment confirmed (if Abu Dhabi customer).</li>
+<li>[ ] Parent consent flow reviewed.</li>
+<li>[ ] Data subject rights procedures documented.</li>
+<li>[ ] Data residency confirmed (UAE region).</li>
+<li>[ ] Legal counsel sign-off (written).</li>
+</ul>
+<h3 id="phase-2-go-live">Phase 2 Go-Live</h3>
+<ul>
+<li>[ ] All Phase 1 items maintained.</li>
+<li>[ ] Learning &amp; Assessment data retention confirmed.</li>
+<li>[ ] AI features (observation transcription, newsletter generation) — OpenAI DPA in place.</li>
+<li>[ ] Mobile app privacy policy section added.</li>
+<li>[ ] App Store + Play Store privacy labels completed.</li>
+</ul>
+<h3 id="phase-3-go-live">Phase 3 Go-Live</h3>
+<ul>
+<li>[ ] All Phase 2 items maintained.</li>
+<li>[ ] Payment gateway PCI DSS scope confirmed (we're SAQ-A — gateway handles cardholder data).</li>
+<li>[ ] ERP integration data flow reviewed (what data syncs to ERP).</li>
+<li>[ ] Open API terms of service published.</li>
+<li>[ ] Multi-centre group data isolation verified.</li>
+<li>[ ] SOC 2 Type II audit initiated (target: 6 months post-launch).</li>
+</ul>
+<hr />
+<p><strong>Next file to read</strong>: <code>18-CURSOR-RULES.md</code> — paste this into <code>.cursorrules</code> to give the Cursor agent the project context.</p></article>
+      <div class="mt-12 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        <a href="spec-16-testing-quality.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition"><div class="text-[10px] font-mono text-slate-400 uppercase">← Previous</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Testing & Quality</div></a>
+        <a href="index.html" class="nursery-card p-4 hover:border-amber-300 transition text-center"><i data-lucide="layout-grid" class="w-5 h-5 text-amber-600 mx-auto"></i></a>
+        <a href="spec-18-cursor-rules.html" class="nursery-card p-4 flex-1 hover:border-amber-300 transition text-right"><div class="text-[10px] font-mono text-slate-400 uppercase">Next →</div><div class="font-heading text-sm font-bold text-slate-800 mt-1">Cursor Rules</div></a>
+      </div>
+    </div>
+    </main>
+    </div>
+  </div>
+  
+    <div id="themeStudioModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="relative w-full max-w-lg nursery-card p-6 space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+          <h3 class="font-heading text-base font-bold text-slate-900">Theme Studio</h3>
+          <button onclick="toggleThemeStudio()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyPreset('#E07A5F')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#E07A5F]"></span> Warm Terracotta</button>
+          <button onclick="applyPreset('#2B7A58')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#2B7A58]"></span> Soft Sage</button>
+          <button onclick="applyPreset('#0284C7')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#0284C7]"></span> Slate Blue</button>
+          <button onclick="applyPreset('#8B5CF6')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 font-heading"><span class="w-3.5 h-3.5 rounded-full bg-[#8B5CF6]"></span> Royal Violet</button>
+        </div>
+        <div class="flex justify-end pt-2 border-t border-slate-200"><button onclick="toggleThemeStudio()" class="btn btn-dark btn-sm">Apply</button></div>
+      </div>
+    </div>
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white font-mono text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-200">
+      <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toastMsg">Done!</span>
+    </div>
+    
+  
+  <script>
+    function toggleSidebar(o) {
+      const s = document.getElementById('sidebar');
+      const b = document.getElementById('sidebarBackdrop');
+      if (!s || !b) return;
+      if (o) { s.classList.add('open'); b.classList.add('show'); }
+      else { s.classList.remove('open'); b.classList.remove('show'); }
+    }
+    function toggleThemeStudio() { document.getElementById('themeStudioModal')?.classList.toggle('hidden'); }
+    function applyPreset(p) {
+      document.documentElement.style.setProperty('--c-primary', p);
+      document.documentElement.style.setProperty('--c-primary-dark', p);
+      showToast('Theme updated!');
+    }
+    function toggleLanguage() {
+      const h = document.documentElement;
+      const c = h.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+      const n = c === 'ar' ? 'en' : 'ar';
+      h.setAttribute('dir', n === 'ar' ? 'rtl' : 'ltr');
+      h.setAttribute('lang', n);
+      const btn = document.getElementById('langToggle');
+      if (btn) btn.textContent = n === 'ar' ? 'EN' : 'ع';
+      showToast(n === 'ar' ? 'تم التبديل إلى العربية' : 'Switched to English');
+    }
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      document.getElementById('toastMsg').innerText = m;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2200);
+    }
+    function switchTab(group, btn, targetId) {
+      document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll(`[data-tab-content="${group}"]`).forEach(c => c.classList.add('hidden'));
+      document.getElementById(targetId).classList.remove('hidden');
+    }
+    function addCopyButtons() {
+      document.querySelectorAll('.prose-nms pre').forEach(pre => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn'; btn.textContent = 'Copy';
+        btn.onclick = function() {
+          const code = pre.querySelector('code');
+          if (!code) return;
+          const text = code.innerText;
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Code copied!'); } catch(e) { showToast('Copy failed'); }
+          document.body.removeChild(ta);
+        };
+        pre.appendChild(btn);
+      });
+    }
+    function setupScrollSpy() {
+      const headings = document.querySelectorAll('.prose-nms h2, .prose-nms h3');
+      const tocLinks = document.querySelectorAll('.toc-link');
+      if (!headings.length || !tocLinks.length) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            tocLinks.forEach(link => {
+              if (link.getAttribute('data-target') === id) link.classList.add('active');
+              else link.classList.remove('active');
+            });
+          }
+        });
+      }, { rootMargin: '-90px 0px -70% 0px', threshold: 0 });
+      headings.forEach(h => observer.observe(h));
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('themeStudioModal')?.classList.add('hidden');
+        toggleSidebar(false);
+      }
+    });
+    window.onload = function() {
+      if (window.lucide) lucide.createIcons();
+      addCopyButtons();
+      setupScrollSpy();
+    };
+  </script>
+
+</body>
+</html>
