@@ -42,6 +42,8 @@ public static class DependencyInjection
         services.AddOptions<NMS.Application.Communication.DailyReportOptions>().Bind(configuration.GetSection(NMS.Application.Communication.DailyReportOptions.Section));
         services.AddOptions<SmtpOptions>().Bind(configuration.GetSection(SmtpOptions.SectionName));
         services.AddSingleton<NMS.Application.Notifications.IEmailSender, SmtpEmailSender>();
+        services.AddOptions<NMS.Infrastructure.Captcha.CaptchaOptions>().Bind(configuration.GetSection(NMS.Infrastructure.Captcha.CaptchaOptions.Section));
+        services.AddHttpClient<NMS.Application.Enquiries.ICaptchaVerifier, NMS.Infrastructure.Captcha.RecaptchaVerifier>();
         services.AddSingleton<NMS.Application.Reporting.IEmergencyReportRenderer, QuestEmergencyReportRenderer>();
         services.AddOptions<NMS.Application.Reporting.AuditOptions>().Bind(configuration.GetSection(NMS.Application.Reporting.AuditOptions.Section))
             .Validate(o => o.MinRetentionDays >= 365 && o.DefaultRetentionDays >= o.MinRetentionDays, "Audit retention must keep at least 365 days and the default must not be lower than the minimum.")

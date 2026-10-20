@@ -71,3 +71,33 @@ public static class TourEndpoints
             ApiResults.From(http, await s.Send(new CompleteTaskCommand(id), ct))).RequireAuthorization(Permissions.EnquiriesWrite);
     }
 }
+
+public sealed record PublicEnquiryRequest(
+    string FamilyName, string ChildName, string? Phone, string? Email, string? PreferredContact, DateOnly? ChildDateOfBirth,
+    DateOnly? DesiredStartDate, string? Message, string? Website, string? CaptchaToken);
+
+public static class PublicEnquiryEndpoints
+{
+    public static void MapPublicEnquiryEndpoints(this IEndpointRouteBuilder routes)
+    {
+        var g = routes.MapGroup("/api/v1/public").WithTags("Public").AllowAnonymous().RequireRateLimiting("anonymous");
+
+        g.MapGet("/enquiry-form/{centre}", async (string centre, HttpContext http, NMS.Application.Abstractions.IAppDbContext db, Microsoft.Extensions.Options.IOptions<NMS.Infrastructure.Captcha.CaptchaOptions> captcha, CancellationToken ct) =>
+        {
+            var slug = centre.Trim().ToLowerInvariant();
+            var found = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
+                Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.AsNoTracking(db.Tenants).Where(t => !t.IsDeleted && t.Status == "active" && t.Slug == slug), ct);
+            return found is null
+                ? ApiResults.Failure(http, [NMS.Shared.Results.Error.NotFound("This enquiry form is not available.")])
+                : ApiResults.Ok(http, new { name = found.Name, captcha_site_key = string.IsNullOrWhiteSpace(captcha.Value.SiteKey) ? null : captcha.Value.SiteKey });
+        });
+
+        g.MapPost("/enquiries/{centre}", async (string centre, PublicEnquiryRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+        {
+            var result = await s.Send(new PublicEnquiryCommand(
+                centre, body.FamilyName, body.ChildName, body.Phone, body.Email, body.PreferredContact, body.ChildDateOfBirth, body.DesiredStartDate,
+                body.Message, body.Website, body.CaptchaToken, http.Connection.RemoteIpAddress?.ToString()), ct);
+            return result.IsFailure ? ApiResults.Failure(http, result.Errors) : ApiResults.Ok(http, new { received = true });
+        });
+    }
+}

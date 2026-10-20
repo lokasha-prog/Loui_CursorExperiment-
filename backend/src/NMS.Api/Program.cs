@@ -188,6 +188,7 @@ app.MapNotificationEndpoints();
 app.MapBillingEndpoints();
 app.MapEnquiryEndpoints();
 app.MapTourEndpoints();
+app.MapPublicEnquiryEndpoints();
 app.MapFeedbackEndpoints();
 app.MapUserEndpoints();
 app.MapHub<CentreHub>("/hubs/centre");
