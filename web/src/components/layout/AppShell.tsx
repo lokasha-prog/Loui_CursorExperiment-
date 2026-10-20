@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Baby, BarChart3, CalendarDays, IdCard, Inbox, Settings, Wallet, MessageCircleHeart, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
+import { Baby, BarChart3, CalendarDays, ClipboardList, IdCard, Inbox, Settings, Wallet, MessageCircleHeart, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
@@ -40,6 +40,7 @@ export function useNavItems(): NavItem[] {
     { to: '/rooms', label: t('nav.rooms'), icon: School, permission: 'centre_structure.read' },
     { to: '/feedback', label: t('nav.feedback'), icon: MessageCircleHeart, permission: 'settings.read' },
     { to: '/audit', label: t('nav.audit'), icon: History, permission: 'audit_log.view' },
+    { to: '/forms', label: t('nav.forms'), icon: ClipboardList, permission: 'forms.read' },
     { to: '/tools', label: t('nav.tools'), icon: IdCard, permission: 'tools.use' },
     { to: '/users', label: t('nav.users'), icon: ShieldCheck, permission: 'user_management.manage' },
     { to: '/settings', label: t('nav.settings'), icon: Settings, permission: 'settings.read' },

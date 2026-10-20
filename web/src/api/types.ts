@@ -702,3 +702,111 @@ export interface IdCardTemplate {
   secondary: string
   accent: string
 }
+
+export interface FormOption {
+  value: string
+  label: Record<string, string>
+}
+
+export interface FormFieldDef {
+  id: string
+  type: string
+  label: Record<string, string>
+  help?: Record<string, string> | null
+  required: boolean
+  options: FormOption[]
+  show_when_field_id: string | null
+  show_when_equals: string | null
+}
+
+export interface FormItem {
+  id: string
+  name: Record<string, string>
+  description: Record<string, string> | null
+  type: string
+  status: string
+  is_public: boolean
+  published_version: number
+  submissions: number
+  created_at: string
+}
+
+export interface FormDetail {
+  form: FormItem
+  editing_version: number
+  has_unpublished_changes: boolean
+  fields: FormFieldDef[]
+  published_fields: FormFieldDef[]
+}
+
+export interface FillableForm {
+  id: string
+  name: Record<string, string>
+  description: Record<string, string> | null
+  type: string
+  version: number
+  fields: FormFieldDef[]
+}
+
+export interface FormSubmissionItem {
+  id: string
+  version: number
+  student_id: string | null
+  student_name: string | null
+  enquiry_id: string | null
+  answers: Record<string, unknown>
+  duration_seconds: number | null
+  created_at: string
+}
+
+export interface FormAnalytics {
+  starts: number
+  submissions: number
+  completion_rate: number
+  average_seconds: number
+  drop_offs: { field_id: string; count: number }[]
+}
+
+export interface AdmissionStepItem {
+  id: string
+  name: Record<string, string>
+  sort_order: number
+  form_id: string | null
+  form_name: string | null
+  due_days: number
+}
+
+export interface StudentAdmission {
+  student_id: string
+  student_name: string
+  done: number
+  total: number
+  steps: { step_id: string; name: Record<string, string>; form_id: string | null; status: string; due_date: string | null; completed_at: string | null; overdue: boolean }[]
+}
+
+export interface AdmissionStatus {
+  steps: { step_id: string; name: Record<string, string>; current: number; overdue: number; done: number; total: number; next_due: string | null }[]
+  children: { student_id: string; student_name: string; done: number; total: number; current_step: string | null; due_date: string | null; overdue: boolean }[]
+}
+
+export interface CertificateTemplateItem {
+  id: string
+  code: string
+  name: Record<string, string>
+  layout: string
+  primary: string
+  accent: string
+  default_title: Record<string, string>
+  default_body: Record<string, string>
+}
+
+export interface IssuedCertificate {
+  id: string
+  template_id: string
+  number: string
+  student_id: string
+  student_name: string | null
+  title: string
+  issued_on: string
+  created_at: string
+}

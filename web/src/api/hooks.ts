@@ -1,6 +1,17 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  AdmissionStatus,
+  AdmissionStepItem,
+  CertificateTemplateItem,
+  FillableForm,
+  FormAnalytics,
+  FormDetail,
+  FormFieldDef,
+  FormItem,
+  FormSubmissionItem,
+  IssuedCertificate,
+  StudentAdmission,
   AgendaItem,
   CalendarEventDetail,
   CalendarOccurrence,
@@ -721,3 +732,67 @@ export function useRotateFeedLink() {
 }
 
 export const useIdCardTemplates = () => useQuery({ queryKey: ['id-card-templates'], queryFn: () => api.get<IdCardTemplate[]>('/tools/id-card-templates') })
+
+// ── Forms, admissions and certificates ──────────────────────────────────────
+
+export const useForms = (status: string) => useInfiniteList<FormItem>(['forms'], '/forms', { status: status || undefined })
+
+export const useForm = (id: string | null) => useQuery({ queryKey: ['form', id], enabled: !!id, queryFn: () => api.get<FormDetail>(`/forms/${id}`) })
+
+export const useFillableForm = (id: string | null) => useQuery({ queryKey: ['form-fill', id], enabled: !!id, queryFn: () => api.get<FillableForm>(`/forms/${id}/fill`) })
+
+function useFormMutation<TBody>(run: (body: TBody) => Promise<unknown>) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: run,
+    onSuccess: () => Promise.all(['forms', 'form', 'form-fill', 'form-submissions', 'form-analytics', 'admission-steps', 'admission-status', 'student-admission'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export interface FormInput {
+  name: Record<string, string>
+  description: Record<string, string> | null
+  type: string
+  is_public: boolean
+}
+
+export const useCreateForm = () => useFormMutation((body: FormInput) => api.post<FormDetail>('/forms', body))
+
+export const useUpdateForm = (id: string) => useFormMutation((body: FormInput) => api.patch<FormDetail>(`/forms/${id}`, body))
+
+export const useSaveFields = (id: string) => useFormMutation((fields: FormFieldDef[]) => api.put<FormDetail>(`/forms/${id}/fields`, { fields }))
+
+export const usePublishForm = (id: string) => useFormMutation(() => api.post<FormDetail>(`/forms/${id}/actions/publish`))
+
+export const useArchiveForm = (id: string) => useFormMutation((archive: boolean) => api.post<FormDetail>(`/forms/${id}/actions/${archive ? 'archive' : 'unarchive'}`))
+
+export const useStartForm = () => useMutation({ mutationFn: (id: string) => api.post<{ start_id: string }>(`/forms/${id}/starts`) })
+
+export const useSubmitForm = (id: string) =>
+  useFormMutation((body: { answers: Record<string, unknown>; student_id: string | null; start_id: string | null }) => api.post<{ id: string }>(`/forms/${id}/submissions`, body))
+
+export const useSubmissions = (id: string | null) => useInfiniteList<FormSubmissionItem>(['form-submissions', id], `/forms/${id}/submissions`, {}, !!id)
+
+export const useFormAnalytics = (id: string | null) => useQuery({ queryKey: ['form-analytics', id], enabled: !!id, queryFn: () => api.get<FormAnalytics>(`/forms/${id}/analytics`) })
+
+export const useAdmissionSteps = (enabled = true) => useQuery({ queryKey: ['admission-steps'], enabled, queryFn: () => api.get<AdmissionStepItem[]>('/admissions/steps') })
+
+export const useSaveStep = (id?: string) =>
+  useFormMutation((body: { name: Record<string, string>; form_id: string | null; due_days: number }) => (id ? api.patch<AdmissionStepItem[]>(`/admissions/steps/${id}`, body) : api.post<AdmissionStepItem[]>('/admissions/steps', body)))
+
+export const useDeleteStep = () => useFormMutation((id: string) => api.delete(`/admissions/steps/${id}`))
+
+export const useReorderSteps = () => useFormMutation((orderedIds: string[]) => api.put<AdmissionStepItem[]>('/admissions/steps/order', { ordered_ids: orderedIds }))
+
+export const useAdmissionStatus = (enabled = true) => useQuery({ queryKey: ['admission-status'], enabled, queryFn: () => api.get<AdmissionStatus>('/admissions/status') })
+
+export const useStudentAdmission = (id: string | null) => useQuery({ queryKey: ['student-admission', id], enabled: !!id, queryFn: () => api.get<StudentAdmission>(`/admissions/students/${id}`) })
+
+export const useStartAdmission = () => useFormMutation((studentId: string) => api.post<StudentAdmission>(`/admissions/students/${studentId}/actions/start`))
+
+export const useStepAction = () =>
+  useFormMutation(({ studentId, stepId, action }: { studentId: string; stepId: string; action: 'complete' | 'skip' }) => api.post<StudentAdmission>(`/admissions/students/${studentId}/steps/${stepId}/actions/${action}`))
+
+export const useCertificateTemplates = () => useQuery({ queryKey: ['certificate-templates'], queryFn: () => api.get<CertificateTemplateItem[]>('/tools/certificate-templates') })
+
+export const useCertificateHistory = () => useInfiniteList<IssuedCertificate>(['certificates'], '/tools/certificates', {})

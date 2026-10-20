@@ -26,6 +26,8 @@ const AuditPage = lazy(() => import('@/modules/audit/AuditPage'))
 const FeedbackPage = lazy(() => import('@/modules/feedback/FeedbackPage'))
 const BillingPage = lazy(() => import('@/modules/billing/BillingPage'))
 const LeavesPage = lazy(() => import('@/modules/attendance/LeavesPage'))
+const FormsPage = lazy(() => import('@/modules/forms/FormsPage'))
+const PublicFormPage = lazy(() => import('@/modules/public/PublicFormPage'))
 const CalendarPage = lazy(() => import('@/modules/calendar/CalendarPage'))
 const ToolsPage = lazy(() => import('@/modules/tools/ToolsPage'))
 const SettingsPage = lazy(() => import('@/modules/settings/SettingsPage'))
@@ -89,6 +91,7 @@ export function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/setup" element={<SetupPage />} />
         <Route path="/enquire/:centre" element={<EnquiryFormPage />} />
+        <Route path="/forms/public/:centre/:id" element={<PublicFormPage />} />
         <Route element={<RequireAuth />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -106,6 +109,7 @@ export function AppRoutes() {
           <Route path="/enquiries" element={<RequirePermission permission="enquiries.read"><EnquiriesPage /></RequirePermission>} />
           <Route path="/settings" element={<RequirePermission permission="settings.read"><SettingsPage /></RequirePermission>} />
           <Route path="/calendar" element={<RequirePermission permission="calendar.read"><CalendarPage /></RequirePermission>} />
+          <Route path="/forms" element={<RequirePermission permission="forms.read"><FormsPage /></RequirePermission>} />
           <Route path="/tools" element={<RequirePermission permission="tools.use"><ToolsPage /></RequirePermission>} />
           <Route path="/leave" element={<RequirePermission permission="attendance.read"><LeavesPage /></RequirePermission>} />
           <Route path="/rooms" element={<RequirePermission permission="centre_structure.read"><RoomsPage /></RequirePermission>} />

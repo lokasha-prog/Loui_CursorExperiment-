@@ -1,3 +1,4 @@
+import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { IdCard } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +12,7 @@ import { Alert, Card, Skeleton } from '@/components/ui/surfaces'
 import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { cn, localized } from '@/lib/utils'
+import { CertificatesTab } from './CertificatesTab'
 
 const FIELDS = ['name', 'photo', 'dob', 'room', 'program', 'barcode', 'expiry']
 
@@ -25,7 +27,7 @@ function Swatch({ t }: { t: IdCardTemplate }) {
 }
 
 /** Print ID cards for children or staff: pick a design, adjust it, choose people, get one PDF with a card on each page. */
-export default function ToolsPage() {
+function IdCardsTool() {
   const { t, i18n } = useTranslation()
   const message = useApiErrorMessage()
   const templates = useIdCardTemplates()
@@ -86,7 +88,6 @@ export default function ToolsPage() {
 
   return (
     <>
-      <PageHeader title={t('tools.title')} subtitle={t('tools.subtitle')} />
       <Card className="space-y-6 p-4">
         <h2 className="flex items-center gap-2 font-heading text-lg font-semibold"><IdCard className="h-5 w-5" aria-hidden="true" />{t('tools.cards.title')}</h2>
         {failure && <Alert>{failure}</Alert>}
@@ -176,6 +177,31 @@ export default function ToolsPage() {
 
         <div className="flex justify-end"><Button onClick={() => void generate()} disabled={busy || !template}>{t('tools.cards.generate')}</Button></div>
       </Card>
+    </>
+  )
+}
+
+export default function ToolsPage() {
+  const { t } = useTranslation()
+  const [tab, setTab] = useState('cards')
+  return (
+    <>
+      <PageHeader title={t('tools.title')} subtitle={t('tools.subtitle')} />
+      <TabsPrimitive.Root value={tab} onValueChange={setTab}>
+        <TabsPrimitive.List className="mb-5 flex gap-1 overflow-x-auto border-b">
+          {['cards', 'certificates'].map((key) => (
+            <TabsPrimitive.Trigger
+              key={key}
+              value={key}
+              className="whitespace-nowrap border-b-2 border-transparent px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:border-primary data-[state=active]:font-bold data-[state=active]:text-primary-dark"
+            >
+              {t(`tools.tabs.${key}`)}
+            </TabsPrimitive.Trigger>
+          ))}
+        </TabsPrimitive.List>
+        <TabsPrimitive.Content value="cards"><IdCardsTool /></TabsPrimitive.Content>
+        <TabsPrimitive.Content value="certificates"><CertificatesTab /></TabsPrimitive.Content>
+      </TabsPrimitive.Root>
     </>
   )
 }

@@ -32,7 +32,9 @@
     "none": "None",
     "required": "required",
     "skipToContent": "Skip to main content",
-    "currencyAed": "AED"
+    "currencyAed": "AED",
+    "yes": "Yes",
+    "no": "No"
   },
   "nav": {
     "main": "Main menu",
@@ -57,7 +59,8 @@
     "enquiries": "Enquiries",
     "settings": "Settings",
     "calendar": "Calendar",
-    "tools": "Tools"
+    "tools": "Tools",
+    "forms": "Forms"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -1430,6 +1433,163 @@
       "needPeople": "Choose at least one person.",
       "generate": "Create PDF",
       "ready": "{{count}} cards ready"
+    },
+    "tabs": {
+      "cards": "ID cards",
+      "certificates": "Certificates"
+    },
+    "certificates": {
+      "title": "Certificates",
+      "words": "Wording",
+      "titleLabel": "Title (optional)",
+      "date": "Date",
+      "body": "Message (optional)",
+      "bodyHint": "Use {name} where the child's name should appear.",
+      "signatures": "Signatures (up to 3)",
+      "signName": "Name",
+      "signTitle": "Job title",
+      "addSignature": "Add signature",
+      "history": "Printed certificates",
+      "noHistory": "Nothing printed yet.",
+      "ready": "{{count}} certificates ready"
+    }
+  },
+  "forms": {
+    "title": "Forms",
+    "subtitle": "Build forms, collect answers and guide each new child through admission.",
+    "parentSubtitle": "Forms for you to fill in, and your child's admission progress.",
+    "tabs": {
+      "forms": "Forms",
+      "admissions": "Admissions"
+    },
+    "types": {
+      "enquiry": "Enquiry",
+      "admission": "Admission",
+      "check_in_out": "Check-in / check-out",
+      "incident": "Incident",
+      "custom": "Custom"
+    },
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "live": "Live",
+      "archived": "Archived"
+    },
+    "fieldTypes": {
+      "text": "Short text",
+      "textarea": "Long text",
+      "number": "Number",
+      "date": "Date",
+      "dropdown": "Drop-down",
+      "radio": "Choose one",
+      "checkbox": "Tick box",
+      "file": "File upload",
+      "signature": "Signature",
+      "section": "Section heading"
+    },
+    "empty": "No forms yet",
+    "emptyBody": "Make your first form: an admission form, an incident report or a permission slip.",
+    "emptyParent": "There are no forms for you to fill in right now.",
+    "public": "Public",
+    "submissionCount": "{{count}} answers",
+    "fillIn": "Fill in",
+    "results": "Answers",
+    "edit": "Edit",
+    "builder": {
+      "new": "New form",
+      "edit": "Edit form",
+      "nameEn": "Form name (English)",
+      "nameAr": "Form name (Arabic)",
+      "formType": "Kind of form",
+      "public": "Anyone can fill it in without signing in (public link)",
+      "notPublished": "Not published yet.",
+      "versionLive": "Version {{live}} is live. You are editing version {{editing}}.",
+      "addField": "Add question",
+      "preview": "Preview",
+      "previewNote": "Preview - nothing is sent",
+      "previewOk": "Looks good - this was only a preview",
+      "type": "Kind",
+      "labelEn": "Question (English)",
+      "labelAr": "Question (Arabic)",
+      "options": "Choices",
+      "optionValue": "Value",
+      "addOption": "Add choice",
+      "required": "Required",
+      "showWhen": "Show only when",
+      "always": "Always show",
+      "equals": "Is equal to",
+      "checked": "Ticked",
+      "unchecked": "Not ticked",
+      "up": "Move up",
+      "down": "Move down",
+      "save": "Save",
+      "publish": "Save and publish",
+      "saved": "Form saved",
+      "created": "Form created - now add its questions",
+      "published": "Form published",
+      "archive": "Archive",
+      "archived": "Form archived",
+      "restore": "Restore",
+      "restored": "Form restored"
+    },
+    "fill": {
+      "title": "Fill in form",
+      "child": "For which child",
+      "noChild": "Not about a child",
+      "submit": "Send",
+      "sent": "Thank you, your answers were sent",
+      "sentPublic": "Your answers were received.",
+      "fix": "Please check this answer",
+      "signature": "Signature box",
+      "signHere": "Sign above with your finger or mouse",
+      "signed": "Signed",
+      "clear": "Clear",
+      "uploaded": "Uploaded"
+    },
+    "submissions": {
+      "title": "Answers",
+      "starts": "Opened",
+      "sent": "Sent",
+      "completion": "Completed",
+      "time": "Average time",
+      "dropOff": "Where people stop",
+      "empty": "No answers yet."
+    },
+    "admissions": {
+      "steps": "Admission steps",
+      "stepsHint": "Every new child goes through these steps in order. A step with a form sends it to the parent.",
+      "addStep": "Add step",
+      "editStep": "Edit step",
+      "saveStep": "Save step",
+      "stepSaved": "Step saved",
+      "nameEn": "Step name (English)",
+      "nameAr": "Step name (Arabic)",
+      "form": "Form for the parent",
+      "formHint": "Optional. Sent to the parent when the child reaches this step.",
+      "noForm": "No form",
+      "dueDays": "Days to finish",
+      "dueIn": "{{count}} days",
+      "noSteps": "No steps yet. Add the first one.",
+      "confirmDelete": "Remove this step?",
+      "dashboard": "Where children are",
+      "counts": "{{current}} now · {{overdue}} late · {{done}}/{{total}} done",
+      "nextDue": "Next due {{date}}",
+      "startFor": "Start admission for",
+      "start": "Start",
+      "started": "Admission started",
+      "noChildren": "No child has started admission yet.",
+      "progress": "Admission progress",
+      "progressFor": "Admission: {{name}}",
+      "due": "Due {{date}}",
+      "overdue": "Overdue",
+      "complete": "Done",
+      "skip": "Skip",
+      "status": {
+        "pending": "Waiting",
+        "current": "Now",
+        "done": "Done",
+        "skipped": "Skipped"
+      }
     }
   }
 }
