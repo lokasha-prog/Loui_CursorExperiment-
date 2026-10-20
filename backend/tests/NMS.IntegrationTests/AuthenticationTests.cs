@@ -66,7 +66,7 @@ public class AuthenticationTests(NmsApiFixture api)
     [Fact]
     public async Task Login_returns_a_token_the_envelope_and_an_httponly_refresh_cookie()
     {
-        var reply = await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = api.AdminEmail, password = api.AdminPassword });
+        var reply = await api.NewClient().PostAsync("/api/v1/auth/login", new { email = api.AdminEmail, password = api.AdminPassword });
 
         reply.Status.Should().Be(HttpStatusCode.OK);
         reply.Root.GetProperty("success").GetBoolean().Should().BeTrue();
@@ -77,20 +77,52 @@ public class AuthenticationTests(NmsApiFixture api)
     }
 
     [Fact]
-    public async Task Sign_in_must_name_an_existing_centre_when_several_exist()
+    public async Task Sign_in_finds_the_centre_from_the_email_alone_and_ignores_an_unknown_centre_hint()
     {
-        var wrong = await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = "nobody", email = api.AdminEmail, password = api.AdminPassword });
-        var right = await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = api.AdminEmail, password = api.AdminPassword });
+        var automatic = await api.NewClient().PostAsync("/api/v1/auth/login", new { email = api.AdminEmail, password = api.AdminPassword });
+        var wrongHint = await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = "nobody", email = api.AdminEmail, password = api.AdminPassword });
 
+        automatic.Status.Should().Be(HttpStatusCode.OK);
+        automatic.Data.GetProperty("me").GetProperty("tenant").GetProperty("id").GetGuid().Should().Be(api.TenantId);
+        wrongHint.Status.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task An_email_in_several_centres_gets_a_choice_only_when_the_password_matches_in_more_than_one()
+    {
+        var email = $"shared-{Guid.NewGuid():N}@test.local";
+        var password = NmsApiFixture.NewPassword();
+        var (first, second) = await api.CreateTwoCentresWithSharedUserAsync(email, password);
+
+        var ambiguous = await api.NewClient().PostAsync("/api/v1/auth/login", new { email, password });
+        var chosen = await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = second.Slug, email, password });
+        var wrong = await api.NewClient().PostAsync("/api/v1/auth/login", new { email, password = "wrong-password-1" });
+
+        ambiguous.Status.Should().Be(HttpStatusCode.OK);
+        ambiguous.Data.TryGetProperty("access_token", out _).Should().BeFalse("nothing is issued until the person picks a centre");
+        ambiguous.Data.GetProperty("choose_centre").GetArrayLength().Should().Be(2);
+        ambiguous.SetCookieRaw.Should().BeNull();
+        chosen.Data.GetProperty("me").GetProperty("tenant").GetProperty("id").GetGuid().Should().Be(second.Id);
         wrong.Status.Should().Be(HttpStatusCode.Unauthorized);
-        right.Status.Should().Be(HttpStatusCode.OK);
+        first.Id.Should().NotBe(second.Id);
+    }
+
+    [Fact]
+    public async Task Users_created_through_the_api_can_sign_in_without_naming_a_centre()
+    {
+        var user = await api.CreateUserAsync("receptionist");
+
+        var reply = await api.NewClient().PostAsync("/api/v1/auth/login", new { email = user.Email, password = user.Password });
+
+        reply.Status.Should().Be(HttpStatusCode.OK);
+        reply.Data.GetProperty("me").GetProperty("tenant").GetProperty("id").GetGuid().Should().Be(api.TenantId);
     }
 
     [Fact]
     public async Task Wrong_password_and_unknown_email_give_the_same_answer()
     {
-        var wrongPassword = await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = api.AdminEmail, password = "nope" });
-        var unknown = await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = "ghost@test.local", password = "nope" });
+        var wrongPassword = await api.NewClient().PostAsync("/api/v1/auth/login", new { email = api.AdminEmail, password = "nope" });
+        var unknown = await api.NewClient().PostAsync("/api/v1/auth/login", new { email = "ghost@test.local", password = "nope" });
 
         wrongPassword.Status.Should().Be(HttpStatusCode.Unauthorized);
         unknown.Status.Should().Be(HttpStatusCode.Unauthorized);
@@ -118,11 +150,11 @@ public class AuthenticationTests(NmsApiFixture api)
 
         for (var i = 0; i < 5; i++)
         {
-            (await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = user.Email, password = "wrong" }))
+            (await api.NewClient().PostAsync("/api/v1/auth/login", new { email = user.Email, password = "wrong" }))
                 .Status.Should().Be(HttpStatusCode.Unauthorized);
         }
 
-        var locked = await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = user.Email, password = user.Password });
+        var locked = await api.NewClient().PostAsync("/api/v1/auth/login", new { email = user.Email, password = user.Password });
 
         locked.Status.Should().Be(HttpStatusCode.Unauthorized);
         locked.Root.GetProperty("errors")[0].GetProperty("message").GetString().Should().Contain("locked");
@@ -200,7 +232,7 @@ public class AuthenticationTests(NmsApiFixture api)
 
         var suspend = await api.Admin.PostAsync($"/api/v1/users/{user.UserId}/actions/set-status", new { status = "suspended" });
         var refresh = await api.NewClient().RefreshAsync(user.Client.RefreshCookie!);
-        var login = await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = user.Email, password = user.Password });
+        var login = await api.NewClient().PostAsync("/api/v1/auth/login", new { email = user.Email, password = user.Password });
 
         suspend.Status.Should().Be(HttpStatusCode.OK);
         refresh.Status.Should().Be(HttpStatusCode.Unauthorized);

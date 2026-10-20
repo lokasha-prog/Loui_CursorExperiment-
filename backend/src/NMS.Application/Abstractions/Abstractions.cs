@@ -52,6 +52,8 @@ public interface IAppDbContext
 
     DbSet<RefreshToken> RefreshTokens { get; }
 
+    DbSet<LoginDirectoryEntry> LoginDirectory { get; }
+
     DbSet<Student> Students { get; }
 
     DbSet<Guardian> Guardians { get; }

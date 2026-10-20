@@ -17,7 +17,6 @@ function buildSchema(minPassword: number) {
     bootstrapToken: z.string().min(1, 'validation.required'),
     tenantNameEn: z.string().min(1, 'validation.required'),
     tenantNameAr: z.string().optional(),
-    tenantSlug: z.string().min(1, 'validation.required').regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'validation.slug'),
     firstName: z.string().min(1, 'validation.required'),
     lastName: z.string().min(1, 'validation.required'),
     email: z.string().min(1, 'validation.required').email('validation.email'),
@@ -29,6 +28,11 @@ function buildSchema(minPassword: number) {
 }
 
 type Values = z.infer<ReturnType<typeof buildSchema>>
+
+/** The internal centre code is made from the English name, so nobody has to type or remember one. */
+export function slugify(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'centre'
+}
 
 export default function SetupPage() {
   const { t } = useTranslation()
@@ -53,7 +57,7 @@ export default function SetupPage() {
     try {
       await authApi.bootstrap({
         bootstrap_token: values.bootstrapToken.trim(),
-        tenant_slug: values.tenantSlug.trim(),
+        tenant_slug: slugify(values.tenantNameEn),
         tenant_name: { en: values.tenantNameEn.trim(), ...(values.tenantNameAr?.trim() ? { ar: values.tenantNameAr.trim() } : {}) },
         admin_email: values.email.trim(),
         admin_first_name: values.firstName.trim(),
@@ -100,9 +104,6 @@ export default function SetupPage() {
           </Field>
           <Field label={t('auth.setup.centreNameAr')} htmlFor="tenantNameAr">
             <Input id="tenantNameAr" dir="rtl" lang="ar" {...register('tenantNameAr')} />
-          </Field>
-          <Field label={t('auth.setup.centreCode')} htmlFor="tenantSlug" hint={t('auth.setup.centreCodeHint')} required error={message(errors.tenantSlug?.message)}>
-            <Input id="tenantSlug" dir="ltr" className="text-start" aria-invalid={!!errors.tenantSlug} {...register('tenantSlug')} />
           </Field>
         </fieldset>
         <fieldset className="space-y-3">

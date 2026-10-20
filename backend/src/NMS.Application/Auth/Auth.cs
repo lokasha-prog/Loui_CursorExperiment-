@@ -73,8 +73,12 @@ public sealed record AuthSession(
     DateTimeOffset RefreshTokenExpiresAt,
     MeDto Me);
 
+/// <summary>Either a finished session, or (when the same e-mail belongs to several centres) the centres to choose from.</summary>
+public sealed record LoginOutcome(AuthSession? Session, IReadOnlyList<TenantSummaryDto>? Centres);
+
+/// <summary>The centre is found from the e-mail address. <c>Tenant</c> is only used to pick one when several match.</summary>
 public sealed record LoginCommand(string? Tenant, string Email, string Password, string? IpAddress)
-    : IRequest<Result<AuthSession>>;
+    : IRequest<Result<LoginOutcome>>;
 
 public sealed record RefreshSessionCommand(string RefreshToken, string? IpAddress) : IRequest<Result<AuthSession>>;
 
@@ -199,68 +203,90 @@ public sealed class LoginHandler(
     IPasswordService passwords,
     ITokenService tokens,
     IClock clock,
-    IOptions<AuthOptions> options) : IRequestHandler<LoginCommand, Result<AuthSession>>
+    IOptions<AuthOptions> options) : IRequestHandler<LoginCommand, Result<LoginOutcome>>
 {
     private static readonly Error InvalidCredentials = Error.Unauthorized("Invalid email or password.");
+    private static readonly Error Locked = Error.Unauthorized("This account is temporarily locked. Try again later.");
 
-    public async Task<Result<AuthSession>> Handle(LoginCommand request, CancellationToken ct)
+    public async Task<Result<LoginOutcome>> Handle(LoginCommand request, CancellationToken ct)
     {
-        var tenantRow = await ResolveTenantAsync(request.Tenant, ct);
-        if (tenantRow is null)
-        {
-            return InvalidCredentials;
-        }
-
-        tenant.TenantId = tenantRow.Id;
         var email = request.Email.Trim().ToLowerInvariant();
-        var user = await db.AppUsers.Include(u => u.Roles).ThenInclude(r => r.Role)
-            .FirstOrDefaultAsync(u => u.Email == email, ct);
+        var centres = await FindCentresAsync(email, request.Tenant, ct);
+        if (centres.Count == 0)
+        {
+            return InvalidCredentials;
+        }
+
         var now = clock.UtcNow;
-
-        if (user is null || user.PasswordHash is null)
+        var matches = new List<(Tenant Centre, AppUser User)>();
+        var anyLocked = false;
+        foreach (var centre in centres)
         {
-            db.AuditLogs.Add(AuditEntries.For(tenant, currentUser, clock, AuditActions.Login, null, email, request.IpAddress));
-            await db.SaveChangesAsync(ct);
-            return InvalidCredentials;
+            tenant.TenantId = centre.Id;
+            var user = await db.AppUsers.Include(u => u.Roles).ThenInclude(r => r.Role)
+                .FirstOrDefaultAsync(u => u.Email == email, ct);
+            if (user?.PasswordHash is null)
+            {
+                db.AuditLogs.Add(AuditEntries.For(tenant, currentUser, clock, AuditActions.Login, null, email, request.IpAddress));
+                await db.SaveChangesAsync(ct);
+                continue;
+            }
+
+            if (user.IsLockedOut(now))
+            {
+                anyLocked = true;
+                continue;
+            }
+
+            if (!passwords.Verify(user.PasswordHash, request.Password))
+            {
+                user.RegisterFailedLogin(now, options.Value.MaxFailedAttempts, TimeSpan.FromMinutes(options.Value.LockoutMinutes));
+                db.AuditLogs.Add(AuditEntries.For(tenant, currentUser, clock, AuditActions.Login, null, email, request.IpAddress));
+                await db.SaveChangesAsync(ct);
+                continue;
+            }
+
+            if (user.Status != "active")
+            {
+                return Error.Forbidden("This account is not active.");
+            }
+
+            matches.Add((centre, user));
         }
 
-        if (user.IsLockedOut(now))
+        if (matches.Count == 0)
         {
-            return Error.Unauthorized("This account is temporarily locked. Try again later.");
+            return anyLocked ? Locked : InvalidCredentials;
         }
 
-        if (!passwords.Verify(user.PasswordHash, request.Password))
+        if (matches.Count > 1)
         {
-            user.RegisterFailedLogin(now, options.Value.MaxFailedAttempts, TimeSpan.FromMinutes(options.Value.LockoutMinutes));
-            await db.SaveChangesAsync(ct);
-            return InvalidCredentials;
+            // The password is right in more than one centre: ask which one, without issuing anything yet.
+            return Result<LoginOutcome>.Success(new LoginOutcome(
+                null, matches.Select(m => new TenantSummaryDto(m.Centre.Id, m.Centre.Slug, m.Centre.Name)).ToList()));
         }
 
-        if (user.Status != "active")
-        {
-            return Error.Forbidden("This account is not active.");
-        }
-
-        user.RegisterSuccessfulLogin(now);
-        var factory = new SessionFactory(db, tokens, clock, options);
-        var session = await factory.IssueAsync(user, Guid.NewGuid(), request.IpAddress, ct);
-        db.AuditLogs.Add(AuditEntries.For(tenant, currentUser, clock, AuditActions.Login, user.Id, user.Email, request.IpAddress));
+        var (chosen, signedIn) = matches[0];
+        tenant.TenantId = chosen.Id;
+        signedIn.RegisterSuccessfulLogin(now);
+        var session = await new SessionFactory(db, tokens, clock, options).IssueAsync(signedIn, Guid.NewGuid(), request.IpAddress, ct);
+        db.AuditLogs.Add(AuditEntries.For(tenant, currentUser, clock, AuditActions.Login, signedIn.Id, signedIn.Email, request.IpAddress));
         await db.SaveChangesAsync(ct);
-        return Result<AuthSession>.Success(session);
+        return Result<LoginOutcome>.Success(new LoginOutcome(session, null));
     }
 
-    private async Task<Tenant?> ResolveTenantAsync(string? slug, CancellationToken ct)
+    private async Task<List<Tenant>> FindCentresAsync(string email, string? slug, CancellationToken ct)
     {
-        slug = string.IsNullOrWhiteSpace(slug) ? options.Value.DefaultTenantSlug : slug.Trim().ToLowerInvariant();
-        var tenants = db.Tenants.AsNoTracking().Where(t => !t.IsDeleted && t.Status == "active");
+        var active = db.Tenants.AsNoTracking().Where(t => !t.IsDeleted && t.Status == "active");
+        var centreIds = await db.LoginDirectory.AsNoTracking().Where(d => d.Email == email).Select(d => d.CentreId).ToListAsync(ct);
+        var candidates = await active.Where(t => centreIds.Contains(t.Id)).ToListAsync(ct);
         if (!string.IsNullOrWhiteSpace(slug))
         {
-            return await tenants.FirstOrDefaultAsync(t => t.Slug == slug, ct);
+            var wanted = slug.Trim().ToLowerInvariant();
+            candidates = candidates.Where(t => t.Slug == wanted).ToList();
         }
 
-        // Single-centre (on-premises) installs have exactly one centre, so no name is needed.
-        var all = await tenants.Take(2).ToListAsync(ct);
-        return all.Count == 1 ? all[0] : null;
+        return candidates;
     }
 }
 
@@ -425,6 +451,7 @@ public sealed class BootstrapHandler(
         };
         admin.Roles.Add(new AppUserRole { Role = roles[SystemRoles.SuperAdmin], AssignedAt = now, AssignedBy = adminId });
         db.AppUsers.Add(admin);
+        db.LoginDirectory.Add(new LoginDirectoryEntry { Email = admin.Email, CentreId = newTenant.Id, UserId = admin.Id });
         await db.SaveChangesAsync(ct);
 
         var me = new MeDto(

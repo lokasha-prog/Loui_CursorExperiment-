@@ -1,20 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff } from 'lucide-react'
+import { Building2, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
-import { useSetupStatus } from '@/api/hooks'
 import { ApiError, authApi } from '@/api/client'
+import { useSetupStatus } from '@/api/hooks'
+import type { CentreChoice } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Field, Input } from '@/components/ui/form-controls'
 import { Alert } from '@/components/ui/surfaces'
+import { localized } from '@/lib/utils'
 import { useAuth } from '@/stores/auth'
 import { AuthLayout } from './AuthLayout'
 
 const schema = z.object({
-  tenant: z.string().optional(),
   email: z.string().min(1, 'validation.required').email('validation.email'),
   password: z.string().min(1, 'validation.required'),
 })
@@ -22,13 +23,15 @@ const schema = z.object({
 type Values = z.infer<typeof schema>
 
 export default function LoginPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const me = useAuth((s) => s.me)
   const navigate = useNavigate()
   const location = useLocation()
   const setup = useSetupStatus()
   const [showPassword, setShowPassword] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
+  const [choices, setChoices] = useState<CentreChoice[] | null>(null)
+  const [submitted, setSubmitted] = useState<Values | null>(null)
   const {
     register,
     handleSubmit,
@@ -38,10 +41,16 @@ export default function LoginPage() {
   const destination = (location.state as { from?: string } | null)?.from ?? '/dashboard'
   if (me) return <Navigate to={destination} replace />
 
-  const onSubmit = handleSubmit(async (values) => {
+  const attempt = async (values: Values, centre?: string) => {
     setFailure(null)
     try {
-      await authApi.login({ tenant: values.tenant?.trim(), email: values.email.trim(), password: values.password })
+      // The centre is found automatically from the e-mail address; a code is only sent when choosing between several.
+      const result = await authApi.login({ email: values.email.trim(), password: values.password, tenant: centre })
+      if ('chooseCentre' in result) {
+        setSubmitted(values)
+        setChoices(result.chooseCentre)
+        return
+      }
       navigate(destination, { replace: true })
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -54,7 +63,32 @@ export default function LoginPage() {
         setFailure(t('errors.NETWORK'))
       }
     }
-  })
+  }
+
+  const onSubmit = handleSubmit((values) => attempt(values))
+
+  if (choices && submitted) {
+    return (
+      <AuthLayout>
+        <h2 className="font-heading text-2xl font-bold">{t('auth.login.chooseCentre')}</h2>
+        <p className="mb-5 mt-1 text-sm text-muted-foreground">{t('auth.login.chooseCentreHint')}</p>
+        {failure && <Alert className="mb-3">{failure}</Alert>}
+        <ul className="space-y-2">
+          {choices.map((centre) => (
+            <li key={centre.id}>
+              <Button variant="secondary" size="lg" className="w-full justify-start" onClick={() => void attempt(submitted, centre.slug)}>
+                <Building2 className="h-4 w-4 text-primary-dark" aria-hidden="true" />
+                {localized(centre.name, i18n.language)}
+              </Button>
+            </li>
+          ))}
+        </ul>
+        <Button variant="ghost" size="sm" className="mt-4" onClick={() => setChoices(null)}>
+          {t('auth.login.backToSignIn')}
+        </Button>
+      </AuthLayout>
+    )
+  }
 
   return (
     <AuthLayout>
@@ -63,9 +97,6 @@ export default function LoginPage() {
 
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         {failure && <Alert>{failure}</Alert>}
-        <Field label={t('auth.login.centre')} htmlFor="tenant" hint={t('auth.login.centreHint')}>
-          <Input id="tenant" autoComplete="organization" dir="ltr" className="text-start" {...register('tenant')} />
-        </Field>
         <Field label={t('auth.login.email')} htmlFor="email" required error={errors.email && t(errors.email.message!)}>
           <Input
             id="email"

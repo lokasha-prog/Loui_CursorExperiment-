@@ -51,7 +51,14 @@ public static class AuthEndpoints
         {
             var result = await sender.Send(new LoginCommand(
                 body.Tenant, body.Email, body.Password, http.Connection.RemoteIpAddress?.ToString()), ct);
-            return result.IsSuccess ? Respond(http, result.Value) : ApiResults.Failure(http, result.Errors);
+            if (result.IsFailure)
+            {
+                return ApiResults.Failure(http, result.Errors);
+            }
+
+            return result.Value.Session is { } session
+                ? Respond(http, session)
+                : ApiResults.Ok(http, new { choose_centre = result.Value.Centres });
         }).AllowAnonymous().RequireRateLimiting("login");
 
         group.MapPost("/refresh", async (HttpContext http, ISender sender, CancellationToken ct) =>

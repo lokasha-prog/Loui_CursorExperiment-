@@ -29,6 +29,8 @@ public sealed class NmsDbContext(
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+    public DbSet<LoginDirectoryEntry> LoginDirectory => Set<LoginDirectoryEntry>();
+
     public DbSet<Student> Students => Set<Student>();
 
     public DbSet<Guardian> Guardians => Set<Guardian>();

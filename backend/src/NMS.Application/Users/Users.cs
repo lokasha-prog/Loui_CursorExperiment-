@@ -74,7 +74,7 @@ public sealed class ListUsersHandler(IAppDbContext db) : IRequestHandler<ListUse
     }
 }
 
-public sealed class CreateUserHandler(IAppDbContext db, IPasswordService passwords, IClock clock, ICurrentUser current)
+public sealed class CreateUserHandler(IAppDbContext db, ITenantContext tenant, IPasswordService passwords, IClock clock, ICurrentUser current)
     : IRequestHandler<CreateUserCommand, Result<UserDto>>
 {
     public async Task<Result<UserDto>> Handle(CreateUserCommand request, CancellationToken ct)
@@ -112,6 +112,7 @@ public sealed class CreateUserHandler(IAppDbContext db, IPasswordService passwor
         }
 
         db.AppUsers.Add(user);
+        db.LoginDirectory.Add(new LoginDirectoryEntry { Email = email, CentreId = tenant.TenantId, UserId = user.Id });
 
         if (request.StaffId is { } staffId)
         {

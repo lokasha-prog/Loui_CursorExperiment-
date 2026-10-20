@@ -6,7 +6,7 @@ import { envelope, failure, renderWithProviders, setLanguage, signOut } from '@/
 import { useAuth } from '@/stores/auth'
 import { makeMe } from '@/test/utils'
 import LoginPage from './LoginPage'
-import SetupPage from './SetupPage'
+import SetupPage, { slugify } from './SetupPage'
 
 const fetchMock = vi.fn()
 
@@ -83,6 +83,32 @@ describe('LoginPage', () => {
 
     expect(await screen.findByText('DASHBOARD')).toBeInTheDocument()
     expect(useAuth.getState().accessToken).toBe('tok')
+  })
+
+  it('asks which centre only when the same email belongs to several', async () => {
+    let chosen: string | undefined
+    routeFetch({
+      'setup-status': () => envelope({ setup_required: false, password_min_length: 12 }),
+      '/auth/login': () => {
+        const body = JSON.parse(fetchMock.mock.calls.at(-1)![1].body)
+        chosen = body.tenant
+        return chosen
+          ? envelope({ access_token: 'tok', expires_at: '', me: makeMe() })
+          : envelope({ choose_centre: [
+              { id: '1', slug: 'sunrise', name: { en: 'Sunrise Nursery' } },
+              { id: '2', slug: 'moonlight', name: { en: 'Moonlight Nursery' } },
+            ] })
+      },
+    })
+    renderLogin()
+
+    await userEvent.type(screen.getByLabelText(/Email/), 'admin@test.local')
+    await userEvent.type(screen.getByLabelText(/Password/), 'secret-password')
+    await userEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+    await userEvent.click(await screen.findByRole('button', { name: /Moonlight Nursery/ }))
+
+    expect(await screen.findByText('DASHBOARD')).toBeInTheDocument()
+    expect(chosen).toBe('moonlight')
   })
 
   it('explains wrong credentials without saying which part was wrong', async () => {
@@ -164,16 +190,15 @@ describe('SetupPage', () => {
     expect(await screen.findByText('At least 14 characters with letters and numbers')).toBeInTheDocument()
   })
 
-  it('validates every required field and the centre code format', async () => {
+  it('validates every required field and has no centre code to type', async () => {
     routeFetch({ 'setup-status': () => envelope({ setup_required: true, password_min_length: 12 }) })
     renderSetup()
     await screen.findByRole('button', { name: 'Create centre' })
 
-    await userEvent.type(screen.getByLabelText(/Centre code/), 'Bad Code!')
     await userEvent.click(screen.getByRole('button', { name: 'Create centre' }))
 
-    expect(await screen.findByText('Use lowercase letters, numbers and hyphens only')).toBeInTheDocument()
-    expect(screen.getAllByText('This field is required').length).toBeGreaterThanOrEqual(5)
+    expect(await screen.findAllByText('This field is required')).toHaveLength(5)
+    expect(screen.queryByLabelText(/Centre code/)).not.toBeInTheDocument()
   })
 
   it('shows a clear message for a wrong setup key', async () => {
@@ -186,7 +211,6 @@ describe('SetupPage', () => {
 
     await userEvent.type(screen.getByLabelText(/Setup key/), 'wrong')
     await userEvent.type(screen.getByLabelText(/Centre name \(English\)/), 'Sunrise')
-    await userEvent.type(screen.getByLabelText(/Centre code/), 'sunrise')
     await userEvent.type(screen.getByLabelText(/First name/), 'Layla')
     await userEvent.type(screen.getByLabelText(/Last name/), 'Hassan')
     await userEvent.type(screen.getByLabelText(/^Email/), 'layla@test.local')
@@ -211,7 +235,6 @@ describe('SetupPage', () => {
     await userEvent.type(screen.getByLabelText(/Setup key/), 'right-key')
     await userEvent.type(screen.getByLabelText(/Centre name \(English\)/), 'Sunrise')
     await userEvent.type(screen.getByLabelText(/Centre name \(Arabic\)/), 'الشروق')
-    await userEvent.type(screen.getByLabelText(/Centre code/), 'sunrise')
     await userEvent.type(screen.getByLabelText(/First name/), 'Layla')
     await userEvent.type(screen.getByLabelText(/Last name/), 'Hassan')
     await userEvent.type(screen.getByLabelText(/^Email/), 'layla@test.local')
@@ -223,4 +246,12 @@ describe('SetupPage', () => {
     expect(body.tenant_name).toEqual({ en: 'Sunrise', ar: 'الشروق' })
     expect(body.tenant_slug).toBe('sunrise')
   })
+})
+
+describe('slugify', () => {
+  it.each([
+    ['Bright Futures Nursery', 'bright-futures-nursery'],
+    ['  Al-Noor  (Dubai) ', 'al-noor-dubai'],
+    ['الشروق', 'centre'],
+  ])('turns %s into %s', (name, slug) => expect(slugify(name)).toBe(slug))
 })

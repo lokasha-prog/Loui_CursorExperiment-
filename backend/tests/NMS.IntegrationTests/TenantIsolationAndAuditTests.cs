@@ -148,8 +148,9 @@ public class TenantIsolationAndAuditTests(NmsApiFixture api)
     public async Task Sign_ins_and_failed_sign_ins_are_audited()
     {
         var user = await api.CreateUserAsync("teacher");
-        await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = user.Email, password = "wrong-password" });
-        await api.NewClient().PostAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = $"ghost-{Guid.NewGuid():N}@test.local", password = "x" });
+        await api.NewClient().PostAsync("/api/v1/auth/login", new { email = user.Email, password = "wrong-password" });
+        // An unknown address belongs to no centre, so there is nowhere to record it; a wrong password for a real account is recorded.
+        await api.NewClient().PostAsync("/api/v1/auth/login", new { email = $"ghost-{Guid.NewGuid():N}@test.local", password = "x" });
 
         var logins = await RawScalarAsync<int>(api.TenantId, "SELECT COUNT(*) FROM AuditLogs WHERE Action = 'login' AND UserId = @u", ("@u", user.UserId));
         var anonymousAttempts = await RawScalarAsync<int>(api.TenantId, "SELECT COUNT(*) FROM AuditLogs WHERE Action = 'login' AND UserId IS NULL");

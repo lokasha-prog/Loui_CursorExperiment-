@@ -159,3 +159,19 @@ public class RefreshToken : ITenantEntity
 
     public string? CreatedByIp { get; set; }
 }
+
+/// <summary>
+/// Maps a sign-in e-mail address to the centre(s) it belongs to, so people never have to type a centre code.
+/// It deliberately has no tenant column and no row-level security: it is read before the centre is known.
+/// It holds only the e-mail, centre and user ids, never credentials.
+/// </summary>
+public class LoginDirectoryEntry
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    public string Email { get; set; } = string.Empty;
+
+    public Guid CentreId { get; set; }
+
+    public Guid UserId { get; set; }
+}

@@ -8,7 +8,10 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using NMS.Application.Abstractions;
+using NMS.Application.Auth;
+using NMS.Domain.Identity;
 using NMS.Infrastructure.Persistence;
 using Xunit;
 
@@ -95,7 +98,7 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
     public async Task<ApiClient> LoginAsync(string email, string password, string? tenant = null)
     {
         var client = NewClient();
-        var response = await client.PostAsync("/api/v1/auth/login", new { tenant = tenant ?? TenantSlug, email, password });
+        var response = await client.PostAsync("/api/v1/auth/login", new { tenant, email, password });
         response.Status.Should().Be(HttpStatusCode.OK, response.Raw);
         client.SetBearer(response.Data.GetProperty("access_token").GetString()!);
         client.RefreshCookie = response.RefreshCookie;
@@ -189,6 +192,34 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
             effective_from = today.AddDays(-1).ToString("yyyy-MM-dd"),
         });
         response.Status.Should().Be(HttpStatusCode.Created, response.Raw);
+    }
+
+    /// <summary>Gives one e-mail address an account (same password) in this centre and in a brand-new second centre.</summary>
+    public async Task<(Tenant First, Tenant Second)> CreateTwoCentresWithSharedUserAsync(string email, string password)
+    {
+        var hash = Services.GetRequiredService<IPasswordService>().Hash(password);
+        var first = await WithTenantAsync(Guid.Empty, db => db.Tenants.FirstAsync(t => t.Id == TenantId));
+        var second = new Tenant { Name = new Dictionary<string, string> { ["en"] = "Second Centre" }, Slug = $"second-{Guid.NewGuid():N}"[..20] };
+        await WithTenantAsync(Guid.Empty, async db =>
+        {
+            db.Tenants.Add(second);
+            await db.SaveChangesAsync();
+            return 0;
+        });
+
+        foreach (var centre in new[] { first, second })
+        {
+            await WithTenantAsync(centre.Id, async db =>
+            {
+                var user = new AppUser { Email = email, FirstName = "Shared", LastName = "Person", PasswordHash = hash };
+                db.AppUsers.Add(user);
+                db.LoginDirectory.Add(new LoginDirectoryEntry { Email = email, CentreId = centre.Id, UserId = user.Id });
+                await db.SaveChangesAsync();
+                return 0;
+            });
+        }
+
+        return (first, second);
     }
 
     /// <summary>Runs code in a scope that behaves like the given tenant (used to prove isolation).</summary>

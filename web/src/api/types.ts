@@ -30,6 +30,12 @@ export interface Me {
   tenant: { id: string; slug: string; name: Localized }
 }
 
+export interface CentreChoice {
+  id: string
+  slug: string
+  name: Localized
+}
+
 export interface Session {
   access_token: string
   expires_at: string

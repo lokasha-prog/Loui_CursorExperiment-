@@ -85,8 +85,6 @@
     "login": {
       "title": "Welcome back",
       "subtitle": "Sign in to manage your nursery.",
-      "centre": "Centre code",
-      "centreHint": "Only needed if you were given one",
       "email": "Email",
       "password": "Password",
       "show": "Show password",
@@ -97,7 +95,10 @@
       "locked": "This account is locked for a short time after too many attempts. Please try again later.",
       "inactive": "This account is not active. Please contact your centre administrator.",
       "firstTime": "First time here?",
-      "setupLink": "Set up your centre"
+      "setupLink": "Set up your centre",
+      "chooseCentre": "Choose your centre",
+      "chooseCentreHint": "Your email belongs to more than one centre. Which one do you want to open?",
+      "backToSignIn": "Use a different email"
     },
     "setup": {
       "title": "Set up your centre",
@@ -111,8 +112,6 @@
       "setupKeyHint": "The private key your technical team configured for this installation",
       "centreName": "Centre name (English)",
       "centreNameAr": "Centre name (Arabic)",
-      "centreCode": "Centre code",
-      "centreCodeHint": "Short name used to sign in, for example bright-futures",
       "adminFirst": "First name",
       "adminLast": "Last name",
       "adminEmail": "Email",
@@ -346,7 +345,12 @@
       "end": "Ends",
       "ageGroup": "Age group",
       "created": "Program added",
-      "columns": { "program": "Program", "days": "Days", "hours": "Hours", "ageGroup": "Age group" }
+      "columns": {
+        "program": "Program",
+        "days": "Days",
+        "hours": "Hours",
+        "ageGroup": "Age group"
+      }
     },
     "group": {
       "add": "Add group",
@@ -356,7 +360,10 @@
       "nameAr": "Group name (Arabic)",
       "room": "Room",
       "created": "Group added",
-      "columns": { "group": "Group", "room": "Room" }
+      "columns": {
+        "group": "Group",
+        "room": "Room"
+      }
     },
     "label": {
       "add": "Add label",
@@ -366,7 +373,10 @@
       "nameAr": "Label name (Arabic)",
       "color": "Colour",
       "created": "Label added",
-      "columns": { "label": "Label", "color": "Colour" }
+      "columns": {
+        "label": "Label",
+        "color": "Colour"
+      }
     }
   },
   "users": {
@@ -374,7 +384,12 @@
     "subtitle": "People who can sign in to your centre.",
     "add": "Create account",
     "empty": "No accounts yet",
-    "columns": { "person": "Person", "roles": "Roles", "status": "Status", "lastSignIn": "Last sign-in" },
+    "columns": {
+      "person": "Person",
+      "roles": "Roles",
+      "status": "Status",
+      "lastSignIn": "Last sign-in"
+    },
     "never": "Never",
     "form": {
       "createTitle": "Create an account",
@@ -391,7 +406,11 @@
       "none": "Not linked",
       "created": "Account created"
     },
-    "status": { "active": "Active", "suspended": "Suspended", "invited": "Invited" },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "invited": "Invited"
+    },
     "suspend": "Suspend",
     "reactivate": "Reactivate",
     "statusChanged": "Account updated"

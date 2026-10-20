@@ -876,6 +876,33 @@ namespace NMS.Infrastructure.Persistence.Migrations
                     b.ToTable("AppUserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("NMS.Domain.Identity.LoginDirectoryEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CentreId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CentreId");
+
+                    b.HasIndex("Email", "CentreId")
+                        .IsUnique();
+
+                    b.ToTable("LoginDirectory", (string)null);
+                });
+
             modelBuilder.Entity("NMS.Domain.Identity.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1271,6 +1298,15 @@ namespace NMS.Infrastructure.Persistence.Migrations
                     b.Navigation("AppUser");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("NMS.Domain.Identity.LoginDirectoryEntry", b =>
+                {
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("CentreId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("NMS.Domain.Identity.RefreshToken", b =>

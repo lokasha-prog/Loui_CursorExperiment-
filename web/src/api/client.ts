@@ -1,5 +1,5 @@
 import { useAuth } from '@/stores/auth'
-import type { Pagination, Session } from './types'
+import type { CentreChoice, Pagination, Session } from './types'
 
 const BASE = '/api/v1'
 const CSRF_HEADER = { 'X-Requested-With': 'XMLHttpRequest' }
@@ -139,7 +139,8 @@ export const api = {
 }
 
 export const authApi = {
-  async login(input: { tenant?: string; email: string; password: string }): Promise<Session> {
+  /** The centre is found from the e-mail. If the same e-mail belongs to several centres, the choices come back instead of a session. */
+  async login(input: { tenant?: string; email: string; password: string }): Promise<Session | { chooseCentre: CentreChoice[] }> {
     const response = await fetch(`${BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -148,7 +149,7 @@ export const authApi = {
     }).catch(() => {
       throw new ApiError(0, 'NETWORK', 'Network error')
     })
-    const body = await parse<Session>(response)
+    const body = await parse<Session | { choose_centre: CentreChoice[] }>(response)
     if (!response.ok || !body?.data) {
       const first = body?.errors?.[0]
       throw new ApiError(
@@ -158,6 +159,7 @@ export const authApi = {
         body?.errors ?? [],
       )
     }
+    if ('choose_centre' in body.data) return { chooseCentre: body.data.choose_centre }
     useAuth.getState().setSession(body.data.access_token, body.data.me)
     return body.data
   },
