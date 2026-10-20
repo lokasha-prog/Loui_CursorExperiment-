@@ -12,7 +12,7 @@ services:
     healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 5s, timeout: 3s, retries: 10 }
   rabbitmq:
     image: rabbitmq:3.13-management
-    environment: { RABBITMQ_DEFAULT_USER: nms, RABBITMQ_DEFAULT_PASS: nms_dev }
+    environment: { RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER:?set in .env}", RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD:?set in .env}" }
     ports: ["5672:5672", "15672:15672"]
     healthcheck: { test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"], interval: 10s, timeout: 10s, retries: 10 }
   keycloak:

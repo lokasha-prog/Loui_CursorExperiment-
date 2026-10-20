@@ -11,3 +11,4 @@ obj/
 !.env.example
 coverage/
 TestResults/
+*.log

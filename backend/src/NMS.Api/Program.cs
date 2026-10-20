@@ -1,41 +1,159 @@
+using System.Text.Json;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using NMS.Api.Endpoints;
+using NMS.Api.Http;
+using NMS.Application;
+using NMS.Application.Abstractions;
+using NMS.Application.Security;
+using NMS.Infrastructure;
+using NMS.Infrastructure.Persistence;
+using NMS.Infrastructure.Security;
+using Scalar.AspNetCore;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Host.UseSerilog((context, logger) => logger
+    .MinimumLevel.Is(context.Configuration.GetValue("Logging:Serilog:MinimumLevel", Serilog.Events.LogEventLevel.Information))
+    .Enrich.FromLogContext()
+    .WriteTo.Console());
+
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddOpenApi();
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower);
+
+builder.Services.AddOptions<RateLimitOptions>()
+    .Bind(builder.Configuration.GetSection(RateLimitOptions.SectionName))
+    .Validate(o => o.AuthenticatedPerMinute > 0 && o.AnonymousPerMinute > 0 && o.LoginPerMinute > 0,
+        "The RateLimiting section must define AuthenticatedPerMinute, AnonymousPerMinute and LoginPerMinute.")
+    .ValidateOnStart();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+    .Configure<IOptions<JwtOptions>>((bearer, jwt) =>
+    {
+        bearer.MapInboundClaims = false;
+        bearer.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = jwt.Value.Issuer,
+            ValidAudience = jwt.Value.Audience,
+            IssuerSigningKey = jwt.Value.CreateKey(),
+            ClockSkew = TimeSpan.FromSeconds(30),
+            RoleClaimType = "role",
+            NameClaimType = "sub",
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    foreach (var permission in RolePermissions.AllPermissionNames())
+    {
+        options.AddPolicy(permission, policy => policy
+            .RequireAuthenticatedUser()
+            .RequireAssertion(context =>
+                RolePermissions.ForRoles(context.User.FindAll("role").Select(c => c.Value)).Contains(permission)));
+    }
+
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser().Build();
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, token) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter = ((int)retryAfter.TotalSeconds).ToString();
+        }
+
+        await ApiResults.Error(context.HttpContext, StatusCodes.Status429TooManyRequests, "RATE_LIMIT_EXCEEDED", "Too many requests.")
+            .ExecuteAsync(context.HttpContext);
+    };
+
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(http =>
+    {
+        var limits = http.RequestServices.GetRequiredService<IOptions<RateLimitOptions>>().Value;
+        var userId = http.User.FindFirst("sub")?.Value;
+        return userId is not null
+            ? Window($"user:{userId}", limits.AuthenticatedPerMinute)
+            : Window($"ip:{http.Connection.RemoteIpAddress}", limits.AnonymousPerMinute);
+    });
+    options.AddPolicy("anonymous", http => Window(
+        $"anon:{http.Connection.RemoteIpAddress}",
+        http.RequestServices.GetRequiredService<IOptions<RateLimitOptions>>().Value.AnonymousPerMinute));
+    options.AddPolicy("login", http => Window(
+        $"login:{http.Connection.RemoteIpAddress}",
+        http.RequestServices.GetRequiredService<IOptions<RateLimitOptions>>().Value.LoginPerMinute));
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+ExceptionHandling.Use(app);
+if (!app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseAuthentication();
+app.UseMiddleware<TenantContextMiddleware>();
+app.UseRateLimiter();
+app.UseAuthorization();
 
-var summaries = new[]
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<NmsDbContext>().Database.MigrateAsync();
+}
 
-app.MapGet("/weatherforecast", () =>
+if (app.Environment.IsDevelopment())
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
+}
+
+app.MapGet("/health/live", () => Results.Ok(new { status = "live" })).AllowAnonymous();
+app.MapGet("/health/ready", async (NmsDbContext db, CancellationToken ct) =>
+    await db.Database.CanConnectAsync(ct) ? Results.Ok(new { status = "ready" }) : Results.StatusCode(StatusCodes.Status503ServiceUnavailable))
+    .AllowAnonymous();
+
+app.MapAuthEndpoints();
+app.MapCentreStructureEndpoints();
+app.MapStudentEndpoints();
+app.MapStaffEndpoints();
+app.MapUserEndpoints();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+static RateLimitPartition<string> Window(string key, int permitsPerMinute) =>
+    RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+    {
+        PermitLimit = permitsPerMinute,
+        Window = TimeSpan.FromMinutes(1),
+        QueueLimit = 0,
+    });
+
+public sealed class RateLimitOptions
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public const string SectionName = "RateLimiting";
+
+    public int AuthenticatedPerMinute { get; set; }
+
+    public int AnonymousPerMinute { get; set; }
+
+    public int LoginPerMinute { get; set; }
 }
+
+public partial class Program;

@@ -1,6 +1,0 @@
-@NMS.Api_HostAddress = http://localhost:5178
-
-GET {{NMS.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -1,0 +1,105 @@
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using NMS.Api.Http;
+using NMS.Application.Abstractions;
+using NMS.Application.Auth;
+
+namespace NMS.Api.Endpoints;
+
+public sealed record LoginRequest(string? Tenant, string Email, string Password);
+
+public sealed record BootstrapRequest(
+    string BootstrapToken,
+    string TenantSlug,
+    Dictionary<string, string> TenantName,
+    string AdminEmail,
+    string AdminFirstName,
+    string AdminLastName,
+    string AdminPassword);
+
+public sealed record SessionResponse(string AccessToken, DateTimeOffset ExpiresAt, MeDto Me);
+
+public static class AuthEndpoints
+{
+    public const string RefreshCookie = "nms_refresh";
+    private const string CsrfHeader = "X-Requested-With";
+
+    public static void MapAuthEndpoints(this IEndpointRouteBuilder routes)
+    {
+        var group = routes.MapGroup("/api/v1/auth").WithTags("Auth");
+
+        group.MapGet("/setup-status", async (HttpContext http, IAppDbContext db, CancellationToken ct) =>
+            ApiResults.Ok(http, new { setup_required = !await db.Tenants.AnyAsync(ct) }))
+            .AllowAnonymous();
+
+        group.MapPost("/bootstrap-super-admin", async (BootstrapRequest body, HttpContext http, ISender sender, CancellationToken ct) =>
+        {
+            var result = await sender.Send(new BootstrapCommand(
+                body.BootstrapToken, body.TenantSlug, body.TenantName, body.AdminEmail,
+                body.AdminFirstName, body.AdminLastName, body.AdminPassword), ct);
+            return ApiResults.From(http, result, StatusCodes.Status201Created);
+        }).AllowAnonymous().RequireRateLimiting("anonymous");
+
+        group.MapPost("/login", async (LoginRequest body, HttpContext http, ISender sender, CancellationToken ct) =>
+        {
+            var result = await sender.Send(new LoginCommand(
+                body.Tenant, body.Email, body.Password, http.Connection.RemoteIpAddress?.ToString()), ct);
+            return result.IsSuccess ? Respond(http, result.Value) : ApiResults.Failure(http, result.Errors);
+        }).AllowAnonymous().RequireRateLimiting("login");
+
+        group.MapPost("/refresh", async (HttpContext http, ISender sender, CancellationToken ct) =>
+        {
+            if (!http.Request.Headers.ContainsKey(CsrfHeader))
+            {
+                return ApiResults.Error(http, StatusCodes.Status400BadRequest, "VALIDATION_ERROR", $"The {CsrfHeader} header is required.");
+            }
+
+            var token = http.Request.Cookies[RefreshCookie];
+            if (string.IsNullOrEmpty(token))
+            {
+                return ApiResults.Error(http, StatusCodes.Status401Unauthorized, "UNAUTHORIZED", "Session expired.");
+            }
+
+            var result = await sender.Send(new RefreshSessionCommand(token, http.Connection.RemoteIpAddress?.ToString()), ct);
+            if (result.IsFailure)
+            {
+                http.Response.Cookies.Delete(RefreshCookie, CookieOptions(http, null));
+                return ApiResults.Failure(http, result.Errors);
+            }
+
+            return Respond(http, result.Value);
+        }).AllowAnonymous().RequireRateLimiting("anonymous");
+
+        group.MapPost("/logout", async (HttpContext http, ISender sender, CancellationToken ct) =>
+        {
+            if (!http.Request.Headers.ContainsKey(CsrfHeader))
+            {
+                return ApiResults.Error(http, StatusCodes.Status400BadRequest, "VALIDATION_ERROR", $"The {CsrfHeader} header is required.");
+            }
+
+            await sender.Send(new LogoutCommand(http.Request.Cookies[RefreshCookie]), ct);
+            http.Response.Cookies.Delete(RefreshCookie, CookieOptions(http, null));
+            return Results.NoContent();
+        }).AllowAnonymous();
+
+        group.MapGet("/me", async (HttpContext http, ISender sender, CancellationToken ct) =>
+            ApiResults.From(http, await sender.Send(new GetMeQuery(), ct)))
+            .RequireAuthorization();
+    }
+
+    /// <summary>The refresh token travels only in an HttpOnly cookie; the body carries just the short-lived access token.</summary>
+    private static IResult Respond(HttpContext http, AuthSession session)
+    {
+        http.Response.Cookies.Append(RefreshCookie, session.RefreshToken, CookieOptions(http, session.RefreshTokenExpiresAt));
+        return ApiResults.Ok(http, new SessionResponse(session.AccessToken, session.AccessTokenExpiresAt, session.Me));
+    }
+
+    private static CookieOptions CookieOptions(HttpContext http, DateTimeOffset? expires) => new()
+    {
+        HttpOnly = true,
+        Secure = http.Request.IsHttps,
+        SameSite = SameSiteMode.Strict,
+        Path = "/api/v1/auth",
+        Expires = expires,
+    };
+}
