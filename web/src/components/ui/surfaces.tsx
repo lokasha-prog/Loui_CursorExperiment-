@@ -106,7 +106,8 @@ export function DialogHeader({ title, description }: { title: string; descriptio
 
 export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="w-full overflow-x-auto">
+    // contain-paint stops a wide table from making the whole phone screen wider; the table scrolls inside this box instead.
+    <div className="w-full overflow-x-auto [contain:paint]">
       <table className={cn('w-full text-sm', className)} {...props} />
     </div>
   )

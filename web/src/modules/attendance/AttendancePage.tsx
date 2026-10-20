@@ -288,7 +288,7 @@ export default function AttendancePage() {
         title={t('attendance.title')}
         subtitle={t('attendance.subtitle')}
         action={canWrite && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <EmergencySheets />
             <Button variant="secondary" onClick={() => setAbsentOpen(true)}>
               <UserX className="h-4 w-4" aria-hidden="true" />{t('attendance.absent.open')}

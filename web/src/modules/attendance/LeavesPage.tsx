@@ -263,7 +263,7 @@ export default function LeavesPage() {
         title={t('leave.title')}
         subtitle={t('leave.subtitle')}
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {canDecide && (
               <Button variant="secondary" onClick={() => setTypesOpen(true)}>
                 <Settings2 className="h-4 w-4" aria-hidden="true" />{t('leave.types.manage')}
