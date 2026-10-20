@@ -72,4 +72,20 @@ foreach ($k in $kids | Select-Object -First 10) {
 
 # The same step the daily job performs: monthly invoices from fee plans.
 Try-Call 'POST' '/invoices/actions/generate' @{} | Out-Null
-Write-Host 'Done: children placed on fee plans, test invoices and payments loaded, monthly invoices generated.' -ForegroundColor Green
+
+# About ten expenses over the last few months, so the net result and the expense report have something to show.
+$spend = @(
+  @('rent', 12000, 'Monthly rent'), @('utilities', 1450, 'Electricity and water'), @('salaries', 38000, 'Staff salaries'), @('supplies', 640, 'Craft and cleaning supplies'),
+  @('food', 2100, 'Kitchen groceries'), @('other', 300, 'Fire extinguisher check'), @('supplies', 980, 'Books and toys'), @('food', 1750, 'Snacks and lunch ingredients'),
+  @('utilities', 520, 'Internet and phones'), @('rent', 12000, 'Monthly rent')
+)
+$e = 0
+foreach ($x in $spend) {
+    $when = (Get-Date).AddDays(-($e * 9)).ToString('yyyy-MM-dd')
+    Try-Call 'POST' '/expenses' @{ expense_date = $when; amount_fils = [long]($x[1] * 100); category = $x[0]; description = $x[2]; receipt_media_id = $null } | Out-Null
+    $e++
+}
+
+# Send any reminders that are due today (the daily job does this on its own).
+Try-Call 'POST' '/billing/reminders/actions/run' @{} | Out-Null
+Write-Host 'Done: children placed on fee plans, test invoices, payments and expenses loaded, monthly invoices generated, reminders run.' -ForegroundColor Green
