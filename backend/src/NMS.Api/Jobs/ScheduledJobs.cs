@@ -22,7 +22,7 @@ public sealed class JobsOptions
 public sealed class ScheduledJobsService(IServiceScopeFactory scopes, Microsoft.Extensions.Options.IOptions<JobsOptions> options, ILogger<ScheduledJobsService> logger)
     : BackgroundService
 {
-    private static readonly IRequest<NMS.Shared.Results.Result<int>>[] Jobs = [new RunDailyCloseCommand(), new NMS.Application.Communication.RunDailyReportsCommand()];
+    private static readonly IRequest<NMS.Shared.Results.Result<int>>[] Jobs = [new RunDailyCloseCommand(), new NMS.Application.Communication.RunDailyReportsCommand(), new NMS.Application.Notifications.RunNotificationDispatchCommand()];
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

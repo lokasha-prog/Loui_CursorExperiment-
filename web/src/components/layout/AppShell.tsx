@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Baby, BarChart3, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
+import { Baby, BarChart3, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
@@ -10,6 +10,7 @@ import { cn, initials, localized } from '@/lib/utils'
 import { can, isParentOnly, useAuth } from '@/stores/auth'
 import { useLiveUpdates } from '@/hooks/use-live-updates'
 import { ShortageBanner } from '@/modules/attendance/ShortageBanner'
+import { useUnreadCount } from '@/api/hooks'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
 interface NavItem {
@@ -33,6 +34,7 @@ export function useNavItems(): NavItem[] {
     { to: '/reports', label: t('nav.reports'), icon: BarChart3, permission: 'attendance.override' },
     { to: '/leave', label: t('nav.leave'), icon: CalendarOff, permission: 'attendance.read' },
     { to: '/rooms', label: t('nav.rooms'), icon: School, permission: 'centre_structure.read' },
+    { to: '/audit', label: t('nav.audit'), icon: History, permission: 'audit_log.view' },
     { to: '/users', label: t('nav.users'), icon: ShieldCheck, permission: 'user_management.manage' },
   ]
   return items.filter((item) => !item.permission || can(me, item.permission))
@@ -64,6 +66,7 @@ export function AppShell() {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const items = useNavItems()
+  const unread = useUnreadCount()
   useLiveUpdates()
 
   const signOut = async () => {
@@ -146,6 +149,10 @@ export function AppShell() {
           </button>
           <div className="hidden lg:block" />
           <div className="flex items-center gap-3">
+            <NavLink to="/notifications" aria-label={t('notifications.bell', { count: unread.data ?? 0 })} className="relative rounded-md p-2 text-muted-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Bell className="h-5 w-5" aria-hidden="true" />
+              {!!unread.data && <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">{unread.data > 99 ? '99+' : unread.data}</span>}
+            </NavLink>
             <LanguageSwitcher />
             <div className="hidden items-center gap-2 sm:flex">
               <Avatar text={initials(me?.first_name, me?.last_name)} />

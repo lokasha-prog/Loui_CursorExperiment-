@@ -24,6 +24,7 @@ import { Alert, Badge, Card, Dialog, DialogContent, DialogHeader, EmptyState, Ta
 import { toast } from '@/components/ui/toaster'
 import { localized } from '@/lib/utils'
 import { can, isParentOnly, useAuth } from '@/stores/auth'
+import { EmergencySheets } from './EmergencySheets'
 import { RatioCards } from './RatioCards'
 
 const statusTone: Record<AttendanceRow['status'], Tone> = {
@@ -287,9 +288,12 @@ export default function AttendancePage() {
         title={t('attendance.title')}
         subtitle={t('attendance.subtitle')}
         action={canWrite && (
-          <Button variant="secondary" onClick={() => setAbsentOpen(true)}>
-            <UserX className="h-4 w-4" aria-hidden="true" />{t('attendance.absent.open')}
-          </Button>
+          <div className="flex gap-2">
+            <EmergencySheets />
+            <Button variant="secondary" onClick={() => setAbsentOpen(true)}>
+              <UserX className="h-4 w-4" aria-hidden="true" />{t('attendance.absent.open')}
+            </Button>
+          </div>
         )}
       />
 

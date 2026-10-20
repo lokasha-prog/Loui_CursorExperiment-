@@ -35,6 +35,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
 
     public FakeAiBrain Ai { get; } = new();
 
+    public FakeEmailSender Email { get; } = new();
+
     public string BootstrapToken { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(24));
 
     public string AdminEmail { get; } = $"admin-{Guid.NewGuid():N}@test.local";
@@ -72,6 +74,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
             services.RemoveAll<NMS.Application.Ai.IAiBrain>();
             services.AddSingleton(Ai);
             services.AddSingleton<NMS.Application.Ai.IAiBrain>(Ai);
+            services.RemoveAll<NMS.Application.Notifications.IEmailSender>();
+            services.AddSingleton<NMS.Application.Notifications.IEmailSender>(Email);
         });
     }
 
@@ -352,5 +356,33 @@ public sealed class FakeAiBrain : NMS.Application.Ai.IAiBrain
         LastSystem = system;
         LastUser = user;
         return Task.FromResult(Answer);
+    }
+}
+
+public sealed class FakeEmailSender : NMS.Application.Notifications.IEmailSender
+{
+    public bool Configured { get; set; } = true;
+
+    public bool Fail { get; set; }
+
+    public System.Collections.Concurrent.ConcurrentBag<(string To, string Subject, string Body)> SentBag { get; } = [];
+
+    public List<(string To, string Subject, string Body)> Sent { get; } = [];
+
+    public bool IsConfigured => Configured;
+
+    public Task<NMS.Shared.Results.Result> SendAsync(string to, string subject, string body, CancellationToken cancellationToken)
+    {
+        if (Fail)
+        {
+            return Task.FromResult(NMS.Shared.Results.Result.Failure(NMS.Shared.Results.Error.InvalidState("down")));
+        }
+
+        lock (Sent)
+        {
+            Sent.Add((to, subject, body));
+        }
+
+        return Task.FromResult(NMS.Shared.Results.Result.Success());
     }
 }

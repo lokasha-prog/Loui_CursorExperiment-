@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NMS.Application.Abstractions;
 using NMS.Domain.Attendance;
 using NMS.Domain.Auditing;
+using NMS.Domain.Notifications;
 using NMS.Domain.Communication;
 using NMS.Domain.CentreManagement;
 using NMS.Domain.Common;
@@ -78,6 +79,12 @@ public sealed class NmsDbContext(
     public DbSet<ThreadParticipant> ThreadParticipants => Set<ThreadParticipant>();
 
     public DbSet<Message> Messages => Set<Message>();
+
+    public DbSet<Notification> Notifications => Set<Notification>();
+
+    public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
+
+    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
 
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 

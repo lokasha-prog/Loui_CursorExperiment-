@@ -40,6 +40,9 @@ public static class DependencyInjection
                 "The Attendance section needs a valid TimeZoneId and non-negative grace minutes.")
             .ValidateOnStart();
         services.AddOptions<NMS.Application.Communication.DailyReportOptions>().Bind(configuration.GetSection(NMS.Application.Communication.DailyReportOptions.Section));
+        services.AddOptions<SmtpOptions>().Bind(configuration.GetSection(SmtpOptions.SectionName));
+        services.AddSingleton<NMS.Application.Notifications.IEmailSender, SmtpEmailSender>();
+        services.AddSingleton<NMS.Application.Reporting.IEmergencyReportRenderer, QuestEmergencyReportRenderer>();
         services.AddSingleton<CentreCalendar>();
 
         services.AddOptions<AiOptions>().Bind(configuration.GetSection(AiOptions.SectionName));

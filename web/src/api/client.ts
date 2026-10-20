@@ -150,6 +150,9 @@ async function blob(path: string): Promise<Blob> {
 export const api = {
   upload,
   blob,
+  async put<T>(path: string, body: unknown): Promise<T> {
+    return (await send<T>('PUT', path, { body }))!.data as T
+  },
   async get<T>(path: string, query?: Query): Promise<T> {
     return (await send<T>('GET', path, { query }))!.data as T
   },

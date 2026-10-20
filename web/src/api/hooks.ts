@@ -1,6 +1,9 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  AppNotification,
+  AuditEntry,
+  NotificationPreference,
   ActivityPost,
   DailyReport,
   MediaItem,
@@ -312,3 +315,38 @@ export function useReply(threadId: string) {
     onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['thread', threadId] }), client.invalidateQueries({ queryKey: ['threads'] })]),
   })
 }
+
+// ── Notifications ───────────────────────────────────────────────────────────
+
+export const useNotifications = () => useInfiniteList<AppNotification>(['notifications'], '/notifications', {})
+
+export const useUnreadCount = () =>
+  useQuery({
+    queryKey: ['unread-count'],
+    refetchInterval: 60_000,
+    queryFn: async () => (await api.get<{ count: number }>('/notifications/unread-count')).count,
+  })
+
+export function useMarkRead() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string | null) => api.post<{ marked: number }>(id ? `/notifications/${id}/actions/read` : '/notifications/actions/read-all'),
+    onSuccess: () => Promise.all(['notifications', 'unread-count'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const usePreferences = () =>
+  useQuery({ queryKey: ['notification-preferences'], queryFn: () => api.get<NotificationPreference[]>('/notifications/preferences') })
+
+export function useSavePreferences() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (preferences: NotificationPreference[]) => api.put<NotificationPreference[]>('/notifications/preferences', { preferences }),
+    onSuccess: (data) => client.setQueryData(['notification-preferences'], data),
+  })
+}
+
+// ── Audit log ───────────────────────────────────────────────────────────────
+
+export const useAuditLogs = (filters: { action?: string; entity_type?: string; from?: string; to?: string }) =>
+  useInfiniteList<AuditEntry>(['audit'], '/audit-logs', { ...filters })

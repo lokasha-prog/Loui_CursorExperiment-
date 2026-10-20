@@ -114,6 +114,8 @@ public static class RolePermissions
         ],
     };
 
+    public static IReadOnlyList<string> AllRoleNames() => Map.Keys.ToList();
+
     public static IReadOnlySet<string> ForRoles(IEnumerable<string> roles)
     {
         var result = new HashSet<string>();

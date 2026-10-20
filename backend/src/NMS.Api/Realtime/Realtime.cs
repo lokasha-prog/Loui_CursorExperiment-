@@ -27,6 +27,7 @@ public static class RealtimeEvents
     public const string RatioRestored = "ratio_restored";
     public const string ActivityPublished = "activity_published";
     public const string MessageReceived = "message_received";
+    public const string NotificationCreated = "notification_created";
 }
 
 /// <summary>
@@ -76,8 +77,12 @@ public sealed class RealtimeNotifier(IHubContext<CentreHub> hub) :
     INotificationHandler<RatioBreachDetected>,
     INotificationHandler<RatioRestored>,
     INotificationHandler<NMS.Application.Communication.ActivityPublished>,
-    INotificationHandler<NMS.Application.Communication.MessageSent>
+    INotificationHandler<NMS.Application.Communication.MessageSent>,
+    INotificationHandler<NMS.Application.Notifications.NotificationCreated>
 {
+    public Task Handle(NMS.Application.Notifications.NotificationCreated notification, CancellationToken cancellationToken) =>
+        hub.Clients.Group(RealtimeGroups.User(notification.TenantId, notification.UserId)).SendAsync(RealtimeEvents.NotificationCreated, new { }, cancellationToken);
+
     public Task Handle(NMS.Application.Communication.ActivityPublished notification, CancellationToken cancellationToken) =>
         hub.Clients.Group(RealtimeGroups.Readers(notification.TenantId)).SendAsync(RealtimeEvents.ActivityPublished, new { }, cancellationToken);
 

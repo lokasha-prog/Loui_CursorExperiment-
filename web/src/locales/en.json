@@ -50,7 +50,8 @@
     "leave": "Leave",
     "reports": "Reports",
     "feed": "Daily feed",
-    "messages": "Messages"
+    "messages": "Messages",
+    "audit": "Audit log"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -701,5 +702,70 @@
     "errors": {
       "noFamily": "This child's family has no account yet, so they cannot be messaged."
     }
+  },
+  "notifications": {
+    "bell": "Notifications, {{count}} unread",
+    "title": "Notifications",
+    "subtitle": "Alerts and updates for you.",
+    "empty": "You are all caught up",
+    "emptyBody": "New alerts will appear here.",
+    "markAll": "Mark all as read",
+    "markRead": "Mark as read",
+    "open": "Open",
+    "preferences": "How should we reach you?",
+    "preferencesHint": "Choose how each kind of notification arrives.",
+    "inApp": "In the app",
+    "email": "By e-mail",
+    "saved": "Choices saved",
+    "criticalNote": "Urgent alerts always appear in the app.",
+    "tier": {
+      "critical": "Urgent (for example not enough staff)",
+      "operational": "Everyday (for example new messages)",
+      "informational": "For your information (for example daily reports)"
+    },
+    "tierShort": {
+      "critical": "Urgent",
+      "operational": "Everyday",
+      "informational": "Info"
+    }
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Every change made in your centre, who made it and when. It cannot be edited or deleted.",
+    "action": "Action",
+    "entity": "Record type",
+    "from": "From",
+    "to": "To",
+    "all": "All",
+    "empty": "No matching entries",
+    "columns": {
+      "when": "When",
+      "who": "Who",
+      "action": "Action",
+      "record": "Record",
+      "changes": "Changes"
+    },
+    "actions": {
+      "create": "Created",
+      "update": "Changed",
+      "delete": "Deleted",
+      "restore": "Restored",
+      "export": "Printed / exported",
+      "login": "Sign-in",
+      "logout": "Sign-out",
+      "permission_change": "Permission change"
+    },
+    "system": "System",
+    "fields": "{{count}} field(s)"
+  },
+  "emergency": {
+    "button": "Emergency sheets",
+    "room": "Room",
+    "child": "One child",
+    "pick": "Choose a room",
+    "download": "Download PDF",
+    "failed": "Could not create the sheet",
+    "title": "Emergency sheet",
+    "description": "A printable page per child with medical notes, allergies and who may collect them."
   }
 }

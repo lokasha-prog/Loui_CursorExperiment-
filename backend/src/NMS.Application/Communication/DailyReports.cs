@@ -60,7 +60,8 @@ public sealed class ListDailyReportsHandler(IAppDbContext db, IAccessScope scope
     }
 }
 
-public sealed class RunDailyReportsHandler(IAppDbContext db, CentreCalendar calendar, IOptions<DailyReportOptions> options, IClock clock)
+public sealed class RunDailyReportsHandler(
+    IAppDbContext db, CentreCalendar calendar, IOptions<DailyReportOptions> options, IClock clock, ITenantContext tenant, IPublisher publisher)
     : IRequestHandler<RunDailyReportsCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(RunDailyReportsCommand request, CancellationToken ct)
@@ -87,24 +88,32 @@ public sealed class RunDailyReportsHandler(IAppDbContext db, CentreCalendar cale
             .Where(x => ids.Contains(x.StudentId) && db.ActivityPosts.Any(p => p.Id == x.PostId && p.ApprovalStatus == ApprovalStatuses.Approved && p.CreatedAt >= clock.UtcNow.AddHours(-24)))
             .GroupBy(x => x.StudentId).Select(g => new { Id = g.Key, Count = g.Count() }).ToDictionaryAsync(g => g.Id, g => g.Count, ct);
 
+        var created = new List<(Guid StudentId, Dictionary<string, string> Summary)>();
         foreach (var t in todo)
         {
             var name = names.GetValueOrDefault(t.PersonId, "");
             var n = counts.GetValueOrDefault(t.PersonId);
             string Local(DateTimeOffset? v) => v is null ? "" : TimeOnly.FromDateTime(TimeZoneInfo.ConvertTime(v.Value, calendar.Zone).DateTime).ToString("HH:mm", CultureInfo.InvariantCulture);
             var stay = t.CheckOutAt is null ? $"{Local(t.CheckInAt)}" : $"{Local(t.CheckInAt)} - {Local(t.CheckOutAt)}";
+            var summary = new Dictionary<string, string>
+            {
+                ["en"] = $"{name} was with us today ({stay}). {(n == 0 ? "No activity updates were posted." : $"{n} activity update(s) were shared with you.")}",
+                ["ar"] = $"كان {name} معنا اليوم ({stay}). {(n == 0 ? "لم تُنشر تحديثات للأنشطة." : $"تمت مشاركة {n} تحديث(ات) للأنشطة معكم.")}",
+            };
+            created.Add((t.PersonId, summary));
             db.DailyReports.Add(new DailyReport
             {
                 StudentId = t.PersonId, Date = today, GeneratedAt = clock.UtcNow, ActivityCount = n, CheckInAt = t.CheckInAt, CheckOutAt = t.CheckOutAt,
-                Summary = new Dictionary<string, string>
-                {
-                    ["en"] = $"{name} was with us today ({stay}). {(n == 0 ? "No activity updates were posted." : $"{n} activity update(s) were shared with you.")}",
-                    ["ar"] = $"كان {name} معنا اليوم ({stay}). {(n == 0 ? "لم تُنشر تحديثات للأنشطة." : $"تمت مشاركة {n} تحديث(ات) للأنشطة معكم.")}",
-                },
+                Summary = summary,
             });
         }
 
         await db.SaveChangesAsync(ct);
+        foreach (var (studentId, summary) in created)
+        {
+            await publisher.Publish(new NMS.Application.Notifications.DailyReportCreated(tenant.TenantId, studentId, summary), ct);
+        }
+
         return Result<int>.Success(todo.Count);
     }
 }

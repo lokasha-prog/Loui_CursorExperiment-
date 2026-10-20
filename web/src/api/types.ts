@@ -358,3 +358,33 @@ export interface ThreadDetail {
   can_reply: boolean
   messages: ThreadMessage[]
 }
+
+export interface AppNotification {
+  id: string
+  tier: 'critical' | 'operational' | 'informational'
+  type: string
+  title: Localized
+  body: Localized
+  link: string | null
+  read: boolean
+  created_at: string
+}
+
+export interface NotificationPreference {
+  tier: 'critical' | 'operational' | 'informational'
+  in_app: boolean
+  email: boolean
+}
+
+export interface AuditEntry {
+  id: string
+  user_id: string | null
+  user_email: string | null
+  entity_type: string
+  entity_id: string
+  action: string
+  changed_fields: Record<string, { before: unknown; after: unknown }> | null
+  ip_address: string | null
+  occurred_at: string
+  created_at: string
+}
