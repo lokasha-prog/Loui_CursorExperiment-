@@ -54,7 +54,8 @@
     "audit": "Audit log",
     "feedback": "Feedback",
     "billing": "Billing",
-    "enquiries": "Enquiries"
+    "enquiries": "Enquiries",
+    "settings": "Settings"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -1194,6 +1195,101 @@
       "family": "Your name",
       "message": "Anything you would like us to know",
       "send": "Send enquiry"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Your centre details, rules and who can do what.",
+    "save": "Save settings",
+    "saved": "Settings saved",
+    "tabs": {
+      "centre": "Centre",
+      "roles": "Roles"
+    },
+    "profile": {
+      "title": "Centre profile",
+      "nameEn": "Centre name (English)",
+      "nameAr": "Centre name (Arabic)",
+      "email": "Contact e-mail",
+      "phone": "Contact phone",
+      "licence": "KHDA licence number",
+      "website": "Website",
+      "address": "Address",
+      "colour": "Brand colour",
+      "colourHint": "A hex colour such as #0E7C86",
+      "logo": "Logo",
+      "logoHint": "Square image, shown on documents."
+    },
+    "rules": {
+      "title": "Attendance and calendar",
+      "late": "Late after (minutes)",
+      "lateHint": "Minutes after the programme starts before a check-in counts as late.",
+      "early": "Early leave before (minutes)",
+      "earlyHint": "Minutes before the programme ends that still count as a normal pick-up.",
+      "weekend": "Weekend days",
+      "timezone": "Time zone: {{zone}} (set when the centre was created)."
+    },
+    "portal": {
+      "title": "Parent portal",
+      "invoices": "Parents can see their invoices",
+      "invoicesHint": "Turn off to hide invoices and payments from parents. Staff are not affected."
+    },
+    "elsewhere": {
+      "title": "More settings",
+      "billing": "Billing settings",
+      "billingBody": "due days and fee reminders (Billing, Settings tab)",
+      "audit": "Audit log retention",
+      "auditBody": "how long history is kept",
+      "rooms": "Rooms and programmes",
+      "roomsBody": "ratios, capacity and ages"
+    },
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "roles": {
+      "intro": "Built-in roles are fixed. Make your own role by choosing exactly what it may do.",
+      "add": "New role",
+      "edit": "Edit role",
+      "nameEn": "Role name (English)",
+      "nameAr": "Role name (Arabic)",
+      "description": "What is this role for",
+      "permissions": "What this role may do",
+      "needPermission": "Choose at least one permission.",
+      "save": "Save role",
+      "saved": "Role saved",
+      "builtIn": "Built-in",
+      "custom": "Custom",
+      "permissionCount": "{{count}} permissions",
+      "people": "{{count}} people",
+      "confirmDelete": "Remove this role?",
+      "refreshNote": "People signed in with this role get changes the next time they sign in or their session refreshes. Managing user accounts cannot be given to a custom role."
+    },
+    "modules": {
+      "dashboard": "Dashboard",
+      "students": "Students",
+      "staff": "Staff",
+      "attendance": "Attendance",
+      "activities": "Daily feed",
+      "messaging": "Messages",
+      "billing": "Billing",
+      "invoices": "Invoices",
+      "payments": "Payments",
+      "enquiries": "Enquiries",
+      "tours": "Tours",
+      "calendar": "Calendar",
+      "forms": "Forms",
+      "tools": "Tools",
+      "reports": "Reports",
+      "settings": "Settings",
+      "audit_log": "Audit log",
+      "notifications": "Notifications",
+      "centre_structure": "Rooms and programmes"
     }
   }
 }

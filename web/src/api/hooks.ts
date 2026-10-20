@@ -1,6 +1,8 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  CentreSettings,
+  RoleItem,
   BlockOff,
   Enquiry,
   EnquiryDetail,
@@ -624,3 +626,36 @@ export const useDeleteBlockOff = () => useEnquiryMutation((id: string) => api.de
 export const useTasks = (done: boolean) => useInfiniteList<FollowUpTask>(['tasks'], '/follow-up-tasks', { done: done ? 'true' : undefined })
 
 export const useCompleteTask = () => useEnquiryMutation((id: string) => api.post<FollowUpTask>(`/follow-up-tasks/${id}/actions/complete`))
+
+// ── Settings and roles ──────────────────────────────────────────────────────
+
+export const useCentreSettings = () => useQuery({ queryKey: ['centre-settings'], queryFn: () => api.get<CentreSettings>('/settings/centre') })
+
+export function useSaveCentreSettings() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CentreSettings) => api.put<CentreSettings>('/settings/centre', body),
+    onSuccess: () => Promise.all(['centre-settings', 'invoices'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const useRoles = (enabled = true) => useQuery({ queryKey: ['roles'], enabled, queryFn: () => api.get<RoleItem[]>('/roles') })
+
+export const usePermissionCatalogue = (enabled = true) => useQuery({ queryKey: ['permission-catalogue'], enabled, queryFn: () => api.get<string[]>('/roles/permissions') })
+
+export function useSaveRole(id?: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { display_name: Record<string, string>; description: string | null; permissions: string[] }) =>
+      id ? api.patch<RoleItem>(`/roles/${id}`, body) : api.post<RoleItem>('/roles', body),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['roles'] }),
+  })
+}
+
+export function useDeleteRole() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/roles/${id}`),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['roles'] }),
+  })
+}

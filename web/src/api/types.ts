@@ -625,3 +625,29 @@ export interface PublicForm {
   name: Record<string, string>
   captcha_site_key: string | null
 }
+
+export interface RoleItem {
+  id: string
+  name: string
+  display_name: Record<string, string>
+  description: string | null
+  is_system_role: boolean
+  permissions: string[]
+  user_count: number
+}
+
+export interface CentreSettings {
+  name: Record<string, string>
+  contact_email: string | null
+  contact_phone: string | null
+  khda_license_number: string | null
+  weekend_days: string[]
+  timezone: string
+  address: string | null
+  website: string | null
+  brand_color: string | null
+  logo_media_id: string | null
+  late_grace_minutes: number
+  early_leave_grace_minutes: number
+  parents_see_invoices: boolean
+}

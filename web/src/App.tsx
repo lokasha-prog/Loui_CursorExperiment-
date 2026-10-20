@@ -26,6 +26,7 @@ const AuditPage = lazy(() => import('@/modules/audit/AuditPage'))
 const FeedbackPage = lazy(() => import('@/modules/feedback/FeedbackPage'))
 const BillingPage = lazy(() => import('@/modules/billing/BillingPage'))
 const LeavesPage = lazy(() => import('@/modules/attendance/LeavesPage'))
+const SettingsPage = lazy(() => import('@/modules/settings/SettingsPage'))
 const EnquiriesPage = lazy(() => import('@/modules/enquiries/EnquiriesPage'))
 const EnquiryFormPage = lazy(() => import('@/modules/public/EnquiryFormPage'))
 
@@ -101,6 +102,7 @@ export function AppRoutes() {
           <Route path="/feedback" element={<RequirePermission permission="settings.read"><FeedbackPage /></RequirePermission>} />
           <Route path="/billing" element={<RequirePermission permission="billing.read"><BillingPage /></RequirePermission>} />
           <Route path="/enquiries" element={<RequirePermission permission="enquiries.read"><EnquiriesPage /></RequirePermission>} />
+          <Route path="/settings" element={<RequirePermission permission="settings.read"><SettingsPage /></RequirePermission>} />
           <Route path="/leave" element={<RequirePermission permission="attendance.read"><LeavesPage /></RequirePermission>} />
           <Route path="/rooms" element={<RequirePermission permission="centre_structure.read"><RoomsPage /></RequirePermission>} />
           <Route path="/users" element={<RequirePermission permission="user_management.manage"><UsersPage /></RequirePermission>} />

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { ApiError } from '@/api/client'
-import { useCreateUser, useSetupStatus, useStaff, flatten } from '@/api/hooks'
+import { useCreateUser, useRoles, useSetupStatus, useStaff, flatten } from '@/api/hooks'
 import { Button } from '@/components/ui/button'
 import { Field, Input, Select } from '@/components/ui/form-controls'
 import { Alert, Dialog, DialogContent, DialogHeader } from '@/components/ui/surfaces'
@@ -45,7 +45,7 @@ export function CreateUserDialog({
   onOpenChange: (open: boolean) => void
   prefill?: UserPrefill
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const me = useAuth((s) => s.me)
   const policy = useSetupStatus()
   const minPassword = policy.data?.passwordMinLength ?? 1
@@ -54,6 +54,7 @@ export function CreateUserDialog({
   const staff = useStaff({})
   const message = useApiErrorMessage()
   const [failure, setFailure] = useState<string | null>(null)
+  const customRoles = useRoles()
   const roles = ROLE_NAMES.filter((r) => r !== 'super_admin' || me?.roles.includes('super_admin'))
 
   const {
@@ -126,6 +127,9 @@ export function CreateUserDialog({
               <Select id="u-role" disabled={!!prefill?.role} {...register('role')}>
                 {roles.map((r) => (
                   <option key={r} value={r}>{t(`roles.${r}`)}</option>
+                ))}
+                {(customRoles.data ?? []).filter((r) => !r.is_system_role).map((r) => (
+                  <option key={r.id} value={r.name}>{r.display_name[i18n.language] ?? r.display_name.en}</option>
                 ))}
               </Select>
             </Field>

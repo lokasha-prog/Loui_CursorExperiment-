@@ -79,7 +79,7 @@ export default function UsersPage() {
                     <Td>
                       <div className="flex flex-wrap gap-1">
                         {user.roles.map((role) => (
-                          <Badge key={role} tone="info">{t(`roles.${role}`)}</Badge>
+                          <Badge key={role} tone="info">{t(`roles.${role}`, { defaultValue: role.replace(/^custom_/, "").replace(/_/g, " ") })}</Badge>
                         ))}
                       </div>
                     </Td>
