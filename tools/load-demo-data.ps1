@@ -14,8 +14,9 @@ $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $headers = @{}
 
 function Call($method, $path, $body = $null) {
-    $args = @{ Uri = "$Api/api/v1$path"; Method = $method; WebSession = $session; Headers = $headers; ContentType = 'application/json'; UseBasicParsing = $true }
-    if ($null -ne $body) { $args.Body = ($body | ConvertTo-Json -Depth 8 -Compress) }
+    $args = @{ Uri = "$Api/api/v1$path"; Method = $method; WebSession = $session; Headers = $headers; ContentType = 'application/json; charset=utf-8'; UseBasicParsing = $true }
+    # Send real UTF-8 bytes: PowerShell 5.1 would otherwise turn Arabic letters into question marks.
+    if ($null -ne $body) { $args.Body = [System.Text.Encoding]::UTF8.GetBytes(($body | ConvertTo-Json -Depth 8 -Compress)) }
     for ($try = 0; $try -lt 6; $try++) {
         try { $r = Invoke-WebRequest @args; break } catch {
             if ($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 429 -and $try -lt 5) { Start-Sleep -Seconds 15; continue }
@@ -49,8 +50,8 @@ foreach ($r in @(
     $rooms[$r.k] = (Call 'POST' '/rooms' @{ name = @{ en = "$($r.en)$tag"; ar = $r.ar }; capacity = $r.cap; min_age_months = $r.min; max_age_months = $r.max; ratio_staff_to_student = $r.ratio }).id
 }
 $programs = @()
-foreach ($p in @(@{ en = 'Full day'; ar = 'يوم كامل'; s = '07:30:00'; e = '15:30:00'; d = 5 }, @{ en = 'Morning only'; ar = 'صباحي فقط'; s = '07:30:00'; e = '12:00:00'; d = 5 })) {
-    $programs += (Call 'POST' '/programs' @{ name = @{ en = "$($p.en)$tag"; ar = $p.ar }; description = $null; days_per_week = $p.d; start_time = $p.s; end_time = $p.e; age_group = '1-4 years'; is_active = $true }).id
+foreach ($p in @(@{ en = 'Full day'; ar = 'يوم كامل'; s = '07:30:00'; e = '15:30:00'; d = 5; min = 12; max = 60 }, @{ en = 'Morning only'; ar = 'صباحي فقط'; s = '07:30:00'; e = '12:00:00'; d = 5; min = 12; max = 36 })) {
+    $programs += (Call 'POST' '/programs' @{ name = @{ en = "$($p.en)$tag"; ar = $p.ar }; description = $null; days_per_week = $p.d; start_time = $p.s; end_time = $p.e; age_group = '1-4 years'; min_age_months = $p.min; max_age_months = $p.max; is_active = $true }).id
 }
 Write-Host "Created $($rooms.Count) rooms and $($programs.Count) programmes."
 
@@ -97,9 +98,9 @@ foreach ($f in $families) {
     $made = Call 'POST' '/students' @{
         student = @{ first_name = $f.c; last_name = $f.l; first_name_arabic = $f.ca; last_name_arabic = $f.la; gender = $f.g
             date_of_birth = (Get-Date).AddMonths(-$f.age).AddDays(-(Get-Random -Maximum 25)).ToString('yyyy-MM-dd'); room_id = $rooms[$f.room]; program_id = $programs[$i % 2]
-            allergy_info = $allergy; medical_notes = $(if ($allergy) { "Carries an action plan for $allergy" } else { $null }); nationality = 'AE'; primary_language = $(if ($i % 3 -eq 0) { 'ar' } else { 'en' }) }
+            allergy_info = $allergy; medical_notes = $(if ($allergy) { "Carries an action plan for $allergy" } else { $null }); nationality = 'AE'; emirates_id = '784-20' + (Get-Random -Minimum 20 -Maximum 26) + '-' + (Get-Random -Minimum 1000000 -Maximum 9999999) + '-1'; primary_language = $(if ($i % 3 -eq 0) { 'ar' } else { 'en' }) }
         guardians = @(
-            @{ first_name = $f.mom; last_name = $f.l; email = $momMail; phone = '+97155' + (Get-Random -Minimum 1000000 -Maximum 9999999); relationship = 'mother'; is_primary = $true; can_pickup = $true; receives_communications = $true },
+            @{ first_name = $f.mom; last_name = $f.l; email = $momMail; phone = '+97155' + (Get-Random -Minimum 1000000 -Maximum 9999999); relationship = 'mother'; is_primary = $true; can_pickup = $true; emirates_id = '784-19' + (Get-Random -Minimum 70 -Maximum 99) + '-' + (Get-Random -Minimum 1000000 -Maximum 9999999) + '-2'; receives_communications = $true },
             @{ first_name = 'Grandparent'; last_name = $f.l; email = "grand.$momMail"; relationship = 'grandparent'; is_primary = $false; can_pickup = ($i % 2 -eq 0); receives_communications = $false })
     }
     Call 'POST' "/students/$($made.id)/actions/transition-status" @{ status = 'active' } | Out-Null

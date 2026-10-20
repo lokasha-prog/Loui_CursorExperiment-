@@ -23,7 +23,7 @@ public static class CommunicationEndpoints
             using var buffer = new MemoryStream();
             await stream.CopyToAsync(buffer, ct);
             return ApiResults.From(http, await s.Send(new UploadMediaCommand(file.FileName, buffer.ToArray()), ct), StatusCodes.Status201Created);
-        }).RequireAuthorization(Permissions.ActivitiesWrite).DisableAntiforgery();
+        }).RequireAuthorization().DisableAntiforgery();
         media.MapGet("/{id:guid}/content", async (Guid id, HttpContext http, ISender s, CancellationToken ct) =>
         {
             var result = await s.Send(new GetMediaContentQuery(id), ct);
@@ -35,7 +35,7 @@ public static class CommunicationEndpoints
             http.Response.Headers.CacheControl = "private, max-age=3600";
             http.Response.Headers["Content-Disposition"] = "inline";
             return Results.File(result.Value.Content, result.Value.ContentType);
-        }).RequireAuthorization(Permissions.ActivitiesRead);
+        }).RequireAuthorization();
 
         var a = routes.MapGroup("/api/v1/activities").WithTags("Activities");
         a.MapGet("/", async (string? status, [FromQuery(Name = "student_id")] Guid? studentId, string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>

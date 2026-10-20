@@ -636,6 +636,9 @@ namespace NMS.Infrastructure.Persistence.Migrations
                         .HasMaxLength(254)
                         .HasColumnType("nvarchar(254)");
 
+                    b.Property<string>("EmiratesId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Employer")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -779,6 +782,12 @@ namespace NMS.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<int>("MaxAgeMonths")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinAgeMonths")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1094,6 +1103,9 @@ namespace NMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<Guid?>("GroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("IdPhotoMediaId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")

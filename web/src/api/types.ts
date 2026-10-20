@@ -74,6 +74,8 @@ export interface StudentDetail extends Omit<StudentSummary, 'created_at'> {
   custody_notes: string | null
   passport_number: string | null
   emirates_id: string | null
+  photo_media_id: string | null
+  id_photo_media_id: string | null
   label_ids: string[]
   created_at: string
 }
@@ -89,6 +91,7 @@ export interface Guardian {
   can_pickup: boolean
   receives_communications: boolean
   has_login: boolean
+  emirates_id: string | null
 }
 
 export interface StaffSummary {
@@ -124,6 +127,8 @@ export interface Program {
   start_time: string
   end_time: string
   age_group: string
+  min_age_months: number
+  max_age_months: number
   is_active: boolean
   created_at: string
 }

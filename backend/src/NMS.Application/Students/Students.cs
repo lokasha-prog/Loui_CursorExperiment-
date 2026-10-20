@@ -53,6 +53,8 @@ public sealed record StudentDetailDto(
     string? CustodyNotes,
     string? PassportNumber,
     string? EmiratesId,
+    Guid? PhotoMediaId,
+    Guid? IdPhotoMediaId,
     IReadOnlyList<Guid> LabelIds,
     DateTimeOffset CreatedAt) : ICursorItem;
 
@@ -62,7 +64,8 @@ public sealed record NewGuardianInput(
     string Email,
     string? Phone,
     string Relationship,
-    bool IsPrimary = false);
+    bool IsPrimary = false,
+    string? EmiratesId = null);
 
 public sealed record StudentFields(
     string FirstName,
@@ -85,7 +88,9 @@ public sealed record StudentFields(
     string? CustodyNotes,
     string? PassportNumber,
     string? EmiratesId,
-    IReadOnlyList<Guid>? LabelIds);
+    IReadOnlyList<Guid>? LabelIds,
+    Guid? PhotoMediaId = null,
+    Guid? IdPhotoMediaId = null);
 
 public sealed record ListStudentsQuery(string? Cursor, int? Limit, string? Status, Guid? RoomId, string? Search)
     : IRequest<Result<CursorPage<StudentSummaryDto>>>;
@@ -104,7 +109,7 @@ public sealed record TransitionStudentStatusCommand(Guid Id, string Status, stri
 
 public static class StudentGenders
 {
-    public static readonly IReadOnlyList<string> All = ["male", "female", "other", "unspecified"];
+    public static readonly IReadOnlyList<string> All = ["male", "female"];
 }
 
 public sealed class StudentFieldsValidator : AbstractValidator<StudentFields>
@@ -119,7 +124,10 @@ public sealed class StudentFieldsValidator : AbstractValidator<StudentFields>
         RuleFor(s => s.Gender!)
             .Must(g => StudentGenders.All.Contains(g))
             .When(s => s.Gender is not null)
-            .WithMessage("Gender must be male, female, other or unspecified.");
+            .WithMessage("Gender must be male or female.");
+        RuleFor(s => s.Nationality!).Matches("^[A-Z]{2}$").When(s => !string.IsNullOrEmpty(s.Nationality))
+            .WithMessage("Choose the nationality from the list.");
+        RuleFor(s => s.EmiratesId!).MaximumLength(30).When(s => s.EmiratesId is not null);
     }
 }
 
@@ -189,6 +197,8 @@ internal static class StudentScope
         isParent ? null : s.CustodyNotes,
         isParent ? null : s.PassportNumber,
         isParent ? null : s.EmiratesId,
+        s.PhotoMediaId,
+        isParent ? null : s.IdPhotoMediaId,
         s.Labels.Select(l => l.LabelId).ToList(),
         s.CreatedAt);
 
@@ -197,11 +207,29 @@ internal static class StudentScope
         && !user.Roles.Any(r => r is SystemRoles.SuperAdmin or SystemRoles.CentreAdmin or SystemRoles.It
             or SystemRoles.Teacher or SystemRoles.Receptionist);
 
-    public static async Task<Result> ValidateReferencesAsync(IAppDbContext db, StudentFields f, CancellationToken ct)
+    public static int AgeInMonths(DateOnly dateOfBirth, DateOnly today)
     {
-        if (f.RoomId is { } roomId && !await db.Rooms.AnyAsync(r => r.Id == roomId, ct))
+        var months = (today.Year - dateOfBirth.Year) * 12 + today.Month - dateOfBirth.Month;
+        return today.Day < dateOfBirth.Day ? months - 1 : months;
+    }
+
+    /// <summary>Checks that the chosen room and programme exist and that the child's age fits them (spec: age bands decide placement).</summary>
+    public static async Task<Result> ValidateReferencesAsync(IAppDbContext db, StudentFields f, DateOnly today, Student? existing, CancellationToken ct)
+    {
+        var age = AgeInMonths(f.DateOfBirth, today);
+        var ageChanged = existing is null || existing.DateOfBirth != f.DateOfBirth;
+        if (f.RoomId is { } roomId)
         {
-            return Result.Failure(Error.Validation("The selected room does not exist.", "room_id"));
+            var room = await db.Rooms.AsNoTracking().FirstOrDefaultAsync(r => r.Id == roomId, ct);
+            if (room is null)
+            {
+                return Result.Failure(Error.Validation("The selected room does not exist.", "room_id"));
+            }
+
+            if ((ageChanged || existing!.RoomId != roomId) && (age < room.MinAgeMonths || age > room.MaxAgeMonths))
+            {
+                return Result.Failure(Error.Validation("This room is not for the child's age.", "room_id"));
+            }
         }
 
         if (f.GroupId is { } groupId && !await db.StudentGroups.AnyAsync(g => g.Id == groupId, ct))
@@ -209,9 +237,26 @@ internal static class StudentScope
             return Result.Failure(Error.Validation("The selected group does not exist.", "group_id"));
         }
 
-        if (f.ProgramId is { } programId && !await db.Programs.AnyAsync(p => p.Id == programId, ct))
+        if (f.ProgramId is { } programId)
         {
-            return Result.Failure(Error.Validation("The selected program does not exist.", "program_id"));
+            var program = await db.Programs.AsNoTracking().FirstOrDefaultAsync(p => p.Id == programId, ct);
+            if (program is null)
+            {
+                return Result.Failure(Error.Validation("The selected program does not exist.", "program_id"));
+            }
+
+            if ((ageChanged || existing!.ProgramId != programId) && (age < program.MinAgeMonths || age > program.MaxAgeMonths))
+            {
+                return Result.Failure(Error.Validation("This programme is not for the child's age.", "program_id"));
+            }
+        }
+
+        foreach (var (mediaId, field) in new[] { (f.PhotoMediaId, "photo_media_id"), (f.IdPhotoMediaId, "id_photo_media_id") })
+        {
+            if (mediaId is { } id && !await db.MediaFiles.AnyAsync(m => m.Id == id && m.ContentType.StartsWith("image/"), ct))
+            {
+                return Result.Failure(Error.Validation("The photo was not found.", field));
+            }
         }
 
         if (f.KeyPersonStaffId is { } staffId && !await db.Staff.AnyAsync(s => s.Id == staffId, ct))
@@ -252,7 +297,9 @@ internal static class StudentScope
         s.DietaryRequirements = f.DietaryRequirements;
         s.CustodyNotes = f.CustodyNotes;
         s.PassportNumber = f.PassportNumber;
-        s.EmiratesId = f.EmiratesId;
+        s.EmiratesId = string.IsNullOrWhiteSpace(f.EmiratesId) ? null : f.EmiratesId.Trim();
+        s.PhotoMediaId = f.PhotoMediaId;
+        s.IdPhotoMediaId = f.IdPhotoMediaId;
     }
 }
 
@@ -305,12 +352,12 @@ public sealed class GetStudentHandler(IAppDbContext db, IAccessScope scope, ICur
     }
 }
 
-public sealed class CreateStudentHandler(IAppDbContext db, ITenantContext tenant, IClock clock)
+public sealed class CreateStudentHandler(IAppDbContext db, ITenantContext tenant, IClock clock, NMS.Application.Attendance.CentreCalendar calendar)
     : IRequestHandler<CreateStudentCommand, Result<StudentDetailDto>>
 {
     public async Task<Result<StudentDetailDto>> Handle(CreateStudentCommand request, CancellationToken ct)
     {
-        var references = await StudentScope.ValidateReferencesAsync(db, request.Student, ct);
+        var references = await StudentScope.ValidateReferencesAsync(db, request.Student, calendar.Today, null, ct);
         if (references.IsFailure)
         {
             return Result<StudentDetailDto>.Failure(references.Errors);
@@ -345,6 +392,7 @@ public sealed class CreateStudentHandler(IAppDbContext db, ITenantContext tenant
                     Phone = input.Phone,
                     Relationship = input.Relationship,
                     IsPrimaryContact = input.IsPrimary,
+                    EmiratesId = string.IsNullOrWhiteSpace(input.EmiratesId) ? null : input.EmiratesId.Trim(),
                 };
                 db.Guardians.Add(guardian);
             }
@@ -373,7 +421,7 @@ public sealed class CreateStudentHandler(IAppDbContext db, ITenantContext tenant
     }
 }
 
-public sealed class UpdateStudentHandler(IAppDbContext db) : IRequestHandler<UpdateStudentCommand, Result<StudentDetailDto>>
+public sealed class UpdateStudentHandler(IAppDbContext db, NMS.Application.Attendance.CentreCalendar calendar) : IRequestHandler<UpdateStudentCommand, Result<StudentDetailDto>>
 {
     public async Task<Result<StudentDetailDto>> Handle(UpdateStudentCommand request, CancellationToken ct)
     {
@@ -383,7 +431,7 @@ public sealed class UpdateStudentHandler(IAppDbContext db) : IRequestHandler<Upd
             return Error.NotFound("Student not found.");
         }
 
-        var references = await StudentScope.ValidateReferencesAsync(db, request.Student, ct);
+        var references = await StudentScope.ValidateReferencesAsync(db, request.Student, calendar.Today, student, ct);
         if (references.IsFailure)
         {
             return Result<StudentDetailDto>.Failure(references.Errors);

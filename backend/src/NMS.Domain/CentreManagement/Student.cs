@@ -48,6 +48,9 @@ public class Student : TenantEntity
     /// <summary>Reserved for the Media module (Sprint 3); no foreign key until media exists.</summary>
     public Guid? PhotoMediaId { get; set; }
 
+    /// <summary>Photo of the child's identity card or passport page, visible to staff who manage students only.</summary>
+    public Guid? IdPhotoMediaId { get; set; }
+
     public Guid? RoomId { get; set; }
 
     public Guid? GroupId { get; set; }

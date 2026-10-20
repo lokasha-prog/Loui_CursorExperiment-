@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { api } from '@/api/client'
 import { Skeleton } from '@/components/ui/surfaces'
+import { cn } from '@/lib/utils'
 
 /** Shows a photo or video that needs the signed-in token, by fetching it and displaying the downloaded copy. */
-export function ProtectedMedia({ id, contentType, alt }: { id: string; contentType: string; alt: string }) {
+export function ProtectedMedia({ id, contentType, alt, className }: { id: string; contentType: string; alt: string; className?: string }) {
   const [url, setUrl] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
 
@@ -24,11 +25,11 @@ export function ProtectedMedia({ id, contentType, alt }: { id: string; contentTy
     }
   }, [id])
 
-  if (failed) return <div className="flex h-40 items-center justify-center rounded-md bg-slate-100 text-xs text-muted-foreground" role="img" aria-label={alt} />
-  if (!url) return <Skeleton className="h-40 w-full" />
+  if (failed) return <div className={cn('flex h-40 items-center justify-center rounded-md bg-slate-100 text-xs text-muted-foreground', className)} role="img" aria-label={alt} />
+  if (!url) return <Skeleton className={cn('h-40 w-full', className)} />
   return contentType.startsWith('video/') ? (
     <video src={url} controls className="max-h-80 w-full rounded-md bg-black" aria-label={alt} />
   ) : (
-    <img src={url} alt={alt} className="max-h-80 w-full rounded-md object-cover" />
+    <img src={url} alt={alt} className={cn('max-h-80 w-full rounded-md object-cover', className)} />
   )
 }

@@ -56,6 +56,11 @@ public sealed class UploadMediaHandler(IAppDbContext db, ICurrentUser current) :
             return Error.Validation(isVideo ? "Videos can be up to 30 MB." : "Photos can be up to 10 MB.", "file");
         }
 
+        if (!current.HasPermission(Permissions.ActivitiesWrite) && !current.HasPermission(Permissions.StudentsWrite))
+        {
+            return Error.Forbidden("You cannot upload files.");
+        }
+
         var name = Path.GetFileName(request.FileName);
         var media = new MediaFile
         {
@@ -84,8 +89,25 @@ public sealed class GetMediaContentHandler(IAppDbContext db, IAccessScope scope,
             return Error.NotFound("File not found.");
         }
 
-        // Staff may open any file in their centre; a family only files that are in a published post about their own child.
-        var restricted = await scope.GetOwnStudentIdsAsync(ct) is not null;
+        if (!current.HasPermission(Permissions.ActivitiesRead) && !current.HasPermission(Permissions.StudentsRead))
+        {
+            return Error.Forbidden();
+        }
+
+        // An identity-document photo is only for staff who manage students.
+        if (await db.Students.AsNoTracking().AnyAsync(s => s.IdPhotoMediaId == media.Id, ct) && !current.HasPermission(Permissions.StudentsWrite))
+        {
+            return Error.NotFound("File not found.");
+        }
+
+        // Staff may open any file in their centre; a family only a profile photo of their own child or a file in a published post about them.
+        var own = await scope.GetOwnStudentIdsAsync(ct);
+        var restricted = own is not null;
+        if (restricted && own!.Count > 0 && await db.Students.AsNoTracking().AnyAsync(s => s.PhotoMediaId == media.Id && own.Contains(s.Id), ct))
+        {
+            return Result<MediaContent>.Success(new MediaContent(media.Content, media.ContentType, media.FileName));
+        }
+
         if (restricted && media.UploadedBy != current.UserId)
         {
             var visible = await ActivityVisibility.PostsAsync(db, scope, current, ct);

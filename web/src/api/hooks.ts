@@ -75,6 +75,14 @@ export const useStudent = (id: string) =>
 export const useGuardians = (studentId: string) =>
   useQuery({ queryKey: ['guardians', studentId], queryFn: () => api.get<Guardian[]>(`/students/${studentId}/guardians`) })
 
+export function useUpdateStudent(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { student: CreateStudentRequest['student'] }) => api.patch<StudentDetail>(`/students/${id}`, body),
+    onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['students'] }), client.invalidateQueries({ queryKey: ['student', id] })]),
+  })
+}
+
 export function useCreateStudent() {
   const client = useQueryClient()
   return useMutation({

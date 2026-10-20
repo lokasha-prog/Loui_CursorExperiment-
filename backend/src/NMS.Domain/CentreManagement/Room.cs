@@ -32,6 +32,11 @@ public class Program : TenantEntity
 
     public string AgeGroup { get; set; } = string.Empty;
 
+    /// <summary>Children whose age in months is outside this range cannot be placed in the programme.</summary>
+    public int MinAgeMonths { get; set; }
+
+    public int MaxAgeMonths { get; set; } = 120;
+
     /// <summary>Reserved for the Billing module (Sprint 7); no foreign key until fee_plan exists.</summary>
     public Guid? FeePlanId { get; set; }
 

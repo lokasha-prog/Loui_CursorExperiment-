@@ -211,13 +211,25 @@
       "guardianPhone": "Guardian phone",
       "relationship": "Relationship",
       "addGuardianLater": "You can add or change guardians later from the student's page.",
-      "created": "Student added"
+      "created": "Student added",
+      "editTitle": "Edit student",
+      "editDescription": "Change any detail. Names can be written in English and Arabic.",
+      "updated": "Student updated",
+      "photo": "Student photo",
+      "photoHint": "A clear photo of the child's face.",
+      "idPhoto": "Student ID document photo",
+      "idPhotoHint": "Photo of the Emirates ID card or passport. Visible to staff who manage students only.",
+      "studentIdNumber": "Student ID number (Emirates ID)",
+      "idNumberHint": "For example 784-2022-1234567-1. Stored encrypted.",
+      "guardianIdNumber": "Guardian ID number (Emirates ID)",
+      "placementNeedsDob": "Enter the date of birth first. Only rooms and programmes that suit the child's age will be offered.",
+      "placementAge": "Age: {{age}} months. Showing only rooms and programmes that fit.",
+      "noRoomFits": "No room accepts this age. Check the age range of your rooms.",
+      "noProgramFits": "No programme accepts this age. Check the age range of your programmes."
     },
     "gender": {
-      "male": "Boy",
-      "female": "Girl",
-      "other": "Other",
-      "unspecified": "Prefer not to say"
+      "male": "Male",
+      "female": "Female"
     },
     "status": {
       "signed_up": "Signed up",
@@ -370,7 +382,9 @@
         "days": "Days",
         "hours": "Hours",
         "ageGroup": "Age group"
-      }
+      },
+      "minAge": "Youngest age (months)",
+      "maxAge": "Oldest age (months)"
     },
     "group": {
       "add": "Add group",
@@ -826,5 +840,10 @@
       "message": "Message",
       "status": "Status"
     }
+  },
+  "photo": {
+    "choose": "Choose photo",
+    "replace": "Replace",
+    "remove": "Remove photo"
   }
 }

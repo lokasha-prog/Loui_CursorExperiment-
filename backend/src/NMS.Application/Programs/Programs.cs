@@ -17,6 +17,8 @@ public sealed record ProgramDto(
     TimeOnly StartTime,
     TimeOnly EndTime,
     string AgeGroup,
+    int MinAgeMonths,
+    int MaxAgeMonths,
     bool IsActive,
     DateTimeOffset CreatedAt) : ICursorItem;
 
@@ -29,6 +31,8 @@ public sealed record CreateProgramCommand(
     TimeOnly StartTime,
     TimeOnly EndTime,
     string AgeGroup,
+    int MinAgeMonths = 0,
+    int MaxAgeMonths = 120,
     bool IsActive = true) : IRequest<Result<ProgramDto>>;
 
 public sealed record UpdateProgramCommand(
@@ -39,6 +43,8 @@ public sealed record UpdateProgramCommand(
     TimeOnly StartTime,
     TimeOnly EndTime,
     string AgeGroup,
+    int MinAgeMonths,
+    int MaxAgeMonths,
     bool IsActive) : IRequest<Result<ProgramDto>>;
 
 public sealed record DeleteProgramCommand(Guid Id) : IRequest<Result>;
@@ -51,6 +57,9 @@ public sealed class CreateProgramValidator : AbstractValidator<CreateProgramComm
         RuleFor(c => c.DaysPerWeek).InclusiveBetween(1, 7);
         RuleFor(c => c.EndTime).GreaterThan(c => c.StartTime).WithMessage("End time must be after start time.");
         RuleFor(c => c.AgeGroup).NotEmpty().MaximumLength(100);
+        RuleFor(c => c.MinAgeMonths).GreaterThanOrEqualTo(0);
+        RuleFor(c => c.MaxAgeMonths).InclusiveBetween(1, 240).GreaterThanOrEqualTo(c => c.MinAgeMonths)
+            .WithMessage("Maximum age must not be lower than minimum age.");
     }
 }
 
@@ -62,13 +71,16 @@ public sealed class UpdateProgramValidator : AbstractValidator<UpdateProgramComm
         RuleFor(c => c.DaysPerWeek).InclusiveBetween(1, 7);
         RuleFor(c => c.EndTime).GreaterThan(c => c.StartTime).WithMessage("End time must be after start time.");
         RuleFor(c => c.AgeGroup).NotEmpty().MaximumLength(100);
+        RuleFor(c => c.MinAgeMonths).GreaterThanOrEqualTo(0);
+        RuleFor(c => c.MaxAgeMonths).InclusiveBetween(1, 240).GreaterThanOrEqualTo(c => c.MinAgeMonths)
+            .WithMessage("Maximum age must not be lower than minimum age.");
     }
 }
 
 internal static class ProgramMapping
 {
     public static ProgramDto ToDto(Program p) => new(
-        p.Id, p.Name, p.Description, p.DaysPerWeek, p.StartTime, p.EndTime, p.AgeGroup, p.IsActive, p.CreatedAt);
+        p.Id, p.Name, p.Description, p.DaysPerWeek, p.StartTime, p.EndTime, p.AgeGroup, p.MinAgeMonths, p.MaxAgeMonths, p.IsActive, p.CreatedAt);
 }
 
 public sealed class ListProgramsHandler(IAppDbContext db)
@@ -80,7 +92,7 @@ public sealed class ListProgramsHandler(IAppDbContext db)
             request.Cursor,
             request.Limit,
             p => new ProgramDto(
-                p.Id, p.Name, p.Description, p.DaysPerWeek, p.StartTime, p.EndTime, p.AgeGroup, p.IsActive, p.CreatedAt),
+                p.Id, p.Name, p.Description, p.DaysPerWeek, p.StartTime, p.EndTime, p.AgeGroup, p.MinAgeMonths, p.MaxAgeMonths, p.IsActive, p.CreatedAt),
             ct);
         return Result<CursorPage<ProgramDto>>.Success(page);
     }
@@ -104,6 +116,8 @@ public sealed class CreateProgramHandler(IAppDbContext db) : IRequestHandler<Cre
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             AgeGroup = request.AgeGroup,
+            MinAgeMonths = request.MinAgeMonths,
+            MaxAgeMonths = request.MaxAgeMonths,
             IsActive = request.IsActive,
         };
         db.Programs.Add(program);
@@ -134,6 +148,8 @@ public sealed class UpdateProgramHandler(IAppDbContext db) : IRequestHandler<Upd
         program.StartTime = request.StartTime;
         program.EndTime = request.EndTime;
         program.AgeGroup = request.AgeGroup;
+        program.MinAgeMonths = request.MinAgeMonths;
+        program.MaxAgeMonths = request.MaxAgeMonths;
         program.IsActive = request.IsActive;
         await db.SaveChangesAsync(ct);
         return Result<ProgramDto>.Success(ProgramMapping.ToDto(program));

@@ -137,7 +137,7 @@ public class CentreManagementTests(NmsApiFixture api)
                 first_name = "Omar",
                 last_name = "Saeed",
                 first_name_arabic = "عمر",
-                date_of_birth = "2022-11-03",
+                date_of_birth = DateTime.UtcNow.AddMonths(-24).ToString("yyyy-MM-dd"),
                 gender = "male",
                 room_id = room,
                 label_ids = new[] { label },

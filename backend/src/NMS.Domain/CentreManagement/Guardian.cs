@@ -36,6 +36,9 @@ public class Guardian : TenantEntity
 
     public string? Nationality { get; set; }
 
+    [Sensitive]
+    public string? EmiratesId { get; set; }
+
     public string? Occupation { get; set; }
 
     public string? Employer { get; set; }

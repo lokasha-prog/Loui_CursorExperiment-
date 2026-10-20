@@ -164,7 +164,7 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
             {
                 first_name = first,
                 last_name = $"Family{Guid.NewGuid():N}"[..14],
-                date_of_birth = "2023-04-12",
+                date_of_birth = DateTime.UtcNow.AddMonths(-24).ToString("yyyy-MM-dd"),
                 gender = "female",
                 room_id = roomId,
                 medical_notes = medical,

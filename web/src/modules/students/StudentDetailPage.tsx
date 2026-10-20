@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Lock, Mail, Phone, Plus, Trash2, UserCheck } from 'lucide-react'
+import { ArrowLeft, IdCard, Lock, Mail, Pencil, Phone, Plus, Trash2, UserCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -7,7 +7,10 @@ import { Link, useParams } from 'react-router-dom'
 import { z } from 'zod'
 import { useAddGuardian, useGuardians, useRemoveGuardian, useRoomOptions, useStudent, useTransitionStudent } from '@/api/hooks'
 import { ApiError } from '@/api/client'
+import { ProtectedMedia } from '@/components/shared/ProtectedMedia'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { StudentDialog } from './StudentForm'
+import { countryName } from '@/lib/countries'
 import { Button } from '@/components/ui/button'
 import { Field, Input, Select } from '@/components/ui/form-controls'
 import { Alert, Avatar, Badge, Card, Dialog, DialogContent, DialogHeader, EmptyState, Skeleton } from '@/components/ui/surfaces'
@@ -34,6 +37,7 @@ const guardianSchema = z.object({
   lastName: z.string().trim().min(1, 'validation.required'),
   email: z.string().trim().min(1, 'validation.required').email('validation.email'),
   phone: z.string().optional(),
+  emiratesId: z.string().optional(),
   relationship: z.string(),
   isPrimary: z.boolean(),
   canPickup: z.boolean(),
@@ -74,6 +78,7 @@ function AddGuardianDialog({ studentId, open, onOpenChange }: { studentId: strin
         last_name: values.lastName.trim(),
         email: values.email.trim(),
         phone: emptyToNull(values.phone),
+        emirates_id: emptyToNull(values.emiratesId),
         relationship: values.relationship,
         is_primary: values.isPrimary,
         can_pickup: values.canPickup,
@@ -105,6 +110,9 @@ function AddGuardianDialog({ studentId, open, onOpenChange }: { studentId: strin
             </Field>
             <Field label={t('students.form.guardianPhone')} htmlFor="g-phone">
               <Input id="g-phone" type="tel" dir="ltr" className="text-start" {...register('phone')} />
+            </Field>
+            <Field label={t('students.form.guardianIdNumber')} htmlFor="g-id">
+              <Input id="g-id" dir="ltr" className="text-start" maxLength={30} autoComplete="off" {...register('emiratesId')} />
             </Field>
             <Field label={t('students.form.relationship')} htmlFor="g-rel">
               <Select id="g-rel" {...register('relationship')}>
@@ -188,6 +196,7 @@ export default function StudentDetailPage() {
   const removeGuardian = useRemoveGuardian(id)
   const rooms = useRoomOptions(can(me, 'centre_structure.read'))
   const [guardianOpen, setGuardianOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const [signIn, setSignIn] = useState<UserPrefill | null>(null)
   const canManageUsers = can(me, 'user_management.manage')
   const message = useApiErrorMessage()
@@ -227,7 +236,11 @@ export default function StudentDetailPage() {
     <>
       {back}
       <Card className="mb-6 flex flex-wrap items-center gap-5 p-6">
-        <Avatar text={initials(s.first_name, s.last_name)} className="h-16 w-16 text-xl" />
+        {s.photo_media_id ? (
+          <ProtectedMedia id={s.photo_media_id} contentType="image/*" alt={`${s.first_name} ${s.last_name}`} className="h-16 w-16 rounded-full object-cover" />
+        ) : (
+          <Avatar text={initials(s.first_name, s.last_name)} className="h-16 w-16 text-xl" />
+        )}
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold">{s.first_name} {s.last_name}</h1>
           {arabicName && <p lang="ar" dir="rtl" className="text-lg text-muted-foreground">{arabicName}</p>}
@@ -238,7 +251,15 @@ export default function StudentDetailPage() {
             <span className="text-xs text-muted-foreground">{t('students.detail.sinceStatus', { date: formatDate(s.status_changed_at, i18n.language) })}</span>
           </div>
         </div>
-        <div className="font-mono text-sm" dir="ltr">{s.barcode}</div>
+        <div className="flex flex-col items-end gap-2">
+          <div className="font-mono text-sm" dir="ltr">{s.barcode}</div>
+          {canWrite && (
+            <Button size="sm" variant="secondary" onClick={() => setEditOpen(true)}>
+              <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+              {t('common.edit')}
+            </Button>
+          )}
+        </div>
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -248,7 +269,7 @@ export default function StudentDetailPage() {
             <dl className="grid gap-4 sm:grid-cols-2">
               <Detail label={t('students.detail.dateOfBirth')} value={formatDate(s.date_of_birth, i18n.language)} />
               <Detail label={t('students.form.gender')} value={s.gender ? t(`students.gender.${s.gender}`) : null} />
-              <Detail label={t('students.detail.nationality')} value={s.nationality} />
+              <Detail label={t('students.detail.nationality')} value={countryName(s.nationality, i18n.language)} />
               <Detail label={t('students.detail.language')} value={s.primary_language} />
               <Detail label={t('students.detail.enrolled')} value={formatDate(s.start_date, i18n.language)} />
               <Detail label={t('students.detail.ended')} value={formatDate(s.end_date, i18n.language)} />
@@ -272,6 +293,12 @@ export default function StudentDetailPage() {
               {canWrite && <Detail label={t('students.detail.passport')} value={s.passport_number} />}
               {canWrite && <Detail label={t('students.detail.emiratesId')} value={s.emirates_id} />}
             </dl>
+            {canWrite && s.id_photo_media_id && (
+              <div className="mt-4">
+                <p className="mb-1 flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground"><IdCard className="h-3 w-3" aria-hidden="true" />{t('students.form.idPhoto')}</p>
+                <ProtectedMedia id={s.id_photo_media_id} contentType="image/*" alt={t('students.form.idPhoto')} className="max-h-48 w-auto" />
+              </div>
+            )}
           </Card>
 
           {canWrite && <StatusChanger studentId={s.id} current={s.status} />}
@@ -312,6 +339,7 @@ export default function StudentDetailPage() {
                   </div>
                   <p className="mt-2 flex items-center gap-1.5 text-xs" dir="ltr"><Mail className="h-3 w-3 text-muted-foreground" aria-hidden="true" />{g.email}</p>
                   {g.phone && <p className="mt-1 flex items-center gap-1.5 text-xs" dir="ltr"><Phone className="h-3 w-3 text-muted-foreground" aria-hidden="true" />{g.phone}</p>}
+                  {g.emirates_id && <p className="mt-1 flex items-center gap-1.5 text-xs" dir="ltr"><IdCard className="h-3 w-3 text-muted-foreground" aria-hidden="true" />{g.emirates_id}</p>}
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-[11px] text-muted-foreground">{g.can_pickup ? t('students.guardians.canPickup') : t('students.guardians.noPickup')}</span>
                     {canManageUsers && !g.has_login && (
@@ -337,6 +365,7 @@ export default function StudentDetailPage() {
       </div>
 
       {canWrite && <AddGuardianDialog studentId={s.id} open={guardianOpen} onOpenChange={setGuardianOpen} />}
+      {canWrite && <StudentDialog open={editOpen} onOpenChange={setEditOpen} student={s} />}
       {canManageUsers && (
         <CreateUserDialog
           open={!!signIn}

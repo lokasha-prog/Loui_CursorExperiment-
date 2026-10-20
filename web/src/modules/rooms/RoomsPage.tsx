@@ -239,8 +239,11 @@ const programSchema = z
     start: z.string().min(1, 'validation.required'),
     end: z.string().min(1, 'validation.required'),
     ageGroup: z.string().trim().min(1, 'validation.required'),
+    minAge: z.coerce.number({ message: 'validation.number' }).int().min(0, 'validation.number'),
+    maxAge: z.coerce.number({ message: 'validation.number' }).int().min(1, 'validation.positive'),
   })
   .refine((v) => !v.start || !v.end || v.end > v.start, { path: ['end'], message: 'validation.timeOrder' })
+  .refine((v) => v.maxAge >= v.minAge, { path: ['maxAge'], message: 'validation.ageRange' })
 
 function CreateProgramDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { t } = useTranslation()
@@ -251,7 +254,7 @@ function CreateProgramDialog({ open, onOpenChange }: { open: boolean; onOpenChan
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<z.input<typeof programSchema>, unknown, z.output<typeof programSchema>>({ resolver: zodResolver(programSchema), defaultValues: { days: 5 } })
+  } = useForm<z.input<typeof programSchema>, unknown, z.output<typeof programSchema>>({ resolver: zodResolver(programSchema), defaultValues: { days: 5, minAge: 12, maxAge: 60 } })
   const err = (key?: string) => (key ? t(key) : undefined)
 
   const submit = handleSubmit(async (values) => {
@@ -264,10 +267,12 @@ function CreateProgramDialog({ open, onOpenChange }: { open: boolean; onOpenChan
         start_time: `${values.start}:00`,
         end_time: `${values.end}:00`,
         age_group: values.ageGroup.trim(),
+        min_age_months: values.minAge,
+        max_age_months: values.maxAge,
         is_active: true,
       })
       toast.success(t('rooms.program.created'))
-      reset({ days: 5 })
+      reset({ days: 5, minAge: 12, maxAge: 60 })
       onOpenChange(false)
     } catch (error) {
       fail(error)
@@ -285,6 +290,12 @@ function CreateProgramDialog({ open, onOpenChange }: { open: boolean; onOpenChan
         </Field>
         <Field label={t('rooms.program.ageGroup')} htmlFor="p-age" required error={err(errors.ageGroup?.message)}>
           <Input id="p-age" aria-invalid={!!errors.ageGroup} {...register('ageGroup')} />
+        </Field>
+        <Field label={t('rooms.program.minAge')} htmlFor="p-min" required error={err(errors.minAge?.message)}>
+          <Input id="p-min" type="number" min={0} dir="ltr" className="text-start" aria-invalid={!!errors.minAge} {...register('minAge')} />
+        </Field>
+        <Field label={t('rooms.program.maxAge')} htmlFor="p-max" required error={err(errors.maxAge?.message)}>
+          <Input id="p-max" type="number" min={1} dir="ltr" className="text-start" aria-invalid={!!errors.maxAge} {...register('maxAge')} />
         </Field>
         <Field label={t('rooms.program.days')} htmlFor="p-days" required error={err(errors.days?.message)}>
           <Input id="p-days" type="number" min={1} max={7} dir="ltr" className="text-start" aria-invalid={!!errors.days} {...register('days')} />

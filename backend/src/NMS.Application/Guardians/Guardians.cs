@@ -17,7 +17,8 @@ public sealed record GuardianDto(
     bool IsPrimary,
     bool CanPickup,
     bool ReceivesCommunications,
-    bool HasLogin);
+    bool HasLogin,
+    string? EmiratesId);
 
 public sealed record GuardianFields(
     string FirstName,
@@ -27,7 +28,8 @@ public sealed record GuardianFields(
     string Relationship,
     bool IsPrimary,
     bool CanPickup = true,
-    bool ReceivesCommunications = true);
+    bool ReceivesCommunications = true,
+    string? EmiratesId = null);
 
 public sealed record ListGuardiansQuery(Guid StudentId) : IRequest<Result<IReadOnlyList<GuardianDto>>>;
 
@@ -81,13 +83,14 @@ internal static class GuardianAccess
         return await students.AnyAsync(ct);
     }
 
-    public static GuardianDto ToDto(StudentGuardian link) => new(
+    /// <summary>Identity numbers are for staff only; families never see another guardian's number.</summary>
+    public static GuardianDto ToDto(StudentGuardian link, bool includeIdNumber = true) => new(
         link.Guardian!.Id, link.Guardian.FirstName, link.Guardian.LastName, link.Guardian.Email, link.Guardian.Phone,
         link.Guardian.Relationship, link.IsPrimary, link.Guardian.CanPickup, link.Guardian.ReceivesCommunications,
-        link.Guardian.AppUserId is not null);
+        link.Guardian.AppUserId is not null, includeIdNumber ? link.Guardian.EmiratesId : null);
 }
 
-public sealed class ListGuardiansHandler(IAppDbContext db, IAccessScope scope)
+public sealed class ListGuardiansHandler(IAppDbContext db, IAccessScope scope, ICurrentUser user)
     : IRequestHandler<ListGuardiansQuery, Result<IReadOnlyList<GuardianDto>>>
 {
     public async Task<Result<IReadOnlyList<GuardianDto>>> Handle(ListGuardiansQuery request, CancellationToken ct)
@@ -101,7 +104,7 @@ public sealed class ListGuardiansHandler(IAppDbContext db, IAccessScope scope)
             .Where(l => l.StudentId == request.StudentId && !l.Guardian!.IsDeleted)
             .OrderByDescending(l => l.IsPrimary).ThenBy(l => l.Guardian!.FirstName)
             .ToListAsync(ct);
-        return Result<IReadOnlyList<GuardianDto>>.Success(links.Select(GuardianAccess.ToDto).ToList());
+        return Result<IReadOnlyList<GuardianDto>>.Success(links.Select(l => GuardianAccess.ToDto(l, !Students.StudentScope.IsParentOnly(user))).ToList());
     }
 }
 
@@ -135,6 +138,7 @@ public sealed class AddGuardianHandler(IAppDbContext db) : IRequestHandler<AddGu
         guardian.Relationship = f.Relationship;
         guardian.IsPrimaryContact = f.IsPrimary;
         guardian.CanPickup = f.CanPickup;
+        guardian.EmiratesId = string.IsNullOrWhiteSpace(f.EmiratesId) ? null : f.EmiratesId.Trim();
         guardian.ReceivesCommunications = f.ReceivesCommunications;
 
         var link = new StudentGuardian { StudentId = request.StudentId, Guardian = guardian, IsPrimary = f.IsPrimary };
@@ -170,6 +174,7 @@ public sealed class UpdateGuardianHandler(IAppDbContext db) : IRequestHandler<Up
         guardian.Relationship = f.Relationship;
         guardian.IsPrimaryContact = f.IsPrimary;
         guardian.CanPickup = f.CanPickup;
+        guardian.EmiratesId = string.IsNullOrWhiteSpace(f.EmiratesId) ? null : f.EmiratesId.Trim();
         guardian.ReceivesCommunications = f.ReceivesCommunications;
         link.IsPrimary = f.IsPrimary;
         await db.SaveChangesAsync(ct);
