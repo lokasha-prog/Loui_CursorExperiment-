@@ -47,7 +47,8 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "attendance": "Attendance",
-    "leave": "Leave"
+    "leave": "Leave",
+    "reports": "Reports"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -600,5 +601,26 @@
     "extra": "{{shortages}} staff shortages and {{leaves}} approved leave requests in this period.",
     "down": "The AI Brain is not available right now. Please try again in a moment.",
     "disclaimer": "AI summaries can be wrong. Check important decisions against the figures."
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Attendance for the month, who is expected, and when rooms were short of staff.",
+    "monthly": "Monthly attendance",
+    "month": "Month",
+    "who": "Show",
+    "export": "Download for Excel",
+    "empty": "Nothing recorded this month",
+    "days": "Days recorded",
+    "forecast": "Expected tomorrow and today's plan",
+    "forecastTotal": "{{count}} children expected on {{date}}",
+    "forecastLine": "{{expected}} expected, {{away}} on leave",
+    "noProgram": "No programme",
+    "shortages": "Times a room was short of staff",
+    "noShortages": "No staff shortages recorded",
+    "from": "Started",
+    "until": "Ended",
+    "gap": "Staff",
+    "gapValue": "{{staff}} here, {{required}} needed",
+    "ongoing": "Still short"
   }
 }

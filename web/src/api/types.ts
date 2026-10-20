@@ -259,3 +259,37 @@ export interface AttendanceInsights {
   shortage_events: number
   approved_leave_requests: number
 }
+
+export interface MonthlyRow {
+  person_id: string
+  name: string
+  present: number
+  late: number
+  early_leave: number
+  absent: number
+  days_recorded: number
+}
+
+export interface MonthlyReport {
+  month: string
+  person_type: 'student' | 'staff'
+  rows: MonthlyRow[]
+}
+
+export interface Forecast {
+  date: string
+  total_expected: number
+  by_program: { program_id: string | null; program_name: Localized | null; expected: number; on_leave: number; enrolled: number }[]
+}
+
+export interface RatioBreach {
+  id: string
+  room_id: string
+  room_name: Localized | null
+  detected_at: string
+  resolved_at: string | null
+  students_present: number
+  staff_present: number
+  staff_required: number
+  created_at: string
+}

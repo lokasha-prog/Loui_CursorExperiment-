@@ -18,6 +18,7 @@ const StaffPage = lazy(() => import('@/modules/staff/StaffPage'))
 const RoomsPage = lazy(() => import('@/modules/rooms/RoomsPage'))
 const UsersPage = lazy(() => import('@/modules/users/UsersPage'))
 const AttendancePage = lazy(() => import('@/modules/attendance/AttendancePage'))
+const ReportsPage = lazy(() => import('@/modules/attendance/ReportsPage'))
 const LeavesPage = lazy(() => import('@/modules/attendance/LeavesPage'))
 
 export function createQueryClient() {
@@ -83,6 +84,7 @@ export function AppRoutes() {
           <Route path="/students/:id" element={<RequirePermission permission="students.read"><StudentDetailPage /></RequirePermission>} />
           <Route path="/staff" element={<RequirePermission permission="staff.read"><StaffPage /></RequirePermission>} />
           <Route path="/attendance" element={<RequirePermission permission="attendance.read"><AttendancePage /></RequirePermission>} />
+          <Route path="/reports" element={<RequirePermission permission="attendance.override"><ReportsPage /></RequirePermission>} />
           <Route path="/leave" element={<RequirePermission permission="attendance.read"><LeavesPage /></RequirePermission>} />
           <Route path="/rooms" element={<RequirePermission permission="centre_structure.read"><RoomsPage /></RequirePermission>} />
           <Route path="/users" element={<RequirePermission permission="user_management.manage"><UsersPage /></RequirePermission>} />

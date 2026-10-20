@@ -1,6 +1,9 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  Forecast,
+  MonthlyReport,
+  RatioBreach,
   AttendanceInsights,
   AttendanceRow,
   CheckOutRequest,
@@ -245,3 +248,16 @@ export const useAttendanceInsights = () =>
     mutationFn: ({ days, language }: { days: number; language: string }) =>
       api.get<AttendanceInsights>('/ai/attendance-summary', { days, language }),
   })
+
+// ── Reports ─────────────────────────────────────────────────────────────────
+
+export const useMonthlyReport = (month: string, personType: 'student' | 'staff') =>
+  useQuery({
+    queryKey: ['monthly-report', month, personType],
+    queryFn: () => api.get<MonthlyReport>('/attendance/report/monthly', { month, person_type: personType }),
+  })
+
+export const useForecast = (date?: string) =>
+  useQuery({ queryKey: ['forecast', date], queryFn: () => api.get<Forecast>('/attendance/forecast', { date }) })
+
+export const useRatioHistory = () => useInfiniteList<RatioBreach>(['ratio-history'], '/attendance/ratio/history', {})

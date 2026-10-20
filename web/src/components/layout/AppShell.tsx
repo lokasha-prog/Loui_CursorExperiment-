@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Baby, CalendarOff, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
+import { Baby, BarChart3, CalendarOff, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
@@ -28,6 +28,7 @@ export function useNavItems(): NavItem[] {
     { to: '/students', label: parent ? t('nav.myChildren') : t('nav.students'), icon: Baby, permission: 'students.read' },
     { to: '/staff', label: t('nav.staff'), icon: UsersRound, permission: 'staff.read' },
     { to: '/attendance', label: t('nav.attendance'), icon: ScanLine, permission: 'attendance.read' },
+    { to: '/reports', label: t('nav.reports'), icon: BarChart3, permission: 'attendance.override' },
     { to: '/leave', label: t('nav.leave'), icon: CalendarOff, permission: 'attendance.read' },
     { to: '/rooms', label: t('nav.rooms'), icon: School, permission: 'centre_structure.read' },
     { to: '/users', label: t('nav.users'), icon: ShieldCheck, permission: 'user_management.manage' },
