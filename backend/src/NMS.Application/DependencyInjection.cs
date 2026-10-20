@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<NMS.Application.Calendar.EventExpander>();
         services.AddScoped<NMS.Application.Forms.AdmissionService>();
         services.AddScoped<NMS.Application.Reporting.ReportBuilder>();
+        services.AddScoped<NMS.Application.Newsletters.NewsletterSender>();
         services.AddScoped<NMS.Application.Calendar.HolidayChecker>();
         services.AddScoped<NMS.Application.Enquiries.TourMail>();
         return services;

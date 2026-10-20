@@ -40,6 +40,8 @@ public static class Permissions
     public const string AuditLogView = "audit_log.view";
     public const string UserManagementManage = "user_management.manage";
     public const string NotificationsPreferences = "notifications.preferences";
+    public const string ResourcesRead = "resources.read";
+    public const string ResourcesWrite = "resources.write";
 
     /// <summary>Rooms, programs, groups and labels are readable by any staff role (spec 08 §15.4 "Staff+").</summary>
     public const string CentreStructureRead = "centre_structure.read";
@@ -70,6 +72,7 @@ public static class RolePermissions
             Permissions.ToolsUse, Permissions.ReportsView, Permissions.ReportsGenerate,
             Permissions.SettingsRead, Permissions.SettingsWrite,
             Permissions.CentreStructureRead, Permissions.CentreStructureWrite,
+            Permissions.ResourcesRead, Permissions.ResourcesWrite,
         ],
         [SystemRoles.Teacher] =
         [
@@ -79,14 +82,14 @@ public static class RolePermissions
             Permissions.ActivitiesRead, Permissions.ActivitiesWrite,
             Permissions.MessagingRead, Permissions.MessagingWrite,
             Permissions.CalendarRead, Permissions.FormsRead, Permissions.ReportsView,
-            Permissions.CentreStructureRead,
+            Permissions.CentreStructureRead, Permissions.ResourcesRead,
         ],
         [SystemRoles.Parent] =
         [
             .. Everyone,
             Permissions.StudentsRead, Permissions.AttendanceRead, Permissions.ActivitiesRead,
             Permissions.MessagingRead, Permissions.MessagingWrite, Permissions.BillingRead,
-            Permissions.CalendarRead, Permissions.FormsRead,
+            Permissions.CalendarRead, Permissions.FormsRead, Permissions.ResourcesRead,
         ],
         [SystemRoles.Receptionist] =
         [
@@ -96,21 +99,21 @@ public static class RolePermissions
             Permissions.MessagingRead, Permissions.MessagingWrite,
             Permissions.EnquiriesRead, Permissions.EnquiriesWrite, Permissions.ToursRead, Permissions.ToursWrite,
             Permissions.CalendarRead, Permissions.CalendarWrite, Permissions.FormsRead, Permissions.FormsWrite,
-            Permissions.ReportsView, Permissions.CentreStructureRead,
+            Permissions.ReportsView, Permissions.CentreStructureRead, Permissions.ResourcesRead, Permissions.ResourcesWrite,
         ],
         [SystemRoles.Accounts] =
         [
             .. Everyone,
             Permissions.StaffRead,
             Permissions.BillingRead, Permissions.BillingWrite, Permissions.InvoicesGenerate, Permissions.PaymentsRecord,
-            Permissions.ReportsView, Permissions.ReportsGenerate, Permissions.CentreStructureRead,
+            Permissions.ReportsView, Permissions.ReportsGenerate, Permissions.CentreStructureRead, Permissions.ResourcesRead,
         ],
         [SystemRoles.Marketing] =
         [
             .. Everyone,
             Permissions.MessagingRead, Permissions.MessagingWrite, Permissions.MessagingBroadcast,
             Permissions.EnquiriesRead, Permissions.EnquiriesWrite,
-            Permissions.CalendarRead, Permissions.CalendarWrite, Permissions.ReportsView,
+            Permissions.CalendarRead, Permissions.CalendarWrite, Permissions.ReportsView, Permissions.ResourcesRead, Permissions.ResourcesWrite,
         ],
     };
 

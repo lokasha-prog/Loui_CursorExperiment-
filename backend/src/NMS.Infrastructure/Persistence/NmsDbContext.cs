@@ -134,6 +134,14 @@ public sealed class NmsDbContext(
     public DbSet<NMS.Domain.Forms.AdmissionStep> AdmissionSteps => Set<NMS.Domain.Forms.AdmissionStep>();
     public DbSet<NMS.Domain.Forms.CertificateIssued> CertificatesIssued => Set<NMS.Domain.Forms.CertificateIssued>();
     public DbSet<NMS.Domain.Forms.ReportRun> ReportRuns => Set<NMS.Domain.Forms.ReportRun>();
+    public DbSet<NMS.Domain.Communication.Newsletter> Newsletters => Set<NMS.Domain.Communication.Newsletter>();
+    public DbSet<NMS.Domain.Communication.NewsletterRecipient> NewsletterRecipients => Set<NMS.Domain.Communication.NewsletterRecipient>();
+    public DbSet<NMS.Domain.Communication.NewsletterLink> NewsletterLinks => Set<NMS.Domain.Communication.NewsletterLink>();
+    public DbSet<NMS.Domain.Communication.NewsletterClick> NewsletterClicks => Set<NMS.Domain.Communication.NewsletterClick>();
+    public DbSet<NMS.Domain.Communication.ResourceFolder> ResourceFolders => Set<NMS.Domain.Communication.ResourceFolder>();
+    public DbSet<NMS.Domain.Communication.ResourceDocument> ResourceDocuments => Set<NMS.Domain.Communication.ResourceDocument>();
+    public DbSet<NMS.Domain.Communication.ResourceVersion> ResourceVersions => Set<NMS.Domain.Communication.ResourceVersion>();
+    public DbSet<NMS.Domain.Communication.ResourceDownload> ResourceDownloads => Set<NMS.Domain.Communication.ResourceDownload>();
     public DbSet<NMS.Domain.Forms.StudentAdmissionStep> StudentAdmissionSteps => Set<NMS.Domain.Forms.StudentAdmissionStep>();
     public DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents => Set<NMS.Domain.Calendar.CalendarEvent>();
     public DbSet<CentreSettings> CentreSettings => Set<CentreSettings>();

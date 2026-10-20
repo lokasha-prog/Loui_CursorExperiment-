@@ -136,6 +136,14 @@ public interface IAppDbContext
     DbSet<NMS.Domain.Forms.AdmissionStep> AdmissionSteps { get; }
     DbSet<NMS.Domain.Forms.CertificateIssued> CertificatesIssued { get; }
     DbSet<NMS.Domain.Forms.ReportRun> ReportRuns { get; }
+    DbSet<NMS.Domain.Communication.Newsletter> Newsletters { get; }
+    DbSet<NMS.Domain.Communication.NewsletterRecipient> NewsletterRecipients { get; }
+    DbSet<NMS.Domain.Communication.NewsletterLink> NewsletterLinks { get; }
+    DbSet<NMS.Domain.Communication.NewsletterClick> NewsletterClicks { get; }
+    DbSet<NMS.Domain.Communication.ResourceFolder> ResourceFolders { get; }
+    DbSet<NMS.Domain.Communication.ResourceDocument> ResourceDocuments { get; }
+    DbSet<NMS.Domain.Communication.ResourceVersion> ResourceVersions { get; }
+    DbSet<NMS.Domain.Communication.ResourceDownload> ResourceDownloads { get; }
     DbSet<NMS.Domain.Forms.StudentAdmissionStep> StudentAdmissionSteps { get; }
     DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents { get; }
     DbSet<CentreSettings> CentreSettings { get; }

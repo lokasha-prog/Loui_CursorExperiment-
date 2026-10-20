@@ -193,6 +193,8 @@ app.MapNotificationEndpoints();
 app.MapBillingEndpoints();
 app.MapEnquiryEndpoints();
 app.MapSettingsEndpoints();
+app.MapNewsletterEndpoints();
+app.MapResourceEndpoints();
 app.MapReportEndpoints();
 app.MapFormEndpoints();
 app.MapAdmissionEndpoints();

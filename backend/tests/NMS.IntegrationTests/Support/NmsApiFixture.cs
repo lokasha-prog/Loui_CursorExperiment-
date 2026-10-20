@@ -330,6 +330,27 @@ public sealed class ApiClient(HttpClient http)
         return new ApiReply(response.StatusCode, await response.Content.ReadAsStringAsync(), response);
     }
 
+    public async Task<(HttpStatusCode Status, string? Location)> GetRedirectAsync(string url)
+    {
+        var response = await http.GetAsync(url);
+        return (response.StatusCode, response.Headers.Location?.ToString());
+    }
+
+    public async Task<ApiReply> PostFormAsync(string url, Dictionary<string, string> fields, byte[] file, string fileName)
+    {
+        using var content = new MultipartFormDataContent();
+        foreach (var (key, value) in fields)
+        {
+            content.Add(new StringContent(value), key);
+        }
+
+        var part = new ByteArrayContent(file);
+        part.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Add(part, "file", fileName);
+        var response = await http.PostAsync(url, content);
+        return new ApiReply(response.StatusCode, await response.Content.ReadAsStringAsync(), response);
+    }
+
     public async Task<(HttpStatusCode Status, byte[] Bytes, string? ContentType)> GetBytesAsync(string url)
     {
         var response = await http.GetAsync(url);
