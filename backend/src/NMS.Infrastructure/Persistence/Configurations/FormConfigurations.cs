@@ -52,3 +52,28 @@ public sealed class FormSubmissionConfiguration : IEntityTypeConfiguration<FormS
         builder.HasIndex(s => new { s.TenantId, s.FormId, s.CreatedAt });
     }
 }
+
+public sealed class AdmissionStepConfiguration : IEntityTypeConfiguration<AdmissionStep>
+{
+    public void Configure(EntityTypeBuilder<AdmissionStep> builder)
+    {
+        builder.ToTable("AdmissionSteps");
+        builder.HasOne<Form>().WithMany().HasForeignKey(s => s.FormId);
+        builder.HasIndex(s => new { s.TenantId, s.SortOrder });
+        builder.ToTable(t => t.HasCheckConstraint("CK_AdmissionSteps_DueDays", "[DueDays] BETWEEN 0 AND 365"));
+    }
+}
+
+public sealed class StudentAdmissionStepConfiguration : IEntityTypeConfiguration<StudentAdmissionStep>
+{
+    public void Configure(EntityTypeBuilder<StudentAdmissionStep> builder)
+    {
+        builder.ToTable("StudentAdmissionSteps");
+        builder.Property(s => s.Status).HasMaxLength(20).IsRequired();
+        builder.HasOne<NMS.Domain.CentreManagement.Student>().WithMany().HasForeignKey(s => s.StudentId);
+        builder.HasOne<AdmissionStep>().WithMany().HasForeignKey(s => s.StepId);
+        builder.HasIndex(s => new { s.TenantId, s.StudentId, s.StepId }).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.HasIndex(s => new { s.TenantId, s.Status, s.DueDate });
+        builder.ToTable(t => t.HasCheckConstraint("CK_StudentAdmissionSteps_Status", "[Status] IN (N'pending', N'current', N'done', N'skipped')"));
+    }
+}

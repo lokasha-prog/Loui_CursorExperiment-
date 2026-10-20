@@ -431,7 +431,7 @@ public static class AnswerChecker
     }
 }
 
-public sealed class SubmitFormHandler(IAppDbContext db, ITenantContext tenant, ICurrentUser current, IAccessScope scope, ICaptchaVerifier captcha, IClock clock)
+public sealed class SubmitFormHandler(IAppDbContext db, ITenantContext tenant, ICurrentUser current, IAccessScope scope, ICaptchaVerifier captcha, IClock clock, AdmissionService admissions)
     : IRequestHandler<SubmitFormCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(SubmitFormCommand request, CancellationToken ct)
@@ -497,6 +497,11 @@ public sealed class SubmitFormHandler(IAppDbContext db, ITenantContext tenant, I
         }
 
         await db.SaveChangesAsync(ct);
+        if (request.StudentId is { } child)
+        {
+            await admissions.OnFormSubmittedAsync(child, form.Id, submission.Id, ct);
+        }
+
         return Result<Guid>.Success(submission.Id);
     }
 }

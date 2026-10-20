@@ -115,6 +115,10 @@ public sealed class Notifier(IAppDbContext db, ITenantContext tenant, IClock clo
     public async Task<List<Guid>> UsersWithPermissionAsync(string permission, CancellationToken ct)
     {
         var roleNames = RolePermissions.AllRoleNames().Where(r => RolePermissions.ForRoles([r]).Contains(permission)).ToList();
+
+        // Roles made in Settings keep their permissions in the database, so they are checked here as well.
+        var custom = await db.Roles.AsNoTracking().Where(r => !r.IsSystemRole).ToListAsync(ct);
+        roleNames.AddRange(custom.Where(r => r.Permissions.Contains(permission)).Select(r => r.Name));
         return await db.AppUserRoles.AsNoTracking().Where(ur => roleNames.Contains(ur.Role!.Name)).Select(ur => ur.AppUserId).Distinct().ToListAsync(ct);
     }
 }

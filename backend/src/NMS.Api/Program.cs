@@ -190,6 +190,7 @@ app.MapBillingEndpoints();
 app.MapEnquiryEndpoints();
 app.MapSettingsEndpoints();
 app.MapFormEndpoints();
+app.MapAdmissionEndpoints();
 app.MapToolsEndpoints();
 app.MapCalendarEndpoints();
 app.MapTourEndpoints();

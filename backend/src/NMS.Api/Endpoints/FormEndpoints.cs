@@ -73,3 +73,33 @@ public static class FormEndpoints
         });
     }
 }
+
+public sealed record StepRequest(Dictionary<string, string> Name, Guid? FormId, int? DueDays);
+
+public sealed record OrderRequest(IReadOnlyList<Guid> OrderedIds);
+
+public static class AdmissionEndpoints
+{
+    public static void MapAdmissionEndpoints(this IEndpointRouteBuilder routes)
+    {
+        var g = routes.MapGroup("/api/v1/admissions").WithTags("Admissions");
+        g.MapGet("/steps", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new ListStepsQuery(), ct))).RequireAuthorization(Permissions.FormsWrite);
+        g.MapPost("/steps", async (StepRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new SaveStepCommand(null, body.Name, body.FormId, body.DueDays ?? 7), ct), StatusCodes.Status201Created)).RequireAuthorization(Permissions.FormsWrite);
+        g.MapPatch("/steps/{id:guid}", async (Guid id, StepRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new SaveStepCommand(id, body.Name, body.FormId, body.DueDays ?? 7), ct))).RequireAuthorization(Permissions.FormsWrite);
+        g.MapDelete("/steps/{id:guid}", async (Guid id, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new DeleteStepCommand(id), ct))).RequireAuthorization(Permissions.FormsWrite);
+        g.MapPut("/steps/order", async (OrderRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new ReorderStepsCommand(body.OrderedIds), ct))).RequireAuthorization(Permissions.FormsWrite);
+        g.MapGet("/status", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new AdmissionStatusQuery(), ct))).RequireAuthorization(Permissions.FormsWrite);
+        g.MapPost("/students/{studentId:guid}/actions/start", async (Guid studentId, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new StartAdmissionCommand(studentId), ct), StatusCodes.Status201Created)).RequireAuthorization(Permissions.FormsWrite);
+        g.MapGet("/students/{studentId:guid}", async (Guid studentId, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new GetStudentAdmissionQuery(studentId), ct))).RequireAuthorization(Permissions.FormsRead);
+        g.MapPost("/students/{studentId:guid}/steps/{stepId:guid}/actions/{action}", async (Guid studentId, Guid stepId, string action, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new StepActionCommand(studentId, stepId, action), ct))).RequireAuthorization(Permissions.FormsWrite);
+    }
+}

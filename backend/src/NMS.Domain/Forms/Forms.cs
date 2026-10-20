@@ -118,3 +118,44 @@ public class FormSubmission : TenantEntity
 
     public int? DurationSeconds { get; set; }
 }
+
+public static class AdmissionStatuses
+{
+    public const string Pending = "pending";
+    public const string Current = "current";
+    public const string Done = "done";
+    public const string Skipped = "skipped";
+
+    public static readonly string[] All = [Pending, Current, Done, Skipped];
+}
+
+/// <summary>One step of the centre's admission process, such as "Submit the admission form" or "Sign the contract". Steps run in order.</summary>
+public class AdmissionStep : TenantEntity
+{
+    public Dictionary<string, string> Name { get; set; } = [];
+
+    public int SortOrder { get; set; }
+
+    /// <summary>When a child reaches this step, this form is sent to their parents.</summary>
+    public Guid? FormId { get; set; }
+
+    public int DueDays { get; set; } = 7;
+}
+
+/// <summary>Where one child is on one step.</summary>
+public class StudentAdmissionStep : TenantEntity
+{
+    public Guid StudentId { get; set; }
+
+    public Guid StepId { get; set; }
+
+    public string Status { get; set; } = AdmissionStatuses.Pending;
+
+    public DateOnly? DueDate { get; set; }
+
+    public DateTimeOffset? CompletedAt { get; set; }
+
+    public Guid? SubmissionId { get; set; }
+
+    public DateTimeOffset? OverdueNotifiedAt { get; set; }
+}
