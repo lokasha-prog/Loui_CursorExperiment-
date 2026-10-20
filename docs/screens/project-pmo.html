@@ -182,7 +182,7 @@
       </div>
       <div class="text-right">
         <div class="text-[10px] font-mono text-slate-400 uppercase">Last Updated</div>
-        <div class="font-mono text-sm font-bold text-slate-700" id="lastUpdated">2026-10-18 14:30 GST</div>
+        <div class="font-mono text-sm font-bold text-slate-700" id="lastUpdated">2026-10-20 16:30 GST</div>
         <div class="text-[10px] font-mono text-slate-400 mt-1">by: PMO Dashboard Init</div>
       </div>
     </div>
@@ -204,7 +204,7 @@
             </defs>
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">2%</div>
+            <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">3%</div>
             <div class="text-[10px] font-mono text-slate-500 uppercase">Overall</div>
             <div class="text-[10px] font-mono text-slate-400">0 of 30 sprints</div>
           </div>
@@ -563,9 +563,9 @@
 <span class="comment">// After each sprint, update the corresponding entry. The page recalculates on load.</span>
 
 <span class="key">const</span> PROJECT_STATE = {
-  lastUpdated: <span class="string">"2026-10-18 14:30 GST"</span>,
-  updatedBy: <span class="string">"PMO Dashboard Init"</span>,
-  overallPct: <span class="string">2</span>,            <span class="comment">// 0-100 — overall project completion</span>
+  lastUpdated: <span class="string">"2026-10-20 16:30 GST"</span>,
+  updatedBy: <span class="string">"Claude Code"</span>,
+  overallPct: <span class="string">3</span>,            <span class="comment">// 0-100 — overall project completion</span>
 
   sprints: {
     <span class="comment">// status: "done" | "active" | "pending" | "blocked"</span>
@@ -655,14 +655,14 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-18 14:30 GST",
-    updatedBy: "PMO Dashboard Init",
-    overallPct: 2,
+    lastUpdated: "2026-10-20 16:30 GST",
+    updatedBy: "Claude Code",
+    overallPct: 3,
 
     sprints: {
       // MVP Pilot (0-5)
-      0:  { status: "active",  pct: 10, title: "Setup & Planning",            notes: "Monorepo + Docker + Keycloak + first commit", deliverables: "Repo, .cursorrules, CI skeleton" },
-      1:  { status: "pending", pct: 0,  title: "Centre Management + Auth",    notes: "Student, Staff, Room, Program, Group, Guardian entities + Keycloak RBAC", deliverables: "CRUD endpoints, login, RBAC" },
+      0:  { status: "done",    pct: 100, title: "Setup & Planning",            notes: "Monorepo + Docker + Keycloak + first commit", deliverables: "Repo, .cursorrules, CI skeleton" },
+      1:  { status: "active",  pct: 5,  title: "Centre Management + Auth",    notes: "Student, Staff, Room, Program, Group, Guardian entities + Keycloak RBAC", deliverables: "CRUD endpoints, login, RBAC" },
       2:  { status: "pending", pct: 0,  title: "Attendance + Dashboard",      notes: "Barcode check-in, live ratio via SignalR, KPI widgets", deliverables: "Attendance module, dashboard" },
       3:  { status: "pending", pct: 0,  title: "Parent Comms + Messaging",    notes: "Activity feed (8 types), approval workflow, shared inbox", deliverables: "Activity posts, messaging" },
       4:  { status: "pending", pct: 0,  title: "Notifications + Audit + Emergency", notes: "3-tier notifications, audit log viewer, one-click emergency PDF", deliverables: "Notifications, audit, emergency report" },
