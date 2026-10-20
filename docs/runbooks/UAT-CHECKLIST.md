@@ -38,7 +38,7 @@ Run each item in **English and Arabic**, on a computer and on a phone-sized scre
 ## F. Reliability
 - [ ] Restart the computer: the service comes back by itself and nobody is lost.
 - [ ] Take a backup and restore it on a spare computer; sign in and see the data.
-- [ ] Three tablets in use at once feel quick (pages open in under 2.5 seconds).
+- [ ] Three tablets in use at once feel quick (pages open in under 2.5 seconds). Measured on the dev machine with 10 people at once: slowest 95th percentile 0.39 s (`python tools/perf-check.py`).
 
 ## G. Exit gates for the pilot (from the product plan)
 - [ ] 10 or more staff and 30 or more parents active.
