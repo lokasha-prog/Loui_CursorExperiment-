@@ -109,7 +109,16 @@ public interface IAppDbContext
 
     DbSet<NotificationPreference> NotificationPreferences { get; }
 
+    DbSet<NMS.Application.Feedback.FeedbackNote> FeedbackNotes { get; }
+
+    DbSet<NMS.Application.Reporting.AuditRetentionSetting> AuditRetentionSettings { get; }
+
+    DbSet<NMS.Application.Reporting.AuditRetentionRun> AuditRetentionRuns { get; }
+
     DbSet<AuditLog> AuditLogs { get; }
+
+    /// <summary>Removes history older than the cutoff. The only way history can ever be deleted; the database enforces a minimum age.</summary>
+    Task<int> PurgeAuditLogsAsync(DateTimeOffset before, CancellationToken cancellationToken);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

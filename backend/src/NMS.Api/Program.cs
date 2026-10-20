@@ -177,6 +177,7 @@ app.MapStaffEndpoints();
 app.MapAttendanceEndpoints();
 app.MapCommunicationEndpoints();
 app.MapNotificationEndpoints();
+app.MapFeedbackEndpoints();
 app.MapUserEndpoints();
 app.MapHub<CentreHub>("/hubs/centre");
 if (DevToolsEndpoints.IsAvailable(app.Environment, app.Configuration))

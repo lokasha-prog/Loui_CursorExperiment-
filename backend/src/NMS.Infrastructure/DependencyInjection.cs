@@ -43,6 +43,9 @@ public static class DependencyInjection
         services.AddOptions<SmtpOptions>().Bind(configuration.GetSection(SmtpOptions.SectionName));
         services.AddSingleton<NMS.Application.Notifications.IEmailSender, SmtpEmailSender>();
         services.AddSingleton<NMS.Application.Reporting.IEmergencyReportRenderer, QuestEmergencyReportRenderer>();
+        services.AddOptions<NMS.Application.Reporting.AuditOptions>().Bind(configuration.GetSection(NMS.Application.Reporting.AuditOptions.Section))
+            .Validate(o => o.MinRetentionDays >= 365 && o.DefaultRetentionDays >= o.MinRetentionDays, "Audit retention must keep at least 365 days and the default must not be lower than the minimum.")
+            .ValidateOnStart();
         services.AddSingleton<CentreCalendar>();
 
         services.AddOptions<AiOptions>().Bind(configuration.GetSection(AiOptions.SectionName));

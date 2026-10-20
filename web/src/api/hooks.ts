@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  RetentionPolicy,
   AppNotification,
   AuditEntry,
   NotificationPreference,
@@ -350,3 +351,21 @@ export function useSavePreferences() {
 
 export const useAuditLogs = (filters: { action?: string; entity_type?: string; from?: string; to?: string }) =>
   useInfiniteList<AuditEntry>(['audit'], '/audit-logs', { ...filters })
+
+export const useRetention = () => useQuery({ queryKey: ['audit-retention'], queryFn: () => api.get<RetentionPolicy>('/audit-logs/retention') })
+
+export function useSaveRetention() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { retention_days: number; auto_purge_enabled: boolean }) => api.put<RetentionPolicy>('/audit-logs/retention', body),
+    onSuccess: (data) => client.setQueryData(['audit-retention'], data),
+  })
+}
+
+export function usePurgeAudit() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<{ run_at: string; mode: string; cutoff: string; rows_deleted: number }>('/audit-logs/retention/actions/purge', { confirm: true }),
+    onSuccess: () => Promise.all(['audit-retention', 'audit'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}

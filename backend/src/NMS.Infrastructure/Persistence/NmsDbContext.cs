@@ -86,6 +86,33 @@ public sealed class NmsDbContext(
 
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
 
+    public DbSet<NMS.Application.Feedback.FeedbackNote> FeedbackNotes => Set<NMS.Application.Feedback.FeedbackNote>();
+
+    public DbSet<NMS.Application.Reporting.AuditRetentionSetting> AuditRetentionSettings => Set<NMS.Application.Reporting.AuditRetentionSetting>();
+
+    public DbSet<NMS.Application.Reporting.AuditRetentionRun> AuditRetentionRuns => Set<NMS.Application.Reporting.AuditRetentionRun>();
+
+    public Task<int> PurgeAuditLogsAsync(DateTimeOffset before, CancellationToken cancellationToken) =>
+        // The retry strategy must own the whole unit of work when a transaction is opened by hand.
+        Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            // One connection and one transaction so the permission flag is set only around this single delete.
+            await using var transaction = await Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                await Database.ExecuteSqlRawAsync("EXEC sp_set_session_context @key = N'audit_purge', @value = 1;", cancellationToken);
+                var deleted = await AuditLogs.Where(l => l.OccurredAt < before).ExecuteDeleteAsync(cancellationToken);
+                await Database.ExecuteSqlRawAsync("EXEC sp_set_session_context @key = N'audit_purge', @value = 0;", cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return deleted;
+            }
+            catch
+            {
+                await transaction.RollbackAsync(CancellationToken.None);
+                throw;
+            }
+        });
+
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

@@ -756,7 +756,33 @@
       "permission_change": "Permission change"
     },
     "system": "System",
-    "fields": "{{count}} field(s)"
+    "fields": "{{count}} field(s)",
+    "retention": {
+      "title": "How long history is kept",
+      "intro": "History is kept for the period below, then removed automatically if you switch that on. Nothing younger than {{min}} days can ever be removed, by anyone.",
+      "days": "Keep history for (days)",
+      "daysHint": "At least {{min}} days. 2555 days is about seven years.",
+      "tooShort": "Must be at least {{min}} days",
+      "auto": "Remove expired history automatically, once a day",
+      "download": "Download a copy (Excel)",
+      "purgeNow": "Remove expired history now",
+      "total": "Entries kept",
+      "oldest": "Oldest entry",
+      "eligible": "Older than the limit",
+      "cutoff": "Limit date",
+      "runs": "Recent clean-ups",
+      "removed": "{{count}} removed",
+      "mode": {
+        "auto": "Automatic",
+        "manual": "Manual"
+      },
+      "saved": "Retention settings saved",
+      "purged": "{{count}} old entries removed",
+      "confirmTitle": "Remove expired history?",
+      "confirmBody": "{{count}} entries older than the limit will be permanently removed.",
+      "confirmHint": "Download a copy first if you may need it. This clean-up is itself recorded in the log.",
+      "confirmButton": "Remove permanently"
+    }
   },
   "emergency": {
     "button": "Emergency sheets",

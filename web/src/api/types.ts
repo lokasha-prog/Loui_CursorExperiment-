@@ -388,3 +388,14 @@ export interface AuditEntry {
   occurred_at: string
   created_at: string
 }
+
+export interface RetentionPolicy {
+  retention_days: number
+  auto_purge_enabled: boolean
+  min_retention_days: number
+  total_entries: number
+  oldest_entry_at: string | null
+  eligible_for_purge: number
+  cutoff: string
+  recent_runs: { run_at: string; mode: 'auto' | 'manual'; cutoff: string; rows_deleted: number }[]
+}

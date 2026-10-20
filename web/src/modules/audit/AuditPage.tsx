@@ -5,6 +5,7 @@ import { flatten, useAuditLogs } from '@/api/hooks'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ListError, ListSkeleton, LoadMore } from '@/components/shared/ListState'
 import { Field, Input, Select } from '@/components/ui/form-controls'
+import { RetentionPanel } from './RetentionPanel'
 import { Badge, Card, EmptyState, Table, Td, Th, type Tone } from '@/components/ui/surfaces'
 
 const ACTIONS = ['create', 'update', 'delete', 'restore', 'export', 'login', 'logout', 'permission_change']
@@ -24,6 +25,7 @@ export default function AuditPage() {
   return (
     <>
       <PageHeader title={t('audit.title')} subtitle={t('audit.subtitle')} />
+      <RetentionPanel />
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <Field label={t('audit.action')} htmlFor="au-action">
           <Select id="au-action" value={action} onChange={(e) => setAction(e.target.value)}>
