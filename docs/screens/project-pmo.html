@@ -170,19 +170,19 @@
       <div>
         <div class="flex items-center gap-2 mb-2">
           <span class="pill pill-info">PHASE 1 · MVP PILOT</span>
-          <span class="pill pill-amber">SPRINT 1 · CENTRE MANAGEMENT</span>
+          <span class="pill pill-amber">SPRINT 2 · ATTENDANCE &amp; DASHBOARD</span>
           <span class="pill pill-info">IN PROGRESS</span>
         </div>
         <h2 class="font-heading text-2xl lg:text-3xl font-bold text-slate-900 mb-1">
-          Where are we? <span class="text-amber-700">Set-up done, building starts.</span>
+          Where are we? <span class="text-amber-700">Sprint 1 complete.</span>
         </h2>
         <p class="text-sm text-slate-600 max-w-2xl">
-          The NMS project has <strong>62 assets ready</strong> (22 specs + 22 spec HTMLs + 25 web screens + 7 mobile + 2 phase3 + 1 PMO + 4 scripts). Sprint 0 is complete (project skeleton, local services, first commit). Next step: Sprint 1 — centre management and login.
+          The NMS project has <strong>62 assets ready</strong> (22 specs + 22 spec HTMLs + 25 web screens + 7 mobile + 2 phase3 + 1 PMO + 4 scripts). Sprint 0 and Sprint 1 are complete: students, staff, rooms, sign-in and access control work in English and Arabic. Two owner decisions are needed before Sprint 2 (see What's Next).
         </p>
       </div>
       <div class="text-right">
         <div class="text-[10px] font-mono text-slate-400 uppercase">Last Updated</div>
-        <div class="font-mono text-sm font-bold text-slate-700" id="lastUpdated">2026-10-20 17:45 GST</div>
+        <div class="font-mono text-sm font-bold text-slate-700" id="lastUpdated">2026-10-20 18:40 GST</div>
         <div class="text-[10px] font-mono text-slate-400 mt-1">by: Claude Code</div>
       </div>
     </div>
@@ -204,9 +204,9 @@
             </defs>
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">3%</div>
+            <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">7%</div>
             <div class="text-[10px] font-mono text-slate-500 uppercase">Overall</div>
-            <div class="text-[10px] font-mono text-slate-400">1 of 30 sprints</div>
+            <div class="text-[10px] font-mono text-slate-400">2 of 30 sprints</div>
           </div>
         </div>
       </div>
@@ -224,9 +224,9 @@
         <div class="nursery-card p-4">
           <div class="flex items-center justify-between mb-1">
             <i data-lucide="git-branch" class="w-4 h-4 text-purple-600"></i>
-            <span class="pill pill-info">1/30</span>
+            <span class="pill pill-info">2/30</span>
           </div>
-          <div class="font-heading text-2xl font-bold text-slate-900">1</div>
+          <div class="font-heading text-2xl font-bold text-slate-900">2</div>
           <div class="text-[10px] font-mono text-slate-500 uppercase">Sprints Done</div>
         </div>
         <div class="nursery-card p-4">
@@ -273,25 +273,25 @@
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2">
           <i data-lucide="target" class="w-5 h-5 text-amber-600"></i>
-          <h3 class="font-heading text-base font-bold text-slate-900">Current Focus · Sprint 1</h3>
+          <h3 class="font-heading text-base font-bold text-slate-900">Latest Result · Sprint 1</h3>
         </div>
-        <span class="pill pill-amber">IN PROGRESS</span>
+        <span class="pill pill-done">DONE</span>
       </div>
       <h4 class="font-heading text-lg font-bold text-slate-900 mb-2">Centre Management + Sign-in</h4>
       <p class="text-sm text-slate-600 mb-4">Students, staff, guardians, rooms, programs and user accounts, with sign-in, role-based access, strict separation between centres and a permanent change history. Everything in English and Arabic (left-to-right and right-to-left), stored only in the local Microsoft SQL Server.</p>
 
       <div class="space-y-2 mb-4">
-        <div class="text-[10px] font-mono text-slate-500 uppercase font-bold">Sprint 1 Checklist (✔ = built and verified)</div>
+        <div class="text-[10px] font-mono text-slate-500 uppercase font-bold">Sprint 1 Checklist (all verified by tests)</div>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Local SQL Server database, migrations, no seeded data</span></label>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Strict separation between centres (database-enforced) + append-only change history</span></label>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Built-in sign-in: roles, lockout, rotating sessions, first-administrator setup</span></label>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Students, guardians, staff, rooms, programs, groups, labels, user accounts (service layer)</span></label>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Parents see only their own children; teachers only their own rooms</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Automated tests: 72 unit/architecture + 55 integration, all passing</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Automated tests: 72 unit/architecture + 56 integration, all passing</span></label>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Web app: setup, sign-in, dashboard, students, staff, rooms &amp; programs, user accounts</span></label>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>English and Arabic with right-to-left layout on every screen</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Web automated tests (in progress)</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Owner decision: AI Brain provider, data location and first features</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Web automated tests: 119 passing, 95% coverage (target 75%); backend 88% (target 80%)</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Owner decisions open: AI Brain, and the test-accounts login panel (ADR-0006)</span></label>
       </div>
 
       <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-200">
@@ -299,6 +299,7 @@
         <a href="spec-20-adrs.html" class="pill pill-info">📖 Original ADRs</a>
         <span class="pill pill-neutral">ADR-0004 SQL Server only</span>
         <span class="pill pill-neutral">ADR-0005 Built-in sign-in</span>
+        <span class="pill pill-amber">ADR-0006 proposed</span>
         <a href="spec-19-roadmap-sprints.html" class="pill pill-info">📖 Roadmap</a>
       </div>
     </div>
@@ -310,13 +311,13 @@
         <h3 class="font-heading text-base font-bold">What's Next</h3>
       </div>
       <div class="space-y-3">
-        <div class="p-3 rounded-xl bg-white/5 border border-white/10">
-          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">NOW</div>
-          <div class="font-bold text-sm">Finish Sprint 1</div>
-          <div class="text-[11px] text-slate-300 mt-1">Automated tests for the web screens, full English/Arabic review, handoff notes</div>
+        <div class="p-3 rounded-xl bg-red-400/20 border border-red-300/50">
+          <div class="text-[10px] font-mono text-red-200 uppercase font-bold mb-1">OWNER DECISION NEEDED · BLOCKING</div>
+          <div class="font-bold text-sm">Test accounts on the login screen</div>
+          <div class="text-[11px] text-slate-300 mt-1">The request (known super-admin password shown on the login page) was stopped by a safety check. Choose a safer option (ADR-0006).</div>
         </div>
         <div class="p-3 rounded-xl bg-amber-400/15 border border-amber-300/40">
-          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">OWNER DECISION NEEDED</div>
+          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">OWNER DECISION NEEDED · BLOCKING</div>
           <div class="font-bold text-sm">AI Brain — the heart of the product</div>
           <div class="text-[11px] text-slate-300 mt-1">Which AI provider, where child data is processed, and what it should do first</div>
         </div>
@@ -564,9 +565,9 @@
 <span class="comment">// After each sprint, update the corresponding entry. The page recalculates on load.</span>
 
 <span class="key">const</span> PROJECT_STATE = {
-  lastUpdated: <span class="string">"2026-10-20 17:45 GST"</span>,
+  lastUpdated: <span class="string">"2026-10-20 18:40 GST"</span>,
   updatedBy: <span class="string">"Claude Code"</span>,
-  overallPct: <span class="string">3</span>,            <span class="comment">// 0-100 — overall project completion</span>
+  overallPct: <span class="string">7</span>,            <span class="comment">// 0-100 — overall project completion</span>
 
   sprints: {
     <span class="comment">// status: "done" | "active" | "pending" | "blocked"</span>
@@ -656,15 +657,15 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-20 17:45 GST",
+    lastUpdated: "2026-10-20 18:40 GST",
     updatedBy: "Claude Code",
-    overallPct: 3,
+    overallPct: 7,
 
     sprints: {
       // MVP Pilot (0-5)
       0:  { status: "done",    pct: 100, title: "Setup & Planning",            notes: "Monorepo, local services, first commit (database: local SQL Server)", deliverables: "Repo, .cursorrules, CI skeleton" },
-      1:  { status: "active",  pct: 85, title: "Centre Management + Auth",    notes: "Student, Staff, Room, Program, Group, Guardian + built-in sign-in and role-based access", deliverables: "CRUD endpoints, login, RBAC" },
-      2:  { status: "pending", pct: 0,  title: "Attendance + Dashboard",      notes: "Barcode check-in, live ratio via SignalR, KPI widgets", deliverables: "Attendance module, dashboard" },
+      1:  { status: "done",    pct: 100, title: "Centre Management + Auth",    notes: "Student, Staff, Room, Program, Group, Guardian + built-in sign-in and role-based access", deliverables: "CRUD endpoints, login, RBAC" },
+      2:  { status: "active",  pct: 5,  title: "Attendance + Dashboard",      notes: "Barcode check-in, live ratio via SignalR, KPI widgets", deliverables: "Attendance module, dashboard" },
       3:  { status: "pending", pct: 0,  title: "Parent Comms + Messaging",    notes: "Activity feed (8 types), approval workflow, shared inbox", deliverables: "Activity posts, messaging" },
       4:  { status: "pending", pct: 0,  title: "Notifications + Audit + Emergency", notes: "3-tier notifications, audit log viewer, one-click emergency PDF", deliverables: "Notifications, audit, emergency report" },
       5:  { status: "pending", pct: 0,  title: "Pilot Deployment + UAT + Go-Live", notes: "Production deploy, pilot nursery onboarding, go-live", deliverables: "Pilot live, feedback loop" },
@@ -703,6 +704,7 @@
       { severity: "warning",  title: "Arabic RTL quality in production", mitigation: "Mandatory RTL QA every sprint + Arabic tester on team from Sprint 1." },
       { severity: "warning",  title: "PDPL legal review not started", mitigation: "Legal counsel identified. Required before go-live (Sprint 17)." },
       { severity: "critical", title: "AI Brain scope and provider undecided", mitigation: "Owner decision needed: provider, where child data is processed (UAE data law), first features. Blocks AI design from Sprint 2." },
+      { severity: "critical", title: "Test-accounts login panel conflicts with security rules", mitigation: "Owner decision needed (ADR-0006): safer local-only option recommended; must be removed before pilot go-live." },
       { severity: "warning",  title: "Free MinIO storage images discontinued", mitigation: "Local development uses a compatible store; confirm production file storage before Sprint 5." }
     ],
 

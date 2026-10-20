@@ -75,7 +75,7 @@ public static class AuthEndpoints
             }
 
             return Respond(http, result.Value);
-        }).AllowAnonymous().RequireRateLimiting("anonymous");
+        }).AllowAnonymous();
 
         group.MapPost("/logout", async (HttpContext http, ISender sender, CancellationToken ct) =>
         {

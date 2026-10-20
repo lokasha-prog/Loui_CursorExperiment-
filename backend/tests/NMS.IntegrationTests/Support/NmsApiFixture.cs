@@ -27,6 +27,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
 
     private readonly string _database = $"NMS_Test_{Guid.NewGuid():N}";
 
+    public const int GraceSeconds = 2;
+
     public string BootstrapToken { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(24));
 
     public string AdminEmail { get; } = $"admin-{Guid.NewGuid():N}@test.local";
@@ -54,6 +56,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseSetting("RateLimiting:AuthenticatedPerMinute", "100000");
         builder.UseSetting("RateLimiting:AnonymousPerMinute", "100000");
         builder.UseSetting("RateLimiting:LoginPerMinute", "100000");
+        builder.UseSetting("RateLimiting:SessionPerMinute", "100000");
+        builder.UseSetting("Auth:RefreshReuseGraceSeconds", GraceSeconds.ToString());
     }
 
     public async Task InitializeAsync()

@@ -147,12 +147,28 @@ public class AuthenticationTests(NmsApiFixture api)
         var original = user.Client.RefreshCookie!;
         var rotated = await api.NewClient().RefreshAsync(original);
         var newest = rotated.RefreshCookie!;
+        await Task.Delay(TimeSpan.FromSeconds(NmsApiFixture.GraceSeconds + 0.7));
 
         var replay = await api.NewClient().RefreshAsync(original);
         var afterTheft = await api.NewClient().RefreshAsync(newest);
 
         replay.Status.Should().Be(HttpStatusCode.Unauthorized);
         afterTheft.Status.Should().Be(HttpStatusCode.Unauthorized, "theft revokes the whole family");
+    }
+
+    [Fact]
+    public async Task A_quick_duplicate_refresh_such_as_two_tabs_is_tolerated_without_ending_the_session()
+    {
+        var user = await api.CreateUserAsync("teacher");
+        var original = user.Client.RefreshCookie!;
+
+        var first = await api.NewClient().RefreshAsync(original);
+        var duplicate = await api.NewClient().RefreshAsync(original);
+        var continued = await api.NewClient().RefreshAsync(first.RefreshCookie!);
+
+        first.Status.Should().Be(HttpStatusCode.OK);
+        duplicate.Status.Should().Be(HttpStatusCode.OK, "a reload or second tab inside the grace window is not theft");
+        continued.Status.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]

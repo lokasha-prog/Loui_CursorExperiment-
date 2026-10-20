@@ -34,8 +34,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddOptions<RateLimitOptions>()
     .Bind(builder.Configuration.GetSection(RateLimitOptions.SectionName))
-    .Validate(o => o.AuthenticatedPerMinute > 0 && o.AnonymousPerMinute > 0 && o.LoginPerMinute > 0,
-        "The RateLimiting section must define AuthenticatedPerMinute, AnonymousPerMinute and LoginPerMinute.")
+    .Validate(o => o.AuthenticatedPerMinute > 0 && o.AnonymousPerMinute > 0 && o.LoginPerMinute > 0 && o.SessionPerMinute > 0,
+        "The RateLimiting section must define AuthenticatedPerMinute, AnonymousPerMinute, LoginPerMinute and SessionPerMinute.")
     .ValidateOnStart();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
@@ -86,6 +86,13 @@ builder.Services.AddRateLimiter(options =>
     {
         var limits = http.RequestServices.GetRequiredService<IOptions<RateLimitOptions>>().Value;
         var userId = http.User.FindFirst("sub")?.Value;
+
+        // Page loads call these two before anyone is signed in; they have their own, more generous limit below.
+        if (http.Request.Path.StartsWithSegments("/api/v1/auth/refresh") || http.Request.Path.StartsWithSegments("/api/v1/auth/setup-status"))
+        {
+            return Window($"session:{http.Connection.RemoteIpAddress}", limits.SessionPerMinute);
+        }
+
         return userId is not null
             ? Window($"user:{userId}", limits.AuthenticatedPerMinute)
             : Window($"ip:{http.Connection.RemoteIpAddress}", limits.AnonymousPerMinute);
@@ -154,6 +161,9 @@ public sealed class RateLimitOptions
     public int AnonymousPerMinute { get; set; }
 
     public int LoginPerMinute { get; set; }
+
+    /// <summary>Limit for session refresh and first-run status checks, which every page load makes.</summary>
+    public int SessionPerMinute { get; set; }
 }
 
 public partial class Program;

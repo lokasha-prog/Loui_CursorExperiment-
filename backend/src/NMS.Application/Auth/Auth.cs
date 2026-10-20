@@ -25,6 +25,12 @@ public sealed class AuthOptions
 
     public int RefreshTokenDays { get; set; }
 
+    /// <summary>
+    /// A refresh token used again within this many seconds is treated as a harmless duplicate (two tabs, a quick reload)
+    /// rather than theft. After the window, reuse revokes the whole session family.
+    /// </summary>
+    public int RefreshReuseGraceSeconds { get; set; }
+
     public int MinPasswordLength { get; set; }
 
     /// <summary>Optional. Used when a sign-in request names no centre and several centres exist.</summary>
@@ -281,9 +287,13 @@ public sealed class RefreshSessionHandler(
             return Error.Unauthorized("Session expired.");
         }
 
-        if (stored.UsedAt is not null || stored.RevokedAt is not null)
+        var withinGrace = stored.RevokedAt is null
+            && stored.UsedAt is not null
+            && now - stored.UsedAt.Value <= TimeSpan.FromSeconds(options.Value.RefreshReuseGraceSeconds);
+
+        if ((stored.UsedAt is not null || stored.RevokedAt is not null) && !withinGrace)
         {
-            // A rotated token was presented again: assume theft and end every session in the family.
+            // A rotated token was presented again after the grace window: assume theft and end every session in the family.
             var family = await db.RefreshTokens.Where(t => t.FamilyId == stored.FamilyId && t.RevokedAt == null).ToListAsync(ct);
             family.ForEach(t => t.RevokedAt = now);
             await db.SaveChangesAsync(ct);
@@ -304,7 +314,7 @@ public sealed class RefreshSessionHandler(
             return Error.Unauthorized("Session expired.");
         }
 
-        stored.UsedAt = now;
+        stored.UsedAt ??= now;
         var session = await new SessionFactory(db, tokens, clock, options).IssueAsync(user, stored.FamilyId, request.IpAddress, ct);
         await db.SaveChangesAsync(ct);
         return Result<AuthSession>.Success(session);
@@ -399,17 +409,7 @@ public sealed class BootstrapHandler(
 
         tenant.TenantId = newTenant.Id;
 
-        var roles = SystemRoles.All.ToDictionary(
-            name => name,
-            name => new Role
-            {
-                Name = name,
-                DisplayName = new Dictionary<string, string> { ["en"] = ToTitle(name) },
-                IsSystemRole = true,
-                Permissions = RolePermissions.ForRoles([name]).OrderBy(p => p).ToList(),
-                CreatedBy = adminId,
-                UpdatedBy = adminId,
-            });
+        var roles = SystemRoleFactory.Create(adminId).ToDictionary(r => r.Name);
         db.Roles.AddRange(roles.Values);
 
         var admin = new AppUser
@@ -433,6 +433,22 @@ public sealed class BootstrapHandler(
             new TenantSummaryDto(newTenant.Id, newTenant.Slug, newTenant.Name));
         return Result<MeDto>.Success(me);
     }
+
+}
+
+/// <summary>Builds the eight system roles with their permissions from the RBAC matrix (spec 09 §2.2).</summary>
+internal static class SystemRoleFactory
+{
+    public static IReadOnlyList<Role> Create(Guid createdBy) =>
+        SystemRoles.All.Select(name => new Role
+        {
+            Name = name,
+            DisplayName = new Dictionary<string, string> { ["en"] = ToTitle(name) },
+            IsSystemRole = true,
+            Permissions = RolePermissions.ForRoles([name]).OrderBy(p => p).ToList(),
+            CreatedBy = createdBy,
+            UpdatedBy = createdBy,
+        }).ToList();
 
     private static string ToTitle(string name) =>
         string.Join(' ', name.Split('_').Select(w => char.ToUpperInvariant(w[0]) + w[1..]));

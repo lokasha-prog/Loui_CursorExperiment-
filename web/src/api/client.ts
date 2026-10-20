@@ -68,8 +68,10 @@ export function refreshSession(): Promise<boolean> {
         useAuth.getState().setSession(body.data.access_token, body.data.me)
         return true
       }
+      // Only a definite "no valid session" answer signs the person out; a busy server (429/5xx) must not.
+      if (response.status !== 401 && response.status !== 403) return false
     } catch {
-      // Treated as "no session" below.
+      return false
     }
     useAuth.getState().clear()
     return false

@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
       coverage: {
         provider: 'v8',
         include: ['src/**/*.{ts,tsx}'],
-        exclude: ['src/**/*.d.ts', 'src/main.tsx', 'src/test/**', 'src/api/schema.d.ts', 'src/components/ui/**'],
+        exclude: ['src/**/*.d.ts', 'src/**/*.test.{ts,tsx}', 'src/main.tsx', 'src/test/**', 'src/api/schema.d.ts', 'src/api/types.ts', 'src/components/ui/**'],
       },
     },
   }
