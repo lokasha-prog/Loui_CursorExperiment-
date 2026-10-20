@@ -1,6 +1,12 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  BillingSnapshot,
+  ComponentInput,
+  FeePlan,
+  FeePlanDetail,
+  InvoiceDetail,
+  InvoiceSummary,
   FeedbackItem,
   RetentionPolicy,
   AppNotification,
@@ -395,3 +401,69 @@ export function useSetFeedbackStatus() {
     onSuccess: () => client.invalidateQueries({ queryKey: ['feedback'] }),
   })
 }
+
+// ── Billing ─────────────────────────────────────────────────────────────────
+
+export const useBillingSnapshot = (enabled = true) =>
+  useQuery({ queryKey: ['billing-snapshot'], enabled, queryFn: () => api.get<BillingSnapshot>('/dashboard/billing-snapshot') })
+
+export const useFeePlans = (enabled = true) => useInfiniteList<FeePlan>(['fee-plans'], '/fee-plans', {}, enabled)
+
+export const useFeePlan = (id: string | null) =>
+  useQuery({ queryKey: ['fee-plan', id], enabled: !!id, queryFn: () => api.get<FeePlanDetail>(`/fee-plans/${id}`) })
+
+export interface FeePlanInput {
+  name: Record<string, string>
+  description?: Record<string, string> | null
+  period: string
+  program_id: string | null
+  status: string
+  components: ComponentInput[]
+}
+
+export function useSaveFeePlan(id?: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: FeePlanInput) => (id ? api.patch<FeePlanDetail>(`/fee-plans/${id}`, body) : api.post<FeePlanDetail>('/fee-plans', body)),
+    onSuccess: () => Promise.all(['fee-plans', 'fee-plan'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export function useAssignToPlan(planId: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { student_ids: string[]; effective_from: string }) => api.post<FeePlanDetail>(`/fee-plans/${planId}/students`, body),
+    onSuccess: () => Promise.all(['fee-plans', 'fee-plan'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const useInvoices = (filters: { status?: string }) => useInfiniteList<InvoiceSummary>(['invoices'], '/invoices', { ...filters })
+
+export const useInvoice = (id: string | null) =>
+  useQuery({ queryKey: ['invoice', id], enabled: !!id, queryFn: () => api.get<InvoiceDetail>(`/invoices/${id}`) })
+
+function useBillingMutation<TBody, TResult>(run: (body: TBody) => Promise<TResult>) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: run,
+    onSuccess: () => Promise.all(['invoices', 'invoice', 'billing-snapshot'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const useCreateInvoice = () =>
+  useBillingMutation((body: {
+    student_id: string
+    period_start: string
+    period_end: string
+    issue: boolean
+    lines: { description: Record<string, string>; quantity: number; unit_price_fils: number; tax_rate_percent: number | null }[]
+  }) => api.post<InvoiceDetail>('/invoices', body))
+
+export const useInvoiceAction = () =>
+  useBillingMutation(({ id, action }: { id: string; action: 'issue' | 'cancel' | 'send' }) => api.post<InvoiceDetail>(`/invoices/${id}/actions/${action}`))
+
+export const useRecordPayment = () =>
+  useBillingMutation(({ id, ...body }: { id: string; amount_fils: number; payment_date: string; method: string; reference?: string | null }) =>
+    api.post<InvoiceDetail>(`/invoices/${id}/payments`, body))
+
+export const useGenerateInvoices = () => useBillingMutation(() => api.post<{ created: number }>('/invoices/actions/generate', {}))

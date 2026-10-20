@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Baby, BarChart3, MessageCircleHeart, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
+import { Baby, BarChart3, Wallet, MessageCircleHeart, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
@@ -32,6 +32,7 @@ export function useNavItems(): NavItem[] {
     { to: '/feed', label: t('nav.feed'), icon: Images, permission: 'activities.read' },
     { to: '/messages', label: t('nav.messages'), icon: MessageSquare, permission: 'messaging.read' },
     { to: '/attendance', label: t('nav.attendance'), icon: ScanLine, permission: 'attendance.read' },
+    { to: '/billing', label: t('nav.billing'), icon: Wallet, permission: 'billing.read' },
     { to: '/reports', label: t('nav.reports'), icon: BarChart3, permission: 'attendance.override' },
     { to: '/leave', label: t('nav.leave'), icon: CalendarOff, permission: 'attendance.read' },
     { to: '/rooms', label: t('nav.rooms'), icon: School, permission: 'centre_structure.read' },

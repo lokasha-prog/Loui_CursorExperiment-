@@ -52,7 +52,8 @@
     "feed": "Daily feed",
     "messages": "Messages",
     "audit": "Audit log",
-    "feedback": "Feedback"
+    "feedback": "Feedback",
+    "billing": "Billing"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -845,5 +846,151 @@
     "choose": "Choose photo",
     "replace": "Replace",
     "remove": "Remove photo"
+  },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Fee plans, invoices and payments.",
+    "parentSubtitle": "Invoices for your children.",
+    "tabs": {
+      "overview": "Overview",
+      "invoices": "Invoices",
+      "plans": "Fee plans"
+    },
+    "kpi": {
+      "billed": "Billed this month",
+      "collected": "Collected this month",
+      "overdue": "Overdue",
+      "outstanding": "Waiting to be paid",
+      "today": "New invoices today"
+    },
+    "trend": "Last 6 months",
+    "billedLegend": "Billed",
+    "collectedLegend": "Collected",
+    "recent": "Recent payments",
+    "topOverdue": "Who owes the most (overdue)",
+    "none": "Nothing yet",
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "issued": "Issued",
+      "partially_paid": "Part paid",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled"
+    },
+    "columns": {
+      "number": "Invoice",
+      "child": "Child",
+      "due": "Due",
+      "total": "Total",
+      "paid": "Paid",
+      "status": "Status"
+    },
+    "empty": "No invoices yet",
+    "emptyBody": "Invoices appear here once fee plans are assigned and generated, or created by hand.",
+    "generate": "Create this month's invoices",
+    "generated": "{{count}} invoices created",
+    "newInvoice": "New invoice",
+    "invoice": {
+      "title": "Invoice {{number}}",
+      "lines": "What it is for",
+      "payments": "Payments",
+      "noPayments": "No payments yet",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "tax": "Tax",
+      "total": "Total",
+      "paid": "Paid",
+      "balance": "Balance",
+      "issue": "Issue",
+      "cancel": "Cancel invoice",
+      "send": "Send to family",
+      "pdf": "Download PDF",
+      "issued": "Invoice issued",
+      "cancelled": "Invoice cancelled",
+      "sent": "Sent to the family",
+      "confirmCancel": "Cancel this invoice?",
+      "period": "Period",
+      "dueOn": "Due {{date}}",
+      "by": "By {{name}}"
+    },
+    "payment": {
+      "title": "Record a payment",
+      "amount": "Amount (AED)",
+      "date": "Date",
+      "method": "Method",
+      "reference": "Reference (cheque or transfer number)",
+      "save": "Record payment",
+      "saved": "Payment recorded",
+      "tooMuch": "That is more than what is still owed.",
+      "methods": {
+        "cash": "Cash",
+        "cheque": "Cheque",
+        "bank_transfer": "Bank transfer",
+        "card": "Card",
+        "other": "Other"
+      }
+    },
+    "form": {
+      "title": "New invoice",
+      "child": "Child",
+      "from": "Period from",
+      "to": "Period to",
+      "description": "Description",
+      "descriptionAr": "Description (Arabic)",
+      "qty": "Quantity",
+      "price": "Unit price (AED)",
+      "tax": "Tax %",
+      "addLine": "Add line",
+      "issueNow": "Issue it now",
+      "save": "Create invoice",
+      "created": "Invoice created",
+      "needLine": "Add at least one line with a price."
+    },
+    "plan": {
+      "add": "New fee plan",
+      "empty": "No fee plans yet",
+      "emptyBody": "A fee plan is a price list, for example Full day monthly.",
+      "children": "{{count}} children",
+      "period": {
+        "monthly": "Monthly",
+        "termly": "Termly",
+        "annual": "Annual",
+        "one_time": "One time"
+      },
+      "form": {
+        "title": "Fee plan",
+        "name": "Name (English)",
+        "nameAr": "Name (Arabic)",
+        "period": "Billed",
+        "program": "Programme (optional)",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "components": "What is charged",
+        "componentName": "Item",
+        "type": "Type",
+        "amount": "Amount (AED)",
+        "tax": "Tax %",
+        "addComponent": "Add item",
+        "save": "Save plan",
+        "saved": "Fee plan saved",
+        "assign": "Put children on this plan",
+        "assignFrom": "From",
+        "assignButton": "Add children",
+        "assigned": "Children added",
+        "onPlan": "Children on this plan",
+        "needItem": "Add at least one item with an amount.",
+        "discountNote": "A discount item is taken off the total."
+      },
+      "types": {
+        "tuition": "Tuition",
+        "meal": "Meal",
+        "transport": "Transport",
+        "activity": "Activity",
+        "discount": "Discount",
+        "other": "Other"
+      }
+    }
   }
 }

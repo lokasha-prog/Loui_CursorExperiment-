@@ -416,3 +416,77 @@ export interface FeedbackItem {
   status: 'new' | 'seen' | 'done'
   created_at: string
 }
+
+export interface FeeComponent {
+  id: string
+  name: Localized
+  component_type: 'tuition' | 'meal' | 'transport' | 'activity' | 'discount' | 'other'
+  amount_fils: number
+  tax_rate_percent: number | null
+  sort_order: number
+}
+
+export interface FeePlan {
+  id: string
+  name: Localized
+  description: Localized | null
+  status: 'active' | 'inactive'
+  period: 'monthly' | 'termly' | 'annual' | 'one_time'
+  program_id: string | null
+  components: FeeComponent[]
+  total_per_period_fils: number
+  student_count: number
+  created_at: string
+}
+
+export interface FeePlanDetail {
+  plan: FeePlan
+  students: { student_id: string; name: string; effective_from: string; effective_to: string | null }[]
+}
+
+export interface ComponentInput {
+  name: Localized
+  component_type: string
+  amount_fils: number
+  tax_rate_percent: number | null
+}
+
+export interface InvoiceSummary {
+  id: string
+  invoice_number: string
+  student_id: string
+  student_name: string | null
+  issue_date: string
+  due_date: string
+  period_start: string
+  period_end: string
+  total_fils: number
+  paid_fils: number
+  status: 'draft' | 'issued' | 'partially_paid' | 'paid' | 'overdue' | 'cancelled'
+  created_at: string
+}
+
+export interface InvoiceDetail {
+  invoice: InvoiceSummary
+  fee_plan_id: string | null
+  subtotal_fils: number
+  discount_fils: number
+  tax_fils: number
+  notes: Localized | null
+  sent_at: string | null
+  lines: { id: string; description: Localized; quantity: number; unit_price_fils: number; discount_fils: number; tax_fils: number; total_fils: number }[]
+  payments: { id: string; amount_fils: number; payment_date: string; method: string; reference: string | null; notes: string | null; recorded_by_name: string | null; created_at: string }[]
+}
+
+export interface BillingSnapshot {
+  month: string
+  billed_fils: number
+  collected_fils: number
+  overdue_fils: number
+  outstanding_fils: number
+  new_invoices_today: number
+  new_invoices_today_fils: number
+  recent_payments: { invoice_id: string; invoice_number: string; student_name: string | null; amount_fils: number; payment_date: string; method: string }[]
+  top_overdue: { student_id: string; student_name: string | null; outstanding_fils: number; invoices: number }[]
+  trend: { month: string; billed_fils: number; collected_fils: number }[]
+}
