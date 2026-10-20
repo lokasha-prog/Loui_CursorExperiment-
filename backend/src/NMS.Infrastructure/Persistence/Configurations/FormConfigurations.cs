@@ -77,3 +77,16 @@ public sealed class StudentAdmissionStepConfiguration : IEntityTypeConfiguration
         builder.ToTable(t => t.HasCheckConstraint("CK_StudentAdmissionSteps_Status", "[Status] IN (N'pending', N'current', N'done', N'skipped')"));
     }
 }
+
+public sealed class CertificateIssuedConfiguration : IEntityTypeConfiguration<CertificateIssued>
+{
+    public void Configure(EntityTypeBuilder<CertificateIssued> builder)
+    {
+        builder.ToTable("CertificatesIssued");
+        builder.Property(c => c.TemplateId).HasMaxLength(40).IsRequired();
+        builder.Property(c => c.Title).HasMaxLength(200).IsRequired();
+        builder.HasOne<NMS.Domain.CentreManagement.Student>().WithMany().HasForeignKey(c => c.StudentId);
+        builder.HasIndex(c => new { c.TenantId, c.TemplateId, c.Number }).IsUnique();
+        builder.HasIndex(c => new { c.TenantId, c.StudentId });
+    }
+}

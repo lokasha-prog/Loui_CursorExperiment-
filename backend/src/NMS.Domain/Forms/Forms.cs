@@ -159,3 +159,19 @@ public class StudentAdmissionStep : TenantEntity
 
     public DateTimeOffset? OverdueNotifiedAt { get; set; }
 }
+
+/// <summary>A certificate that was printed. The number is sequential per design so each one can be checked later.</summary>
+public class CertificateIssued : TenantEntity
+{
+    public string TemplateId { get; set; } = string.Empty;
+
+    public int Number { get; set; }
+
+    public Guid StudentId { get; set; }
+
+    public string Title { get; set; } = string.Empty;
+
+    public DateOnly IssuedOn { get; set; }
+
+    public Guid IssuedBy { get; set; }
+}

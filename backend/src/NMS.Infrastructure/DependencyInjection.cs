@@ -53,6 +53,7 @@ public static class DependencyInjection
             .ValidateOnStart();
         services.AddSingleton<NMS.Application.Billing.IInvoiceRenderer, QuestInvoiceRenderer>();
         services.AddSingleton<NMS.Application.Tools.IIdCardRenderer, NMS.Infrastructure.Services.QuestIdCardRenderer>();
+        services.AddSingleton<NMS.Application.Tools.ICertificateRenderer, NMS.Infrastructure.Services.QuestCertificateRenderer>();
         services.AddSingleton<CentreCalendar>();
 
         services.AddOptions<AiOptions>().Bind(configuration.GetSection(AiOptions.SectionName));

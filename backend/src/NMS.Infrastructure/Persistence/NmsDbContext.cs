@@ -132,6 +132,7 @@ public sealed class NmsDbContext(
     public DbSet<NMS.Domain.Forms.FormStart> FormStarts => Set<NMS.Domain.Forms.FormStart>();
     public DbSet<NMS.Domain.Forms.FormSubmission> FormSubmissions => Set<NMS.Domain.Forms.FormSubmission>();
     public DbSet<NMS.Domain.Forms.AdmissionStep> AdmissionSteps => Set<NMS.Domain.Forms.AdmissionStep>();
+    public DbSet<NMS.Domain.Forms.CertificateIssued> CertificatesIssued => Set<NMS.Domain.Forms.CertificateIssued>();
     public DbSet<NMS.Domain.Forms.StudentAdmissionStep> StudentAdmissionSteps => Set<NMS.Domain.Forms.StudentAdmissionStep>();
     public DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents => Set<NMS.Domain.Calendar.CalendarEvent>();
     public DbSet<CentreSettings> CentreSettings => Set<CentreSettings>();
