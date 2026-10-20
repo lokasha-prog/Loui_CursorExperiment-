@@ -129,6 +129,10 @@ public interface IAppDbContext
 
     DbSet<InvoicePayment> InvoicePayments { get; }
     DbSet<Expense> Expenses { get; }
+    DbSet<NMS.Domain.Forms.Form> Forms { get; }
+    DbSet<NMS.Domain.Forms.FormVersion> FormVersions { get; }
+    DbSet<NMS.Domain.Forms.FormStart> FormStarts { get; }
+    DbSet<NMS.Domain.Forms.FormSubmission> FormSubmissions { get; }
     DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents { get; }
     DbSet<CentreSettings> CentreSettings { get; }
     DbSet<Enquiry> Enquiries { get; }

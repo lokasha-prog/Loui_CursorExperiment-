@@ -127,6 +127,10 @@ public sealed class NmsDbContext(
 
     public DbSet<InvoicePayment> InvoicePayments => Set<InvoicePayment>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<NMS.Domain.Forms.Form> Forms => Set<NMS.Domain.Forms.Form>();
+    public DbSet<NMS.Domain.Forms.FormVersion> FormVersions => Set<NMS.Domain.Forms.FormVersion>();
+    public DbSet<NMS.Domain.Forms.FormStart> FormStarts => Set<NMS.Domain.Forms.FormStart>();
+    public DbSet<NMS.Domain.Forms.FormSubmission> FormSubmissions => Set<NMS.Domain.Forms.FormSubmission>();
     public DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents => Set<NMS.Domain.Calendar.CalendarEvent>();
     public DbSet<CentreSettings> CentreSettings => Set<CentreSettings>();
     public DbSet<Enquiry> Enquiries => Set<Enquiry>();
