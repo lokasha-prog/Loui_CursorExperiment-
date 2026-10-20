@@ -127,6 +127,7 @@ public sealed class NmsDbContext(
 
     public DbSet<InvoicePayment> InvoicePayments => Set<InvoicePayment>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents => Set<NMS.Domain.Calendar.CalendarEvent>();
     public DbSet<CentreSettings> CentreSettings => Set<CentreSettings>();
     public DbSet<Enquiry> Enquiries => Set<Enquiry>();
     public DbSet<EnquiryStageLog> EnquiryStageLogs => Set<EnquiryStageLog>();

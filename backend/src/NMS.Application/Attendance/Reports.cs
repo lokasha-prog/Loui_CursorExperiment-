@@ -20,7 +20,7 @@ public sealed record ExportAttendanceQuery(string Month, string PersonType) : IR
 
 public sealed record ForecastLine(Guid? ProgramId, Dictionary<string, string>? ProgramName, int Expected, int OnLeave, int Enrolled);
 
-public sealed record ForecastDto(DateOnly Date, int TotalExpected, IReadOnlyList<ForecastLine> ByProgram);
+public sealed record ForecastDto(DateOnly Date, int TotalExpected, IReadOnlyList<ForecastLine> ByProgram, Dictionary<string, string>? Holiday = null);
 
 public sealed record ForecastQuery(DateOnly? Date) : IRequest<Result<ForecastDto>>;
 
@@ -121,11 +121,16 @@ public sealed class ExportAttendanceHandler(IAppDbContext db) : IRequestHandler<
     }
 }
 
-public sealed class ForecastHandler(IAppDbContext db, CentreCalendar calendar) : IRequestHandler<ForecastQuery, Result<ForecastDto>>
+public sealed class ForecastHandler(IAppDbContext db, CentreCalendar calendar, NMS.Application.Calendar.HolidayChecker holidays) : IRequestHandler<ForecastQuery, Result<ForecastDto>>
 {
     public async Task<Result<ForecastDto>> Handle(ForecastQuery request, CancellationToken ct)
     {
         var date = request.Date ?? calendar.Today;
+        if (await holidays.HolidayOnAsync(date, ct) is { } holiday)
+        {
+            return Result<ForecastDto>.Success(new ForecastDto(date, 0, [], holiday));
+        }
+
         var students = await db.Students.AsNoTracking().Where(s => s.Status == StudentStatuses.Active)
             .Select(s => new { s.Id, s.ProgramId }).ToListAsync(ct);
         var onLeave = (await db.LeaveRequests.AsNoTracking()

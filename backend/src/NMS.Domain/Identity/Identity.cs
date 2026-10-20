@@ -194,4 +194,7 @@ public class CentreSettings : TenantEntity
     public int? EarlyLeaveGraceMinutes { get; set; }
 
     public bool ParentsSeeInvoices { get; set; } = true;
+
+    /// <summary>Secret in the calendar subscription link families add to their phone. Changing it switches the old link off.</summary>
+    public string? CalendarFeedToken { get; set; }
 }

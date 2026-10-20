@@ -17,6 +17,8 @@ public static class DependencyInjection
         services.AddScoped<NMS.Application.Billing.InvoiceGenerator>();
         services.AddScoped<NMS.Application.Billing.BillingSettingsReader>();
         services.AddScoped<NMS.Application.Settings.CentreSettingsReader>();
+        services.AddScoped<NMS.Application.Calendar.EventExpander>();
+        services.AddScoped<NMS.Application.Calendar.HolidayChecker>();
         services.AddScoped<NMS.Application.Enquiries.TourMail>();
         return services;
     }

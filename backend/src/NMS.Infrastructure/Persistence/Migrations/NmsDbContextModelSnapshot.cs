@@ -1650,6 +1650,82 @@ namespace NMS.Infrastructure.Persistence.Migrations
                     b.ToTable("StudentFeePlans", (string)null);
                 });
 
+            modelBuilder.Entity("NMS.Domain.Calendar.CalendarEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("EndsAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsAllDay")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Recurrence")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("StartsAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.HasIndex("TenantId", "StartsAt");
+
+                    b.ToTable("CalendarEvents", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_CalendarEvents_Range", "[EndsAt] >= [StartsAt]");
+
+                            t.HasCheckConstraint("CK_CalendarEvents_Type", "[Type] IN (N'regular', N'holiday', N'staff_only')");
+
+                            t.HasCheckConstraint("CK_CalendarEvents_Visibility", "[Visibility] IN (N'parents', N'staff')");
+                        });
+                });
+
             modelBuilder.Entity("NMS.Domain.CentreManagement.Guardian", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2821,6 +2897,10 @@ namespace NMS.Infrastructure.Persistence.Migrations
                         .HasMaxLength(7)
                         .HasColumnType("nvarchar(7)");
 
+                    b.Property<string>("CalendarFeedToken")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -3613,6 +3693,20 @@ namespace NMS.Infrastructure.Persistence.Migrations
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NMS.Domain.Calendar.CalendarEvent", b =>
+                {
+                    b.HasOne("NMS.Domain.CentreManagement.Room", null)
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("NMS.Domain.Identity.Tenant", null)
                         .WithMany()

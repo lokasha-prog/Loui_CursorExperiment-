@@ -156,7 +156,7 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
     }
 
     public async Task<Guid> CreateStudentAsync(
-        Guid? roomId = null, string? guardianEmail = null, string first = "Layla", string? medical = null)
+        Guid? roomId = null, string? guardianEmail = null, string first = "Layla", string? medical = null, string? dateOfBirth = null)
     {
         var response = await Admin.PostAsync("/api/v1/students", new
         {
@@ -164,7 +164,7 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
             {
                 first_name = first,
                 last_name = $"Family{Guid.NewGuid():N}"[..14],
-                date_of_birth = DateTime.UtcNow.AddMonths(-24).ToString("yyyy-MM-dd"),
+                date_of_birth = dateOfBirth ?? DateTime.UtcNow.AddMonths(-24).ToString("yyyy-MM-dd"),
                 gender = "female",
                 room_id = roomId,
                 medical_notes = medical,

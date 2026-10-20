@@ -122,11 +122,31 @@ public sealed class CentreSettingsConfiguration : IEntityTypeConfiguration<NMS.D
         builder.Property(s => s.Address).HasMaxLength(300);
         builder.Property(s => s.Website).HasMaxLength(200);
         builder.Property(s => s.BrandColor).HasMaxLength(7);
+        builder.Property(s => s.CalendarFeedToken).HasMaxLength(64);
         builder.HasIndex(s => s.TenantId).IsUnique().HasFilter("[IsDeleted] = 0");
         builder.ToTable(t =>
         {
             t.HasCheckConstraint("CK_CentreSettings_Late", "[LateGraceMinutes] IS NULL OR [LateGraceMinutes] BETWEEN 0 AND 120");
             t.HasCheckConstraint("CK_CentreSettings_Early", "[EarlyLeaveGraceMinutes] IS NULL OR [EarlyLeaveGraceMinutes] BETWEEN 0 AND 120");
+        });
+    }
+}
+
+public sealed class CalendarEventConfiguration : IEntityTypeConfiguration<NMS.Domain.Calendar.CalendarEvent>
+{
+    public void Configure(EntityTypeBuilder<NMS.Domain.Calendar.CalendarEvent> builder)
+    {
+        builder.ToTable("CalendarEvents");
+        builder.Property(e => e.Type).HasMaxLength(20).IsRequired();
+        builder.Property(e => e.Visibility).HasMaxLength(20).IsRequired();
+        builder.Property(e => e.Recurrence).HasMaxLength(200);
+        builder.HasOne<NMS.Domain.CentreManagement.Room>().WithMany().HasForeignKey(e => e.RoomId);
+        builder.HasIndex(e => new { e.TenantId, e.StartsAt });
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_CalendarEvents_Type", "[Type] IN (N'regular', N'holiday', N'staff_only')");
+            t.HasCheckConstraint("CK_CalendarEvents_Visibility", "[Visibility] IN (N'parents', N'staff')");
+            t.HasCheckConstraint("CK_CalendarEvents_Range", "[EndsAt] >= [StartsAt]");
         });
     }
 }
