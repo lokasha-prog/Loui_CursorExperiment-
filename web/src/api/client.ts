@@ -147,9 +147,29 @@ async function blob(path: string): Promise<Blob> {
   return response.blob()
 }
 
+/** Sends a request and receives a file (a PDF) back. Problems come back as the usual error envelope. */
+async function postBlob(path: string, body: unknown): Promise<Blob> {
+  const token = useAuth.getState().accessToken
+  const response = await fetch(`${BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify(body),
+    credentials: 'same-origin',
+  }).catch(() => {
+    throw new ApiError(0, 'NETWORK', 'Network error')
+  })
+  if (!response.ok) {
+    const envelope = await parse<unknown>(response)
+    const first = envelope?.errors?.[0]
+    throw new ApiError(response.status, first?.code ?? 'UNKNOWN', first?.message ?? response.statusText, envelope?.errors ?? [])
+  }
+  return response.blob()
+}
+
 export const api = {
   upload,
   blob,
+  postBlob,
   async put<T>(path: string, body: unknown): Promise<T> {
     return (await send<T>('PUT', path, { body }))!.data as T
   },

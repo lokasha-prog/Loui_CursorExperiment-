@@ -1,6 +1,11 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  AgendaItem,
+  CalendarEventDetail,
+  CalendarOccurrence,
+  IdCardTemplate,
+  ScheduleData,
   CentreSettings,
   RoleItem,
   BlockOff,
@@ -659,3 +664,60 @@ export function useDeleteRole() {
     onSuccess: () => client.invalidateQueries({ queryKey: ['roles'] }),
   })
 }
+
+// ── Calendar and tools ──────────────────────────────────────────────────────
+
+export const useCalendarEvents = (from: string, to: string, roomId?: string) =>
+  useQuery({ queryKey: ['calendar', 'events', from, to, roomId ?? ''], queryFn: () => api.get<CalendarOccurrence[]>('/calendar/events', { from, to, room_id: roomId }) })
+
+export const useAgenda = (from: string, to: string, layers: string[], mine: boolean, enabled = true) =>
+  useQuery({
+    queryKey: ['calendar', 'agenda', from, to, layers.join(','), mine],
+    enabled,
+    queryFn: () => api.get<AgendaItem[]>('/calendar/agenda', { from, to, layers: layers.join(','), mine }),
+  })
+
+export const useSchedules = (enabled = true) => useQuery({ queryKey: ['calendar', 'schedules'], enabled, queryFn: () => api.get<ScheduleData>('/calendar/schedules') })
+
+export const useCalendarEvent = (id: string | null) =>
+  useQuery({ queryKey: ['calendar', 'event', id], enabled: !!id, queryFn: () => api.get<CalendarEventDetail>(`/calendar/events/${id}`) })
+
+export interface CalendarEventInput {
+  title: Record<string, string>
+  description: Record<string, string> | null
+  starts_at: string
+  ends_at: string
+  is_all_day: boolean
+  type: string
+  room_id: string | null
+  visibility: string
+  recurrence: string | null
+}
+
+export function useSaveCalendarEvent(id?: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CalendarEventInput) => (id ? api.patch<CalendarEventDetail>(`/calendar/events/${id}`, body) : api.post<CalendarEventDetail>('/calendar/events', body)),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['calendar'] }),
+  })
+}
+
+export function useDeleteCalendarEvent() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/calendar/events/${id}`),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['calendar'] }),
+  })
+}
+
+export const useFeedLink = (enabled = true) => useQuery({ queryKey: ['calendar', 'feed-link'], enabled, queryFn: () => api.get<{ path: string }>('/calendar/feed-link') })
+
+export function useRotateFeedLink() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<{ path: string }>('/calendar/feed-link/actions/rotate'),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['calendar', 'feed-link'] }),
+  })
+}
+
+export const useIdCardTemplates = () => useQuery({ queryKey: ['id-card-templates'], queryFn: () => api.get<IdCardTemplate[]>('/tools/id-card-templates') })

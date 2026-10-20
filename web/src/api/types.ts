@@ -651,3 +651,54 @@ export interface CentreSettings {
   early_leave_grace_minutes: number
   parents_see_invoices: boolean
 }
+
+export interface CalendarOccurrence {
+  event_id: string
+  title: Record<string, string>
+  description: Record<string, string> | null
+  starts_at: string
+  ends_at: string
+  is_all_day: boolean
+  type: string
+  room_id: string | null
+  visibility: string
+  repeats: boolean
+}
+
+export interface CalendarEventDetail {
+  id: string
+  title: Record<string, string>
+  description: Record<string, string> | null
+  starts_at: string
+  ends_at: string
+  is_all_day: boolean
+  type: string
+  room_id: string | null
+  visibility: string
+  recurrence: string | null
+}
+
+export interface AgendaItem {
+  kind: string
+  label: string | null
+  title: Record<string, string> | null
+  start: string
+  end: string
+  ref_id: string | null
+  detail: string | null
+}
+
+export interface ScheduleData {
+  staff: { staff_id: string; name: string; shifts: { day_of_week: number; room_id: string; room_name: string | null }[] }[]
+  programs: { program_id: string; name: Record<string, string>; start_time: string; end_time: string; days_per_week: number; students: number }[]
+}
+
+export interface IdCardTemplate {
+  id: string
+  scope: string
+  name: Record<string, string>
+  layout: string
+  primary: string
+  secondary: string
+  accent: string
+}

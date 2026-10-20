@@ -55,7 +55,9 @@
     "feedback": "Feedback",
     "billing": "Billing",
     "enquiries": "Enquiries",
-    "settings": "Settings"
+    "settings": "Settings",
+    "calendar": "Calendar",
+    "tools": "Tools"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -1290,6 +1292,144 @@
       "audit_log": "Audit log",
       "notifications": "Notifications",
       "centre_structure": "Rooms and programmes"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "Events, holidays, birthdays, leave and tours in one place.",
+    "parentSubtitle": "What is happening at the nursery.",
+    "add": "Add event",
+    "edit": "Edit event",
+    "saved": "Event saved",
+    "confirmDelete": "Remove this event?",
+    "previous": "Previous month",
+    "next": "Next month",
+    "addOn": "Add an event on {{date}}",
+    "more": "+{{count}} more",
+    "agendaEmpty": "Nothing this month",
+    "agendaEmptyBody": "Switch on more layers or move to another month.",
+    "tabs": {
+      "school": "School calendar",
+      "admin": "Admin calendar",
+      "mine": "My calendar",
+      "schedules": "Schedules"
+    },
+    "types": {
+      "regular": "Event",
+      "holiday": "Holiday (centre closed)",
+      "staff_only": "Staff only"
+    },
+    "visibility": {
+      "parents": "Parents can see it",
+      "staff": "Staff only"
+    },
+    "repeat": {
+      "none": "Does not repeat",
+      "daily": "Every day",
+      "weekly": "Every week",
+      "monthly": "Every month"
+    },
+    "days": {
+      "MO": "Mon",
+      "TU": "Tue",
+      "WE": "Wed",
+      "TH": "Thu",
+      "FR": "Fri",
+      "SA": "Sat",
+      "SU": "Sun"
+    },
+    "form": {
+      "titleEn": "Title (English)",
+      "titleAr": "Title (Arabic)",
+      "descEn": "Details (English)",
+      "descAr": "Details (Arabic)",
+      "allDay": "All day",
+      "start": "Starts",
+      "end": "Ends",
+      "type": "Type",
+      "room": "Room",
+      "allRooms": "All rooms",
+      "visibility": "Who can see it",
+      "repeat": "Repeat",
+      "until": "Repeat until",
+      "days": "On these days",
+      "save": "Save event"
+    },
+    "layers": {
+      "title": "Show",
+      "events": "Events and holidays",
+      "birthdays_students": "Children birthdays",
+      "birthdays_staff": "Staff birthdays",
+      "leaves": "Staff leave",
+      "tours": "Tours"
+    },
+    "kinds": {
+      "event": "Event",
+      "holiday": "Holiday",
+      "birthdays_students": "Birthday",
+      "birthdays_staff": "Birthday",
+      "leave": "Leave",
+      "tour": "Tour"
+    },
+    "schedules": {
+      "staff": "Staff schedule",
+      "programs": "Programme times",
+      "noStaff": "No staff are assigned to rooms yet.",
+      "noPrograms": "No programmes yet.",
+      "days": "{{count}} days a week",
+      "students": "{{count}} children"
+    },
+    "feed": {
+      "title": "Subscribe on your phone",
+      "body": "Add this link to Google, Apple or Outlook calendar to see nursery events and holidays on your phone. It shows only what parents may see.",
+      "copy": "Copy link",
+      "copied": "Link copied",
+      "copyFailed": "Could not copy. Select the link and copy it.",
+      "rotate": "Replace link",
+      "confirmRotate": "Replace the link? Everyone who subscribed will need the new one."
+    }
+  },
+  "tools": {
+    "title": "Tools",
+    "subtitle": "Print ID cards for children and staff.",
+    "cards": {
+      "title": "ID cards",
+      "scope": "Who are the cards for",
+      "scopes": {
+        "student": "Children",
+        "staff": "Staff"
+      },
+      "design": "Choose a design",
+      "colours": "Colours",
+      "colour": {
+        "primary": "Main",
+        "secondary": "Background",
+        "accent": "Accent"
+      },
+      "show": "What to show on the card",
+      "fields": {
+        "name": "Name",
+        "photo": "Photo",
+        "dob": "Date of birth",
+        "room": "Room",
+        "program": "Programme",
+        "barcode": "QR code for scanning",
+        "expiry": "Expiry date"
+      },
+      "size": "Size",
+      "sizes": {
+        "a6": "A6 (105 × 148 mm)",
+        "cr80": "Card (85.6 × 54 mm)"
+      },
+      "language": "Card language",
+      "expiry": "Expires on",
+      "people": "People ({{count}} chosen)",
+      "selectAll": "Choose all shown",
+      "clear": "Clear",
+      "noPeople": "No one to show.",
+      "needPeople": "Choose at least one person.",
+      "generate": "Create PDF",
+      "ready": "{{count}} cards ready"
     }
   }
 }
