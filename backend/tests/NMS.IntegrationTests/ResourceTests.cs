@@ -24,9 +24,10 @@ public class ResourceTests(NmsApiFixture api)
 
     private async Task<Guid> FolderAsync(string audience)
     {
-        var made = await api.Admin.PostAsync("/api/v1/resources/folders", new { name = new { en = $"Folder {Guid.NewGuid():N}"[..14], ar = "مجلد" }, audience });
+        var name = $"Folder {Guid.NewGuid():N}";
+        var made = await api.Admin.PostAsync("/api/v1/resources/folders", new { name = new { en = name, ar = "مجلد" }, audience });
         made.Status.Should().Be(HttpStatusCode.Created, made.Raw);
-        return made.Data.EnumerateArray().OrderByDescending(f => f.GetProperty("name").GetProperty("en").GetString()).First(f => f.GetProperty("audience").GetString() == audience).GetProperty("id").GetGuid();
+        return made.Data.EnumerateArray().Single(f => f.GetProperty("name").GetProperty("en").GetString() == name).GetProperty("id").GetGuid();
     }
 
     private async Task<Guid> UploadAsync(Guid folder, string title, byte[]? file = null, string name = "handbook.pdf", string tags = "handbook")
