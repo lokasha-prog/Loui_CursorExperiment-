@@ -312,14 +312,14 @@
       </div>
       <div class="space-y-3">
         <div class="p-3 rounded-xl bg-red-400/20 border border-red-300/50">
-          <div class="text-[10px] font-mono text-red-200 uppercase font-bold mb-1">OWNER DECISION NEEDED · BLOCKING</div>
-          <div class="font-bold text-sm">Test accounts on the login screen</div>
-          <div class="text-[11px] text-slate-300 mt-1">The request (known super-admin password shown on the login page) was stopped by a safety check. Choose a safer option (ADR-0006).</div>
+          <div class="text-[10px] font-mono text-red-200 uppercase font-bold mb-1">OWNER ACTION · BEFORE GO-LIVE</div>
+          <div class="font-bold text-sm">Replace the secrets shared in chat</div>
+          <div class="text-[11px] text-slate-300 mt-1">New Groq key and a new Super Admin password; keep the key file nms.keys.xml safe off the computer</div>
         </div>
         <div class="p-3 rounded-xl bg-amber-400/15 border border-amber-300/40">
-          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">OWNER DECISION NEEDED · BLOCKING</div>
-          <div class="font-bold text-sm">AI Brain — the heart of the product</div>
-          <div class="text-[11px] text-slate-300 mt-1">Which AI provider, where child data is processed, and what it should do first</div>
+          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">OWNER / LEGAL · BEFORE GO-LIVE</div>
+          <div class="font-bold text-sm">Data-protection sign-off (PDPL)</div>
+          <div class="text-[11px] text-slate-300 mt-1">Required before go-live and before any AI feature uses personal data</div>
         </div>
         <div class="p-3 rounded-xl bg-white/5 border border-white/10">
           <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">AFTER THE PILOT</div>
@@ -657,7 +657,7 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-20 23:30 GST",
+    lastUpdated: "2026-10-21 00:30 GST",
     updatedBy: "Claude Code",
     overallPct: 19,
 
