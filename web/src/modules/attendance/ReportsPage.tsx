@@ -1,3 +1,4 @@
+import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { BarChart3, Download } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +10,9 @@ import { Field, Select } from '@/components/ui/form-controls'
 import { Badge, Card, EmptyState, Table, Td, Th } from '@/components/ui/surfaces'
 import { formatDate } from '@/lib/format'
 import { localized } from '@/lib/utils'
+import { can, useAuth } from '@/stores/auth'
+import { AnalyticsTab } from '../reports/AnalyticsTab'
+import { ReportCentreTab } from '../reports/ReportCentreTab'
 
 function currentMonth() {
   const now = new Date()
@@ -24,7 +28,7 @@ function lastMonths(count: number) {
 }
 
 /** Manager reports: the month's attendance, tomorrow's expected numbers, and when rooms were short of staff. */
-export default function ReportsPage() {
+function AttendanceReports() {
   const { t, i18n } = useTranslation()
   const [month, setMonth] = useState(currentMonth())
   const [personType, setPersonType] = useState<'student' | 'staff'>('student')
@@ -39,8 +43,6 @@ export default function ReportsPage() {
 
   return (
     <>
-      <PageHeader title={t('reports.title')} subtitle={t('reports.subtitle')} />
-
       <section className="mb-8" aria-labelledby="monthly-h">
         <div className="mb-3 flex flex-wrap items-end gap-3">
           <h2 id="monthly-h" className="me-auto font-heading text-lg font-semibold">{t('reports.monthly')}</h2>
@@ -138,6 +140,38 @@ export default function ReportsPage() {
             )}
         </Card>
       </section>
+    </>
+  )
+}
+
+/** Reports for managers: this month's attendance and shortages, the report centre (files to download) and the analytics charts. */
+export default function ReportsPage() {
+  const { t } = useTranslation()
+  const me = useAuth((s) => s.me)
+  const tabs = [...(can(me, 'attendance.override') ? ['attendance'] : []), ...(can(me, 'reports.view') ? ['center', 'analytics'] : [])]
+  const [tab, setTab] = useState(tabs[0] ?? 'attendance')
+
+  return (
+    <>
+      <PageHeader title={t('reports.title')} subtitle={t('reports.subtitle')} />
+      <TabsPrimitive.Root value={tab} onValueChange={setTab}>
+        {tabs.length > 1 && (
+          <TabsPrimitive.List className="mb-5 flex gap-1 overflow-x-auto border-b">
+            {tabs.map((key) => (
+              <TabsPrimitive.Trigger
+                key={key}
+                value={key}
+                className="whitespace-nowrap border-b-2 border-transparent px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=active]:border-primary data-[state=active]:font-bold data-[state=active]:text-primary-dark"
+              >
+                {t(`reports.tabs.${key}`)}
+              </TabsPrimitive.Trigger>
+            ))}
+          </TabsPrimitive.List>
+        )}
+        {tabs.includes('attendance') && <TabsPrimitive.Content value="attendance"><AttendanceReports /></TabsPrimitive.Content>}
+        {tabs.includes('center') && <TabsPrimitive.Content value="center"><ReportCentreTab /></TabsPrimitive.Content>}
+        {tabs.includes('analytics') && <TabsPrimitive.Content value="analytics"><AnalyticsTab /></TabsPrimitive.Content>}
+      </TabsPrimitive.Root>
     </>
   )
 }

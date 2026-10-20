@@ -99,7 +99,7 @@ export function AppRoutes() {
           <Route path="/students/:id" element={<RequirePermission permission="students.read"><StudentDetailPage /></RequirePermission>} />
           <Route path="/staff" element={<RequirePermission permission="staff.read"><StaffPage /></RequirePermission>} />
           <Route path="/attendance" element={<RequirePermission permission="attendance.read"><AttendancePage /></RequirePermission>} />
-          <Route path="/reports" element={<RequirePermission permission="attendance.override"><ReportsPage /></RequirePermission>} />
+          <Route path="/reports" element={<RequirePermission permission="reports.view"><ReportsPage /></RequirePermission>} />
           <Route path="/feed" element={<RequirePermission permission="activities.read"><FeedPage /></RequirePermission>} />
           <Route path="/messages" element={<RequirePermission permission="messaging.read"><MessagesPage /></RequirePermission>} />
           <Route path="/notifications" element={<NotificationsPage />} />

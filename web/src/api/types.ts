@@ -650,6 +650,10 @@ export interface CentreSettings {
   late_grace_minutes: number
   early_leave_grace_minutes: number
   parents_see_invoices: boolean
+  sms_enabled: boolean
+  sms_monthly_quota: number
+  sms_available: boolean
+  sms_used_this_month: number
 }
 
 export interface CalendarOccurrence {
@@ -809,4 +813,37 @@ export interface IssuedCertificate {
   title: string
   issued_on: string
   created_at: string
+}
+
+export interface ReportDefinition {
+  kind: string
+  name: Record<string, string>
+  formats: string[]
+  filters: string[]
+  permission: string
+}
+
+export interface ReportRun {
+  id: string
+  kind: string
+  format: string
+  status: 'pending' | 'running' | 'done' | 'failed'
+  error: string | null
+  file_name: string | null
+  parameters: Record<string, string | null>
+  created_at: string
+  completed_at: string | null
+  expires_at: string
+}
+
+export interface Analytics {
+  from: string
+  to: string
+  attendance_rate: { label: string; value: number }[]
+  attendance_by_status: { label: string; count: number }[]
+  revenue: { month: string; billed_fils: number; collected_fils: number; expenses_fils: number }[] | null
+  invoice_status: { label: string; count: number }[] | null
+  enquiries_by_month: { label: string; count: number }[] | null
+  enrolled_by_month: { label: string; count: number }[] | null
+  enquiries_by_source: { label: string; count: number }[] | null
 }

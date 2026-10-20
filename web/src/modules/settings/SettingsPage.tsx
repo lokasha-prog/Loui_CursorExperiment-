@@ -94,6 +94,20 @@ function CentreForm({ settings, canWrite }: { settings: CentreSettings; canWrite
             <span><span className="font-semibold">{t('settings.portal.invoices')}</span><span className="block text-xs text-muted-foreground">{t('settings.portal.invoicesHint')}</span></span>
           </label>
         </Card>
+
+        <Card className="space-y-3 p-4">
+          <h2 className="font-heading text-lg font-semibold">{t('settings.sms.title')}</h2>
+          <p className="text-xs text-muted-foreground">{t('settings.sms.body')}</p>
+          {!draft.sms_available && <Alert>{t('settings.sms.notSetUp')}</Alert>}
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input type="checkbox" className="h-4 w-4 accent-primary" checked={draft.sms_enabled} onChange={(e) => set({ sms_enabled: e.target.checked })} />
+            {t('settings.sms.enabled')}
+          </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label={t('settings.sms.quota')} htmlFor="cs-sms-quota" hint={t('settings.sms.quotaHint')}><Input id="cs-sms-quota" inputMode="numeric" dir="ltr" className="text-start" value={draft.sms_monthly_quota} onChange={(e) => set({ sms_monthly_quota: num(e.target.value) })} /></Field>
+            <p className="self-end pb-2 text-sm text-muted-foreground">{t('settings.sms.used', { count: draft.sms_used_this_month })}</p>
+          </div>
+        </Card>
       </fieldset>
       {canWrite && <div className="flex justify-end"><Button type="submit" disabled={save.isPending}>{t('settings.save')}</Button></div>}
 

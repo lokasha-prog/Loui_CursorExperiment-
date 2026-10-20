@@ -647,7 +647,51 @@
     "until": "Ended",
     "gap": "Staff",
     "gapValue": "{{staff}} here, {{required}} needed",
-    "ongoing": "Still short"
+    "ongoing": "Still short",
+    "tabs": {
+      "attendance": "Attendance",
+      "center": "Report centre",
+      "analytics": "Analytics"
+    },
+    "centre": {
+      "title": "Make a report",
+      "which": "Report",
+      "format": "File type",
+      "formats": {
+        "excel": "Excel",
+        "pdf": "PDF",
+        "json": "JSON"
+      },
+      "generate": "Make report",
+      "started": "Your report is being made",
+      "making": "Making...",
+      "failed": "Could not be made",
+      "download": "Download",
+      "recent": "Your recent reports",
+      "keep": "Kept for 30 days, then removed.",
+      "none": "No reports yet.",
+      "to": "To",
+      "date": "Date",
+      "any": "Any",
+      "program": "Programme",
+      "staff": "Staff",
+      "source": "Source",
+      "status": "Status",
+      "userEmail": "User e-mail",
+      "entity": "Item type",
+      "action": "Action"
+    },
+    "analytics": {
+      "png": "Save picture",
+      "noData": "Nothing to show for this period.",
+      "attendanceRate": "Attendance rate",
+      "attendanceStatus": "Attendance by status",
+      "revenue": "Billed, collected and spent",
+      "invoiceStatus": "Invoices by status",
+      "enquiries": "Enquiries and enrolments",
+      "newEnquiries": "New enquiries",
+      "sources": "Where enquiries come from"
+    }
   },
   "feed": {
     "title": "Daily feed",
@@ -1295,6 +1339,15 @@
       "audit_log": "Audit log",
       "notifications": "Notifications",
       "centre_structure": "Rooms and programmes"
+    },
+    "sms": {
+      "title": "Text messages (SMS)",
+      "body": "Critical alerts such as a staff shortage can also be sent by text message. Each message costs money, so this is off until you turn it on, and there is a monthly limit.",
+      "notSetUp": "No text message provider is connected yet. Alerts will still go to the app and e-mail. Ask your system administrator to add the provider account.",
+      "enabled": "Also send critical alerts by text message",
+      "quota": "Monthly limit (messages)",
+      "quotaHint": "Texts stop for the month when this is reached.",
+      "used": "Sent this month: {{count}}"
     }
   },
   "calendar": {

@@ -35,7 +35,7 @@ export function useNavItems(): NavItem[] {
     { to: '/calendar', label: t('nav.calendar'), icon: CalendarDays, permission: 'calendar.read' },
     { to: '/enquiries', label: t('nav.enquiries'), icon: Inbox, permission: 'enquiries.read' },
     { to: '/billing', label: t('nav.billing'), icon: Wallet, permission: 'billing.read' },
-    { to: '/reports', label: t('nav.reports'), icon: BarChart3, permission: 'attendance.override' },
+    { to: '/reports', label: t('nav.reports'), icon: BarChart3, permission: 'reports.view' },
     { to: '/leave', label: t('nav.leave'), icon: CalendarOff, permission: 'attendance.read' },
     { to: '/rooms', label: t('nav.rooms'), icon: School, permission: 'centre_structure.read' },
     { to: '/feedback', label: t('nav.feedback'), icon: MessageCircleHeart, permission: 'settings.read' },

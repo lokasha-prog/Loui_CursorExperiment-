@@ -1,6 +1,9 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  Analytics,
+  ReportDefinition,
+  ReportRun,
   AdmissionStatus,
   AdmissionStepItem,
   CertificateTemplateItem,
@@ -796,3 +799,28 @@ export const useStepAction = () =>
 export const useCertificateTemplates = () => useQuery({ queryKey: ['certificate-templates'], queryFn: () => api.get<CertificateTemplateItem[]>('/tools/certificate-templates') })
 
 export const useCertificateHistory = () => useInfiniteList<IssuedCertificate>(['certificates'], '/tools/certificates', {})
+
+// ── Report centre and analytics ─────────────────────────────────────────────
+
+export const useReportDefinitions = () => useQuery({ queryKey: ['report-definitions'], queryFn: () => api.get<ReportDefinition[]>('/reports/center/definitions') })
+
+export const useReportRuns = () =>
+  useInfiniteQuery({
+    queryKey: ['report-runs'],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }): Promise<Page<ReportRun>> => api.page<ReportRun>('/reports/center/runs', { cursor: pageParam, limit: PAGE_SIZE }),
+    getNextPageParam: (last) => (last.pagination.has_more ? (last.pagination.next_cursor ?? undefined) : undefined),
+    // Reports are made in the background, so keep looking while any is still being made.
+    refetchInterval: (query) => (query.state.data?.pages.some((p) => p.items.some((r) => r.status === 'pending' || r.status === 'running')) ? 2000 : false),
+  })
+
+export function useRequestReport() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { kind: string; format: string; parameters: Record<string, string>; language: string }) => api.post<ReportRun>('/reports/center/runs', body),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['report-runs'] }),
+  })
+}
+
+export const useAnalytics = (from: string, to: string) =>
+  useQuery({ queryKey: ['analytics', from, to], queryFn: () => api.get<Analytics>('/reports/analytics', { from, to }) })
