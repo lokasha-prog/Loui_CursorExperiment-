@@ -331,6 +331,13 @@ public sealed class ApiClient(HttpClient http)
         return (response.StatusCode, await response.Content.ReadAsByteArrayAsync(), response.Content.Headers.ContentType?.MediaType);
     }
 
+    public async Task<(HttpStatusCode Status, byte[] Bytes, string? ContentType)> PostBytesAsync(string url, object body)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = JsonContent.Create(body, options: Json) };
+        var response = await http.SendAsync(request);
+        return (response.StatusCode, await response.Content.ReadAsByteArrayAsync(), response.Content.Headers.ContentType?.MediaType);
+    }
+
     public Task<ApiReply> RefreshAsync(string cookie) =>
         SendAsync(HttpMethod.Post, "/api/v1/auth/refresh", null, cookie, csrfHeader: true);
 }

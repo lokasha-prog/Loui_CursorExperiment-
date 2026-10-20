@@ -52,6 +52,7 @@ public static class DependencyInjection
             .Validate(o => o.DefaultDueDays is >= 0 and <= 365, "Billing:DefaultDueDays must be between 0 and 365.")
             .ValidateOnStart();
         services.AddSingleton<NMS.Application.Billing.IInvoiceRenderer, QuestInvoiceRenderer>();
+        services.AddSingleton<NMS.Application.Tools.IIdCardRenderer, NMS.Infrastructure.Services.QuestIdCardRenderer>();
         services.AddSingleton<CentreCalendar>();
 
         services.AddOptions<AiOptions>().Bind(configuration.GetSection(AiOptions.SectionName));
