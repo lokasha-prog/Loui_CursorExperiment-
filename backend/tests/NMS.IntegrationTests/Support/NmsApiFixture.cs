@@ -60,6 +60,7 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseSetting("Auth:BootstrapToken", BootstrapToken);
         builder.UseSetting("Database:MigrateOnStartup", "true");
         builder.UseSetting("Jobs:Enabled", "false");
+        builder.UseSetting("DailyReports:GenerateAt", "00:00");
         builder.UseSetting("RateLimiting:AuthenticatedPerMinute", "100000");
         builder.UseSetting("RateLimiting:AnonymousPerMinute", "100000");
         builder.UseSetting("RateLimiting:LoginPerMinute", "100000");
@@ -306,6 +307,22 @@ public sealed class ApiClient(HttpClient http)
 
         var response = await http.SendAsync(request);
         return new ApiReply(response.StatusCode, await response.Content.ReadAsStringAsync(), response);
+    }
+
+    public async Task<ApiReply> PostFileAsync(string url, byte[] bytes, string fileName)
+    {
+        using var content = new MultipartFormDataContent();
+        var part = new ByteArrayContent(bytes);
+        part.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Add(part, "file", fileName);
+        var response = await http.PostAsync(url, content);
+        return new ApiReply(response.StatusCode, await response.Content.ReadAsStringAsync(), response);
+    }
+
+    public async Task<(HttpStatusCode Status, byte[] Bytes, string? ContentType)> GetBytesAsync(string url)
+    {
+        var response = await http.GetAsync(url);
+        return (response.StatusCode, await response.Content.ReadAsByteArrayAsync(), response.Content.Headers.ContentType?.MediaType);
     }
 
     public Task<ApiReply> RefreshAsync(string cookie) =>

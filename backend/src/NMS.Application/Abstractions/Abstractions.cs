@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NMS.Domain.Attendance;
 using NMS.Domain.Auditing;
+using NMS.Domain.Communication;
 using NMS.Domain.CentreManagement;
 using NMS.Domain.Identity;
 
@@ -84,6 +85,22 @@ public interface IAppDbContext
     DbSet<LeaveType> LeaveTypes { get; }
 
     DbSet<LeaveRequest> LeaveRequests { get; }
+
+    DbSet<MediaFile> MediaFiles { get; }
+
+    DbSet<ActivityPost> ActivityPosts { get; }
+
+    DbSet<ActivityPostStudent> ActivityPostStudents { get; }
+
+    DbSet<ActivityPostMedia> ActivityPostMedia { get; }
+
+    DbSet<DailyReport> DailyReports { get; }
+
+    DbSet<MessageThread> MessageThreads { get; }
+
+    DbSet<ThreadParticipant> ThreadParticipants { get; }
+
+    DbSet<Message> Messages { get; }
 
     DbSet<AuditLog> AuditLogs { get; }
 

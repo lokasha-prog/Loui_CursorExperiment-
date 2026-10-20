@@ -30,6 +30,8 @@ public sealed class CentreCalendar(IClock clock, IOptions<AttendanceOptions> opt
 {
     private readonly TimeZoneInfo _zone = TimeZoneInfo.FindSystemTimeZoneById(options.Value.TimeZoneId);
 
+    public TimeZoneInfo Zone => _zone;
+
     public DateTimeOffset Now => clock.UtcNow;
 
     public DateTime LocalNow => TimeZoneInfo.ConvertTime(clock.UtcNow, _zone).DateTime;

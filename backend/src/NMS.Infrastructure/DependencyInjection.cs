@@ -39,6 +39,7 @@ public static class DependencyInjection
                 o => TimeZoneInfo.TryFindSystemTimeZoneById(o.TimeZoneId, out _) && o.LateGraceMinutes >= 0 && o.EarlyLeaveGraceMinutes >= 0,
                 "The Attendance section needs a valid TimeZoneId and non-negative grace minutes.")
             .ValidateOnStart();
+        services.AddOptions<NMS.Application.Communication.DailyReportOptions>().Bind(configuration.GetSection(NMS.Application.Communication.DailyReportOptions.Section));
         services.AddSingleton<CentreCalendar>();
 
         services.AddOptions<AiOptions>().Bind(configuration.GetSection(AiOptions.SectionName));

@@ -13,6 +13,11 @@ public static class RealtimeGroups
 
     /// <summary>People who may approve and override, who also receive staff-shortage alerts.</summary>
     public static string Managers(Guid tenantId) => $"centre:{tenantId:N}:managers";
+
+    /// <summary>Everyone who can read activity feeds. Messages carry no data: screens simply ask the server again.</summary>
+    public static string Readers(Guid tenantId) => $"centre:{tenantId:N}:readers";
+
+    public static string User(Guid tenantId, Guid userId) => $"centre:{tenantId:N}:user:{userId:N}";
 }
 
 public static class RealtimeEvents
@@ -20,6 +25,8 @@ public static class RealtimeEvents
     public const string AttendanceChanged = "attendance_changed";
     public const string RatioBreach = "ratio_breach";
     public const string RatioRestored = "ratio_restored";
+    public const string ActivityPublished = "activity_published";
+    public const string MessageReceived = "message_received";
 }
 
 /// <summary>
@@ -39,6 +46,16 @@ public sealed class CentreHub : Hub
         }
 
         var permissions = RolePermissions.ForRoles(user.FindAll("role").Select(c => c.Value));
+        if (Guid.TryParse(user.FindFirst("sub")?.Value, out var userId))
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.User(tenantId, userId));
+        }
+
+        if (permissions.Contains(Permissions.ActivitiesRead))
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.Readers(tenantId));
+        }
+
         if (permissions.Contains(Permissions.AttendanceWrite))
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.Staff(tenantId));
@@ -57,8 +74,27 @@ public sealed class CentreHub : Hub
 public sealed class RealtimeNotifier(IHubContext<CentreHub> hub) :
     INotificationHandler<AttendanceChanged>,
     INotificationHandler<RatioBreachDetected>,
-    INotificationHandler<RatioRestored>
+    INotificationHandler<RatioRestored>,
+    INotificationHandler<NMS.Application.Communication.ActivityPublished>,
+    INotificationHandler<NMS.Application.Communication.MessageSent>
 {
+    public Task Handle(NMS.Application.Communication.ActivityPublished notification, CancellationToken cancellationToken) =>
+        hub.Clients.Group(RealtimeGroups.Readers(notification.TenantId)).SendAsync(RealtimeEvents.ActivityPublished, new { }, cancellationToken);
+
+    public async Task Handle(NMS.Application.Communication.MessageSent notification, CancellationToken cancellationToken)
+    {
+        var targets = notification.RecipientUserIds.Select(id => RealtimeGroups.User(notification.TenantId, id)).ToList();
+        if (notification.ToStaffInbox)
+        {
+            targets.Add(RealtimeGroups.Staff(notification.TenantId));
+        }
+
+        if (targets.Count > 0)
+        {
+            await hub.Clients.Groups(targets).SendAsync(RealtimeEvents.MessageReceived, new { notification.ThreadId }, cancellationToken);
+        }
+    }
+
     public Task Handle(AttendanceChanged notification, CancellationToken cancellationToken) =>
         hub.Clients.Group(RealtimeGroups.Staff(notification.TenantId)).SendAsync(
             RealtimeEvents.AttendanceChanged,

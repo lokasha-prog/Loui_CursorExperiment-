@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NMS.Application.Abstractions;
 using NMS.Domain.Attendance;
 using NMS.Domain.Auditing;
+using NMS.Domain.Communication;
 using NMS.Domain.CentreManagement;
 using NMS.Domain.Common;
 using NMS.Domain.Identity;
@@ -61,6 +62,22 @@ public sealed class NmsDbContext(
     public DbSet<LeaveType> LeaveTypes => Set<LeaveType>();
 
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+
+    public DbSet<MediaFile> MediaFiles => Set<MediaFile>();
+
+    public DbSet<ActivityPost> ActivityPosts => Set<ActivityPost>();
+
+    public DbSet<ActivityPostStudent> ActivityPostStudents => Set<ActivityPostStudent>();
+
+    public DbSet<ActivityPostMedia> ActivityPostMedia => Set<ActivityPostMedia>();
+
+    public DbSet<DailyReport> DailyReports => Set<DailyReport>();
+
+    public DbSet<MessageThread> MessageThreads => Set<MessageThread>();
+
+    public DbSet<ThreadParticipant> ThreadParticipants => Set<ThreadParticipant>();
+
+    public DbSet<Message> Messages => Set<Message>();
 
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 

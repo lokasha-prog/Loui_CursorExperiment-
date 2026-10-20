@@ -45,6 +45,8 @@ builder.Services.AddTransient<RealtimeNotifier>();
 builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Attendance.AttendanceChanged>>(p => p.GetRequiredService<RealtimeNotifier>());
 builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Attendance.RatioBreachDetected>>(p => p.GetRequiredService<RealtimeNotifier>());
 builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Attendance.RatioRestored>>(p => p.GetRequiredService<RealtimeNotifier>());
+builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Communication.ActivityPublished>>(p => p.GetRequiredService<RealtimeNotifier>());
+builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Communication.MessageSent>>(p => p.GetRequiredService<RealtimeNotifier>());
 
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower);
@@ -172,6 +174,7 @@ app.MapCentreStructureEndpoints();
 app.MapStudentEndpoints();
 app.MapStaffEndpoints();
 app.MapAttendanceEndpoints();
+app.MapCommunicationEndpoints();
 app.MapUserEndpoints();
 app.MapHub<CentreHub>("/hubs/centre");
 if (DevToolsEndpoints.IsAvailable(app.Environment, app.Configuration))
