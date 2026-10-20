@@ -174,10 +174,10 @@
           <span class="pill pill-info">IN PROGRESS</span>
         </div>
         <h2 class="font-heading text-2xl lg:text-3xl font-bold text-slate-900 mb-1">
-          Where are we? <span class="text-amber-700">Sprint 1 complete.</span>
+          Where are we? <span class="text-amber-700">Sprint 2 in progress.</span>
         </h2>
         <p class="text-sm text-slate-600 max-w-2xl">
-          The NMS project has <strong>62 assets ready</strong> (22 specs + 22 spec HTMLs + 25 web screens + 7 mobile + 2 phase3 + 1 PMO + 4 scripts). Sprint 0 and Sprint 1 are complete: students, staff, rooms, sign-in and access control work in English and Arabic. Two owner decisions are needed before Sprint 2 (see What's Next).
+          The NMS project has <strong>62 assets ready</strong> (22 specs + 22 spec HTMLs + 25 web screens + 7 mobile + 2 phase3 + 1 PMO + 4 scripts). Sprints 0 and 1 are complete. Sprint 2 is well under way: check-in and check-out by barcode, safe child pick-up, absences, leave requests, live staff cover per room and the first dashboard numbers all work in English and Arabic. Live push updates, scheduled jobs and the phone app skeleton are still to do. Two owner decisions are still open (see What's Next).
         </p>
       </div>
       <div class="text-right">
@@ -204,7 +204,7 @@
             </defs>
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">7%</div>
+            <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">8%</div>
             <div class="text-[10px] font-mono text-slate-500 uppercase">Overall</div>
             <div class="text-[10px] font-mono text-slate-400">2 of 30 sprints</div>
           </div>
@@ -273,24 +273,27 @@
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2">
           <i data-lucide="target" class="w-5 h-5 text-amber-600"></i>
-          <h3 class="font-heading text-base font-bold text-slate-900">Latest Result · Sprint 1</h3>
+          <h3 class="font-heading text-base font-bold text-slate-900">Current Focus · Sprint 2</h3>
         </div>
-        <span class="pill pill-done">DONE</span>
+        <span class="pill pill-amber">ACTIVE · 55%</span>
       </div>
-      <h4 class="font-heading text-lg font-bold text-slate-900 mb-2">Centre Management + Sign-in</h4>
-      <p class="text-sm text-slate-600 mb-4">Students, staff, guardians, rooms, programs and user accounts, with sign-in, role-based access, strict separation between centres and a permanent change history. Everything in English and Arabic (left-to-right and right-to-left), stored only in the local Microsoft SQL Server.</p>
+      <h4 class="font-heading text-lg font-bold text-slate-900 mb-2">Attendance + Dashboard</h4>
+      <p class="text-sm text-slate-600 mb-4">Staff can check children and staff in and out by scanning a barcode or by hand, mark absences, hand a child over only to an authorised person, record leave requests for a manager to approve, and see at a glance whether every room has enough staff. The scan history can never be edited.</p>
 
       <div class="space-y-2 mb-4">
-        <div class="text-[10px] font-mono text-slate-500 uppercase font-bold">Sprint 1 Checklist (all verified by tests)</div>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Local SQL Server database, migrations, no seeded data</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Strict separation between centres (database-enforced) + append-only change history</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Built-in sign-in: roles, lockout, rotating sessions, first-administrator setup</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Students, guardians, staff, rooms, programs, groups, labels, user accounts (service layer)</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Parents see only their own children; teachers only their own rooms</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Automated tests: 72 unit/architecture + 56 integration, all passing</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Web app: setup, sign-in, dashboard, students, staff, rooms &amp; programs, user accounts</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>English and Arabic with right-to-left layout on every screen</span></label>
-        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Web automated tests: 119 passing, 95% coverage (target 75%); backend 88% (target 80%)</span></label>
+        <div class="text-[10px] font-mono text-slate-500 uppercase font-bold">Sprint 2 Checklist</div>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Check-in / check-out by barcode scanner or manually, with late and early-leave detection</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Pick-up needs an authorised guardian and a confirmed identity check</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Unchangeable scan log (database-enforced), including failed scans</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Absences, leave types and leave requests with approve / reject / cancel</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Live staff cover per room, with a shortage flagged in words and icon</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Dashboard: present, absent, not yet here, on leave, staff here, rooms short, leave waiting</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Teachers see their own rooms only; parents see only their own children</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>English and Arabic with right-to-left on every new screen</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" checked disabled class="accent-emerald-600 w-4 h-4"> <span>Tests: 150 backend + 136 web, all passing</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Instant push updates (SignalR + Redis) and the shortage alert to managers</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Scheduled jobs (background tasks), monthly report and forecast, history tables for speed</span></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Phone app skeleton with camera scanning, dashboard speed test</span></label>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" disabled class="accent-emerald-600 w-4 h-4"> <span>Owner decisions open: AI Brain, and the test-accounts login panel (ADR-0006)</span></label>
       </div>
 
@@ -322,9 +325,9 @@
           <div class="text-[11px] text-slate-300 mt-1">Which AI provider, where child data is processed, and what it should do first</div>
         </div>
         <div class="p-3 rounded-xl bg-white/5 border border-white/10">
-          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">SPRINT 2</div>
-          <div class="font-bold text-sm">Attendance + Dashboard</div>
-          <div class="text-[11px] text-slate-300 mt-1">Barcode check-in, live staff-to-child ratio, real-time updates</div>
+          <div class="text-[10px] font-mono text-amber-300 uppercase font-bold mb-1">SPRINT 2 · REMAINING</div>
+          <div class="font-bold text-sm">Instant updates, scheduled jobs, phone app skeleton</div>
+          <div class="text-[11px] text-slate-300 mt-1">Screens refresh by themselves every 15 seconds today; push updates and manager alerts come next</div>
         </div>
       </div>
       <a href="spec-19-roadmap-sprints.html" class="btn btn-primary w-full mt-4 btn-sm">View Full Roadmap →</a>
@@ -657,15 +660,15 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-20 18:40 GST",
+    lastUpdated: "2026-10-20 19:10 GST",
     updatedBy: "Claude Code",
-    overallPct: 7,
+    overallPct: 8,
 
     sprints: {
       // MVP Pilot (0-5)
       0:  { status: "done",    pct: 100, title: "Setup & Planning",            notes: "Monorepo, local services, first commit (database: local SQL Server)", deliverables: "Repo, .cursorrules, CI skeleton" },
       1:  { status: "done",    pct: 100, title: "Centre Management + Auth",    notes: "Student, Staff, Room, Program, Group, Guardian + built-in sign-in and role-based access", deliverables: "CRUD endpoints, login, RBAC" },
-      2:  { status: "active",  pct: 5,  title: "Attendance + Dashboard",      notes: "Barcode check-in, live ratio via SignalR, KPI widgets", deliverables: "Attendance module, dashboard" },
+      2:  { status: "active",  pct: 55, title: "Attendance + Dashboard",      notes: "Done: scan/manual check-in-out, safe pick-up, absences, leave workflow, live staff cover, dashboard numbers. To do: push updates, scheduled jobs, phone app skeleton", deliverables: "Attendance module, dashboard" },
       3:  { status: "pending", pct: 0,  title: "Parent Comms + Messaging",    notes: "Activity feed (8 types), approval workflow, shared inbox", deliverables: "Activity posts, messaging" },
       4:  { status: "pending", pct: 0,  title: "Notifications + Audit + Emergency", notes: "3-tier notifications, audit log viewer, one-click emergency PDF", deliverables: "Notifications, audit, emergency report" },
       5:  { status: "pending", pct: 0,  title: "Pilot Deployment + UAT + Go-Live", notes: "Production deploy, pilot nursery onboarding, go-live", deliverables: "Pilot live, feedback loop" },
