@@ -14,7 +14,7 @@ public class TenantIsolationAndAuditTests(NmsApiFixture api)
 {
     private async Task<(Guid StudentId, Guid TenantId)> CreateSecondCentreWithStudentAsync(string firstName)
     {
-        var otherTenant = new Tenant { Name = new Dictionary<string, string> { ["en"] = "Other Centre" }, Slug = $"other-{Guid.NewGuid():N}"[..20] };
+        var otherTenant = new Tenant { Name = new Dictionary<string, string> { ["en"] = "Other Centre" }, Slug = $"other-{Guid.NewGuid():N}"[..20], CreatedAt = DateTimeOffset.UtcNow.AddDays(1) };
         await api.WithTenantAsync(Guid.Empty, async db =>
         {
             db.Tenants.Add(otherTenant);

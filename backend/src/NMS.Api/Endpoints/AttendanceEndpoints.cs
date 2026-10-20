@@ -9,6 +9,8 @@ namespace NMS.Api.Endpoints;
 
 public sealed record DecideLeaveRequest(string? Notes);
 
+public sealed record EditAttendanceRequest(string Status, string? Notes);
+
 public static class AttendanceEndpoints
 {
     public static void MapAttendanceEndpoints(this IEndpointRouteBuilder routes)
@@ -33,6 +35,23 @@ public static class AttendanceEndpoints
             ApiResults.From(http, await s.Send(new LiveRatioQuery(), ct)))
             .RequireAuthorization(Permissions.AttendanceWrite);
 
+        a.MapGet("/report/monthly", async (string month, [FromQuery(Name = "person_type")] string? personType, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new MonthlyReportQuery(month, personType ?? "student"), ct)))
+            .RequireAuthorization(Permissions.AttendanceOverride);
+        a.MapGet("/export", async (string month, [FromQuery(Name = "person_type")] string? personType, HttpContext http, ISender s, CancellationToken ct) =>
+        {
+            var result = await s.Send(new ExportAttendanceQuery(month, personType ?? "student"), ct);
+            return result.IsFailure
+                ? ApiResults.Failure(http, result.Errors)
+                : Results.File(System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(result.Value)).ToArray(),
+                    "text/csv; charset=utf-8", $"attendance-{month}.csv");
+        }).RequireAuthorization(Permissions.AttendanceOverride);
+        a.MapGet("/forecast", async (DateOnly? date, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new ForecastQuery(date), ct)))
+            .RequireAuthorization(Permissions.AttendanceWrite);
+        a.MapPatch("/{id:guid}", async (Guid id, EditAttendanceRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new EditAttendanceCommand(id, body.Status, body.Notes), ct)))
+            .RequireAuthorization(Permissions.AttendanceOverride);
         a.MapGet("/ratio/history", async (
             [FromQuery(Name = "room_id")] Guid? roomId, string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.FromPage(http, await s.Send(new RatioHistoryQuery(roomId, cursor, limit), ct)))

@@ -38,6 +38,9 @@ if (!string.IsNullOrWhiteSpace(redis))
     signalR.AddStackExchangeRedis(redis, o => o.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal("nms"));
 }
 
+builder.Services.AddOptions<NMS.Api.Jobs.JobsOptions>().Bind(builder.Configuration.GetSection(NMS.Api.Jobs.JobsOptions.SectionName));
+builder.Services.AddSingleton<NMS.Api.Jobs.ScheduledJobsService>();
+builder.Services.AddHostedService(p => p.GetRequiredService<NMS.Api.Jobs.ScheduledJobsService>());
 builder.Services.AddTransient<RealtimeNotifier>();
 builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Attendance.AttendanceChanged>>(p => p.GetRequiredService<RealtimeNotifier>());
 builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Attendance.RatioBreachDetected>>(p => p.GetRequiredService<RealtimeNotifier>());
