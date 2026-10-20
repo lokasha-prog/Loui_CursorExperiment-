@@ -88,3 +88,92 @@ public class EnquiryActivity : TenantEntity
 
     public string Summary { get; set; } = string.Empty;
 }
+
+public static class TourStatuses
+{
+    public const string Scheduled = "scheduled";
+    public const string Completed = "completed";
+    public const string Cancelled = "cancelled";
+    public const string NoShow = "no_show";
+
+    public static readonly string[] All = [Scheduled, Completed, Cancelled, NoShow];
+}
+
+public static class TourTypes
+{
+    public static readonly string[] All = ["general", "program_focus", "birthday_party"];
+}
+
+/// <summary>A visit booked for an enquiring family (spec 03 §9).</summary>
+public class Tour : TenantEntity
+{
+    public Guid EnquiryId { get; set; }
+
+    public Guid? StaffId { get; set; }
+
+    public DateTimeOffset StartsAt { get; set; }
+
+    public int DurationMinutes { get; set; } = 30;
+
+    public string TourType { get; set; } = "general";
+
+    public int Adults { get; set; } = 1;
+
+    public int Children { get; set; } = 1;
+
+    public string? Notes { get; set; }
+
+    public string Status { get; set; } = TourStatuses.Scheduled;
+
+    public DateTimeOffset? ReminderSentAt { get; set; }
+}
+
+/// <summary>Time a staff member cannot take tours (leave, lunch, other commitments). No staff means the whole centre is closed to tours.</summary>
+public class TourBlockOff : TenantEntity
+{
+    public Guid? StaffId { get; set; }
+
+    public DateTimeOffset StartsAt { get; set; }
+
+    public DateTimeOffset EndsAt { get; set; }
+
+    public string? Reason { get; set; }
+}
+
+/// <summary>Something a member of staff must do, such as following up with a family after a tour.</summary>
+public class FollowUpTask : TenantEntity
+{
+    public string Title { get; set; } = string.Empty;
+
+    public DateOnly DueDate { get; set; }
+
+    public Guid? AssignedStaffId { get; set; }
+
+    public Guid? EnquiryId { get; set; }
+
+    public Guid? TourId { get; set; }
+
+    public bool IsDone { get; set; }
+
+    public DateTimeOffset? CompletedAt { get; set; }
+}
+
+/// <summary>An e-mail to someone who is not a system user yet (an enquiring family). Sent by the background run, retried, never lost.</summary>
+public class OutboundEmail : TenantEntity
+{
+    public string ToAddress { get; set; } = string.Empty;
+
+    public string Subject { get; set; } = string.Empty;
+
+    public string Body { get; set; } = string.Empty;
+
+    public string Status { get; set; } = "pending";
+
+    public int Attempts { get; set; }
+
+    public DateTimeOffset NextAttemptAt { get; set; }
+
+    public DateTimeOffset? SentAt { get; set; }
+
+    public string? Error { get; set; }
+}

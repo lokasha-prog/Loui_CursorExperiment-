@@ -54,3 +54,62 @@ public sealed class EnquiryActivityConfiguration : IEntityTypeConfiguration<Enqu
         builder.HasIndex(e => new { e.TenantId, e.EnquiryId, e.CreatedAt });
     }
 }
+
+public sealed class TourConfiguration : IEntityTypeConfiguration<Tour>
+{
+    public void Configure(EntityTypeBuilder<Tour> builder)
+    {
+        builder.ToTable("Tours");
+        builder.Property(t => t.TourType).HasMaxLength(20).IsRequired();
+        builder.Property(t => t.Status).HasMaxLength(20).IsRequired();
+        builder.Property(t => t.Notes).HasMaxLength(1000);
+        builder.HasOne<Enquiry>().WithMany().HasForeignKey(t => t.EnquiryId);
+        builder.HasOne<NMS.Domain.CentreManagement.Staff>().WithMany().HasForeignKey(t => t.StaffId);
+        builder.HasIndex(t => new { t.TenantId, t.StartsAt });
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Tours_Status", "[Status] IN (N'scheduled', N'completed', N'cancelled', N'no_show')");
+            t.HasCheckConstraint("CK_Tours_TourType", "[TourType] IN (N'general', N'program_focus', N'birthday_party')");
+            t.HasCheckConstraint("CK_Tours_Counts", "[Adults] >= 0 AND [Children] >= 0 AND [DurationMinutes] > 0");
+        });
+    }
+}
+
+public sealed class TourBlockOffConfiguration : IEntityTypeConfiguration<TourBlockOff>
+{
+    public void Configure(EntityTypeBuilder<TourBlockOff> builder)
+    {
+        builder.ToTable("TourBlockOffs");
+        builder.Property(b => b.Reason).HasMaxLength(300);
+        builder.HasOne<NMS.Domain.CentreManagement.Staff>().WithMany().HasForeignKey(b => b.StaffId);
+        builder.HasIndex(b => new { b.TenantId, b.StartsAt });
+        builder.ToTable(t => t.HasCheckConstraint("CK_TourBlockOffs_Range", "[EndsAt] > [StartsAt]"));
+    }
+}
+
+public sealed class FollowUpTaskConfiguration : IEntityTypeConfiguration<FollowUpTask>
+{
+    public void Configure(EntityTypeBuilder<FollowUpTask> builder)
+    {
+        builder.ToTable("FollowUpTasks");
+        builder.Property(t => t.Title).HasMaxLength(300).IsRequired();
+        builder.HasOne<NMS.Domain.CentreManagement.Staff>().WithMany().HasForeignKey(t => t.AssignedStaffId);
+        builder.HasOne<Enquiry>().WithMany().HasForeignKey(t => t.EnquiryId);
+        builder.HasOne<Tour>().WithMany().HasForeignKey(t => t.TourId);
+        builder.HasIndex(t => new { t.TenantId, t.IsDone, t.DueDate });
+    }
+}
+
+public sealed class OutboundEmailConfiguration : IEntityTypeConfiguration<OutboundEmail>
+{
+    public void Configure(EntityTypeBuilder<OutboundEmail> builder)
+    {
+        builder.ToTable("OutboundEmails");
+        builder.Property(e => e.ToAddress).HasMaxLength(254).IsRequired();
+        builder.Property(e => e.Subject).HasMaxLength(300).IsRequired();
+        builder.Property(e => e.Body).IsRequired();
+        builder.Property(e => e.Status).HasMaxLength(20).IsRequired();
+        builder.Property(e => e.Error).HasMaxLength(500);
+        builder.HasIndex(e => new { e.TenantId, e.Status, e.NextAttemptAt });
+    }
+}

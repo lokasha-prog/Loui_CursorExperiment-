@@ -130,6 +130,10 @@ public sealed class NmsDbContext(
     public DbSet<Enquiry> Enquiries => Set<Enquiry>();
     public DbSet<EnquiryStageLog> EnquiryStageLogs => Set<EnquiryStageLog>();
     public DbSet<EnquiryActivity> EnquiryActivities => Set<EnquiryActivity>();
+    public DbSet<Tour> Tours => Set<Tour>();
+    public DbSet<TourBlockOff> TourBlockOffs => Set<TourBlockOff>();
+    public DbSet<FollowUpTask> FollowUpTasks => Set<FollowUpTask>();
+    public DbSet<OutboundEmail> OutboundEmails => Set<OutboundEmail>();
     public DbSet<BillingSettings> BillingSettings => Set<BillingSettings>();
     public DbSet<ReminderLog> ReminderLogs => Set<ReminderLog>();
 

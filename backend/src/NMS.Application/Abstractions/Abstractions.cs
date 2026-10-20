@@ -132,6 +132,10 @@ public interface IAppDbContext
     DbSet<Enquiry> Enquiries { get; }
     DbSet<EnquiryStageLog> EnquiryStageLogs { get; }
     DbSet<EnquiryActivity> EnquiryActivities { get; }
+    DbSet<Tour> Tours { get; }
+    DbSet<TourBlockOff> TourBlockOffs { get; }
+    DbSet<FollowUpTask> FollowUpTasks { get; }
+    DbSet<OutboundEmail> OutboundEmails { get; }
     DbSet<BillingSettings> BillingSettings { get; }
     DbSet<ReminderLog> ReminderLogs { get; }
 
