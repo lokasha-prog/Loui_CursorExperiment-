@@ -175,3 +175,37 @@ public class CertificateIssued : TenantEntity
 
     public Guid IssuedBy { get; set; }
 }
+
+public static class ReportStatuses
+{
+    public const string Pending = "pending";
+    public const string Running = "running";
+    public const string Done = "done";
+    public const string Failed = "failed";
+}
+
+/// <summary>One requested report: what was asked for, who asked, and the finished file, kept for 30 days.</summary>
+public class ReportRun : TenantEntity
+{
+    public string Kind { get; set; } = string.Empty;
+
+    public string Format { get; set; } = "excel";
+
+    public string ParametersJson { get; set; } = "{}";
+
+    public string Status { get; set; } = ReportStatuses.Pending;
+
+    public string? Error { get; set; }
+
+    public Guid RequestedBy { get; set; }
+
+    public string? FileName { get; set; }
+
+    public string? ContentType { get; set; }
+
+    public byte[]? Content { get; set; }
+
+    public DateTimeOffset? CompletedAt { get; set; }
+
+    public DateTimeOffset ExpiresAt { get; set; }
+}

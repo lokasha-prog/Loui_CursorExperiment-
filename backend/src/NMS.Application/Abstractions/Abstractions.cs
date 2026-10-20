@@ -135,6 +135,7 @@ public interface IAppDbContext
     DbSet<NMS.Domain.Forms.FormSubmission> FormSubmissions { get; }
     DbSet<NMS.Domain.Forms.AdmissionStep> AdmissionSteps { get; }
     DbSet<NMS.Domain.Forms.CertificateIssued> CertificatesIssued { get; }
+    DbSet<NMS.Domain.Forms.ReportRun> ReportRuns { get; }
     DbSet<NMS.Domain.Forms.StudentAdmissionStep> StudentAdmissionSteps { get; }
     DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents { get; }
     DbSet<CentreSettings> CentreSettings { get; }

@@ -90,3 +90,24 @@ public sealed class CertificateIssuedConfiguration : IEntityTypeConfiguration<Ce
         builder.HasIndex(c => new { c.TenantId, c.StudentId });
     }
 }
+
+public sealed class ReportRunConfiguration : IEntityTypeConfiguration<ReportRun>
+{
+    public void Configure(EntityTypeBuilder<ReportRun> builder)
+    {
+        builder.ToTable("ReportRuns");
+        builder.Property(r => r.Kind).HasMaxLength(40).IsRequired();
+        builder.Property(r => r.Format).HasMaxLength(10).IsRequired();
+        builder.Property(r => r.Status).HasMaxLength(20).IsRequired();
+        builder.Property(r => r.Error).HasMaxLength(500);
+        builder.Property(r => r.FileName).HasMaxLength(200);
+        builder.Property(r => r.ContentType).HasMaxLength(100);
+        builder.HasIndex(r => new { r.TenantId, r.RequestedBy, r.CreatedAt });
+        builder.HasIndex(r => new { r.Status, r.ExpiresAt });
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_ReportRuns_Status", "[Status] IN (N'pending', N'running', N'done', N'failed')");
+            t.HasCheckConstraint("CK_ReportRuns_Format", "[Format] IN (N'excel', N'pdf', N'json')");
+        });
+    }
+}

@@ -140,6 +140,10 @@ builder.Services.AddRateLimiter(options =>
         http.RequestServices.GetRequiredService<IOptions<RateLimitOptions>>().Value.LoginPerMinute));
 });
 
+builder.Services.AddSingleton<NMS.Api.Jobs.ReportQueue>();
+builder.Services.AddSingleton<NMS.Application.Reporting.IReportQueue>(sp => sp.GetRequiredService<NMS.Api.Jobs.ReportQueue>());
+builder.Services.AddHostedService<NMS.Api.Jobs.ReportWorker>();
+
 var app = builder.Build();
 
 ExceptionHandling.Use(app);
@@ -189,6 +193,7 @@ app.MapNotificationEndpoints();
 app.MapBillingEndpoints();
 app.MapEnquiryEndpoints();
 app.MapSettingsEndpoints();
+app.MapReportEndpoints();
 app.MapFormEndpoints();
 app.MapAdmissionEndpoints();
 app.MapToolsEndpoints();
