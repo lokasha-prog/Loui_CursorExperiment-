@@ -19,6 +19,8 @@ public sealed record BillingSnapshotDto(
     long CollectedFils,
     long OverdueFils,
     long OutstandingFils,
+    long ExpensesFils,
+    long NetFils,
     int NewInvoicesToday,
     long NewInvoicesTodayFils,
     IReadOnlyList<RecentPaymentDto> RecentPayments,
@@ -42,6 +44,7 @@ public sealed class BillingSnapshotHandler(IAppDbContext db, CentreCalendar cale
         var overdue = await live.Where(i => i.Status == InvoiceStatuses.Overdue).SumAsync(i => (long?)(i.TotalFils - i.PaidFils), ct) ?? 0;
         var outstanding = await live.Where(i => i.Status == InvoiceStatuses.Issued || i.Status == InvoiceStatuses.PartiallyPaid)
             .SumAsync(i => (long?)(i.TotalFils - i.PaidFils), ct) ?? 0;
+        var expenses = await db.Expenses.AsNoTracking().Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end).SumAsync(e => (long?)e.AmountFils, ct) ?? 0;
         var todays = await live.Where(i => i.IssueDate == today).Select(i => i.TotalFils).ToListAsync(ct);
 
         var recent = await db.InvoicePayments.AsNoTracking().OrderByDescending(p => p.PaymentDate).ThenByDescending(p => p.CreatedAt).Take(10)
@@ -69,7 +72,7 @@ public sealed class BillingSnapshotHandler(IAppDbContext db, CentreCalendar cale
         }
 
         return Result<BillingSnapshotDto>.Success(new BillingSnapshotDto(
-            start.ToString("yyyy-MM"), billed, collected, overdue, outstanding, todays.Count, todays.Sum(), recent,
+            start.ToString("yyyy-MM"), billed, collected, overdue, outstanding, expenses, collected - expenses, todays.Count, todays.Sum(), recent,
             late.Select(l => new TopOverdueDto(l.StudentId, names.GetValueOrDefault(l.StudentId), l.Owed, l.Count)).ToList(), trend));
     }
 }

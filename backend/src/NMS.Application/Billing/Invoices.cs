@@ -194,7 +194,7 @@ public sealed class GetInvoiceHandler(IAppDbContext db, IAccessScope scope) : IR
             : Error.NotFound("Invoice not found.");
 }
 
-public sealed class CreateInvoiceHandler(IAppDbContext db, CentreCalendar calendar, ITenantContext tenant, IOptions<BillingOptions> options, IPublisher publisher)
+public sealed class CreateInvoiceHandler(IAppDbContext db, CentreCalendar calendar, ITenantContext tenant, BillingSettingsReader settings, IPublisher publisher)
     : IRequestHandler<CreateInvoiceCommand, Result<InvoiceDetailDto>>
 {
     public async Task<Result<InvoiceDetailDto>> Handle(CreateInvoiceCommand request, CancellationToken ct)
@@ -205,10 +205,11 @@ public sealed class CreateInvoiceHandler(IAppDbContext db, CentreCalendar calend
         }
 
         var today = calendar.Today;
+        var dueDays = (await settings.GetAsync(ct)).DueDays;
         var issue = request.IssueDate ?? today;
         var invoice = new Invoice
         {
-            StudentId = request.StudentId, IssueDate = issue, DueDate = request.DueDate ?? issue.AddDays(options.Value.DefaultDueDays),
+            StudentId = request.StudentId, IssueDate = issue, DueDate = request.DueDate ?? issue.AddDays(dueDays),
             PeriodStart = request.PeriodStart, PeriodEnd = request.PeriodEnd, Notes = request.Notes,
             Status = request.Issue ? InvoiceStatuses.Issued : InvoiceStatuses.Draft,
         };
@@ -351,11 +352,12 @@ public sealed class SendInvoiceHandler(IAppDbContext db, IClock clock, ITenantCo
 }
 
 /// <summary>The invoice run, shared by the button and the scheduled job.</summary>
-public sealed class InvoiceGenerator(IAppDbContext db, CentreCalendar calendar, ITenantContext tenant, IOptions<BillingOptions> options, IPublisher publisher)
+public sealed class InvoiceGenerator(IAppDbContext db, CentreCalendar calendar, ITenantContext tenant, BillingSettingsReader settings, IPublisher publisher)
 {
     public async Task<int> GenerateAsync(DateOnly monthStart, CancellationToken ct)
     {
         var today = calendar.Today;
+        var dueDays = (await settings.GetAsync(ct)).DueDays;
         var plans = await db.FeePlans.AsNoTracking().Include(p => p.Components).Where(p => p.Status == "active").ToListAsync(ct);
         if (plans.Count == 0)
         {
@@ -395,7 +397,7 @@ public sealed class InvoiceGenerator(IAppDbContext db, CentreCalendar calendar, 
 
             var invoice = new Invoice
             {
-                StudentId = link.StudentId, FeePlanId = plan.Id, IssueDate = today, DueDate = today.AddDays(options.Value.DefaultDueDays),
+                StudentId = link.StudentId, FeePlanId = plan.Id, IssueDate = today, DueDate = today.AddDays(dueDays),
                 PeriodStart = monthStart, PeriodEnd = periodEnd, Status = InvoiceStatuses.Issued,
             };
             var order = 0;

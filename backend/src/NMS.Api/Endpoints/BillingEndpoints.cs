@@ -14,6 +14,8 @@ public sealed record RecordPaymentRequest(long AmountFils, DateOnly PaymentDate,
 
 public sealed record GenerateRequest(string? Month);
 
+public sealed record ExpenseRequest(DateOnly ExpenseDate, long AmountFils, string Category, string Description, Guid? ReceiptMediaId);
+
 public static class BillingEndpoints
 {
     public static void MapBillingEndpoints(this IEndpointRouteBuilder routes)
@@ -59,6 +61,33 @@ public static class BillingEndpoints
         {
             var result = await s.Send(new GenerateInvoicesCommand(body?.Month), ct);
             return result.IsFailure ? ApiResults.Failure(http, result.Errors) : ApiResults.Ok(http, new { created = result.Value });
+        }).RequireAuthorization(Permissions.InvoicesGenerate);
+
+        var expenses = routes.MapGroup("/api/v1/expenses").WithTags("Billing");
+        expenses.MapGet("/", async (string? month, string? category, string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.FromPage(http, await s.Send(new ListExpensesQuery(month, category, cursor, limit), ct))).RequireAuthorization(Permissions.BillingWrite);
+        expenses.MapGet("/report", async (string? month, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new ExpenseReportQuery(month), ct))).RequireAuthorization(Permissions.BillingWrite);
+        expenses.MapPost("/", async (ExpenseRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new SaveExpenseCommand(null, body.ExpenseDate, body.AmountFils, body.Category, body.Description, body.ReceiptMediaId), ct), StatusCodes.Status201Created))
+            .RequireAuthorization(Permissions.BillingWrite);
+        expenses.MapPatch("/{id:guid}", async (Guid id, ExpenseRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new SaveExpenseCommand(id, body.ExpenseDate, body.AmountFils, body.Category, body.Description, body.ReceiptMediaId), ct)))
+            .RequireAuthorization(Permissions.BillingWrite);
+        expenses.MapDelete("/{id:guid}", async (Guid id, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new DeleteExpenseCommand(id), ct))).RequireAuthorization(Permissions.BillingWrite);
+
+        var settings = routes.MapGroup("/api/v1/billing").WithTags("Billing");
+        settings.MapGet("/settings", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new GetBillingSettingsQuery(), ct))).RequireAuthorization(Permissions.BillingWrite);
+        settings.MapPut("/settings", async (SaveBillingSettingsCommand body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(body, ct))).RequireAuthorization(Permissions.BillingWrite);
+        settings.MapGet("/reminders", async (string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.FromPage(http, await s.Send(new ListRemindersQuery(cursor, limit), ct))).RequireAuthorization(Permissions.BillingWrite);
+        settings.MapPost("/reminders/actions/run", async (HttpContext http, ISender s, CancellationToken ct) =>
+        {
+            var result = await s.Send(new RunRemindersCommand(), ct);
+            return result.IsFailure ? ApiResults.Failure(http, result.Errors) : ApiResults.Ok(http, new { sent = result.Value });
         }).RequireAuthorization(Permissions.InvoicesGenerate);
 
         routes.MapGet("/api/v1/dashboard/billing-snapshot", async (string? month, HttpContext http, ISender s, CancellationToken ct) =>

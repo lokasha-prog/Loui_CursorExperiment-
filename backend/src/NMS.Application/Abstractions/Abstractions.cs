@@ -127,6 +127,9 @@ public interface IAppDbContext
     DbSet<InvoiceLine> InvoiceLines { get; }
 
     DbSet<InvoicePayment> InvoicePayments { get; }
+    DbSet<Expense> Expenses { get; }
+    DbSet<BillingSettings> BillingSettings { get; }
+    DbSet<ReminderLog> ReminderLogs { get; }
 
     DbSet<AuditLog> AuditLogs { get; }
 

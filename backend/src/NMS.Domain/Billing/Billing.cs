@@ -182,3 +182,66 @@ public static class InvoiceMath
         invoice.TotalFils = invoice.SubtotalFils - invoice.DiscountFils + invoice.TaxFils;
     }
 }
+
+public static class ExpenseCategories
+{
+    public static readonly string[] All = ["rent", "utilities", "salaries", "supplies", "food", "other"];
+}
+
+/// <summary>Money the centre spent (rent, salaries, supplies...). Amounts are whole fils, like everything else in billing.</summary>
+public class Expense : TenantEntity
+{
+    public DateOnly ExpenseDate { get; set; }
+
+    public long AmountFils { get; set; }
+
+    public string Category { get; set; } = "other";
+
+    public string Description { get; set; } = string.Empty;
+
+    public Guid? ReceiptMediaId { get; set; }
+
+    public Guid RecordedBy { get; set; }
+}
+
+/// <summary>One row per centre: how billing behaves there (due days, reminder schedule and wording). Absent means the defaults apply.</summary>
+public class BillingSettings : TenantEntity
+{
+    public int DueDays { get; set; } = 14;
+
+    public bool RemindersEnabled { get; set; } = true;
+
+    /// <summary>Comma-separated days before the due date to remind, for example "3,1".</summary>
+    public string BeforeDueDays { get; set; } = "3,1";
+
+    /// <summary>Comma-separated days after the due date to chase, for example "1,7".</summary>
+    public string AfterDueDays { get; set; } = "1,7";
+
+    public Dictionary<string, string>? BeforeSubject { get; set; }
+
+    public Dictionary<string, string>? BeforeBody { get; set; }
+
+    public Dictionary<string, string>? OverdueSubject { get; set; }
+
+    public Dictionary<string, string>? OverdueBody { get; set; }
+}
+
+public static class ReminderKinds
+{
+    public const string BeforeDue = "before_due";
+    public const string Overdue = "overdue";
+}
+
+/// <summary>Records every reminder so the same one is never sent twice (spec 03 §8.4 reminder log).</summary>
+public class ReminderLog : TenantEntity
+{
+    public Guid InvoiceId { get; set; }
+
+    public string Kind { get; set; } = ReminderKinds.BeforeDue;
+
+    public int OffsetDays { get; set; }
+
+    public int Recipients { get; set; }
+
+    public string Status { get; set; } = "sent";
+}

@@ -607,6 +607,134 @@ namespace NMS.Infrastructure.Persistence.Migrations
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
+            modelBuilder.Entity("NMS.Domain.Billing.BillingSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AfterDueDays")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("BeforeBody")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BeforeDueDays")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("BeforeSubject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("DueDays")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OverdueBody")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OverdueSubject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("RemindersEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("BillingSettings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_BillingSettings_DueDays", "[DueDays] BETWEEN 0 AND 365");
+                        });
+                });
+
+            modelBuilder.Entity("NMS.Domain.Billing.Expense", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("AmountFils")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly>("ExpenseDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("ReceiptMediaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RecordedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "ExpenseDate");
+
+                    b.ToTable("Expenses", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Expenses_Amount", "[AmountFils] > 0");
+
+                            t.HasCheckConstraint("CK_Expenses_Category", "[Category] IN (N'rent', N'utilities', N'salaries', N'supplies', N'food', N'other')");
+                        });
+                });
+
             modelBuilder.Entity("NMS.Domain.Billing.FeeComponent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -964,6 +1092,65 @@ namespace NMS.Infrastructure.Persistence.Migrations
                     b.ToTable("InvoicePayments", null, t =>
                         {
                             t.HasCheckConstraint("CK_InvoicePayments_Amount", "[AmountFils] > 0");
+                        });
+                });
+
+            modelBuilder.Entity("NMS.Domain.Billing.ReminderLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("InvoiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("OffsetDays")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Recipients")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.HasIndex("TenantId", "InvoiceId", "Kind", "OffsetDays")
+                        .IsUnique();
+
+                    b.ToTable("ReminderLogs", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ReminderLogs_Kind", "[Kind] IN (N'before_due', N'overdue')");
                         });
                 });
 
@@ -2640,6 +2827,24 @@ namespace NMS.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("NMS.Domain.Billing.BillingSettings", b =>
+                {
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NMS.Domain.Billing.Expense", b =>
+                {
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("NMS.Domain.Billing.FeeComponent", b =>
                 {
                     b.HasOne("NMS.Domain.Billing.FeePlan", null)
@@ -2713,6 +2918,21 @@ namespace NMS.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("NMS.Domain.Billing.Invoice", null)
                         .WithMany("Payments")
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NMS.Domain.Billing.ReminderLog", b =>
+                {
+                    b.HasOne("NMS.Domain.Billing.Invoice", null)
+                        .WithMany()
                         .HasForeignKey("InvoiceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();

@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddScoped<NMS.Application.Notifications.Notifier>();
         services.AddScoped<NMS.Application.Billing.InvoiceGenerator>();
+        services.AddScoped<NMS.Application.Billing.BillingSettingsReader>();
         return services;
     }
 }

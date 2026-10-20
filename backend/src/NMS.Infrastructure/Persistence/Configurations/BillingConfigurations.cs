@@ -100,3 +100,44 @@ public sealed class InvoicePaymentConfiguration : IEntityTypeConfiguration<Invoi
         builder.ToTable(t => t.HasCheckConstraint("CK_InvoicePayments_Amount", "[AmountFils] > 0"));
     }
 }
+
+public sealed class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
+{
+    public void Configure(EntityTypeBuilder<Expense> builder)
+    {
+        builder.ToTable("Expenses");
+        builder.Property(e => e.Category).HasMaxLength(20).IsRequired();
+        builder.Property(e => e.Description).HasMaxLength(500).IsRequired();
+        builder.HasIndex(e => new { e.TenantId, e.ExpenseDate });
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Expenses_Amount", "[AmountFils] > 0");
+            t.HasCheckConstraint("CK_Expenses_Category", "[Category] IN (N'rent', N'utilities', N'salaries', N'supplies', N'food', N'other')");
+        });
+    }
+}
+
+public sealed class BillingSettingsConfiguration : IEntityTypeConfiguration<BillingSettings>
+{
+    public void Configure(EntityTypeBuilder<BillingSettings> builder)
+    {
+        builder.ToTable("BillingSettings");
+        builder.Property(s => s.BeforeDueDays).HasMaxLength(50).IsRequired();
+        builder.Property(s => s.AfterDueDays).HasMaxLength(50).IsRequired();
+        builder.HasIndex(s => s.TenantId).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.ToTable(t => t.HasCheckConstraint("CK_BillingSettings_DueDays", "[DueDays] BETWEEN 0 AND 365"));
+    }
+}
+
+public sealed class ReminderLogConfiguration : IEntityTypeConfiguration<ReminderLog>
+{
+    public void Configure(EntityTypeBuilder<ReminderLog> builder)
+    {
+        builder.ToTable("ReminderLogs");
+        builder.Property(r => r.Kind).HasMaxLength(20).IsRequired();
+        builder.Property(r => r.Status).HasMaxLength(20).IsRequired();
+        builder.HasOne<Invoice>().WithMany().HasForeignKey(r => r.InvoiceId);
+        builder.HasIndex(r => new { r.TenantId, r.InvoiceId, r.Kind, r.OffsetDays }).IsUnique();
+        builder.ToTable(t => t.HasCheckConstraint("CK_ReminderLogs_Kind", "[Kind] IN (N'before_due', N'overdue')"));
+    }
+}

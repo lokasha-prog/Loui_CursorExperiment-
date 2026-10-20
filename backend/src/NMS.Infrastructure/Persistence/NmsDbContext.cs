@@ -125,6 +125,9 @@ public sealed class NmsDbContext(
     public DbSet<InvoiceLine> InvoiceLines => Set<InvoiceLine>();
 
     public DbSet<InvoicePayment> InvoicePayments => Set<InvoicePayment>();
+    public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<BillingSettings> BillingSettings => Set<BillingSettings>();
+    public DbSet<ReminderLog> ReminderLogs => Set<ReminderLog>();
 
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 

@@ -288,6 +288,8 @@ public sealed class ApiClient(HttpClient http)
 
     public Task<ApiReply> PatchAsync(string url, object body) => SendAsync(HttpMethod.Patch, url, body);
 
+    public Task<ApiReply> PutAsync(string url, object body) => SendAsync(HttpMethod.Put, url, body);
+
     public Task<ApiReply> DeleteAsync(string url) => SendAsync(HttpMethod.Delete, url, null);
 
     public async Task<ApiReply> SendAsync(
