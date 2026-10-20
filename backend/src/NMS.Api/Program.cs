@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NMS.Api.Endpoints;
 using NMS.Api.Http;
+using NMS.Api.Realtime;
 using NMS.Application;
 using NMS.Application.Abstractions;
 using NMS.Application.Security;
@@ -29,6 +30,19 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddOpenApi();
 
+var signalR = builder.Services.AddSignalR()
+    .AddJsonProtocol(o => o.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower);
+var redis = builder.Configuration.GetSection(RealtimeOptions.SectionName).Get<RealtimeOptions>()?.RedisConnectionString;
+if (!string.IsNullOrWhiteSpace(redis))
+{
+    signalR.AddStackExchangeRedis(redis, o => o.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal("nms"));
+}
+
+builder.Services.AddTransient<RealtimeNotifier>();
+builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Attendance.AttendanceChanged>>(p => p.GetRequiredService<RealtimeNotifier>());
+builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Attendance.RatioBreachDetected>>(p => p.GetRequiredService<RealtimeNotifier>());
+builder.Services.AddTransient<MediatR.INotificationHandler<NMS.Application.Attendance.RatioRestored>>(p => p.GetRequiredService<RealtimeNotifier>());
+
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower);
 
@@ -43,6 +57,20 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
     .Configure<IOptions<JwtOptions>>((bearer, jwt) =>
     {
         bearer.MapInboundClaims = false;
+        // Browsers cannot set headers on a live connection, so the hub accepts the token in the query string.
+        bearer.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = token;
+                }
+
+                return Task.CompletedTask;
+            },
+        };
         bearer.TokenValidationParameters = new TokenValidationParameters
         {
             ValidIssuer = jwt.Value.Issuer,
@@ -142,6 +170,7 @@ app.MapStudentEndpoints();
 app.MapStaffEndpoints();
 app.MapAttendanceEndpoints();
 app.MapUserEndpoints();
+app.MapHub<CentreHub>("/hubs/centre");
 
 app.Run();
 

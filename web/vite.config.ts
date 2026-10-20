@@ -10,7 +10,10 @@ export default defineConfig(({ mode }) => {
     server: {
       // The API address comes from configuration (.env files), never from code.
       proxy: env.VITE_API_PROXY_TARGET
-        ? { '/api': { target: env.VITE_API_PROXY_TARGET, changeOrigin: false } }
+        ? {
+            '/api': { target: env.VITE_API_PROXY_TARGET, changeOrigin: false },
+            '/hubs': { target: env.VITE_API_PROXY_TARGET, changeOrigin: false, ws: true },
+          }
         : undefined,
     },
     test: {

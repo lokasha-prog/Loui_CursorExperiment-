@@ -32,6 +32,11 @@ public static class AttendanceEndpoints
             ApiResults.From(http, await s.Send(new LiveRatioQuery(), ct)))
             .RequireAuthorization(Permissions.AttendanceWrite);
 
+        a.MapGet("/ratio/history", async (
+            [FromQuery(Name = "room_id")] Guid? roomId, string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.FromPage(http, await s.Send(new RatioHistoryQuery(roomId, cursor, limit), ct)))
+            .RequireAuthorization(Permissions.AttendanceOverride);
+
         routes.MapGet("/api/v1/dashboard/attendance-summary", async (HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(new DashboardSummaryQuery(), ct)))
             .WithTags("Dashboard")

@@ -77,3 +77,14 @@ public sealed class LeaveRequestConfiguration : IEntityTypeConfiguration<LeaveRe
         });
     }
 }
+
+public sealed class RatioBreachConfiguration : IEntityTypeConfiguration<RatioBreach>
+{
+    public void Configure(EntityTypeBuilder<RatioBreach> builder)
+    {
+        builder.ToTable("RatioBreaches");
+        builder.HasIndex(r => new { r.TenantId, r.RoomId, r.ResolvedAt });
+        builder.HasIndex(r => new { r.TenantId, r.CreatedAt });
+        builder.HasOne<NMS.Domain.CentreManagement.Room>().WithMany().HasForeignKey(r => r.RoomId);
+    }
+}

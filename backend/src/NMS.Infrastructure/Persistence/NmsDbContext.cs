@@ -56,6 +56,8 @@ public sealed class NmsDbContext(
 
     public DbSet<AttendanceEvent> AttendanceEvents => Set<AttendanceEvent>();
 
+    public DbSet<RatioBreach> RatioBreaches => Set<RatioBreach>();
+
     public DbSet<LeaveType> LeaveTypes => Set<LeaveType>();
 
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();

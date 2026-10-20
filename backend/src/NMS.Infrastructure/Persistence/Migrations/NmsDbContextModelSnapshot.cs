@@ -318,6 +318,62 @@ namespace NMS.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NMS.Domain.Attendance.RatioBreach", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("DetectedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("StaffPresent")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StaffRequired")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentsPresent")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.HasIndex("TenantId", "CreatedAt");
+
+                    b.HasIndex("TenantId", "RoomId", "ResolvedAt");
+
+                    b.ToTable("RatioBreaches", (string)null);
+                });
+
             modelBuilder.Entity("NMS.Domain.Auditing.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1420,6 +1476,21 @@ namespace NMS.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("NMS.Domain.Attendance.LeaveType", b =>
                 {
+                    b.HasOne("NMS.Domain.Identity.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NMS.Domain.Attendance.RatioBreach", b =>
+                {
+                    b.HasOne("NMS.Domain.CentreManagement.Room", null)
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("NMS.Domain.Identity.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")

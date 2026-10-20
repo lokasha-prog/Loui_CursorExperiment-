@@ -79,6 +79,8 @@ public interface IAppDbContext
 
     DbSet<AttendanceEvent> AttendanceEvents { get; }
 
+    DbSet<RatioBreach> RatioBreaches { get; }
+
     DbSet<LeaveType> LeaveTypes { get; }
 
     DbSet<LeaveRequest> LeaveRequests { get; }

@@ -512,6 +512,11 @@
       "covered": "Covered",
       "summary": "{{students}} children, {{staff}} staff here",
       "rule": "1 staff for every {{count}} children. Needs {{required}} now."
+    },
+    "banner": {
+      "title": "Not enough staff:",
+      "room": "{{room}} needs {{required}}, has {{present}}",
+      "view": "See details"
     }
   },
   "leave": {

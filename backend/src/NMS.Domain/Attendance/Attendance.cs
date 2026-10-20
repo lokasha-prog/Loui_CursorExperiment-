@@ -164,3 +164,19 @@ public class LeaveRequest : TenantEntity
 
     public string? ApprovalNotes { get; set; }
 }
+
+/// <summary>One period during which a room had fewer staff than its ratio requires (spec 02 §3.3). Open until resolved.</summary>
+public class RatioBreach : TenantEntity
+{
+    public Guid RoomId { get; set; }
+
+    public DateTimeOffset DetectedAt { get; set; }
+
+    public DateTimeOffset? ResolvedAt { get; set; }
+
+    public int StudentsPresent { get; set; }
+
+    public int StaffPresent { get; set; }
+
+    public int StaffRequired { get; set; }
+}

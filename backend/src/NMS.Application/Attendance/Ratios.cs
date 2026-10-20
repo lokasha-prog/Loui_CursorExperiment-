@@ -1,7 +1,9 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NMS.Application.Abstractions;
+using NMS.Application.Common;
 using NMS.Domain.Attendance;
+using NMS.Shared.Paging;
 using NMS.Shared.Results;
 
 namespace NMS.Application.Attendance;
@@ -58,22 +60,92 @@ internal static class RatioCalculator
 
 internal static class RatioMonitor
 {
-    /// <summary>Tells the rest of the system an attendance change happened, and when the room is now short of staff.</summary>
+    /// <summary>
+    /// Tells the rest of the system an attendance change happened, and keeps the shortage history: a shortage opens when a room
+    /// first lacks staff (one alert), is updated while it continues, and closes when the room is covered again.
+    /// </summary>
     public static async Task PublishAsync(
-        IAppDbContext db, IPublisher publisher, Guid tenantId, DateOnly today, Guid? roomId,
+        IAppDbContext db, IPublisher publisher, IClock clock, Guid tenantId, DateOnly today, Guid? roomId,
         ResolvedPerson person, string status, CancellationToken ct)
     {
+        if (roomId is not null)
+        {
+            await TrackRoomAsync(db, publisher, clock, tenantId, today, roomId.Value, ct);
+        }
+
         await publisher.Publish(new AttendanceChanged(tenantId, person.Type, person.Id, roomId, status), ct);
-        if (roomId is null)
+    }
+
+    private static async Task TrackRoomAsync(
+        IAppDbContext db, IPublisher publisher, IClock clock, Guid tenantId, DateOnly today, Guid roomId, CancellationToken ct)
+    {
+        var ratio = (await RatioCalculator.ForRoomsAsync(db, today, [roomId], ct)).FirstOrDefault();
+        if (ratio is null)
         {
             return;
         }
 
-        var ratio = (await RatioCalculator.ForRoomsAsync(db, today, [roomId.Value], ct)).FirstOrDefault();
-        if (ratio is { IsBreach: true })
+        var open = await db.RatioBreaches.FirstOrDefaultAsync(b => b.RoomId == roomId && b.ResolvedAt == null, ct);
+        if (ratio.IsBreach)
         {
-            await publisher.Publish(new RatioBreachDetected(tenantId, ratio.RoomId, ratio.StudentsPresent, ratio.StaffPresent, ratio.StaffRequired), ct);
+            if (open is null)
+            {
+                db.RatioBreaches.Add(new RatioBreach
+                {
+                    RoomId = roomId, DetectedAt = clock.UtcNow, StudentsPresent = ratio.StudentsPresent,
+                    StaffPresent = ratio.StaffPresent, StaffRequired = ratio.StaffRequired,
+                });
+                await db.SaveChangesAsync(ct);
+                await publisher.Publish(new RatioBreachDetected(tenantId, roomId, ratio.StudentsPresent, ratio.StaffPresent, ratio.StaffRequired), ct);
+            }
+            else if (open.StudentsPresent != ratio.StudentsPresent || open.StaffPresent != ratio.StaffPresent || open.StaffRequired != ratio.StaffRequired)
+            {
+                open.StudentsPresent = ratio.StudentsPresent;
+                open.StaffPresent = ratio.StaffPresent;
+                open.StaffRequired = ratio.StaffRequired;
+                await db.SaveChangesAsync(ct);
+            }
         }
+        else if (open is not null)
+        {
+            open.ResolvedAt = clock.UtcNow;
+            await db.SaveChangesAsync(ct);
+            await publisher.Publish(new RatioRestored(tenantId, roomId), ct);
+        }
+    }
+}
+
+public sealed record RatioBreachDto(
+    Guid Id,
+    Guid RoomId,
+    Dictionary<string, string>? RoomName,
+    DateTimeOffset DetectedAt,
+    DateTimeOffset? ResolvedAt,
+    int StudentsPresent,
+    int StaffPresent,
+    int StaffRequired,
+    DateTimeOffset CreatedAt) : ICursorItem;
+
+public sealed record RatioHistoryQuery(Guid? RoomId, string? Cursor, int? Limit) : IRequest<Result<CursorPage<RatioBreachDto>>>;
+
+public sealed class RatioHistoryHandler(IAppDbContext db) : IRequestHandler<RatioHistoryQuery, Result<CursorPage<RatioBreachDto>>>
+{
+    public async Task<Result<CursorPage<RatioBreachDto>>> Handle(RatioHistoryQuery request, CancellationToken ct)
+    {
+        var breaches = db.RatioBreaches.AsNoTracking();
+        if (request.RoomId is { } roomId)
+        {
+            breaches = breaches.Where(b => b.RoomId == roomId);
+        }
+
+        var page = await breaches.ToCursorPageAsync(
+            request.Cursor,
+            request.Limit,
+            b => new RatioBreachDto(
+                b.Id, b.RoomId, db.Rooms.Where(r => r.Id == b.RoomId).Select(r => r.Name).FirstOrDefault(),
+                b.DetectedAt, b.ResolvedAt, b.StudentsPresent, b.StaffPresent, b.StaffRequired, b.CreatedAt),
+            ct);
+        return Result<CursorPage<RatioBreachDto>>.Success(page);
     }
 }
 

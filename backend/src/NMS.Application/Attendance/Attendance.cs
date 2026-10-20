@@ -71,6 +71,9 @@ public sealed record ListAttendanceQuery(DateOnly? Date, Guid? RoomId, string? P
 public sealed record RatioBreachDetected(Guid TenantId, Guid RoomId, int StudentsPresent, int StaffPresent, int StaffRequired)
     : INotification;
 
+/// <summary>Raised when a room that was short of staff has enough again.</summary>
+public sealed record RatioRestored(Guid TenantId, Guid RoomId) : INotification;
+
 /// <summary>Raised after any attendance change so live screens can refresh.</summary>
 public sealed record AttendanceChanged(Guid TenantId, string PersonType, Guid PersonId, Guid? RoomId, string Status)
     : INotification;
@@ -172,6 +175,7 @@ public sealed class CheckInHandler(
     ICurrentUser current,
     CentreCalendar calendar,
     ITenantContext tenant,
+    IClock clock,
     IOptions<AttendanceOptions> options,
     IPublisher publisher) : IRequestHandler<CheckInCommand, Result<AttendanceDto>>
 {
@@ -221,7 +225,7 @@ public sealed class CheckInHandler(
 
         db.AttendanceEvents.Add(NewEvent(request.Barcode, person, AttendanceEventTypes.CheckIn, AttendanceOutcomes.Success, null, request.Device));
         await db.SaveChangesAsync(ct);
-        await RatioMonitor.PublishAsync(db, publisher, tenant.TenantId, today, roomId, person, status, ct);
+        await RatioMonitor.PublishAsync(db, publisher, clock, tenant.TenantId, today, roomId, person, status, ct);
         return Result<AttendanceDto>.Success(AttendanceMapping.ToDto(record, person.Name));
     }
 
@@ -279,6 +283,7 @@ public sealed class CheckOutHandler(
     ICurrentUser current,
     CentreCalendar calendar,
     ITenantContext tenant,
+    IClock clock,
     IOptions<AttendanceOptions> options,
     IPublisher publisher) : IRequestHandler<CheckOutCommand, Result<AttendanceDto>>
 {
@@ -342,7 +347,7 @@ public sealed class CheckOutHandler(
             Outcome = AttendanceOutcomes.Success,
         });
         await db.SaveChangesAsync(ct);
-        await RatioMonitor.PublishAsync(db, publisher, tenant.TenantId, today, record.RoomId, person, record.Status, ct);
+        await RatioMonitor.PublishAsync(db, publisher, clock, tenant.TenantId, today, record.RoomId, person, record.Status, ct);
         return Result<AttendanceDto>.Success(AttendanceMapping.ToDto(record, person.Name));
     }
 

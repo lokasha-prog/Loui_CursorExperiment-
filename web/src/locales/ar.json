@@ -512,6 +512,11 @@
       "covered": "مغطّاة",
       "summary": "{{students}} طفل، {{staff}} موظف حاضر",
       "rule": "موظف لكل {{count}} أطفال. المطلوب الآن {{required}}."
+    },
+    "banner": {
+      "title": "نقص في الموظفين:",
+      "room": "{{room}} تحتاج {{required}} والموجود {{present}}",
+      "view": "عرض التفاصيل"
     }
   },
   "leave": {

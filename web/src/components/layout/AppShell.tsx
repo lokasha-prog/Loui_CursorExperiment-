@@ -8,6 +8,8 @@ import { Avatar } from '@/components/ui/surfaces'
 import { Button } from '@/components/ui/button'
 import { cn, initials, localized } from '@/lib/utils'
 import { can, isParentOnly, useAuth } from '@/stores/auth'
+import { useLiveUpdates } from '@/hooks/use-live-updates'
+import { ShortageBanner } from '@/modules/attendance/ShortageBanner'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
 interface NavItem {
@@ -59,6 +61,7 @@ export function AppShell() {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const items = useNavItems()
+  useLiveUpdates()
 
   const signOut = async () => {
     await authApi.logout()
@@ -157,6 +160,7 @@ export function AppShell() {
             </Button>
           </div>
         </header>
+        <ShortageBanner />
         <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 focus:outline-none lg:px-8 lg:py-8">
           <Outlet />
         </main>

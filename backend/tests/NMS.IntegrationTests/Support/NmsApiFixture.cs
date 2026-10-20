@@ -258,7 +258,13 @@ public sealed class ApiClient(HttpClient http)
 
     public string? RefreshCookie { get; set; }
 
-    public void SetBearer(string token) => http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    public string? Bearer { get; private set; }
+
+    public void SetBearer(string token)
+    {
+        Bearer = token;
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    }
 
     public Task<ApiReply> GetAsync(string url) => SendAsync(HttpMethod.Get, url, null);
 
