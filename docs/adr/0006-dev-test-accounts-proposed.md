@@ -1,6 +1,6 @@
-# ADR-0006: Temporary test accounts on the login screen (PROPOSED, awaiting owner decision)
+# ADR-0006: Test users on the login screen (ACCEPTED: option A, local-only helper)
 
-- Status: **Proposed. Not implemented.** The first attempt was stopped by the build tool's security check (2026-10-20).
+- Status: **Accepted, option A (owner, 2026-10-20). Implemented.** Mapped only in the Development environment with `DevTools:Enabled` in local secrets, only for requests from the same computer; test users get random unseen passwords; the super administrator is never offered (use the real account).
 - Owner request: while in development and testing, the login screen should always list a test account for each role, with the super administrator `salam@brightfuturs.com` and the password `Salam12` (all test accounts to use that password).
 - Why it needs a decision: it conflicts with three standing rules.
   1. Golden rule: never seed data or hard-code values (this would create accounts at start-up and show credentials).
