@@ -1,10 +1,11 @@
-import { Baby, DoorOpen, Plus, School, Sparkles, UsersRound } from 'lucide-react'
+import { AlertTriangle, Baby, CalendarOff, DoorOpen, LogIn, Plus, School, Sparkles, UserCheck, UserX, UsersRound } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { useRooms, useStaff, useStudents } from '@/api/hooks'
+import { useDashboardSummary, useRooms, useStaff, useStudents } from '@/api/hooks'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, Skeleton } from '@/components/ui/surfaces'
+import { RatioCards } from '@/modules/attendance/RatioCards'
 import { can, isParentOnly, useAuth } from '@/stores/auth'
 
 function Count({ pages, loading }: { pages?: { items: unknown[]; pagination: { has_more: boolean } }[]; loading: boolean }) {
@@ -32,6 +33,9 @@ export default function DashboardPage() {
   const students = useStudents({})
   const staff = useStaff({})
   const rooms = useRooms(can(me, 'centre_structure.read'))
+  const canSeeAttendance = can(me, 'attendance.read')
+  const canSeeCover = can(me, 'attendance.write')
+  const summary = useDashboardSummary(canSeeAttendance)
   const name = me?.first_name ?? me?.email ?? ''
 
   const actions = [
@@ -61,6 +65,48 @@ export default function DashboardPage() {
           </Kpi>
         )}
       </div>
+
+      {canSeeAttendance && (
+        <section className="mb-8" aria-labelledby="today-heading">
+          <h2 id="today-heading" className="mb-3 font-heading text-lg font-semibold">{t('dashboard.attendanceToday')}</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Kpi icon={<UserCheck className="h-5 w-5" aria-hidden="true" />} label={t('dashboard.present')} to="/attendance">
+              {summary.isLoading ? <Skeleton className="h-9 w-16" /> : (summary.data?.students_present ?? 0)}
+            </Kpi>
+            <Kpi icon={<LogIn className="h-5 w-5 rtl:rotate-180" aria-hidden="true" />} label={t('dashboard.notYetArrived')} to="/attendance">
+              {summary.isLoading ? <Skeleton className="h-9 w-16" /> : (summary.data?.students_not_yet_arrived ?? 0)}
+            </Kpi>
+            <Kpi icon={<UserX className="h-5 w-5" aria-hidden="true" />} label={t('dashboard.absent')} to="/attendance">
+              {summary.isLoading ? <Skeleton className="h-9 w-16" /> : (summary.data?.students_absent ?? 0)}
+            </Kpi>
+            <Kpi icon={<CalendarOff className="h-5 w-5" aria-hidden="true" />} label={t('dashboard.onLeave')} to="/leave">
+              {summary.isLoading ? <Skeleton className="h-9 w-16" /> : (summary.data?.students_on_leave ?? 0)}
+            </Kpi>
+            {canSeeCover && (
+              <>
+                <Kpi icon={<UsersRound className="h-5 w-5" aria-hidden="true" />} label={t('dashboard.staffHere')} to="/attendance">
+                  {summary.isLoading ? <Skeleton className="h-9 w-16" /> : `${summary.data?.staff_present ?? 0} / ${summary.data?.active_staff ?? 0}`}
+                </Kpi>
+                <Kpi icon={<AlertTriangle className="h-5 w-5" aria-hidden="true" />} label={t('dashboard.roomsShort')} to="/attendance">
+                  {summary.isLoading ? <Skeleton className="h-9 w-16" /> : (summary.data?.rooms_in_breach ?? 0)}
+                </Kpi>
+              </>
+            )}
+            {can(me, 'attendance.override') && (
+              <Kpi icon={<CalendarOff className="h-5 w-5" aria-hidden="true" />} label={t('dashboard.pendingLeave')} to="/leave">
+                {summary.isLoading ? <Skeleton className="h-9 w-16" /> : (summary.data?.pending_leave_requests ?? 0)}
+              </Kpi>
+            )}
+          </div>
+        </section>
+      )}
+
+      {canSeeCover && (
+        <section className="mb-8" aria-labelledby="cover-heading">
+          <h2 id="cover-heading" className="mb-3 font-heading text-lg font-semibold">{t('dashboard.liveCover')}</h2>
+          <RatioCards />
+        </section>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {actions.length > 0 && (

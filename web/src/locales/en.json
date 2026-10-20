@@ -45,7 +45,9 @@
     "rooms": "Rooms & programs",
     "users": "User accounts",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "attendance": "Attendance",
+    "leave": "Leave"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -139,7 +141,16 @@
     "addStaff": "Add a staff member",
     "addRoom": "Add a room",
     "comingTitle": "More is on the way",
-    "comingBody": "Attendance, live room ratios, messages and billing will appear here in the next releases."
+    "comingBody": "Messages, activity updates and billing will appear here in the next releases.",
+    "attendanceToday": "Today at a glance",
+    "present": "Present",
+    "absent": "Absent",
+    "notYetArrived": "Not yet here",
+    "onLeave": "On leave",
+    "staffHere": "Staff here",
+    "pendingLeave": "Leave waiting for a decision",
+    "roomsShort": "Rooms needing staff",
+    "liveCover": "Live staff cover"
   },
   "students": {
     "title": "Students",
@@ -429,5 +440,143 @@
     "title": "Page not found",
     "body": "The page you are looking for does not exist.",
     "home": "Go to the dashboard"
+  },
+  "attendance": {
+    "title": "Attendance",
+    "subtitle": "Check children and staff in and out, and see who is here right now.",
+    "today": "Today",
+    "empty": "No one has been recorded yet today",
+    "emptyBody": "Scan a barcode or choose a person to start the day.",
+    "checkOut": "Check out",
+    "type": {
+      "student": "Child",
+      "staff": "Staff"
+    },
+    "status": {
+      "pending": "Pending",
+      "present": "Present",
+      "late": "Late",
+      "early_leave": "Left early",
+      "absent": "Absent"
+    },
+    "columns": {
+      "name": "Name",
+      "type": "Who",
+      "in": "In",
+      "out": "Out",
+      "status": "Status"
+    },
+    "filters": {
+      "type": "Show",
+      "room": "Room",
+      "all": "Everyone"
+    },
+    "scan": {
+      "mode": "Scan mode",
+      "modeIn": "Check in",
+      "modeOut": "Check out",
+      "label": "Barcode",
+      "placeholder": "Scan or type a barcode",
+      "submitIn": "Check in",
+      "submitOut": "Check out",
+      "checkedIn": "{{name}} is checked in",
+      "checkedOut": "{{name}} is checked out",
+      "notFound": "No one matches this barcode.",
+      "already": "This person has already been recorded today.",
+      "notAllowed": "This cannot be done right now. The person may not be active, or may not be checked in.",
+      "needPickup": "Choose who is collecting {{name}} to finish checking out."
+    },
+    "pickup": {
+      "title": "Collect {{name}}",
+      "description": "A child can only leave with a person who is authorised to collect them.",
+      "guardian": "Collected by",
+      "noneAllowed": "No authorised guardian is on file. Add one on the child page first.",
+      "verified": "I have checked the identity of the person collecting the child.",
+      "verifyRequired": "Confirm that you checked their identity.",
+      "confirm": "Confirm check-out"
+    },
+    "absent": {
+      "open": "Mark absent",
+      "title": "Mark a child absent",
+      "description": "Use this when a child is not coming today. They can still be checked in later.",
+      "student": "Child",
+      "notes": "Note (optional)",
+      "confirm": "Mark absent",
+      "done": "Marked absent"
+    },
+    "ratio": {
+      "title": "Staff cover by room",
+      "unavailable": "Live cover is not available right now.",
+      "noRooms": "No rooms yet.",
+      "short": "Needs staff",
+      "covered": "Covered",
+      "summary": "{{students}} children, {{staff}} staff here",
+      "rule": "1 staff for every {{count}} children. Needs {{required}} now."
+    }
+  },
+  "leave": {
+    "title": "Leave",
+    "subtitle": "Requests for time off for children and staff.",
+    "add": "New request",
+    "filter": "Filter by status",
+    "empty": "No leave requests",
+    "emptyBody": "Requests will appear here once they are made.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "cancel": "Cancel",
+    "created": "Request sent",
+    "done": {
+      "approve": "Request approved",
+      "reject": "Request rejected",
+      "cancel": "Request cancelled"
+    },
+    "status": {
+      "all": "All",
+      "submitted": "Waiting",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    },
+    "columns": {
+      "person": "Who",
+      "type": "Type",
+      "dates": "Dates",
+      "status": "Status"
+    },
+    "errors": {
+      "conflict": "This person already has leave on some of these dates.",
+      "dateOrder": "The end date must not be before the start date."
+    },
+    "form": {
+      "title": "New leave request",
+      "description": "Choose who it is for, the kind of leave and the dates.",
+      "personType": "For",
+      "person": "Person",
+      "type": "Kind of leave",
+      "start": "From",
+      "end": "To",
+      "reason": "Reason (optional)",
+      "submit": "Send request",
+      "noTypes": "No kinds of leave exist yet. A manager needs to add them first."
+    },
+    "types": {
+      "manage": "Kinds of leave",
+      "title": "Kinds of leave",
+      "description": "Set up the kinds of leave your centre uses, such as sick leave or family travel.",
+      "none": "None yet",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "appliesToLabel": "Applies to",
+      "appliesTo": {
+        "both": "Children and staff",
+        "student": "Children",
+        "staff": "Staff"
+      },
+      "requiresApproval": "A manager must approve it",
+      "affectsAttendance": "Counts as an excused absence",
+      "affectsRatio": "Staff on this leave do not count towards cover",
+      "add": "Add kind of leave",
+      "created": "Kind of leave added"
+    }
   }
 }

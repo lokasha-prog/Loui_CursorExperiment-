@@ -1,6 +1,15 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  AttendanceRow,
+  CheckOutRequest,
+  CreateLeaveRequest,
+  CreateLeaveTypeRequest,
+  DashboardSummary,
+  LeaveRequest,
+  LeaveType,
+  RoomRatio,
+  ScanRequest,
   CreateGroupRequest,
   CreateLabelRequest,
   CreateProgramRequest,
@@ -151,3 +160,78 @@ export function useSetUserStatus() {
 /** First-run state and the password rule, both read from the server configuration (never hard-coded in the web app). */
 export const useSetupStatus = () =>
   useQuery({ queryKey: ['setup-status'], queryFn: () => authApi.setupStatus(), staleTime: 60_000 })
+
+// ── Attendance ──────────────────────────────────────────────────────────────
+
+/** How often live screens ask again until push updates (SignalR) are connected. */
+export const LIVE_REFRESH_MS = 15_000
+
+export const useAttendance = (filters: { date?: string; room_id?: string; person_type?: string }, enabled = true) =>
+  useInfiniteList<AttendanceRow>(['attendance'], '/attendance', { ...filters }, enabled)
+
+export const useLiveRatios = (enabled = true) =>
+  useQuery({
+    queryKey: ['live-ratios'],
+    enabled,
+    refetchInterval: LIVE_REFRESH_MS,
+    queryFn: () => api.get<RoomRatio[]>('/attendance/ratio/live'),
+  })
+
+export const useDashboardSummary = (enabled = true) =>
+  useQuery({
+    queryKey: ['dashboard-summary'],
+    enabled,
+    refetchInterval: LIVE_REFRESH_MS,
+    queryFn: () => api.get<DashboardSummary>('/dashboard/attendance-summary'),
+  })
+
+function useAttendanceAction<TBody>(action: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: TBody) => api.post<AttendanceRow>(`/attendance/actions/${action}`, body),
+    onSuccess: () =>
+      Promise.all(['attendance', 'live-ratios', 'dashboard-summary'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const useCheckIn = () => useAttendanceAction<ScanRequest>('check-in')
+export const useCheckOut = () => useAttendanceAction<CheckOutRequest>('check-out')
+export const useMarkAbsent = () => useAttendanceAction<{ student_id: string; notes?: string }>('mark-absent')
+
+export const useStudentOptions = (enabled = true, status = 'active') =>
+  useQuery({
+    queryKey: ['student-options', status],
+    enabled,
+    queryFn: async () => (await api.page<StudentSummary>('/students', { status, limit: 100 })).items,
+  })
+
+export const useStaffOptions = (enabled = true) =>
+  useQuery({
+    queryKey: ['staff-options'],
+    enabled,
+    queryFn: async () => (await api.page<StaffSummary>('/staff', { status: 'active', limit: 100 })).items,
+  })
+
+// ── Leave ───────────────────────────────────────────────────────────────────
+
+export const useLeaveTypes = (enabled = true) =>
+  useQuery({
+    queryKey: ['leave-types'],
+    enabled,
+    queryFn: async () => (await api.page<LeaveType>('/leave-types', { limit: 100 })).items,
+  })
+
+export const useCreateLeaveType = () => useCreate<CreateLeaveTypeRequest, LeaveType>('/leave-types', ['leave-types'])
+
+export const useLeaves = (filters: { status?: string }) => useInfiniteList<LeaveRequest>(['leaves'], '/leaves', { ...filters })
+
+export const useCreateLeave = () => useCreate<CreateLeaveRequest, LeaveRequest>('/leaves', ['leaves', 'dashboard-summary'])
+
+export function useLeaveAction() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, action, notes }: { id: string; action: 'approve' | 'reject' | 'cancel'; notes?: string }) =>
+      api.post<LeaveRequest>(`/leaves/${id}/actions/${action}`, action === 'cancel' ? undefined : { notes }),
+    onSuccess: () => Promise.all(['leaves', 'dashboard-summary'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}

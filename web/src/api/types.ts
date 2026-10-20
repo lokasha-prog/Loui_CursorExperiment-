@@ -153,3 +153,99 @@ export interface UserAccount {
   last_login_at: string | null
   created_at: string
 }
+
+export interface AttendanceRow {
+  id: string
+  person_type: 'student' | 'staff'
+  person_id: string
+  person_name: string | null
+  room_id: string | null
+  date: string
+  check_in_at: string | null
+  check_in_method: string | null
+  check_out_at: string | null
+  check_out_method: string | null
+  check_out_guardian_id: string | null
+  status: 'pending' | 'present' | 'absent' | 'late' | 'early_leave'
+  notes: string | null
+  created_at: string
+}
+
+export interface RoomRatio {
+  room_id: string
+  name: Localized
+  capacity: number
+  ratio_staff_to_student: number
+  students_present: number
+  staff_present: number
+  staff_required: number
+  is_breach: boolean
+}
+
+export interface DashboardSummary {
+  date: string
+  active_students: number
+  students_present: number
+  students_absent: number
+  students_not_yet_arrived: number
+  students_on_leave: number
+  active_staff: number
+  staff_present: number
+  rooms_in_breach: number
+  pending_leave_requests: number
+}
+
+export interface LeaveType {
+  id: string
+  name: Localized
+  applies_to: 'student' | 'staff' | 'both'
+  requires_approval: boolean
+  affects_attendance: boolean
+  affects_ratio: boolean
+  created_at: string
+}
+
+export interface LeaveRequest {
+  id: string
+  person_type: 'student' | 'staff'
+  person_id: string
+  person_name: string | null
+  leave_type_id: string
+  leave_type_name: Localized
+  start_date: string
+  end_date: string
+  reason: string | null
+  status: 'submitted' | 'approved' | 'rejected' | 'cancelled'
+  approved_at: string | null
+  approval_notes: string | null
+  created_at: string
+}
+
+export interface ScanRequest {
+  barcode?: string
+  person_type?: 'student' | 'staff'
+  person_id?: string
+  room_id?: string
+}
+
+export interface CheckOutRequest extends ScanRequest {
+  guardian_id?: string
+  pickup_identity_verified?: boolean
+}
+
+export interface CreateLeaveRequest {
+  person_type: 'student' | 'staff'
+  person_id: string
+  leave_type_id: string
+  start_date: string
+  end_date: string
+  reason?: string
+}
+
+export interface CreateLeaveTypeRequest {
+  name: Localized
+  applies_to: 'student' | 'staff' | 'both'
+  requires_approval: boolean
+  affects_attendance: boolean
+  affects_ratio: boolean
+}
