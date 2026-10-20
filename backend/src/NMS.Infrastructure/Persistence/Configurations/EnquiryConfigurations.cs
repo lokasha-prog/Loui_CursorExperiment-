@@ -127,6 +127,7 @@ public sealed class CentreSettingsConfiguration : IEntityTypeConfiguration<NMS.D
         builder.ToTable(t =>
         {
             t.HasCheckConstraint("CK_CentreSettings_Late", "[LateGraceMinutes] IS NULL OR [LateGraceMinutes] BETWEEN 0 AND 120");
+            t.HasCheckConstraint("CK_CentreSettings_SmsQuota", "[SmsMonthlyQuota] BETWEEN 0 AND 100000");
             t.HasCheckConstraint("CK_CentreSettings_Early", "[EarlyLeaveGraceMinutes] IS NULL OR [EarlyLeaveGraceMinutes] BETWEEN 0 AND 120");
         });
     }

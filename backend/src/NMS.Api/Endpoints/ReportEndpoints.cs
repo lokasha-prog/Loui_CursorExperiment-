@@ -11,6 +11,9 @@ public static class ReportEndpoints
 {
     public static void MapReportEndpoints(this IEndpointRouteBuilder routes)
     {
+        routes.MapGet("/api/v1/reports/analytics", async (DateOnly from, DateOnly to, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new AnalyticsQuery(from, to), ct))).WithTags("Reports").RequireAuthorization(Permissions.ReportsView);
+
         var g = routes.MapGroup("/api/v1/reports/center").WithTags("Reports");
         g.MapGet("/definitions", async (HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(new ListReportDefinitionsQuery(), ct))).RequireAuthorization(Permissions.ReportsView);

@@ -12,13 +12,13 @@ namespace NMS.Application.Settings;
 
 public sealed record CentreSettingsDto(
     Dictionary<string, string> Name, string? ContactEmail, string? ContactPhone, string? KhdaLicenseNumber, IReadOnlyList<string> WeekendDays, string Timezone,
-    string? Address, string? Website, string? BrandColor, Guid? LogoMediaId, int LateGraceMinutes, int EarlyLeaveGraceMinutes, bool ParentsSeeInvoices);
+    string? Address, string? Website, string? BrandColor, Guid? LogoMediaId, int LateGraceMinutes, int EarlyLeaveGraceMinutes, bool ParentsSeeInvoices, bool SmsEnabled, int SmsMonthlyQuota, bool SmsAvailable, int SmsUsedThisMonth);
 
 public sealed record GetCentreSettingsQuery : IRequest<Result<CentreSettingsDto>>;
 
 public sealed record SaveCentreSettingsCommand(
     Dictionary<string, string> Name, string? ContactEmail, string? ContactPhone, string? KhdaLicenseNumber, IReadOnlyList<string> WeekendDays,
-    string? Address, string? Website, string? BrandColor, Guid? LogoMediaId, int LateGraceMinutes, int EarlyLeaveGraceMinutes, bool ParentsSeeInvoices)
+    string? Address, string? Website, string? BrandColor, Guid? LogoMediaId, int LateGraceMinutes, int EarlyLeaveGraceMinutes, bool ParentsSeeInvoices, bool SmsEnabled = false, int SmsMonthlyQuota = 200)
     : IRequest<Result<CentreSettingsDto>>;
 
 public static class WeekDays
@@ -27,7 +27,7 @@ public static class WeekDays
 }
 
 /// <summary>What the centre has chosen, or the system defaults where it has not chosen anything.</summary>
-public sealed class CentreSettingsReader(IAppDbContext db, IOptions<AttendanceOptions> attendance)
+public sealed class CentreSettingsReader(IAppDbContext db, IOptions<AttendanceOptions> attendance, NMS.Application.Notifications.ISmsSender sms, CentreCalendar calendar)
 {
     public async Task<(int LateGrace, int EarlyGrace)> AttendanceAsync(CancellationToken ct)
     {
@@ -45,7 +45,8 @@ public sealed class CentreSettingsReader(IAppDbContext db, IOptions<AttendanceOp
         var (late, early) = await AttendanceAsync(ct);
         return new CentreSettingsDto(
             tenant.Name, tenant.ContactEmail, tenant.ContactPhone, tenant.KhdaLicenseNumber, tenant.WeekendDays, tenant.Timezone,
-            row?.Address, row?.Website, row?.BrandColor, row?.LogoMediaId, late, early, row?.ParentsSeeInvoices ?? true);
+            row?.Address, row?.Website, row?.BrandColor, row?.LogoMediaId, late, early, row?.ParentsSeeInvoices ?? true, row?.SmsEnabled ?? false, row?.SmsMonthlyQuota ?? 200, sms.IsConfigured,
+            await db.NotificationDeliveries.CountAsync(d => d.Channel == "sms" && d.Status == "sent" && d.SentAt >= new DateTimeOffset(new DateTime(calendar.Today.Year, calendar.Today.Month, 1), TimeSpan.Zero), ct));
     }
 }
 
@@ -66,6 +67,7 @@ public sealed partial class SaveCentreSettingsValidator : AbstractValidator<Save
         RuleFor(x => x.WeekendDays).Must(d => d is not null && d.Count <= 6 && d.All(WeekDays.All.Contains) && d.Distinct().Count() == d.Count).WithMessage("Choose weekend days from Monday to Sunday (at most six).");
         RuleFor(x => x.LateGraceMinutes).InclusiveBetween(0, 120);
         RuleFor(x => x.EarlyLeaveGraceMinutes).InclusiveBetween(0, 120);
+        RuleFor(x => x.SmsMonthlyQuota).InclusiveBetween(0, 100_000);
     }
 }
 
@@ -105,6 +107,8 @@ public sealed class SaveCentreSettingsHandler(IAppDbContext db, CentreSettingsRe
         row.LateGraceMinutes = request.LateGraceMinutes;
         row.EarlyLeaveGraceMinutes = request.EarlyLeaveGraceMinutes;
         row.ParentsSeeInvoices = request.ParentsSeeInvoices;
+        row.SmsEnabled = request.SmsEnabled;
+        row.SmsMonthlyQuota = request.SmsMonthlyQuota;
         await db.SaveChangesAsync(ct);
         return Result<CentreSettingsDto>.Success(await reader.GetAsync(tenant.TenantId, ct));
     }

@@ -37,6 +37,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
 
     public FakeEmailSender Email { get; } = new();
 
+    public FakeSmsSender Sms { get; } = new();
+
     public string BootstrapToken { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(24));
 
     public string AdminEmail { get; } = $"admin-{Guid.NewGuid():N}@test.local";
@@ -76,6 +78,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
             services.AddSingleton<NMS.Application.Ai.IAiBrain>(Ai);
             services.RemoveAll<NMS.Application.Notifications.IEmailSender>();
             services.AddSingleton<NMS.Application.Notifications.IEmailSender>(Email);
+            services.RemoveAll<NMS.Application.Notifications.ISmsSender>();
+            services.AddSingleton<NMS.Application.Notifications.ISmsSender>(Sms);
         });
     }
 
@@ -177,7 +181,7 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
         return response.Data.GetProperty("id").GetGuid();
     }
 
-    public async Task<Guid> CreateStaffAsync(string? email = null)
+    public async Task<Guid> CreateStaffAsync(string? email = null, string? phone = null)
     {
         var response = await Admin.PostAsync("/api/v1/staff", new
         {
@@ -186,6 +190,7 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
                 first_name = "Noor",
                 last_name = "Teacher",
                 email = email ?? $"staff-{Guid.NewGuid():N}@test.local",
+                phone,
                 hire_date = "2025-09-01",
                 status = "active",
                 job_title = "Teacher",
@@ -365,6 +370,25 @@ public sealed class FakeAiBrain : NMS.Application.Ai.IAiBrain
         LastSystem = system;
         LastUser = user;
         return Task.FromResult(Answer);
+    }
+}
+
+public sealed class FakeSmsSender : NMS.Application.Notifications.ISmsSender
+{
+    public bool Configured { get; set; } = true;
+
+    public List<(string To, string Text)> Sent { get; } = [];
+
+    public bool IsConfigured => Configured;
+
+    public Task<NMS.Shared.Results.Result> SendAsync(string to, string text, CancellationToken cancellationToken)
+    {
+        lock (Sent)
+        {
+            Sent.Add((to, text));
+        }
+
+        return Task.FromResult(NMS.Shared.Results.Result.Success());
     }
 }
 

@@ -3420,6 +3420,12 @@ namespace NMS.Infrastructure.Persistence.Migrations
                     b.Property<bool>("ParentsSeeInvoices")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("SmsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("SmsMonthlyQuota")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
@@ -3444,6 +3450,8 @@ namespace NMS.Infrastructure.Persistence.Migrations
                             t.HasCheckConstraint("CK_CentreSettings_Early", "[EarlyLeaveGraceMinutes] IS NULL OR [EarlyLeaveGraceMinutes] BETWEEN 0 AND 120");
 
                             t.HasCheckConstraint("CK_CentreSettings_Late", "[LateGraceMinutes] IS NULL OR [LateGraceMinutes] BETWEEN 0 AND 120");
+
+                            t.HasCheckConstraint("CK_CentreSettings_SmsQuota", "[SmsMonthlyQuota] BETWEEN 0 AND 100000");
                         });
                 });
 

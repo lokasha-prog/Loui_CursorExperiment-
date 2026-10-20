@@ -42,6 +42,8 @@ public static class DependencyInjection
         services.AddOptions<NMS.Application.Communication.DailyReportOptions>().Bind(configuration.GetSection(NMS.Application.Communication.DailyReportOptions.Section));
         services.AddOptions<SmtpOptions>().Bind(configuration.GetSection(SmtpOptions.SectionName));
         services.AddSingleton<NMS.Application.Notifications.IEmailSender, SmtpEmailSender>();
+        services.AddOptions<NMS.Infrastructure.Sms.SmsOptions>().Bind(configuration.GetSection(NMS.Infrastructure.Sms.SmsOptions.Section));
+        services.AddHttpClient<NMS.Application.Notifications.ISmsSender, NMS.Infrastructure.Sms.TwilioSmsSender>();
         services.AddOptions<NMS.Infrastructure.Captcha.CaptchaOptions>().Bind(configuration.GetSection(NMS.Infrastructure.Captcha.CaptchaOptions.Section));
         services.AddHttpClient<NMS.Application.Enquiries.ICaptchaVerifier, NMS.Infrastructure.Captcha.RecaptchaVerifier>();
         services.AddSingleton<NMS.Application.Reporting.IEmergencyReportRenderer, QuestEmergencyReportRenderer>();

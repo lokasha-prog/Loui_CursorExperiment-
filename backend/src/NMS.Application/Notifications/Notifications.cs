@@ -12,6 +12,14 @@ using NMS.Shared.Results;
 
 namespace NMS.Application.Notifications;
 
+/// <summary>Sends a text message. Not set up (no provider keys) means nothing is sent and deliveries are skipped.</summary>
+public interface ISmsSender
+{
+    bool IsConfigured { get; }
+
+    Task<Result> SendAsync(string to, string text, CancellationToken cancellationToken);
+}
+
 public interface IEmailSender
 {
     bool IsConfigured { get; }
@@ -71,6 +79,8 @@ public sealed class Notifier(IAppDbContext db, ITenantContext tenant, IClock clo
         var users = await db.AppUsers.AsNoTracking().Where(u => userIds.Contains(u.Id) && u.Status == "active").Select(u => new { u.Id, u.Email }).ToListAsync(ct);
         var prefs = await db.NotificationPreferences.AsNoTracking().Where(p => userIds.Contains(p.UserId) && p.Tier == tier).ToListAsync(ct);
         var created = new List<Guid>();
+        var smsOn = tier == NotificationTiers.Critical && await db.CentreSettings.AsNoTracking().Select(s => (bool?)s.SmsEnabled).FirstOrDefaultAsync(ct) == true;
+        var phones = smsOn ? await PhonesAsync(userIds, ct) : [];
         foreach (var user in users)
         {
             var pref = prefs.FirstOrDefault(p => p.UserId == user.Id);
@@ -102,6 +112,15 @@ public sealed class Notifier(IAppDbContext db, ITenantContext tenant, IClock clo
                     NextAttemptAt = clock.UtcNow, Recipient = user.Email,
                 });
             }
+
+            if (smsOn && phones.TryGetValue(user.Id, out var phone))
+            {
+                db.NotificationDeliveries.Add(new NotificationDelivery
+                {
+                    NotificationId = notification.Id, Channel = NotificationChannels.Sms, Status = DeliveryStatuses.Pending,
+                    NextAttemptAt = clock.UtcNow, Recipient = phone,
+                });
+            }
         }
 
         await db.SaveChangesAsync(ct);
@@ -109,6 +128,24 @@ public sealed class Notifier(IAppDbContext db, ITenantContext tenant, IClock clo
         {
             await publisher.Publish(new NotificationCreated(tenant.TenantId, id), ct);
         }
+    }
+
+    /// <summary>The mobile number on file for each person (staff or parent), in a form a text message can be sent to.</summary>
+    private async Task<Dictionary<Guid, string>> PhonesAsync(IReadOnlyCollection<Guid> userIds, CancellationToken ct)
+    {
+        var staff = await db.Staff.AsNoTracking().Where(s => s.AppUserId != null && userIds.Contains(s.AppUserId.Value) && s.Phone != null).Select(s => new { UserId = s.AppUserId!.Value, s.Phone }).ToListAsync(ct);
+        var parents = await db.Guardians.AsNoTracking().Where(g => g.AppUserId != null && userIds.Contains(g.AppUserId.Value) && g.Phone != null).Select(g => new { UserId = g.AppUserId!.Value, g.Phone }).ToListAsync(ct);
+        var result = new Dictionary<Guid, string>();
+        foreach (var p in staff.Concat(parents))
+        {
+            var digits = new string(p.Phone!.Where(c => char.IsDigit(c) || c == '+').ToArray());
+            if (digits.StartsWith('+') && digits.Length is >= 9 and <= 16)
+            {
+                result.TryAdd(p.UserId, digits);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>Everyone at the centre whose role grants the permission (managers for shortages, and so on).</summary>
@@ -212,7 +249,7 @@ public sealed class SetPreferencesHandler(IAppDbContext db, ICurrentUser current
     }
 }
 
-public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSender mail, IClock clock) : IRequestHandler<RunNotificationDispatchCommand, Result<int>>
+public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSender mail, ISmsSender sms, IClock clock, CentreCalendar calendar) : IRequestHandler<RunNotificationDispatchCommand, Result<int>>
 {
     private static readonly TimeSpan[] Backoff = [TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15)];
 
@@ -220,7 +257,7 @@ public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSende
     {
         var now = clock.UtcNow;
         var due = await db.NotificationDeliveries
-            .Where(d => d.Channel == NotificationChannels.Email && d.Status == DeliveryStatuses.Pending && d.NextAttemptAt <= now)
+            .Where(d => (d.Channel == NotificationChannels.Email || d.Channel == NotificationChannels.Sms) && d.Status == DeliveryStatuses.Pending && d.NextAttemptAt <= now)
             .OrderBy(d => d.NextAttemptAt).Take(50).ToListAsync(ct);
         if (due.Count == 0)
         {
@@ -233,17 +270,33 @@ public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSende
         var languages = await db.AppUsers.AsNoTracking().Where(u => users.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.PreferredLanguage, ct);
         var sent = 0;
 
+        // Text messages cost money, so each centre has a monthly limit.
+        var monthStart = new DateTimeOffset(new DateTime(calendar.Today.Year, calendar.Today.Month, 1), TimeSpan.Zero);
+        var quota = await db.CentreSettings.AsNoTracking().Select(s => (int?)s.SmsMonthlyQuota).FirstOrDefaultAsync(ct) ?? 200;
+        var usedSms = await db.NotificationDeliveries.CountAsync(d => d.Channel == NotificationChannels.Sms && d.Status == DeliveryStatuses.Sent && d.SentAt >= monthStart, ct);
+
         foreach (var delivery in due)
         {
-            if (!mail.IsConfigured || string.IsNullOrWhiteSpace(delivery.Recipient) || !notes.TryGetValue(delivery.NotificationId, out var note))
+            var isSms = delivery.Channel == NotificationChannels.Sms;
+            var configured = isSms ? sms.IsConfigured : mail.IsConfigured;
+            if (!configured || string.IsNullOrWhiteSpace(delivery.Recipient) || !notes.TryGetValue(delivery.NotificationId, out var note))
             {
                 delivery.Status = DeliveryStatuses.Skipped;
-                delivery.Error = mail.IsConfigured ? "No recipient" : "E-mail is not set up";
+                delivery.Error = configured ? "No recipient" : isSms ? "Text messages are not set up" : "E-mail is not set up";
+                continue;
+            }
+
+            if (isSms && usedSms >= quota)
+            {
+                delivery.Status = DeliveryStatuses.Skipped;
+                delivery.Error = "The monthly text message limit has been reached";
                 continue;
             }
 
             var lang = languages.GetValueOrDefault(note.UserId, "en");
-            var result = await mail.SendAsync(delivery.Recipient, Pick(note.Title, lang), Pick(note.Body, lang), ct);
+            var result = isSms
+                ? await sms.SendAsync(delivery.Recipient, $"{Pick(note.Title, lang)}: {Pick(note.Body, lang)}", ct)
+                : await mail.SendAsync(delivery.Recipient, Pick(note.Title, lang), Pick(note.Body, lang), ct);
             delivery.Attempts++;
             if (result.IsSuccess)
             {
@@ -251,15 +304,19 @@ public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSende
                 delivery.SentAt = now;
                 delivery.Error = null;
                 sent++;
+                if (isSms)
+                {
+                    usedSms++;
+                }
             }
-            else if (delivery.Attempts > Backoff.Length)
+            else if (delivery.Attempts > (isSms ? 2 : Backoff.Length))
             {
                 delivery.Status = DeliveryStatuses.Failed;
                 delivery.Error = result.Errors.FirstOrDefault()?.Message;
             }
             else
             {
-                delivery.NextAttemptAt = now + Backoff[delivery.Attempts - 1];
+                delivery.NextAttemptAt = now + Backoff[Math.Min(delivery.Attempts - 1, Backoff.Length - 1)];
                 delivery.Error = result.Errors.FirstOrDefault()?.Message;
             }
         }

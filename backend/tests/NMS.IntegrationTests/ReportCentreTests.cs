@@ -105,3 +105,29 @@ public class ReportCentreTests(NmsApiFixture api)
         stolen.Status.Should().Be(HttpStatusCode.NotFound);
     }
 }
+
+[Collection(ApiCollection.Name)]
+public class AnalyticsTests(NmsApiFixture api)
+{
+    private static string Today => DateTime.UtcNow.AddHours(4).ToString("yyyy-MM-dd");
+
+    [Fact]
+    public async Task Analytics_show_trends_for_managers_and_leave_out_money_and_enquiries_for_teachers()
+    {
+        var teacher = await api.CreateUserAsync("teacher");
+        var from = $"{DateTime.UtcNow.Year}-01-01";
+
+        var admin = await api.Admin.GetAsync($"/api/v1/reports/analytics?from={from}&to={Today}");
+        var staff = await teacher.Client.GetAsync($"/api/v1/reports/analytics?from={from}&to={Today}");
+        var backwards = await api.Admin.GetAsync($"/api/v1/reports/analytics?from={Today}&to={from}");
+        var tooLong = await api.Admin.GetAsync("/api/v1/reports/analytics?from=2020-01-01&to=2026-01-01");
+
+        admin.Data.GetProperty("revenue").GetArrayLength().Should().BeGreaterThan(0);
+        admin.Data.GetProperty("enquiries_by_source").ValueKind.Should().Be(JsonValueKind.Array);
+        staff.Status.Should().Be(HttpStatusCode.OK);
+        staff.Data.GetProperty("revenue").ValueKind.Should().Be(JsonValueKind.Null);
+        staff.Data.GetProperty("enquiries_by_month").ValueKind.Should().Be(JsonValueKind.Null);
+        backwards.Status.Should().Be(HttpStatusCode.BadRequest);
+        tooLong.Status.Should().Be(HttpStatusCode.BadRequest);
+    }
+}

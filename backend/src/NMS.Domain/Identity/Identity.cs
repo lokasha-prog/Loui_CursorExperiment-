@@ -197,4 +197,9 @@ public class CentreSettings : TenantEntity
 
     /// <summary>Secret in the calendar subscription link families add to their phone. Changing it switches the old link off.</summary>
     public string? CalendarFeedToken { get; set; }
+
+    /// <summary>Critical alerts (ratio shortage, unexpected absence) are also sent by text message when this is on. It costs money per message, so it is off until the centre chooses.</summary>
+    public bool SmsEnabled { get; set; }
+
+    public int SmsMonthlyQuota { get; set; } = 200;
 }
