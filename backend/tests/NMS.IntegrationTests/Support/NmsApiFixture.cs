@@ -210,7 +210,7 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
     {
         var hash = Services.GetRequiredService<IPasswordService>().Hash(password);
         var first = await WithTenantAsync(Guid.Empty, db => db.Tenants.FirstAsync(t => t.Id == TenantId));
-        var second = new Tenant { Name = new Dictionary<string, string> { ["en"] = "Second Centre" }, Slug = $"second-{Guid.NewGuid():N}"[..20], CreatedAt = DateTimeOffset.UtcNow.AddDays(1) };
+        var second = new Tenant { Name = new Dictionary<string, string> { ["en"] = "Second Centre" }, Slug = $"second-{Guid.NewGuid():N}"[..20] };
         await WithTenantAsync(Guid.Empty, async db =>
         {
             db.Tenants.Add(second);
