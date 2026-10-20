@@ -705,7 +705,7 @@
       { severity: "warning",  title: "PDPL legal review not started", mitigation: "Legal counsel identified. Required before go-live (Sprint 17)." },
       { severity: "warning", title: "AI Brain: child-data residency", mitigation: "Groq chosen; first feature sends totals only. Legal sign-off needed before any feature sends personal data. Rotate the key that was shared in chat." },
       { severity: "warning", title: "Test-user helper must never ship", mitigation: "Local-only by design (ADR-0006 A); verify it is off in the pilot deployment checklist." },
-      { severity: "warning",  title: "Free MinIO storage images discontinued", mitigation: "Local development uses a compatible store; confirm production file storage before Sprint 5." }
+      { severity: "warning",  title: "Single on-site computer holds all data", mitigation: "Nightly verified backups are scripted; copy them off the computer and rehearse a restore before go-live." }
     ],
 
     pilotNurseries: 0,
