@@ -152,12 +152,14 @@ export function StudentDialog({ open, onOpenChange, student }: { open: boolean; 
     formState: { errors, isSubmitting },
   } = useForm<StudentFormValues>({ resolver: zodResolver(studentSchema), defaultValues: valuesFrom(student) })
 
+  // Fill the form once the room and programme lists have arrived, so the saved choices can be shown in their drop-downs.
+  const listsReady = !!rooms.data && !!programs.data
   useEffect(() => {
-    if (open) {
+    if (open && listsReady) {
       reset(valuesFrom(student))
       setFailure(null)
     }
-  }, [open, student, reset])
+  }, [open, student, listsReady, reset])
 
   const dob = watch('dateOfBirth')
   const roomId = watch('roomId')

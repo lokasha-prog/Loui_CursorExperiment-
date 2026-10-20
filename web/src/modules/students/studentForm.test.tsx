@@ -116,6 +116,8 @@ describe('StudentDialog', () => {
     const dialog = await screen.findByRole('dialog')
 
     expect(within(dialog).getByRole('heading', { name: 'Edit student' })).toBeInTheDocument()
+    await waitFor(() => expect(within(dialog).getByLabelText('Room')).toHaveValue('r1'))
+    expect(within(dialog).getByLabelText('Program')).toHaveValue('p1')
     expect(within(dialog).queryByLabelText(/Guardian ID number/)).not.toBeInTheDocument()
     const arabic = within(dialog).getByLabelText(/First name \(Arabic\)/)
     expect(arabic).toHaveValue('مريم')
