@@ -622,22 +622,22 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-21 GST (Sprint 20 done, website animated, 200 children loaded)",
+    lastUpdated: "2026-10-21 GST (Sprint 21 nearly done)",
     updatedBy: "Claude Code",
     overallPct: 53,
 
 
     hero: {
-      pills: [["info", "PHASE 1 · FULL PRODUCT"], ["amber", "SPRINT 20 · OBSERVATIONS AND ASSESSMENTS"], ["info", "PEOPLE WORK RUNS IN PARALLEL"]],
+      pills: [["info", "PHASE 1 · FULL PRODUCT"], ["amber", "SPRINT 21 · MONTESSORI AND AI HELPERS"], ["info", "PEOPLE WORK RUNS IN PARALLEL"]],
       title: 'Where are we? <span class="text-amber-700">Pilot-ready, now building Phase 2.</span>',
       text: "The MVP and Phase 1 engineering are built: attendance, safe pick-up, billing, enquiries and tours, calendar, forms, reports, newsletters, the staff and parent phone apps, the nursery website, the accessibility, security and speed work, and the first half of the learning module (curriculum and lessons). Work now continues on observations, assessments and the learning journey. What needs people rather than code: the pilot nursery's UAT and onboarding, the outside security test, legal sign-off, store accounts and the first customers."
     },
     focus: {
-      heading: "Current Focus · Sprint 20",
+      heading: "Current Focus · Sprint 21",
       pill: "ACTIVE",
-      title: "Observations, assessments and the learning journey",
-      text: "Teachers record what they see (formal, informal or concern), managers define assessment checklists per age group, each child is assessed per term, the parent version is approved by a manager before families see it, and every child gets a time-ordered learning journey.",
-      listTitle: "Sprint 19-20 checklist",
+      title: "Montessori, lesson templates and AI helpers",
+      text: "A second curriculum (Montessori) alongside EYFS, reusable lesson plan templates per age group, an AI helper that drafts lesson ideas from curriculum names only, and milestone suggestions for observations that run entirely inside the system.",
+      listTitle: "Sprint 20-21 checklist",
       items: [
         [true, "Curriculum frameworks, areas, age bands and milestones (entered or imported, never built in)"],
         [true, "Lessons with materials, objectives, links and milestones; teachers see only their rooms"],
@@ -647,7 +647,8 @@
         [true, "Screens: observations, assessments, learning journey, parent My-child-learning page"],
         [true, "Dashboard now collective for the whole system (role-aware blocks incl. learning)"],
         [true, "Tests (+20 backend, +7 web) and loader data (2 through the screen, 15 through the API)"],
-        [false, "Reports and phone app capture (Sprints 21-24)"]
+        [true, "Montessori curriculum starter, lesson plan templates, AI lesson-idea helper, milestone suggestions"],
+        [false, "Assessment report PDFs: 5 report types (Sprint 22), phone capture (Sprint 23)"]
       ]
     },
     next: [
@@ -682,7 +683,7 @@
       // Phase 2 (19-26)
       19: { status: "active",  pct: 55, title: "EYFS Framework (1/2)",         notes: "Done: curriculum frameworks as the centre's own data (areas, age bands, milestones, import by code, EN/AR), lessons module (create/search/filter by curriculum, area, age band, room; materials, objectives, links, milestones; teachers limited to their rooms), Learning screen, starter EYFS loader (7 areas, 6 bands, 42 milestones). Open: lesson plan templates per age group, observations and assessments (Sprint 20)", deliverables: "EYFS module" },
       20: { status: "active",  pct: 80, title: "EYFS Framework (2/2)",         notes: "Done: observations (formal/informal/concern, share with family, concern alerts), assessment checklists, scoring, completion and manager approval of a plain parent version, learning journey (staff and parent views), Learning screen tabs, parent My-child-learning page, whole-centre dashboard (people, money, enrolment, learning, communication; role-aware, family view), loaders. Test data now at pilot-day scale: about 200 children in 8 classes, 37 staff, 270+ observations, 90+ assessments. Open: lesson plan templates, reports PDFs (Sprint 22), phone capture (Sprint 23)", deliverables: "Observations, assessments" },
-      21: { status: "pending", pct: 0,  title: "Montessori + AI Observations", notes: "Montessori curriculum, AI dictation for observations", deliverables: "Montessori, AI features" },
+      21: { status: "active",  pct: 85, title: "Montessori + AI Observations", notes: "Done: Montessori starter curriculum (5 areas, 4 age bands, 20 milestones EN/AR) loaded as data; lesson plan templates per age group (keep as template, use as starting point); AI lesson-idea helper (sends only curriculum names and a theme, never child data); milestone suggestions for observations matched inside the system (nothing sent out). Held until legal sign-off: AI dictation/auto-tagging that would read children's notes. Website Sign in buttons open the NMS login", deliverables: "Montessori, AI features" },
       22: { status: "pending", pct: 0,  title: "Assessment Reports",           notes: "5 report types, dual staff/parent views, PDF generation", deliverables: "Assessment reports" },
       23: { status: "pending", pct: 0,  title: "Mobile Maturity (1/2)",        notes: "Offline cache, full notifications, learning journey view", deliverables: "Mobile offline" },
       24: { status: "pending", pct: 0,  title: "Mobile Maturity (2/2)",        notes: "Push for all tiers, App Store + Play Store submission", deliverables: "Mobile apps live" },

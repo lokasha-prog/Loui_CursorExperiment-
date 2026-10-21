@@ -68,6 +68,8 @@ import type {
   FrameworkSummary,
   Lesson,
   LessonInput,
+  LessonDraft,
+  MilestoneSuggestion,
   Observation,
   ObservationInput,
   AssessmentTemplate,
@@ -948,8 +950,9 @@ export function useImportFramework(id: string) {
   })
 }
 
-export const useLessons = (filters: { frameworkId?: string; areaId?: string; ageBandId?: string; roomId?: string; search?: string }) =>
+export const useLessons = (filters: { frameworkId?: string; areaId?: string; ageBandId?: string; roomId?: string; search?: string; templates?: boolean }) =>
   useInfiniteList<Lesson>(['lessons'], '/learning/lessons', {
+    templates: filters.templates ? 'true' : undefined,
     framework_id: filters.frameworkId || undefined, area_id: filters.areaId || undefined, age_band_id: filters.ageBandId || undefined,
     room_id: filters.roomId || undefined, search: filters.search || undefined,
   })
@@ -1024,3 +1027,15 @@ export const useJourney = (studentId: string) => useQuery({ queryKey: ['journey'
 export const useParentReports = (studentId: string) => useQuery({ queryKey: ['parent-reports', studentId], enabled: !!studentId, queryFn: () => api.get<ParentReport[]>(`/learning/parent-reports/${studentId}`) })
 
 export const useSystemOverview = () => useQuery({ queryKey: ['system-overview'], queryFn: () => api.get<SystemOverview>('/dashboard/system'), refetchInterval: 60_000 })
+
+export const useSuggestMilestones = () =>
+  useMutation({
+    mutationFn: (q: { frameworkId: string; text: string; areaId?: string; ageBandId?: string }) =>
+      api.get<MilestoneSuggestion[]>('/learning/suggest-milestones', { framework_id: q.frameworkId, text: q.text, area_id: q.areaId || undefined, age_band_id: q.ageBandId || undefined }),
+  })
+
+export const useLessonDraft = () =>
+  useMutation({
+    mutationFn: (q: { frameworkId: string; areaId?: string; ageBandId?: string; theme?: string; language: string }) =>
+      api.get<LessonDraft>('/ai/lesson-draft', { framework_id: q.frameworkId, area_id: q.areaId || undefined, age_band_id: q.ageBandId || undefined, theme: q.theme || undefined, language: q.language }),
+  })

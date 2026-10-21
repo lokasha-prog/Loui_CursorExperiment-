@@ -1,0 +1,264 @@
+{
+ "areas": [
+  {
+   "code": "practical-life",
+   "name": {
+    "en": "Practical Life",
+    "ar": "الحياة العملية"
+   },
+   "sort_order": 1
+  },
+  {
+   "code": "sensorial",
+   "name": {
+    "en": "Sensorial",
+    "ar": "الحسّي"
+   },
+   "sort_order": 2
+  },
+  {
+   "code": "language",
+   "name": {
+    "en": "Language",
+    "ar": "اللغة"
+   },
+   "sort_order": 3
+  },
+  {
+   "code": "mathematics",
+   "name": {
+    "en": "Mathematics",
+    "ar": "الرياضيات"
+   },
+   "sort_order": 4
+  },
+  {
+   "code": "cultural",
+   "name": {
+    "en": "Cultural",
+    "ar": "الثقافي"
+   },
+   "sort_order": 5
+  }
+ ],
+ "age_bands": [
+  {
+   "code": "c30-36",
+   "name": {
+    "en": "2.5-3 years",
+    "ar": "2.5-3 سنوات"
+   },
+   "min_months": 30,
+   "max_months": 36
+  },
+  {
+   "code": "c36-48",
+   "name": {
+    "en": "3-4 years",
+    "ar": "3-4 سنوات"
+   },
+   "min_months": 36,
+   "max_months": 48
+  },
+  {
+   "code": "c48-60",
+   "name": {
+    "en": "4-5 years",
+    "ar": "4-5 سنوات"
+   },
+   "min_months": 48,
+   "max_months": 60
+  },
+  {
+   "code": "c60-72",
+   "name": {
+    "en": "5-6 years",
+    "ar": "5-6 سنوات"
+   },
+   "min_months": 60,
+   "max_months": 72
+  }
+ ],
+ "milestones": [
+  {
+   "area": "practical-life",
+   "age_band": "c30-36",
+   "code": "pra-c30-36",
+   "statement": {
+    "en": "Pours water from a small jug without spilling",
+    "ar": "يصب الماء من إبريق صغير دون أن ينسكب"
+   }
+  },
+  {
+   "area": "practical-life",
+   "age_band": "c36-48",
+   "code": "pra-c36-48",
+   "statement": {
+    "en": "Washes and dries their hands and prepares a simple snack",
+    "ar": "يغسل يديه ويجففهما ويحضّر وجبة خفيفة بسيطة"
+   }
+  },
+  {
+   "area": "practical-life",
+   "age_band": "c48-60",
+   "code": "pra-c48-60",
+   "statement": {
+    "en": "Ties and buttons clothes and cares for the classroom plants",
+    "ar": "يربط ملابسه ويزرّرها ويعتني بنباتات الصف"
+   }
+  },
+  {
+   "area": "practical-life",
+   "age_band": "c60-72",
+   "code": "pra-c60-72",
+   "statement": {
+    "en": "Cooks a simple recipe with help and cleans up independently",
+    "ar": "يطبخ وصفة بسيطة بمساعدة وينظف بنفسه"
+   }
+  },
+  {
+   "area": "sensorial",
+   "age_band": "c30-36",
+   "code": "sen-c30-36",
+   "statement": {
+    "en": "Matches objects by colour, shape and texture",
+    "ar": "يطابق الأشياء بحسب اللون والشكل والملمس"
+   }
+  },
+  {
+   "area": "sensorial",
+   "age_band": "c36-48",
+   "code": "sen-c36-48",
+   "statement": {
+    "en": "Builds the pink tower and arranges rods from long to short",
+    "ar": "يبني البرج الوردي ويرتّب القضبان من الطويل إلى القصير"
+   }
+  },
+  {
+   "area": "sensorial",
+   "age_band": "c48-60",
+   "code": "sen-c48-60",
+   "statement": {
+    "en": "Grades colour tablets and sound cylinders",
+    "ar": "يدرّج ألواح الألوان وأسطوانات الأصوات"
+   }
+  },
+  {
+   "area": "sensorial",
+   "age_band": "c60-72",
+   "code": "sen-c60-72",
+   "statement": {
+    "en": "Names geometric solids and describes their features",
+    "ar": "يسمّي المجسمات الهندسية ويصف خصائصها"
+   }
+  },
+  {
+   "area": "language",
+   "age_band": "c30-36",
+   "code": "lan-c30-36",
+   "statement": {
+    "en": "Names objects and enjoys rhymes and songs",
+    "ar": "يسمّي الأشياء ويستمتع بالأناشيد والأغاني"
+   }
+  },
+  {
+   "area": "language",
+   "age_band": "c36-48",
+   "code": "lan-c36-48",
+   "statement": {
+    "en": "Says the first sound of words and traces sandpaper letters",
+    "ar": "ينطق أول صوت في الكلمات ويتتبع الحروف الخشنة"
+   }
+  },
+  {
+   "area": "language",
+   "age_band": "c48-60",
+   "code": "lan-c48-60",
+   "statement": {
+    "en": "Builds simple words with the moveable alphabet",
+    "ar": "يكوّن كلمات بسيطة بالحروف المتحركة"
+   }
+  },
+  {
+   "area": "language",
+   "age_band": "c60-72",
+   "code": "lan-c60-72",
+   "statement": {
+    "en": "Reads short sentences and writes a few lines",
+    "ar": "يقرأ جملاً قصيرة ويكتب بضعة أسطر"
+   }
+  },
+  {
+   "area": "mathematics",
+   "age_band": "c30-36",
+   "code": "mat-c30-36",
+   "statement": {
+    "en": "Counts objects to five and handles number rods",
+    "ar": "يعد الأشياء حتى خمسة ويتعامل مع قضبان الأرقام"
+   }
+  },
+  {
+   "area": "mathematics",
+   "age_band": "c36-48",
+   "code": "mat-c36-48",
+   "statement": {
+    "en": "Matches numerals to quantities up to ten",
+    "ar": "يطابق الأرقام مع الكميات حتى عشرة"
+   }
+  },
+  {
+   "area": "mathematics",
+   "age_band": "c48-60",
+   "code": "mat-c48-60",
+   "statement": {
+    "en": "Builds numbers with golden beads up to a thousand",
+    "ar": "يكوّن الأعداد بالخرز الذهبي حتى الألف"
+   }
+  },
+  {
+   "area": "mathematics",
+   "age_band": "c60-72",
+   "code": "mat-c60-72",
+   "statement": {
+    "en": "Adds and subtracts with beads and understands fractions",
+    "ar": "يجمع ويطرح بالخرز ويفهم الكسور"
+   }
+  },
+  {
+   "area": "cultural",
+   "age_band": "c30-36",
+   "code": "cul-c30-36",
+   "statement": {
+    "en": "Explores nature and animals through touch and observation",
+    "ar": "يستكشف الطبيعة والحيوانات باللمس والملاحظة"
+   }
+  },
+  {
+   "area": "cultural",
+   "age_band": "c36-48",
+   "code": "cul-c36-48",
+   "statement": {
+    "en": "Names continents on the puzzle map and plants a seed",
+    "ar": "يسمّي القارات على خريطة التركيب ويزرع بذرة"
+   }
+  },
+  {
+   "area": "cultural",
+   "age_band": "c48-60",
+   "code": "cul-c48-60",
+   "statement": {
+    "en": "Sorts living and non-living things and learns about festivals",
+    "ar": "يصنّف الأحياء وغير الأحياء ويتعلم عن المناسبات"
+   }
+  },
+  {
+   "area": "cultural",
+   "age_band": "c60-72",
+   "code": "cul-c60-72",
+   "statement": {
+    "en": "Talks about countries, time lines and simple science experiments",
+    "ar": "يتحدث عن البلدان والخطوط الزمنية وتجارب علمية بسيطة"
+   }
+  }
+ ]
+}

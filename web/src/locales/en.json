@@ -1857,7 +1857,14 @@
       "milestones": "Milestones this lesson supports",
       "pickFramework": "Choose a curriculum first.",
       "empty": "No lessons yet",
-      "emptyHint": "Add the first lesson, or change the filters."
+      "emptyHint": "Add the first lesson, or change the filters.",
+      "theme": "Theme (optional)",
+      "aiHint": "Choose the curriculum, area and age first",
+      "ai": "Suggest a lesson with AI",
+      "aiDone": "Draft added. Please check and adjust it.",
+      "asTemplate": "Keep as a template for this age group",
+      "templatesOnly": "Templates only",
+      "useTemplate": "Use as a starting point"
     },
     "curriculum": {
       "new": "New curriculum",
@@ -1899,7 +1906,11 @@
       "shared": "Shared",
       "by": "By {{name}}",
       "empty": "No observations yet",
-      "emptyHint": "Record what you see children do, with the area and milestones."
+      "emptyHint": "Record what you see children do, with the area and milestones.",
+      "suggest": "Suggest milestones",
+      "suggestHint": "Matches your words with the curriculum inside the system; nothing is sent out.",
+      "suggestNeeds": "Choose a curriculum and write what you saw first.",
+      "suggested": "{{count}} milestones suggested"
     },
     "assess": {
       "start": "Start assessment",

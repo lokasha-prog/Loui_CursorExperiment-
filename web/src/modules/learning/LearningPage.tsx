@@ -1,8 +1,8 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { Clock, Plus, Search, Trash2, Upload } from 'lucide-react'
+import { Clock, Plus, Sparkles, Search, Trash2, Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { flatten, useStudentOptions, useDeleteLesson, useFramework, useFrameworks, useImportFramework, useLessons, useRoomOptions, useSaveFramework, useSaveLesson } from '@/api/hooks'
+import { flatten, useStudentOptions, useDeleteLesson, useFramework, useFrameworks, useImportFramework, useLessons, useRoomOptions, useSaveFramework, useSaveLesson, useLessonDraft } from '@/api/hooks'
 import type { FrameworkDetail, Lesson } from '@/api/types'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ListError, ListSkeleton, LoadMore } from '@/components/shared/ListState'
@@ -28,6 +28,9 @@ function LessonDialog({ lesson, frameworkId, onClose }: { lesson: Lesson | null;
   const [fw, setFw] = useState(lesson?.framework_id ?? frameworkId)
   const detail = useFramework(fw)
   const save = useSaveLesson(lesson?.id)
+  const draft = useLessonDraft()
+  const [isTemplate, setIsTemplate] = useState(lesson?.is_template ?? false)
+  const [theme, setTheme] = useState('')
   const [en, setEn] = useState(lesson?.title.en ?? '')
   const [ar, setAr] = useState(lesson?.title.ar ?? '')
   const [descEn, setDescEn] = useState(lesson?.description?.en ?? '')
@@ -43,8 +46,21 @@ function LessonDialog({ lesson, frameworkId, onClose }: { lesson: Lesson | null;
   const [failure, setFailure] = useState<string | null>(null)
   const milestones = (detail.data?.milestones ?? []).filter((m) => (!area || m.area_id === area) && (!band || m.age_band_id === band))
 
+  const askAi = async () => {
+    if (!fw) return setFailure(t('learning.lesson.pickFramework'))
+    setFailure(null)
+    try {
+      const d = await draft.mutateAsync({ frameworkId: fw, areaId: area, ageBandId: band, theme, language: lang === 'ar' ? 'ar' : 'en' })
+      const key = d.language
+      if (key === 'ar') { setAr(d.title.ar ?? ''); setDescAr(d.description.ar ?? '') } else { setEn(d.title.en ?? ''); setDescEn(d.description.en ?? '') }
+      setMaterials(d.materials.join('\n')); setObjectives(d.objectives.join('\n'))
+      toast.success(t('learning.lesson.aiDone'))
+    } catch (error) {
+      setFailure(message(error))
+    }
+  }
   const submit = async () => {
-    if (!en.trim()) return setFailure(t('validation.required'))
+    if (!en.trim() && !ar.trim()) return setFailure(t('validation.required'))
     if (!fw) return setFailure(t('learning.lesson.pickFramework'))
     setFailure(null)
     const linkMap: Record<string, string> = {}
@@ -54,7 +70,7 @@ function LessonDialog({ lesson, frameworkId, onClose }: { lesson: Lesson | null;
         title: ar.trim() ? { en: en.trim(), ar: ar.trim() } : { en: en.trim() },
         description: descEn.trim() || descAr.trim() ? { ...(descEn.trim() ? { en: descEn.trim() } : {}), ...(descAr.trim() ? { ar: descAr.trim() } : {}) } : null,
         framework_id: fw, area_id: area || null, age_band_id: band || null, room_id: room || null, duration_minutes: Number(minutes) || 30,
-        materials: lines(materials), objectives: lines(objectives), links: linkMap, milestone_ids: picked,
+        materials: lines(materials), objectives: lines(objectives), links: linkMap, milestone_ids: picked, is_template: isTemplate,
       })
       toast.success(t('learning.lesson.saved'))
       onClose()
@@ -69,6 +85,10 @@ function LessonDialog({ lesson, frameworkId, onClose }: { lesson: Lesson | null;
         <DialogHeader title={lesson ? t('learning.lesson.edit') : t('learning.lesson.new')} />
         <form onSubmit={(e) => { e.preventDefault(); void submit() }} className="max-h-[70vh] space-y-4 overflow-y-auto pe-1" noValidate>
           {failure && <Alert>{failure}</Alert>}
+          <div className="flex flex-wrap items-end gap-2 rounded-md border border-dashed bg-accent/40 p-3">
+            <Field label={t('learning.lesson.theme')} htmlFor="ls-theme" hint={t('learning.lesson.aiHint')}><Input id="ls-theme" value={theme} maxLength={120} onChange={(e) => setTheme(e.target.value)} /></Field>
+            <Button type="button" variant="secondary" onClick={() => void askAi()} disabled={draft.isPending}><Sparkles className="h-4 w-4" aria-hidden="true" />{draft.isPending ? t('ai.working') : t('learning.lesson.ai')}</Button>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label={t('learning.lesson.titleEn')} htmlFor="ls-en" required><Input id="ls-en" value={en} maxLength={150} onChange={(e) => setEn(e.target.value)} /></Field>
             <Field label={t('learning.lesson.titleAr')} htmlFor="ls-ar"><Input id="ls-ar" dir="rtl" lang="ar" value={ar} maxLength={150} onChange={(e) => setAr(e.target.value)} /></Field>
@@ -95,6 +115,7 @@ function LessonDialog({ lesson, frameworkId, onClose }: { lesson: Lesson | null;
               </ul>
             </fieldset>
           )}
+          <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={isTemplate} onChange={(e) => setIsTemplate(e.target.checked)} />{t('learning.lesson.asTemplate')}</label>
           <div className="flex justify-end gap-2 border-t pt-4"><Button type="button" variant="secondary" onClick={onClose}>{t('common.cancel')}</Button><Button type="submit" disabled={save.isPending}>{t('learning.lesson.save')}</Button></div>
         </form>
       </DialogContent>
@@ -111,7 +132,8 @@ function LessonsTab({ canWrite }: { canWrite: boolean }) {
   const [band, setBand] = useState('')
   const [search, setSearch] = useState('')
   const detail = useFramework(fw)
-  const query = useLessons({ frameworkId: fw, areaId: area, ageBandId: band, search })
+  const [templates, setTemplates] = useState(false)
+  const query = useLessons({ frameworkId: fw, areaId: area, ageBandId: band, search, templates })
   const remove = useDeleteLesson()
   const [editing, setEditing] = useState<{ lesson: Lesson | null } | null>(null)
   const lessons = flatten(query.data)
@@ -132,6 +154,7 @@ function LessonsTab({ canWrite }: { canWrite: boolean }) {
         <Select value={fw} onChange={(e) => { setFw(e.target.value); setArea(''); setBand('') }} aria-label={t('learning.framework')} className="w-52"><option value="">{t('learning.allFrameworks')}</option>{(frameworks.data ?? []).map((f) => <option key={f.id} value={f.id}>{localized(f.name, lang)}</option>)}</Select>
         {fw && <Select value={area} onChange={(e) => setArea(e.target.value)} aria-label={t('learning.area')} className="w-56"><option value="">{t('learning.allAreas')}</option>{(detail.data?.areas ?? []).map((a) => <option key={a.id} value={a.id}>{localized(a.name, lang)}</option>)}</Select>}
         {fw && <Select value={band} onChange={(e) => setBand(e.target.value)} aria-label={t('learning.band')} className="w-44"><option value="">{t('learning.allBands')}</option>{(detail.data?.age_bands ?? []).map((b) => <option key={b.id} value={b.id}>{localized(b.name, lang)}</option>)}</Select>}
+        <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={templates} onChange={(e) => setTemplates(e.target.checked)} />{t('learning.lesson.templatesOnly')}</label>
         {canWrite && <Button onClick={() => setEditing({ lesson: null })} disabled={(frameworks.data ?? []).length === 0}><Plus className="h-4 w-4" aria-hidden="true" />{t('learning.lesson.new')}</Button>}
       </div>
       {query.isLoading ? <ListSkeleton /> : query.isError ? <ListError error={query.error} onRetry={() => void query.refetch()} /> : lessons.length === 0 ? (
@@ -156,6 +179,7 @@ function LessonsTab({ canWrite }: { canWrite: boolean }) {
               {canWrite && (
                 <div className="mt-3 flex gap-2 border-t pt-3">
                   <Button size="sm" variant="secondary" onClick={() => setEditing({ lesson: l })}>{t('common.edit')}</Button>
+                  {l.is_template && <Button size="sm" variant="secondary" onClick={() => setEditing({ lesson: { ...l, id: '', is_template: false } as Lesson })}>{t('learning.lesson.useTemplate')}</Button>}
                   <Button size="sm" variant="ghost" onClick={() => { if (window.confirm(t('learning.lesson.confirmDelete'))) remove.mutate(l.id, { onSuccess: () => toast.success(t('learning.lesson.deleted')) }) }}><Trash2 className="h-4 w-4" aria-hidden="true" />{t('common.delete')}</Button>
                 </div>
               )}

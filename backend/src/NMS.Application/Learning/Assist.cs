@@ -19,7 +19,21 @@ public sealed class SuggestMilestonesHandler(IAppDbContext db) : IRequestHandler
 
     internal static HashSet<string> Words(string text) =>
         text.ToLowerInvariant().Split([' ', ',', '.', ';', ':', '!', '?', '-', '\n', '\r', '(', ')', '"'], StringSplitOptions.RemoveEmptyEntries)
-            .Where(w => w.Length > 2 && !Stop.Contains(w)).Select(w => w.TrimEnd('s')).ToHashSet();
+            .Where(w => w.Length > 2 && !Stop.Contains(w)).Select(Stem).ToHashSet();
+
+    /// <summary>Roughly the root of a word, so counted, counts and counting all match.</summary>
+    private static string Stem(string w)
+    {
+        foreach (var suffix in new[] { "ing", "ed", "es", "s" })
+        {
+            if (w.Length > suffix.Length + 3 && w.EndsWith(suffix, StringComparison.Ordinal))
+            {
+                return w[..^suffix.Length];
+            }
+        }
+
+        return w;
+    }
 
     public async Task<Result<IReadOnlyList<MilestoneSuggestionDto>>> Handle(SuggestMilestonesQuery request, CancellationToken ct)
     {

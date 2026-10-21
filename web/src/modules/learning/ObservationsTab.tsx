@@ -1,7 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { flatten, useDeleteObservation, useFramework, useFrameworks, useObservations, useSaveObservation, useStudentOptions } from '@/api/hooks'
+import { flatten, useDeleteObservation, useFramework, useFrameworks, useObservations, useSaveObservation, useStudentOptions, useSuggestMilestones } from '@/api/hooks'
 import { ListError, ListSkeleton, LoadMore } from '@/components/shared/ListState'
 import { Button } from '@/components/ui/button'
 import { Field, Select, Textarea } from '@/components/ui/form-controls'
@@ -31,6 +31,15 @@ function ObservationDialog({ onClose }: { onClose: () => void }) {
   const [picked, setPicked] = useState<string[]>([])
   const [failure, setFailure] = useState<string | null>(null)
   const detail = useFramework(fw)
+  const suggest = useSuggestMilestones()
+  const suggestNow = async () => {
+    const text = `${notesEn} ${notesAr}`.trim()
+    if (!fw || !text) return setFailure(t('learning.obs.suggestNeeds'))
+    setFailure(null)
+    const found = await suggest.mutateAsync({ frameworkId: fw, text, areaId: area, ageBandId: band })
+    setPicked((p) => Array.from(new Set([...p, ...found.map((f) => f.milestone_id)])))
+    toast.success(t('learning.obs.suggested', { count: found.length }))
+  }
   const milestones = (detail.data?.milestones ?? []).filter((m) => (!area || m.area_id === area) && (!band || m.age_band_id === band))
 
   const submit = async () => {
@@ -64,6 +73,7 @@ function ObservationDialog({ onClose }: { onClose: () => void }) {
             <Field label={t('learning.obs.notesEn')} htmlFor="ob-en" required><Textarea id="ob-en" value={notesEn} onChange={(e) => setNotesEn(e.target.value)} /></Field>
             <Field label={t('learning.obs.notesAr')} htmlFor="ob-ar"><Textarea id="ob-ar" dir="rtl" lang="ar" value={notesAr} onChange={(e) => setNotesAr(e.target.value)} /></Field>
           </div>
+          <div className="flex items-center gap-2"><Button type="button" size="sm" variant="secondary" onClick={() => void suggestNow()} disabled={suggest.isPending}>{t('learning.obs.suggest')}</Button><span className="text-xs text-muted-foreground">{t('learning.obs.suggestHint')}</span></div>
           {milestones.length > 0 && (
             <fieldset className="rounded-md border p-3">
               <legend className="px-1 text-sm font-bold">{t('learning.obs.milestones')}</legend>

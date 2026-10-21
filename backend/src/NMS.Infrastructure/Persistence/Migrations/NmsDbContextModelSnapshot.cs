@@ -4484,6 +4484,9 @@ namespace NMS.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsTemplate")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Links")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

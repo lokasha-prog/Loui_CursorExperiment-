@@ -949,11 +949,11 @@ export interface LearningMilestone { id: string; area_id: string; age_band_id: s
 export interface FrameworkDetail { id: string; code: string; name: Localized_; description: Localized_ | null; areas: LearningArea[]; age_bands: LearningBand[]; milestones: LearningMilestone[] }
 export interface Lesson {
   id: string; title: Localized_; description: Localized_ | null; framework_id: string; area_id: string | null; age_band_id: string | null; room_id: string | null
-  duration_minutes: number; materials: string[]; objectives: string[]; links: Record<string, string>; milestone_ids: string[]; created_at: string
+  duration_minutes: number; materials: string[]; objectives: string[]; links: Record<string, string>; milestone_ids: string[]; is_template: boolean; created_at: string
 }
 export interface LessonInput {
   title: Localized_; description?: Localized_ | null; framework_id: string; area_id?: string | null; age_band_id?: string | null; room_id?: string | null
-  duration_minutes: number; materials: string[]; objectives: string[]; links?: Record<string, string>; milestone_ids?: string[]
+  duration_minutes: number; materials: string[]; objectives: string[]; links?: Record<string, string>; milestone_ids?: string[]; is_template?: boolean
 }
 
 export interface Observation {
@@ -985,3 +985,6 @@ export interface SystemOverview {
   family: { children: number; shared_observations: number; reports_ready: number } | null
   communication: { posts_to_approve: number; newsletters_last30_days: number; live_forms: number; documents: number } | null
 }
+
+export interface MilestoneSuggestion { milestone_id: string; code: string; statement: Record<string, string>; area_id: string; age_band_id: string; score: number }
+export interface LessonDraft { title: Record<string, string>; description: Record<string, string>; materials: string[]; objectives: string[]; language: string; model: string }
