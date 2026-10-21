@@ -320,7 +320,7 @@ public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSende
         var now = clock.UtcNow;
         var due = await db.NotificationDeliveries
             .Where(d => (d.Channel == NotificationChannels.Email || d.Channel == NotificationChannels.Sms || d.Channel == NotificationChannels.Push) && d.Status == DeliveryStatuses.Pending && d.NextAttemptAt <= now)
-            .OrderBy(d => d.NextAttemptAt).Take(50).ToListAsync(ct);
+            .OrderBy(d => d.NextAttemptAt).Take(500).ToListAsync(ct);
         if (due.Count == 0)
         {
             return Result<int>.Success(0);

@@ -622,22 +622,22 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-21 GST (Sprint 23 phone app maturity)",
+    lastUpdated: "2026-10-21 GST (Sprints 24-25: APK, store pack, decision record)",
     updatedBy: "Claude Code",
     overallPct: 53,
 
 
     hero: {
-      pills: [["info", "PHASE 1 · FULL PRODUCT"], ["amber", "SPRINT 23 · MOBILE MATURITY"], ["info", "PEOPLE WORK RUNS IN PARALLEL"]],
+      pills: [["info", "PHASE 1 · FULL PRODUCT"], ["amber", "SPRINT 24-25 · PHONE APP RELEASE AND PERFORMANCE"], ["info", "PEOPLE WORK RUNS IN PARALLEL"]],
       title: 'Where are we? <span class="text-amber-700">Pilot-ready, now building Phase 2.</span>',
       text: "The MVP and Phase 1 engineering are built: attendance, safe pick-up, billing, enquiries and tours, calendar, forms, reports, newsletters, the staff and parent phone apps, the nursery website, the accessibility, security and speed work, and the first half of the learning module (curriculum and lessons). Work now continues on observations, assessments and the learning journey. What needs people rather than code: the pilot nursery's UAT and onboarding, the outside security test, legal sign-off, store accounts and the first customers."
     },
     focus: {
-      heading: "Current Focus · Sprint 23",
+      heading: "Current Focus · Sprint 24-25",
       pill: "ACTIVE",
-      title: "Phone app: offline use, learning journey and observation capture",
-      text: "The phone app keeps a saved copy of what people read, sends what they did with no signal when it returns, shows parents their child's learning journey, and lets teachers record observations with a photo in a few taps.",
-      listTitle: "Sprint 22-23 checklist",
+      title: "Phone app release pack, performance and the service decision",
+      text: "An installable Android app (APK) is built, the store pack is written, alerts have one channel per tier and open the right screen when tapped, the system holds up 500 people with a realistic pause, and the decision to keep alerts and media inside the one application is recorded with the numbers and triggers to revisit.",
+      listTitle: "Sprint 23-25 checklist",
       items: [
         [true, "Curriculum frameworks, areas, age bands and milestones (entered or imported, never built in)"],
         [true, "Lessons with materials, objectives, links and milestones; teachers see only their rooms"],
@@ -650,7 +650,8 @@
         [true, "Montessori curriculum starter, lesson plan templates, AI lesson-idea helper, milestone suggestions"],
         [true, "Five report types + learning journey as PDF, staff and family versions, EN/AR"],
         [true, "Phone: saved copies, offline queue, learning journey, observation capture with photo"],
-        [false, "Store builds, push for every alert tier on real devices (Sprint 24)"]
+        [true, "Android APK built; store pack; alert channels per tier; ADR-0008; queue measuring endpoint"],
+        [false, "Apple/Google accounts, real-device push test, 3-month uptime measurement (people)"]
       ]
     },
     next: [
@@ -687,9 +688,9 @@
       20: { status: "active",  pct: 80, title: "EYFS Framework (2/2)",         notes: "Done: observations (formal/informal/concern, share with family, concern alerts), assessment checklists, scoring, completion and manager approval of a plain parent version, learning journey (staff and parent views), Learning screen tabs, parent My-child-learning page, whole-centre dashboard (people, money, enrolment, learning, communication; role-aware, family view), loaders. Test data now at pilot-day scale: about 200 children in 8 classes, 37 staff, 270+ observations, 90+ assessments. Open: lesson plan templates, reports PDFs (Sprint 22), phone capture (Sprint 23)", deliverables: "Observations, assessments" },
       21: { status: "done",    pct: 100, title: "Montessori + AI Observations", notes: "Montessori starter curriculum (5 areas, 4 bands, 20 milestones EN/AR), lesson plan templates per age group, AI lesson-idea helper (curriculum names and theme only), milestone suggestions matched inside the system. AI dictation of children's notes deliberately held until the data-protection sign-off", deliverables: "Montessori, AI features" },
       22: { status: "done",    pct: 100, title: "Assessment Reports",           notes: "Five learning reports (progress, assessment, comparison, class milestones, child milestones) plus the learning journey as PDF in English and Arabic; staff version with codes, scores and notes (also Excel/JSON); family version with plain levels only from approved reports and shared moments; Reports tab and parent download buttons; checked visually", deliverables: "Assessment reports" },
-      23: { status: "active",  pct: 70, title: "Mobile Maturity (1/2)",        notes: "Done: phone keeps a saved copy of feed, messages, alerts, day reports, learning and emergency data and shows it with no signal; posts, replies, attendance and observations made offline are saved and sent automatically (every 20 s); parent Learning screen (journey and approved reports); staff Observe screen (child, type, note, share, photo); sign-out wipes saved copies. Open: real-phone testing, push on a device", deliverables: "Mobile offline" },
-      24: { status: "pending", pct: 0,  title: "Mobile Maturity (2/2)",        notes: "Push for all tiers, App Store + Play Store submission", deliverables: "Mobile apps live" },
-      25: { status: "pending", pct: 0,  title: "Performance + Service Extraction Decision", notes: "Load test, decide on Notification/Media extraction", deliverables: "Perf sign-off, ADRs" },
+      23: { status: "done",    pct: 100, title: "Mobile Maturity (1/2)",        notes: "Phone keeps saved copies and sends what was done with no signal; parent Learning screen; staff Observe screen with photo; sign-out wipes saved copies; verified in the browser preview", deliverables: "Mobile offline" },
+      24: { status: "active",  pct: 75, title: "Mobile Maturity (2/2)",        notes: "Done: alert channels per tier on Android and tap-to-open, server address on the sign-in screen, EAS build config, store listing text EN/AR, privacy answers, reviewer notes and release checklist, installable Android APK built on this computer. Needs people/accounts: Apple and Google accounts, Expo project id, real-device push test, screenshots", deliverables: "Mobile apps live" },
+      25: { status: "active",  pct: 60, title: "Performance + Service Extraction Decision", notes: "Done: 500-user speed test with realistic pauses (0 errors, 99th percentile 0.03-0.10 s), alert batch raised to 500, queue measuring endpoint, ADR-0008 decision: keep notifications and media inside the application, with triggers to revisit. Open: 3-month uptime measurement on the pilot server", deliverables: "Perf sign-off, ADRs" },
       26: { status: "pending", pct: 0,  title: "Phase 2 Go-Live",              notes: "L&A module live in 3+ nurseries, 4.5+ app rating", deliverables: "Phase 2 sign-off" },
       // Phase 3 (27-30)
       27: { status: "pending", pct: 0,  title: "Multi-Centre Support",         notes: "MCG hierarchy, cross-centre SSO, consolidated dashboard", deliverables: "Multi-centre live" },

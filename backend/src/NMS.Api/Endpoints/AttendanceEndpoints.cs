@@ -72,6 +72,11 @@ public static class AttendanceEndpoints
             .WithTags("Dashboard")
             .RequireAuthorization(Permissions.DashboardView);
 
+        routes.MapGet("/api/v1/system/queues", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new QueueHealthQuery(), ct)))
+            .WithTags("Dashboard")
+            .RequireAuthorization(Permissions.SettingsWrite);
+
         // AI Brain briefings for management: each area needs the permission for the data it summarises.
         foreach (var (area, permission) in new[]
         {
