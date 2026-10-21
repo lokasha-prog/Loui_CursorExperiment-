@@ -13,6 +13,9 @@ public static class DependencyInjection
         services.AddMediatR(config => config.RegisterServicesFromAssembly(assembly));
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        services.AddSingleton<ShortCache>();
+        services.AddOptions<CachingOptions>();
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ShortCacheBehavior<,>));
         services.AddScoped<NMS.Application.Notifications.Notifier>();
         services.AddScoped<NMS.Application.Billing.InvoiceGenerator>();
         services.AddScoped<NMS.Application.Billing.BillingSettingsReader>();

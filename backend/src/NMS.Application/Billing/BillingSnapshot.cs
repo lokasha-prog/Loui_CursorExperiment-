@@ -27,7 +27,11 @@ public sealed record BillingSnapshotDto(
     IReadOnlyList<TopOverdueDto> TopOverdue,
     IReadOnlyList<MonthFigure> Trend);
 
-public sealed record BillingSnapshotQuery(string? Month) : IRequest<Result<BillingSnapshotDto>>;
+public sealed record BillingSnapshotQuery(string? Month) : IRequest<Result<BillingSnapshotDto>>, NMS.Application.Common.IShortCachedQuery
+{
+    public string CacheKey => Month ?? string.Empty;
+}
+
 
 /// <summary>The numbers on the billing dashboard (spec 03 §8.1): what was billed and collected this month, what is owed, and the trend.</summary>
 public sealed class BillingSnapshotHandler(IAppDbContext db, CentreCalendar calendar) : IRequestHandler<BillingSnapshotQuery, Result<BillingSnapshotDto>>

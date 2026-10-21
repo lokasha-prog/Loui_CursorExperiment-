@@ -65,6 +65,7 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseSetting("Encryption:Key", Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)));
         builder.UseSetting("Auth:BootstrapToken", BootstrapToken);
         builder.UseSetting("Database:MigrateOnStartup", "true");
+        builder.UseSetting("Caching:ManagerScreensSeconds", "0"); // tests read right after writing
         builder.UseSetting("Jobs:Enabled", "false");
         builder.UseSetting("DailyReports:GenerateAt", "00:00");
         builder.UseSetting("RateLimiting:AuthenticatedPerMinute", "100000");

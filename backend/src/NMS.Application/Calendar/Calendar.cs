@@ -33,7 +33,11 @@ public sealed record SaveEventCommand(Guid? Id, EventFields Fields) : IRequest<R
 
 public sealed record DeleteEventCommand(Guid Id) : IRequest<Result>;
 
-public sealed record AgendaQuery(DateOnly From, DateOnly To, IReadOnlyList<string> Layers, bool Mine) : IRequest<Result<IReadOnlyList<AgendaItem>>>;
+public sealed record AgendaQuery(DateOnly From, DateOnly To, IReadOnlyList<string> Layers, bool Mine) : IRequest<Result<IReadOnlyList<AgendaItem>>>, NMS.Application.Common.IShortCachedQuery
+{
+    public string CacheKey => $"{From:O}|{To:O}|{string.Join(',', Layers.Order())}|{Mine}";
+}
+
 
 public sealed record StaffScheduleRow(Guid StaffId, string Name, IReadOnlyList<StaffShift> Shifts);
 

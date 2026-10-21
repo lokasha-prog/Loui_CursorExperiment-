@@ -22,7 +22,11 @@ public sealed record AnalyticsDto(
     IReadOnlyList<MoneyPoint>? Revenue, IReadOnlyList<CountPoint>? InvoiceStatus,
     IReadOnlyList<CountPoint>? EnquiriesByMonth, IReadOnlyList<CountPoint>? EnrolledByMonth, IReadOnlyList<CountPoint>? EnquiriesBySource);
 
-public sealed record AnalyticsQuery(DateOnly From, DateOnly To) : IRequest<Result<AnalyticsDto>>;
+public sealed record AnalyticsQuery(DateOnly From, DateOnly To) : IRequest<Result<AnalyticsDto>>, NMS.Application.Common.IShortCachedQuery
+{
+    public string CacheKey => $"{From:O}|{To:O}";
+}
+
 
 public sealed class AnalyticsValidator : AbstractValidator<AnalyticsQuery>
 {
