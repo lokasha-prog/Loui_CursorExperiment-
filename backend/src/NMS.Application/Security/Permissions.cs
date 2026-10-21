@@ -44,6 +44,8 @@ public static class Permissions
     public const string ResourcesWrite = "resources.write";
     public const string LearningRead = "learning.read";
     public const string LearningWrite = "learning.write";
+    public const string LearningApprove = "learning.approve";
+    public const string JourneyRead = "journey.read";
 
     /// <summary>Rooms, programs, groups and labels are readable by any staff role (spec 08 §15.4 "Staff+").</summary>
     public const string CentreStructureRead = "centre_structure.read";
@@ -75,7 +77,7 @@ public static class RolePermissions
             Permissions.SettingsRead, Permissions.SettingsWrite,
             Permissions.CentreStructureRead, Permissions.CentreStructureWrite,
             Permissions.ResourcesRead, Permissions.ResourcesWrite,
-            Permissions.LearningRead, Permissions.LearningWrite,
+            Permissions.LearningRead, Permissions.LearningWrite, Permissions.LearningApprove, Permissions.JourneyRead,
         ],
         [SystemRoles.Teacher] =
         [
@@ -86,14 +88,14 @@ public static class RolePermissions
             Permissions.MessagingRead, Permissions.MessagingWrite,
             Permissions.CalendarRead, Permissions.FormsRead, Permissions.ReportsView,
             Permissions.CentreStructureRead, Permissions.ResourcesRead,
-            Permissions.LearningRead, Permissions.LearningWrite,
+            Permissions.LearningRead, Permissions.LearningWrite, Permissions.JourneyRead,
         ],
         [SystemRoles.Parent] =
         [
             .. Everyone,
             Permissions.StudentsRead, Permissions.AttendanceRead, Permissions.ActivitiesRead,
             Permissions.MessagingRead, Permissions.MessagingWrite, Permissions.BillingRead,
-            Permissions.CalendarRead, Permissions.FormsRead, Permissions.ResourcesRead,
+            Permissions.CalendarRead, Permissions.FormsRead, Permissions.ResourcesRead, Permissions.JourneyRead,
         ],
         [SystemRoles.Receptionist] =
         [

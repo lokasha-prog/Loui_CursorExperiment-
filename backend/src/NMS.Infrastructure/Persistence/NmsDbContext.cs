@@ -150,6 +150,10 @@ public sealed class NmsDbContext(
     public DbSet<NMS.Domain.Learning.AgeBand> AgeBands => Set<NMS.Domain.Learning.AgeBand>();
     public DbSet<NMS.Domain.Learning.Milestone> Milestones => Set<NMS.Domain.Learning.Milestone>();
     public DbSet<NMS.Domain.Learning.Lesson> Lessons => Set<NMS.Domain.Learning.Lesson>();
+    public DbSet<NMS.Domain.Learning.Observation> Observations => Set<NMS.Domain.Learning.Observation>();
+    public DbSet<NMS.Domain.Learning.AssessmentTemplate> AssessmentTemplates => Set<NMS.Domain.Learning.AssessmentTemplate>();
+    public DbSet<NMS.Domain.Learning.AssessmentRun> AssessmentRuns => Set<NMS.Domain.Learning.AssessmentRun>();
+    public DbSet<NMS.Domain.Learning.AssessmentScore> AssessmentScores => Set<NMS.Domain.Learning.AssessmentScore>();
     public DbSet<NMS.Domain.Forms.StudentAdmissionStep> StudentAdmissionSteps => Set<NMS.Domain.Forms.StudentAdmissionStep>();
     public DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents => Set<NMS.Domain.Calendar.CalendarEvent>();
     public DbSet<CentreSettings> CentreSettings => Set<CentreSettings>();

@@ -81,3 +81,104 @@ public class Lesson : TenantEntity
 
     public List<string> MilestoneIds { get; set; } = [];
 }
+
+public static class ObservationTypes
+{
+    public const string Formal = "formal";
+    public const string Informal = "informal";
+    public const string Concern = "concern";
+
+    public static readonly string[] All = [Formal, Informal, Concern];
+}
+
+/// <summary>What a teacher saw a child do. Concerns and anything not marked "share" stay with staff; the journey shows parents only what was shared.</summary>
+public class Observation : TenantEntity
+{
+    public Guid StudentId { get; set; }
+
+    public Guid ObserverUserId { get; set; }
+
+    public DateTimeOffset ObservedAt { get; set; }
+
+    public string Type { get; set; } = ObservationTypes.Informal;
+
+    public Guid? FrameworkId { get; set; }
+
+    public Guid? AreaId { get; set; }
+
+    public Guid? AgeBandId { get; set; }
+
+    public List<string> MilestoneIds { get; set; } = [];
+
+    public Dictionary<string, string> Notes { get; set; } = [];
+
+    public List<string> MediaIds { get; set; } = [];
+
+    public bool ShareWithParents { get; set; }
+}
+
+public static class ScoringKinds
+{
+    public const string Binary = "binary";
+    public const string ThreePoint = "three_point";
+
+    public static readonly string[] All = [Binary, ThreePoint];
+}
+
+/// <summary>A reusable checklist of milestones for one age group, scored yes/no or on three levels.</summary>
+public class AssessmentTemplate : TenantEntity
+{
+    public Dictionary<string, string> Name { get; set; } = [];
+
+    public Guid FrameworkId { get; set; }
+
+    public Guid? AgeBandId { get; set; }
+
+    public string ScoringKind { get; set; } = ScoringKinds.ThreePoint;
+
+    public List<string> MilestoneIds { get; set; } = [];
+}
+
+public static class AssessmentStatuses
+{
+    public const string Draft = "draft";
+    public const string Completed = "completed";
+
+    public static readonly string[] All = [Draft, Completed];
+}
+
+/// <summary>One child assessed once (for example per term). The parent version is shown only after a manager approves it.</summary>
+public class AssessmentRun : TenantEntity
+{
+    public Guid TemplateId { get; set; }
+
+    public Guid StudentId { get; set; }
+
+    public string Term { get; set; } = string.Empty;
+
+    public DateOnly AssessedOn { get; set; }
+
+    public string Status { get; set; } = AssessmentStatuses.Draft;
+
+    public Dictionary<string, string>? StaffSummary { get; set; }
+
+    public Dictionary<string, string>? ParentSummary { get; set; }
+
+    public bool ParentApproved { get; set; }
+
+    public Guid? ApprovedBy { get; set; }
+
+    public DateTimeOffset? ApprovedAt { get; set; }
+}
+
+/// <summary>Score for one milestone: binary 0/1, three-point 0 (not yet), 1 (emerging), 2 (secure).</summary>
+public class AssessmentScore : TenantEntity
+{
+    public Guid RunId { get; set; }
+
+    public Guid MilestoneId { get; set; }
+
+    public int Score { get; set; }
+
+    public string? Note { get; set; }
+}

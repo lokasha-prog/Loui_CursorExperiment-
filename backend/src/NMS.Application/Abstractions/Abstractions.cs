@@ -152,6 +152,10 @@ public interface IAppDbContext
     DbSet<NMS.Domain.Learning.AgeBand> AgeBands { get; }
     DbSet<NMS.Domain.Learning.Milestone> Milestones { get; }
     DbSet<NMS.Domain.Learning.Lesson> Lessons { get; }
+    DbSet<NMS.Domain.Learning.Observation> Observations { get; }
+    DbSet<NMS.Domain.Learning.AssessmentTemplate> AssessmentTemplates { get; }
+    DbSet<NMS.Domain.Learning.AssessmentRun> AssessmentRuns { get; }
+    DbSet<NMS.Domain.Learning.AssessmentScore> AssessmentScores { get; }
     DbSet<NMS.Domain.Forms.StudentAdmissionStep> StudentAdmissionSteps { get; }
     DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents { get; }
     DbSet<CentreSettings> CentreSettings { get; }
