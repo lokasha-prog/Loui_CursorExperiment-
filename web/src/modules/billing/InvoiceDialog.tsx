@@ -1,8 +1,8 @@
-import { Ban, Download, Send, Check } from 'lucide-react'
+import { Ban, CreditCard, Download, Send, Check, Undo2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ApiError, api } from '@/api/client'
-import { useInvoice, useInvoiceAction, useRecordPayment } from '@/api/hooks'
+import { useInvoice, useInvoiceAction, useInvoicePayments, usePaymentConfig, useRecordPayment, useRefundPayment, useStartPayment } from '@/api/hooks'
 import { Button } from '@/components/ui/button'
 import { Field, Input, Select } from '@/components/ui/form-controls'
 import { Alert, Badge, Dialog, DialogContent, DialogHeader, Skeleton, type Tone } from '@/components/ui/surfaces'
@@ -10,7 +10,7 @@ import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { formatAed, formatDate, todayIso } from '@/lib/format'
 import { localized } from '@/lib/utils'
-import { can, useAuth } from '@/stores/auth'
+import { can, isParentOnly, useAuth } from '@/stores/auth'
 
 export const statusTone: Record<string, Tone> = { draft: 'neutral', issued: 'info', partially_paid: 'warning', paid: 'success', overdue: 'danger', cancelled: 'neutral' }
 
@@ -80,6 +80,32 @@ export function InvoiceDialog({ id, onClose }: { id: string | null; onClose: () 
   const d = detail.data
   const inv = d?.invoice
   const open = !!inv && ['issued', 'partially_paid', 'overdue'].includes(inv.status)
+  const config = usePaymentConfig()
+  const sessions = useInvoicePayments(id)
+  const start = useStartPayment()
+  const refund = useRefundPayment()
+  const family = isParentOnly(me)
+  const canRefund = can(me, 'payments.refund')
+
+  const payByCard = async () => {
+    try {
+      const started = await start.mutateAsync({ invoiceId: id! })
+      if (started.redirect_url) window.location.href = started.redirect_url
+    } catch (error) {
+      toast.error(message(error))
+    }
+  }
+
+  const refundIt = async (sessionId: string) => {
+    const reason = window.prompt(t('billing.pay.refundReason'))
+    if (!reason?.trim()) return
+    try {
+      await refund.mutateAsync({ id: sessionId, reason: reason.trim() })
+      toast.success(t('billing.pay.refunded'))
+    } catch (error) {
+      toast.error(message(error))
+    }
+  }
 
   const run = async (kind: 'issue' | 'cancel' | 'send') => {
     if (kind === 'cancel' && !window.confirm(t('billing.invoice.confirmCancel'))) return
@@ -145,6 +171,25 @@ export function InvoiceDialog({ id, onClose }: { id: string | null; onClose: () 
                 </ul>
               )}
             </section>
+            {family && open && config.data?.enabled && (
+              <div className="flex justify-end"><Button onClick={() => void payByCard()} disabled={start.isPending}><CreditCard className="h-4 w-4" aria-hidden="true" />{t('billing.pay.byCard')}</Button></div>
+            )}
+            {(sessions.data ?? []).length > 0 && (
+              <section aria-labelledby="inv-online">
+                <h3 id="inv-online" className="mb-1 text-sm font-bold">{t('billing.pay.online')}</h3>
+                <ul className="divide-y rounded-md border text-sm">
+                  {(sessions.data ?? []).map((s) => (
+                    <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                      <span>{formatDate(s.created_at, i18n.language)} · <Badge tone={s.status === 'paid' ? 'success' : s.status === 'pending' ? 'info' : s.status === 'needs_review' ? 'warning' : 'neutral'}>{t(`billing.pay.status.${s.status}`)}</Badge></span>
+                      <span className="flex items-center gap-2">
+                        <span dir="ltr" className="font-semibold">{formatAed(s.amount_fils, i18n.language)}</span>
+                        {canRefund && ['paid', 'partially_refunded'].includes(s.status) && <Button size="sm" variant="secondary" onClick={() => void refundIt(s.id)}><Undo2 className="h-4 w-4" aria-hidden="true" />{t('billing.pay.refund')}</Button>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
             {canPay && open && <PaymentForm id={inv.id} balance={inv.total_fils - inv.paid_fils} onDone={() => undefined} />}
             <div className="flex flex-wrap justify-end gap-2 border-t pt-3">
               <Button variant="secondary" onClick={() => void pdf()}><Download className="h-4 w-4" aria-hidden="true" />{t('billing.invoice.pdf')}</Button>

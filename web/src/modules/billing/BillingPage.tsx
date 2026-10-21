@@ -1,8 +1,8 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { Plus, ReceiptText, Wallet } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { flatten, useBillingSnapshot, useFeePlans, useGenerateInvoices, useInvoices } from '@/api/hooks'
+import { flatten, useBillingSnapshot, useFeePlans, useGenerateInvoices, useInvoices, usePaymentByReference } from '@/api/hooks'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ListError, ListSkeleton, LoadMore } from '@/components/shared/ListState'
 import { Button } from '@/components/ui/button'
@@ -210,6 +210,15 @@ export default function BillingPage() {
   const canWrite = can(me, 'billing.write')
   const [tab, setTab] = useState(canWrite ? 'overview' : 'invoices')
   const [invoice, setInvoice] = useState<string | null>(null)
+  const returned = new URLSearchParams(window.location.search).get('payment')
+  const outcome = usePaymentByReference(returned)
+  useEffect(() => {
+    const status = outcome.data?.status
+    if (!status) return
+    if (status === 'paid') toast.success(t('billing.pay.thanks'))
+    else if (status !== 'pending') toast.error(t(`billing.pay.status.${status}`))
+    window.history.replaceState(null, '', window.location.pathname)
+  }, [outcome.data, t])
   const [plan, setPlan] = useState<{ id: string | null } | null>(null)
 
   const tabs = [...(canWrite ? ['overview'] : []), 'invoices', ...(canWrite ? ['plans', 'expenses', 'reports', 'settings'] : [])]

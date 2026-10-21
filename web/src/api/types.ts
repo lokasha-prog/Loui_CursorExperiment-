@@ -997,3 +997,10 @@ export interface CentreFigures {
 }
 export interface GroupOverview { date: string; centres: CentreFigures[]; total: CentreFigures }
 export interface GroupReportTable { title: string; subtitle: string | null; columns: string[]; rows: (string | number | null)[][]; summary: { label: string; value: string }[] }
+
+export interface PaymentSession {
+  id: string; invoice_id: string; invoice_number: string | null; reference: string; gateway: string; amount_fils: number; refunded_fils: number
+  currency: string; status: string; failure_reason: string | null; payer_name: string | null; created_at: string; completed_at: string | null
+}
+export interface PaymentConfig { enabled: boolean; provider: string; currency: string; saved_cards: boolean }
+export interface StartedPayment { session_id: string; reference: string; redirect_url: string | null; status: string }

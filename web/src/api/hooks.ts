@@ -1,6 +1,9 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  PaymentConfig,
+  PaymentSession,
+  StartedPayment,
   GroupCentre,
   GroupOverview,
   GroupReportTable,
@@ -1064,5 +1067,21 @@ export function useTransferStudent() {
   return useMutation({
     mutationFn: (v: { studentId: string; toCentreId: string; reason?: string }) => api.post<string>(`/group/students/${v.studentId}/transfer`, { to_centre_id: v.toCentreId, reason: v.reason }),
     onSuccess: () => Promise.all(['students', 'student-options', 'group-overview'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const usePaymentConfig = () => useQuery({ queryKey: ['payment-config'], queryFn: () => api.get<PaymentConfig>('/billing/payments/config'), staleTime: 60_000 })
+export const useInvoicePayments = (invoiceId: string | null) =>
+  useQuery({ queryKey: ['invoice-payments', invoiceId], enabled: !!invoiceId, queryFn: () => api.get<PaymentSession[]>('/billing/payments', { invoice_id: invoiceId ?? undefined }) })
+export const usePaymentByReference = (reference: string | null) =>
+  useQuery({ queryKey: ['payment-ref', reference], enabled: !!reference, queryFn: () => api.get<PaymentSession>(`/billing/payments/by-reference/${reference}`) })
+export const useStartPayment = () =>
+  useMutation({ mutationFn: (v: { invoiceId: string; amountFils?: number }) => api.post<StartedPayment>(`/billing/invoices/${v.invoiceId}/pay`, { amount_fils: v.amountFils }) })
+
+export function useRefundPayment() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (v: { id: string; amountFils?: number; reason: string }) => api.post<PaymentSession>(`/billing/payments/${v.id}/refund`, { amount_fils: v.amountFils, reason: v.reason }),
+    onSuccess: () => Promise.all(['invoice-payments', 'invoice', 'invoices', 'billing-snapshot'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
   })
 }

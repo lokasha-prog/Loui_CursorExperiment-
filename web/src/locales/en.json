@@ -1017,6 +1017,15 @@
       "dueOn": "Due {{date}}",
       "by": "By {{name}}"
     },
+    "pay": {
+      "byCard": "Pay by card",
+      "online": "Online payments",
+      "refund": "Refund",
+      "refundReason": "Why is this being refunded?",
+      "refunded": "Refund done. The invoice balance was updated.",
+      "thanks": "Thank you. Your payment was received.",
+      "status": { "pending": "Waiting", "paid": "Paid", "failed": "Declined", "cancelled": "Cancelled", "expired": "Expired", "needs_review": "Needs a look", "partially_refunded": "Part refunded", "refunded": "Refunded" }
+    },
     "payment": {
       "title": "Record a payment",
       "amount": "Amount (AED)",

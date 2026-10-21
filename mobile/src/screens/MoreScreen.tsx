@@ -6,6 +6,8 @@ import { store } from '../core'
 import { pick, useI18n } from '../i18n'
 import { Banner, Body, Btn, Card, Field, Heading, Pill, Row, Screen, Title } from '../ui'
 import { LanguageSwitch } from './LoginScreen'
+import { ApprovalsOps, CalendarOps, CentreOps, ChildrenOps, EnquiriesOps, InvoicesOps, LeaveOps, NewslettersOps, opsWords } from './ops'
+import { Pressable } from 'react-native'
 
 interface Alert { id: string; tier: string; title: Record<string, string>; body: Record<string, string>; read: boolean; created_at: string }
 interface Contact { name: string; relationship: string; phone: string | null; can_pickup: boolean; is_primary: boolean }
@@ -23,6 +25,19 @@ export function MoreScreen() {
   const [search, setSearch] = useState('')
   const [busy, setBusy] = useState(false)
   const [offline, setOffline] = useState(false)
+  const [view, setView] = useState<string | null>(null)
+  const w = opsWords(lang)
+  const parent = !!me?.roles.includes('parent')
+  const menu = [
+    { id: 'centre', icon: '◉', title: w.centre, hint: w.centreHint, show: can('attendance.override') },
+    { id: 'children', icon: '☺', title: w.children, hint: w.childrenHint, show: !parent && can('students.read') },
+    { id: 'leave', icon: '✈', title: w.leave, hint: w.leaveHint, show: !parent && can('attendance.read') },
+    { id: 'approvals', icon: '✔', title: w.approvals, hint: w.approvalsHint, show: can('activities.approve') },
+    { id: 'enquiries', icon: '☎', title: w.enquiries, hint: w.enquiriesHint, show: can('enquiries.read') },
+    { id: 'invoices', icon: '▤', title: w.invoices, hint: w.invoicesHint, show: can('billing.read') },
+    { id: 'calendar', icon: '▦', title: w.calendar, hint: w.calendarHint, show: can('calendar.read') },
+    { id: 'newsletters', icon: '✉', title: w.newsletters, hint: w.newslettersHint, show: can('messaging.read') },
+  ].filter((m) => m.show)
 
   const loadAlerts = useCallback(async () => {
     try { setAlerts(await api.page<Alert>('/notifications?limit=20')) } catch { /* offline */ }
@@ -49,9 +64,24 @@ export function MoreScreen() {
 
   const shown = (emergency?.children ?? []).filter((c) => `${c.name} ${c.arabic_name ?? ''}`.toLowerCase().includes(search.toLowerCase()))
 
+  const back = () => setView(null)
+  if (view === 'centre') return <CentreOps onBack={back} />
+  if (view === 'children') return <ChildrenOps onBack={back} />
+  if (view === 'leave') return <LeaveOps onBack={back} />
+  if (view === 'approvals') return <ApprovalsOps onBack={back} />
+  if (view === 'enquiries') return <EnquiriesOps onBack={back} />
+  if (view === 'invoices') return <InvoicesOps onBack={back} />
+  if (view === 'calendar') return <CalendarOps onBack={back} />
+  if (view === 'newsletters') return <NewslettersOps onBack={back} />
+
   return (
     <Screen>
       <Title>{t('more')}</Title>
+      {menu.map((m) => (
+        <Pressable key={m.id} accessibilityRole="button" accessibilityLabel={m.title} onPress={() => setView(m.id)}>
+          <Card><Row><Heading>{m.icon}  {m.title}</Heading></Row><Body muted>{m.hint}</Body></Card>
+        </Pressable>
+      ))}
       <Card>
         <Heading>{t('profile')}</Heading>
         <Body>{[me?.first_name, me?.last_name].filter(Boolean).join(' ') || me?.email}</Body>
