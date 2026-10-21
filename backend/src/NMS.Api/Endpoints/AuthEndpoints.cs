@@ -100,7 +100,13 @@ public static class AuthEndpoints
                 return ApiResults.Error(http, StatusCodes.Status400BadRequest, "VALIDATION_ERROR", $"The {CsrfHeader} header is required.");
             }
 
-            await sender.Send(new LogoutCommand(http.Request.Cookies[RefreshCookie]), ct);
+            var token = http.Request.Cookies[RefreshCookie];
+            if (string.IsNullOrEmpty(token) && IsMobile(http))
+            {
+                token = (await http.Request.ReadFromJsonAsync<MobileRefreshRequest>(ct))?.RefreshToken;
+            }
+
+            await sender.Send(new LogoutCommand(token), ct);
             http.Response.Cookies.Delete(RefreshCookie, CookieOptions(http, null));
             return Results.NoContent();
         }).AllowAnonymous();

@@ -203,7 +203,7 @@
             </defs>
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">46%</div>
+            <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">50%</div>
             <div class="text-[10px] font-mono text-slate-500 uppercase">Overall</div>
             <div class="text-[10px] font-mono text-slate-400">13 of 30 sprints</div>
           </div>
@@ -654,9 +654,9 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-20 GST (billing complete)",
+    lastUpdated: "2026-10-21 GST (staff phone app built)",
     updatedBy: "Claude Code",
-    overallPct: 46,
+    overallPct: 50,
 
     sprints: {
       // MVP Pilot (0-5)
@@ -676,7 +676,7 @@
       12: { status: "done",    pct: 100, title: "Calendar + Forms + Tools (2/2)", notes: "Form builder (11 field types, versions, show-only-if rules, public forms), answers and analytics, admission checklist with automatic forms and overdue reminders, certificate printer (10 designs, numbering, signatures), all in English and Arabic", deliverables: "Admissions, certificates" },
       13: { status: "done",    pct: 100, title: "Reports + SMS + Emergency",    notes: "Report centre: 8 reports in Excel/PDF/JSON made in the background with 30-day history; analytics charts with picture export; SMS fallback for critical alerts (per-centre switch, monthly limit, provider keys needed); emergency sheets already built; offline emergency cache comes with the phone app", deliverables: "Reports, SMS, RTL QA" },
       14: { status: "done",    pct: 100, title: "Reports + RTL QA Pass",        notes: "Newsletter builder (safe rich text, audiences, scheduling, open and click counts, AI draft), resource centre (folders, versions, download log), Arabic right-to-left sweep of all 20 screens on desktop and phone, speed test with 100 simultaneous users (slowest 95th percentile 0.9 s), security pass (no vulnerable packages, react-router upgraded)", deliverables: "RTL sign-off, load test" },
-      15: { status: "active",  pct: 1,  title: "Mobile App (1/2)",             notes: "Staff app: dashboard, attendance, activities, messaging", deliverables: "Staff mobile app" },
+      15: { status: "done",    pct: 100, title: "Mobile App (1/2)",             notes: "Staff phone app (Expo): sign-in with fingerprint/face unlock, Today dashboard and staff cover, attendance by camera scan or typed card number with offline queue, feed posting, messages, alerts, emergency information saved on the phone for use with no signal, English/Arabic right-to-left. Phone sign-in keeps its session in the secure store (server hands the phone a refresh token). Push alerts and store builds come with Sprint 16/24", deliverables: "Staff mobile app" },
       16: { status: "pending", pct: 0,  title: "Mobile App (2/2)",             notes: "Parent app: feed, daily report, messaging, push", deliverables: "Parent mobile app" },
       17: { status: "pending", pct: 0,  title: "QA + Security + UAT",          notes: "Pen test, WCAG audit, load test, UAT with pilot", deliverables: "Pen test report, sign-off" },
       18: { status: "pending", pct: 0,  title: "Go-Live · Phase 1 Complete",   notes: "Production deploy, first paid customers", deliverables: "2 on-prem + 3 SaaS live" },

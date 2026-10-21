@@ -41,6 +41,20 @@ public class MobileAuthTests(NmsApiFixture api)
     }
 
     [Fact]
+    public async Task Signing_out_on_the_phone_ends_the_saved_session()
+    {
+        var user = await api.CreateUserAsync("teacher");
+        var login = await SendAsync("/api/v1/auth/login", new { tenant = api.TenantSlug, email = user.Email, password = user.Password }, mobile: true);
+        var token = System.Text.Json.JsonDocument.Parse(await login.Content.ReadAsStringAsync()).RootElement.GetProperty("data").GetProperty("refresh_token").GetString()!;
+
+        var logout = await SendAsync("/api/v1/auth/logout", new { refresh_token = token }, mobile: true);
+        var again = await SendAsync("/api/v1/auth/refresh", new { refresh_token = token }, mobile: true);
+
+        logout.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        again.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
     public async Task The_emergency_data_for_offline_use_is_for_attendance_staff_only_and_is_written_to_the_change_history()
     {
         var teacher = await api.CreateUserAsync("teacher");
