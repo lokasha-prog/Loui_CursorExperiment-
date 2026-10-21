@@ -92,6 +92,9 @@ public static class PublicEnquiryEndpoints
                 : ApiResults.Ok(http, new { name = found.Name, captcha_site_key = string.IsNullOrWhiteSpace(captcha.Value.SiteKey) ? null : captcha.Value.SiteKey });
         });
 
+        g.MapGet("/centre/{centre}", async (string centre, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new PublicCentreQuery(centre), ct)));
+
         g.MapPost("/enquiries/{centre}", async (string centre, PublicEnquiryRequest body, HttpContext http, ISender s, CancellationToken ct) =>
         {
             var result = await s.Send(new PublicEnquiryCommand(

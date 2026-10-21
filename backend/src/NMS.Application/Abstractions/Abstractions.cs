@@ -146,6 +146,12 @@ public interface IAppDbContext
     DbSet<NMS.Domain.Communication.ResourceDocument> ResourceDocuments { get; }
     DbSet<NMS.Domain.Communication.ResourceVersion> ResourceVersions { get; }
     DbSet<NMS.Domain.Communication.ResourceDownload> ResourceDownloads { get; }
+
+    DbSet<NMS.Domain.Learning.CurriculumFramework> CurriculumFrameworks { get; }
+    DbSet<NMS.Domain.Learning.DevelopmentArea> DevelopmentAreas { get; }
+    DbSet<NMS.Domain.Learning.AgeBand> AgeBands { get; }
+    DbSet<NMS.Domain.Learning.Milestone> Milestones { get; }
+    DbSet<NMS.Domain.Learning.Lesson> Lessons { get; }
     DbSet<NMS.Domain.Forms.StudentAdmissionStep> StudentAdmissionSteps { get; }
     DbSet<NMS.Domain.Calendar.CalendarEvent> CalendarEvents { get; }
     DbSet<CentreSettings> CentreSettings { get; }

@@ -195,6 +195,7 @@ app.MapEnquiryEndpoints();
 app.MapSettingsEndpoints();
 app.MapNewsletterEndpoints();
 app.MapResourceEndpoints();
+app.MapLearningEndpoints();
 app.MapReportEndpoints();
 app.MapFormEndpoints();
 app.MapAdmissionEndpoints();

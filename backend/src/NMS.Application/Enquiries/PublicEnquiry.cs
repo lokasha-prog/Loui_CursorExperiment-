@@ -75,3 +75,33 @@ public sealed class PublicEnquiryHandler(IAppDbContext db, ITenantContext tenant
         return Result.Success();
     }
 }
+
+public sealed record PublicProgrammeDto(Dictionary<string, string> Name, Dictionary<string, string>? Description, int DaysPerWeek, string StartTime, string EndTime, int MinAgeMonths, int MaxAgeMonths);
+
+public sealed record PublicCentreDto(Dictionary<string, string> Name, IReadOnlyList<PublicProgrammeDto> Programmes, int? ChildrenPerAdultAtMost, int Rooms);
+
+/// <summary>What a family may see on the nursery's website: the centre name and its open programmes. No fees, no people, no private data.</summary>
+public sealed record PublicCentreQuery(string Centre) : IRequest<Result<PublicCentreDto>>;
+
+public sealed class PublicCentreHandler(IAppDbContext db, ITenantContext tenant) : IRequestHandler<PublicCentreQuery, Result<PublicCentreDto>>
+{
+    public async Task<Result<PublicCentreDto>> Handle(PublicCentreQuery request, CancellationToken ct)
+    {
+        var slug = request.Centre.Trim().ToLowerInvariant();
+        var centre = await db.Tenants.AsNoTracking().FirstOrDefaultAsync(t => !t.IsDeleted && t.Status == "active" && t.Slug == slug, ct);
+        if (centre is null)
+        {
+            return Error.NotFound("This centre is not available.");
+        }
+
+        tenant.TenantId = centre.Id;
+        var programmes = await db.Programs.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.MinAgeMonths).ThenBy(p => p.MaxAgeMonths)
+            .Select(p => new { p.Name, p.Description, p.DaysPerWeek, p.StartTime, p.EndTime, p.MinAgeMonths, p.MaxAgeMonths }).ToListAsync(ct);
+        var rooms = await db.Rooms.AsNoTracking().Where(r => r.IsActive).Select(r => r.RatioStaffToStudent).ToListAsync(ct);
+        var ratios = rooms.Where(r => r > 0).ToList();
+        return Result<PublicCentreDto>.Success(new PublicCentreDto(
+            centre.Name,
+            programmes.Select(p => new PublicProgrammeDto(p.Name, p.Description, p.DaysPerWeek, p.StartTime.ToString("HH:mm"), p.EndTime.ToString("HH:mm"), p.MinAgeMonths, p.MaxAgeMonths)).ToList(),
+            ratios.Count > 0 ? ratios.Max() : null, rooms.Count));
+    }
+}

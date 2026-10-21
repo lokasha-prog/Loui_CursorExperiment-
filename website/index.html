@@ -4,144 +4,274 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bright Futures Nursery</title>
-  <meta name="description" content="A warm, safe nursery where every child is known, loved and learning. Book a visit or ask about a place." />
+  <meta name="description" content="A warm, safe, bilingual nursery in the UAE where every child is known, loved and learning. Book a visit today." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23b13f25'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23f6c453'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <script type="application/ld+json" id="ld"></script>
 </head>
 <body>
 <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+<div class="notice" id="notice" hidden></div>
 
 <header class="top">
   <div class="wrap bar">
     <a class="brand" href="#top"><span class="logo" aria-hidden="true">☀</span><span id="brandName" data-i18n="brand">Bright Futures</span></a>
-    <nav aria-label="Main">
-      <a href="#about" data-i18n="nav.about">About</a>
-      <a href="#day" data-i18n="nav.day">A day with us</a>
-      <a href="#parents" data-i18n="nav.parents">Parents</a>
-      <a href="#faq" data-i18n="nav.faq">Questions</a>
-      <a class="btn" href="#enquire" data-i18n="nav.enquire">Ask about a place</a>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu">☰</button>
+    <nav class="main" id="nav" aria-label="Main">
+      <a class="link" href="#why" data-i18n="nav.why">Why us</a>
+      <a class="link" href="#programmes" data-i18n="nav.programmes">Programmes</a>
+      <a class="link" href="#day" data-i18n="nav.day">A day with us</a>
+      <a class="link" href="#learning" data-i18n="nav.learning">Learning</a>
+      <a class="link" href="#safety" data-i18n="nav.safety">Safety</a>
+      <a class="link" href="#faq" data-i18n="nav.faq">Questions</a>
+      <a class="btn" href="#enquire" data-i18n="nav.enquire">Book a visit</a>
       <button class="lang" id="lang" type="button" lang="ar">العربية</button>
     </nav>
   </div>
 </header>
 
 <main id="main">
+  <!-- HERO -->
   <section class="hero" id="top">
+    <span class="blob a"></span><span class="blob b"></span><span class="blob c"></span>
     <div class="wrap grid">
-      <div>
-        <p class="kicker" data-i18n="hero.kicker">Early years in the UAE</p>
-        <h1 data-i18n="hero.title">A happy, safe place where every child is known and loved</h1>
+      <div class="rv">
+        <span class="kicker" data-i18n="hero.kicker">Early years in the UAE</span>
+        <h1><span data-i18n="hero.t1">A happy, safe place where every child is</span> <em data-i18n="hero.t2">known and loved</em></h1>
         <p class="lead" data-i18n="hero.lead">Small groups, caring teachers and a calm, playful day. We keep you close to your child's day, in English and Arabic.</p>
         <div class="cta">
           <a class="btn" href="#enquire" data-i18n="hero.cta1">Book a visit</a>
           <a class="btn ghost" href="#day" data-i18n="hero.cta2">See a day with us</a>
         </div>
+        <div class="badges">
+          <span class="badge">🛡 <span data-i18n="badge.safe">Secure check-in</span></span>
+          <span class="badge">🌍 <span data-i18n="badge.bi">English + Arabic</span></span>
+          <span class="badge">👩‍🏫 <span data-i18n="badge.small">Small groups</span></span>
+          <span class="badge">📱 <span data-i18n="badge.app">Parent app</span></span>
+          <span class="badge" id="ratioBadge" hidden>💛 <span id="ratioText"></span></span>
+        </div>
       </div>
-      <svg class="art" viewBox="0 0 400 400" role="img" aria-hidden="true">
-        <circle cx="200" cy="200" r="180" fill="#fdeee6"/>
-        <circle cx="300" cy="100" r="46" fill="#f6c453"/>
-        <rect x="90" y="220" width="220" height="120" rx="20" fill="#b13f25"/>
-        <polygon points="70,230 200,130 330,230" fill="#8f3019"/>
-        <rect x="170" y="270" width="60" height="70" rx="10" fill="#fff"/>
-        <rect x="115" y="250" width="40" height="40" rx="8" fill="#fde2d3"/>
-        <rect x="245" y="250" width="40" height="40" rx="8" fill="#fde2d3"/>
-        <circle cx="90" cy="350" r="20" fill="#1f7a6d"/><circle cx="320" cy="355" r="26" fill="#1f7a6d"/>
+      <svg class="hero-art rv" viewBox="0 0 520 480" role="img" aria-hidden="true">
+        <circle cx="260" cy="250" r="220" fill="#fde3cf"/>
+        <circle cx="410" cy="95" r="52" fill="#f6c453"/>
+        <g stroke="#f6c453" stroke-width="6" stroke-linecap="round"><path d="M410 22v-18M410 168v18M337 95h-18M483 95h18M358 43l-13-13M462 147l13 13M462 43l13-13M358 147l-13 13"/></g>
+        <ellipse cx="120" cy="110" rx="52" ry="24" fill="#fff"/><ellipse cx="150" cy="96" rx="36" ry="22" fill="#fff"/><ellipse cx="96" cy="100" rx="32" ry="18" fill="#fff"/>
+        <path d="M30 420 Q150 330 270 400 T510 380 V480 H30Z" fill="#cdebd7"/>
+        <path d="M0 450 Q160 390 300 440 T520 430 V480 H0Z" fill="#9bd3b0"/>
+        <rect x="150" y="250" width="230" height="150" rx="24" fill="#b13f25"/>
+        <polygon points="128,262 265,150 402,262" fill="#8f3019"/>
+        <rect x="236" y="320" width="62" height="80" rx="12" fill="#fff"/><circle cx="288" cy="362" r="4" fill="#b13f25"/>
+        <rect x="172" y="288" width="50" height="46" rx="10" fill="#fde2d3"/><rect x="312" y="288" width="50" height="46" rx="10" fill="#fde2d3"/>
+        <circle cx="265" cy="214" r="20" fill="#fff"/><path d="M265 202v12l8 5" stroke="#b13f25" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- children -->
+        <g><circle cx="90" cy="385" r="24" fill="#ffd9b8"/><path d="M66 378q24-30 48 0" fill="#5a3a24"/><circle cx="82" cy="387" r="3" fill="#1f2937"/><circle cx="98" cy="387" r="3" fill="#1f2937"/><path d="M82 396q8 7 16 0" stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="68" y="408" width="44" height="46" rx="16" fill="#1f7a6d"/></g>
+        <g><circle cx="430" cy="395" r="22" fill="#e9b88f"/><path d="M408 392q22-34 44 0" fill="#2b1d16"/><circle cx="422" cy="397" r="3" fill="#1f2937"/><circle cx="438" cy="397" r="3" fill="#1f2937"/><path d="M423 405q7 6 14 0" stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="410" y="416" width="40" height="42" rx="14" fill="#f6c453"/></g>
+        <g><path d="M470 330v-60" stroke="#8f3019" stroke-width="3"/><ellipse cx="470" cy="250" rx="22" ry="28" fill="#fcd9d4"/><path d="M470 330v-60M448 252c0-18 12-28 22-28" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/></g>
+        <g><path d="M60 330v-50" stroke="#8f3019" stroke-width="3"/><ellipse cx="60" cy="262" rx="20" ry="26" fill="#cfeaf7"/></g>
       </svg>
     </div>
+    <svg class="wave" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path d="M0 40 Q360 0 720 40 T1440 40 V80 H0Z" fill="#fff"/></svg>
   </section>
 
-  <section id="about" class="alt">
+  <!-- WHY US -->
+  <section id="why" class="alt">
     <div class="wrap">
-      <p class="kicker" data-i18n="about.kicker">Why families choose us</p>
-      <h2 data-i18n="about.title">Care you can see, learning you can feel</h2>
+      <div class="head center rv"><span class="kicker" data-i18n="why.kicker">Why families choose us</span><h2 data-i18n="why.title">Care you can see, learning you can feel</h2><p data-i18n="why.lead">Choosing a nursery is one of the biggest decisions you make. Here is what you can expect from us, every single day.</p></div>
       <div class="cards">
-        <div class="card"><div class="ico" aria-hidden="true">💛</div><h3 data-i18n="about.c1t">Known and loved</h3><p data-i18n="about.c1">Every child has a key person who knows their routines, likes and needs.</p></div>
-        <div class="card"><div class="ico" aria-hidden="true">🛡</div><h3 data-i18n="about.c2t">Safe by design</h3><p data-i18n="about.c2">Secure check-in and check-out, named pick-up people and the right number of staff in every room, all day.</p></div>
-        <div class="card"><div class="ico" aria-hidden="true">🌍</div><h3 data-i18n="about.c3t">English and Arabic</h3><p data-i18n="about.c3">Songs, stories and conversations in both languages so children grow confident in each.</p></div>
-        <div class="card"><div class="ico" aria-hidden="true">📱</div><h3 data-i18n="about.c4t">Close to your child's day</h3><p data-i18n="about.c4">Photos, meals, naps and daily reports in our parent app, with messages to the team.</p></div>
+        <div class="card c1 rv"><div class="ico" aria-hidden="true">💛</div><h3 data-i18n="why.c1t">Known and loved</h3><p data-i18n="why.c1">Every child has a key person who knows their routines, favourite songs, comfort habits and needs, so settling in feels natural.</p></div>
+        <div class="card c2 rv"><div class="ico" aria-hidden="true">🛡</div><h3 data-i18n="why.c2t">Safe by design</h3><p data-i18n="why.c2">Secure check-in and check-out, named pick-up people only, and the right number of adults in every room, all day long.</p></div>
+        <div class="card c3 rv"><div class="ico" aria-hidden="true">🌍</div><h3 data-i18n="why.c3t">English and Arabic</h3><p data-i18n="why.c3">Songs, stories and daily conversations in both languages, so children grow confident in each and proud of their heritage.</p></div>
+        <div class="card c4 rv"><div class="ico" aria-hidden="true">📱</div><h3 data-i18n="why.c4t">Close to your child's day</h3><p data-i18n="why.c4">Photos, meals, naps and a daily report in our parent app, with direct messages to the team. Never wonder how the day went.</p></div>
+        <div class="card c5 rv"><div class="ico" aria-hidden="true">🥗</div><h3 data-i18n="why.c5t">Healthy and mindful</h3><p data-i18n="why.c5">Nutritious meals that respect every family's needs, allergy care taken seriously, and rest when little bodies need it.</p></div>
+        <div class="card c6 rv"><div class="ico" aria-hidden="true">🎨</div><h3 data-i18n="why.c6t">Learning through play</h3><p data-i18n="why.c6">A rich, play-based programme built on the early years framework, so curiosity, language and confidence grow together.</p></div>
       </div>
     </div>
   </section>
 
-  <section id="day">
+  <!-- PROGRAMMES (from the nursery system) -->
+  <section id="programmes" class="tint" hidden>
     <div class="wrap">
-      <p class="kicker" data-i18n="day.kicker">A day with us</p>
-      <h2 data-i18n="day.title">A gentle rhythm of play, rest and discovery</h2>
-      <ol class="steps">
-        <li><div><strong data-i18n="day.s1t">Warm welcome</strong><br /><span data-i18n="day.s1">Children are greeted by name and settle in with free play.</span></div></li>
-        <li><div><strong data-i18n="day.s2t">Circle time and stories</strong><br /><span data-i18n="day.s2">Songs, languages and storytelling to start the day together.</span></div></li>
-        <li><div><strong data-i18n="day.s3t">Play and learning</strong><br /><span data-i18n="day.s3">Indoor and outdoor activities for movement, creativity and early skills.</span></div></li>
-        <li><div><strong data-i18n="day.s4t">Healthy meals and rest</strong><br /><span data-i18n="day.s4">Nutritious food that respects every family's needs, then a quiet rest.</span></div></li>
-        <li><div><strong data-i18n="day.s5t">Home with a daily report</strong><br /><span data-i18n="day.s5">You hear how the day went, with photos and notes, before you arrive.</span></div></li>
-      </ol>
+      <div class="head center rv"><span class="kicker" data-i18n="prog.kicker">Our programmes</span><h2 data-i18n="prog.title">A place for every age</h2><p data-i18n="prog.lead">Each group has its own space, routine and teachers, so your child gets what suits their stage.</p></div>
+      <div class="progs" id="progs"></div>
     </div>
   </section>
 
+  <!-- DAY -->
+  <section id="day" class="alt">
+    <div class="wrap split">
+      <div class="rv">
+        <span class="kicker" data-i18n="day.kicker">A day with us</span>
+        <h2 data-i18n="day.title">A gentle rhythm of play, rest and discovery</h2>
+        <p data-i18n="day.lead">Children thrive on routine. Our day flows from calm arrival to joyful play, healthy meals and quiet rest, and you hear all about it before pick-up.</p>
+        <a class="btn teal" href="#enquire" data-i18n="day.cta">Come and see it</a>
+      </div>
+      <div class="timeline rv">
+        <div class="tl" data-i="1"><strong>🌅 <span data-i18n="day.s1t">Warm welcome</span></strong><br /><span data-i18n="day.s1">Children are greeted by name, settle in and start with free play.</span></div>
+        <div class="tl" data-i="2"><strong>🎶 <span data-i18n="day.s2t">Circle time and stories</span></strong><br /><span data-i18n="day.s2">Songs, languages, rhymes and storytelling to begin the day together.</span></div>
+        <div class="tl" data-i="3"><strong>🎨 <span data-i18n="day.s3t">Play and learning</span></strong><br /><span data-i18n="day.s3">Art, building, sensory play, movement and outdoor exploration.</span></div>
+        <div class="tl" data-i="4"><strong>🍎 <span data-i18n="day.s4t">Healthy meals and rest</span></strong><br /><span data-i18n="day.s4">Nutritious food, then a quiet rest or calm activities for each child's need.</span></div>
+        <div class="tl" data-i="5"><strong>🏡 <span data-i18n="day.s5t">Home with a daily report</span></strong><br /><span data-i18n="day.s5">You see photos and notes from the day, so there is always something to talk about.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEARNING -->
+  <section id="learning" class="tint">
+    <div class="wrap">
+      <div class="head center rv"><span class="kicker" data-i18n="learn.kicker">How children learn here</span><h2 data-i18n="learn.title">Seven areas of learning, all through play</h2><p data-i18n="learn.lead">We follow the Early Years Foundation Stage, the framework used by the best early years settings, and we track each child's progress with you.</p></div>
+      <div class="tiles">
+        <div class="tile rv" style="background:var(--rose)"><span class="e">🗣</span><span data-i18n="learn.a1">Communication and language</span><small data-i18n="learn.a1d">Listening, talking, stories</small></div>
+        <div class="tile rv" style="background:var(--leaf)"><span class="e">🤸</span><span data-i18n="learn.a2">Physical development</span><small data-i18n="learn.a2d">Moving, balance, fine skills</small></div>
+        <div class="tile rv" style="background:var(--sky)"><span class="e">🤝</span><span data-i18n="learn.a3">Personal, social and emotional</span><small data-i18n="learn.a3d">Friends, feelings, confidence</small></div>
+        <div class="tile rv" style="background:var(--lilac)"><span class="e">📖</span><span data-i18n="learn.a4">Literacy</span><small data-i18n="learn.a4d">Books, sounds, first writing</small></div>
+        <div class="tile rv" style="background:#fff0b8"><span class="e">🔢</span><span data-i18n="learn.a5">Mathematics</span><small data-i18n="learn.a5d">Numbers, shapes, patterns</small></div>
+        <div class="tile rv" style="background:var(--peach)"><span class="e">🌳</span><span data-i18n="learn.a6">Understanding the world</span><small data-i18n="learn.a6d">Nature, people, our community</small></div>
+        <div class="tile rv" style="background:#e6f4c8"><span class="e">🎭</span><span data-i18n="learn.a7">Expressive arts and design</span><small data-i18n="learn.a7d">Music, art, imagination</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACTIVITIES / GALLERY -->
+  <section id="life" class="alt">
+    <div class="wrap">
+      <div class="head center rv"><span class="kicker" data-i18n="life.kicker">Life at nursery</span><h2 data-i18n="life.title">Where curiosity gets to play</h2></div>
+      <div class="gallery" id="gallery">
+        <div class="shot g1 rv">🎨<span class="label" data-i18n="life.p1">Messy art mornings</span></div>
+        <div class="shot g2 rv">🎵<span class="label" data-i18n="life.p2">Music and movement</span></div>
+        <div class="shot g3 rv">🌱<span class="label" data-i18n="life.p3">Garden and outdoor play</span></div>
+        <div class="shot g4 rv">📚<span class="label" data-i18n="life.p4">Story corner</span></div>
+        <div class="shot g5 rv">💦<span class="label" data-i18n="life.p5">Water and sensory play</span></div>
+        <div class="shot g6 rv">🧱<span class="label" data-i18n="life.p6">Building and problem solving</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAFETY -->
+  <section id="safety" class="tint">
+    <div class="wrap split">
+      <div class="rv">
+        <span class="kicker" data-i18n="safe.kicker">Safety and wellbeing</span>
+        <h2 data-i18n="safe.title">Peace of mind, built into every day</h2>
+        <p data-i18n="safe.lead">You should never have to wonder whether your child is safe. These are the things we do, not just promise.</p>
+        <ul class="checks">
+          <li data-i18n="safe.l1">Secure check-in and check-out with a scanned card, recorded every time</li>
+          <li data-i18n="safe.l2">Only the people you name may collect your child, with identity checked</li>
+          <li data-i18n="safe.l3">Staff-to-child ratios watched live, so every room always has enough adults</li>
+          <li data-i18n="safe.l4">Allergies and medical needs recorded and visible to the team, even with no signal</li>
+          <li data-i18n="safe.l5">Photos and details shared only with your own family, under UAE data-protection rules</li>
+        </ul>
+      </div>
+      <div class="rv">
+        <div class="card" style="background:linear-gradient(135deg,#fff,#dff3ee)"><div class="ico" aria-hidden="true">🩺</div><h3 data-i18n="safe.cardt">Your child's wellbeing comes first</h3><p data-i18n="safe.card">From the first conversation we learn about your child's health, diet and routines, and the whole team follows them every day.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARENT APP -->
   <section id="parents" class="alt">
-    <div class="wrap">
-      <p class="kicker" data-i18n="parents.kicker">For parents</p>
-      <h2 data-i18n="parents.title">Everything in one place</h2>
-      <div class="cards">
-        <div class="card"><h3 data-i18n="parents.c1t">Parent app</h3><p data-i18n="parents.c1">See the feed, daily reports and messages, and choose which alerts you get.</p></div>
-        <div class="card"><h3 data-i18n="parents.c2t">Invoices and forms</h3><p data-i18n="parents.c2">View invoices, fill in forms and read newsletters without paper.</p></div>
-        <div class="card"><h3 data-i18n="parents.c3t">Your privacy</h3><p data-i18n="parents.c3">Photos and details are shared only with your family. We follow UAE data-protection rules.</p></div>
+    <div class="wrap split">
+      <div class="phone rv" aria-hidden="true">
+        <div class="screen">
+          <div class="top"><span data-i18n="app.screenTitle">Today</span><span class="chip" data-i18n="app.live">Live</span></div>
+          <div class="post"><div class="pic g1">🎨</div><span class="chip" data-i18n="app.s1">Activity</span> <span data-i18n="app.p1">Painted a rainbow and shared the crayons!</span><small>10:20</small></div>
+          <div class="post"><div class="pic g3">🥗</div><span class="chip" data-i18n="app.s2">Lunch</span> <span data-i18n="app.p2">Ate all the vegetables today.</span><small>12:05</small></div>
+          <div class="post"><div class="pic g2">😴</div><span class="chip" data-i18n="app.s3">Nap</span> <span data-i18n="app.p3">Slept peacefully for an hour.</span><small>13:30</small></div>
+        </div>
       </div>
-      <p><a class="btn ghost" id="portal" href="#" hidden data-i18n="parents.portal">Parent sign-in</a></p>
+      <div class="rv">
+        <span class="kicker" data-i18n="app.kicker">For parents</span>
+        <h2 data-i18n="app.title">Your child's day, in your pocket</h2>
+        <p data-i18n="app.lead">Our parent app keeps you close, without interrupting your own day.</p>
+        <ul class="checks">
+          <li data-i18n="app.l1">Photos, meals, naps and activities as they happen</li>
+          <li data-i18n="app.l2">A daily report every afternoon, in English or Arabic</li>
+          <li data-i18n="app.l3">Message the team directly and get alerts you choose</li>
+          <li data-i18n="app.l4">Invoices, forms and newsletters in one place, no paper</li>
+        </ul>
+        <p style="margin-top:18px"><a class="btn ghost" id="portal" href="#" hidden data-i18n="app.portal">Parent sign-in</a></p>
+      </div>
     </div>
   </section>
 
-  <section id="faq">
+  <!-- TESTIMONIALS (only when the centre adds real ones in config.js) -->
+  <section id="voices" class="tint" hidden>
     <div class="wrap">
-      <p class="kicker" data-i18n="faq.kicker">Questions</p>
-      <h2 data-i18n="faq.title">Things families often ask</h2>
-      <details><summary data-i18n="faq.q1">Can I visit before I decide?</summary><p data-i18n="faq.a1">Yes. Send us the form below and we will arrange a tour at a time that suits you.</p></details>
-      <details><summary data-i18n="faq.q2">What ages do you take?</summary><p data-i18n="faq.a2">Tell us your child's date of birth in the form and we will explain which group is right.</p></details>
-      <details><summary data-i18n="faq.q3">How do I know my child is safe?</summary><p data-i18n="faq.a3">Children are checked in and out securely, only named people may collect them, and we keep staff cover in every room.</p></details>
-      <details><summary data-i18n="faq.q4">What about fees?</summary><p data-i18n="faq.a4">Fees depend on the programme and days. We will send a clear breakdown when you enquire.</p></details>
+      <div class="head center rv"><span class="kicker" data-i18n="voices.kicker">What parents say</span><h2 data-i18n="voices.title">Families who trust us</h2></div>
+      <div class="quotes" id="quotes"></div>
     </div>
   </section>
 
-  <section id="enquire" class="alt">
-    <div class="wrap" style="max-width:720px">
-      <p class="kicker" data-i18n="form.kicker">Ask about a place</p>
-      <h2 data-i18n="form.title">Tell us about your child</h2>
-      <p class="note" data-i18n="form.note">We will get back to you soon. Only our team sees what you send.</p>
-      <div id="status" role="status" aria-live="polite"></div>
-      <form id="enquiryForm" novalidate>
-        <div class="row2">
-          <label><span data-i18n="form.family">Your name</span><input name="family_name" required autocomplete="name" /></label>
-          <label><span data-i18n="form.child">Child's name</span><input name="child_name" required /></label>
-        </div>
-        <div class="row2">
-          <label><span data-i18n="form.phone">Phone</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" /></label>
-          <label><span data-i18n="form.email">E-mail</span><input name="email" type="email" autocomplete="email" /></label>
-        </div>
-        <div class="row2">
-          <label><span data-i18n="form.dob">Child's date of birth</span><input name="child_date_of_birth" type="date" /></label>
-          <label><span data-i18n="form.start">Wished start date</span><input name="desired_start_date" type="date" /></label>
-        </div>
-        <label><span data-i18n="form.contact">How should we contact you?</span>
-          <select name="preferred_contact"><option value="phone" data-i18n="form.byPhone">Phone</option><option value="email" data-i18n="form.byEmail">E-mail</option></select>
-        </label>
-        <label><span data-i18n="form.message">Anything you would like us to know</span><textarea name="message"></textarea></label>
-        <div class="hp" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off" /></label></div>
-        <div id="captchaBox"></div>
-        <button class="btn" type="submit" id="send" data-i18n="form.send">Send</button>
-      </form>
+  <!-- HOW TO JOIN -->
+  <section id="join" class="alt">
+    <div class="wrap">
+      <div class="head center rv"><span class="kicker" data-i18n="join.kicker">Joining us</span><h2 data-i18n="join.title">Three easy steps to a place</h2></div>
+      <div class="steps3">
+        <div class="step rv"><h3 data-i18n="join.s1t">Tell us about your child</h3><p data-i18n="join.s1">Send the short form below. It takes two minutes and we reply quickly.</p></div>
+        <div class="step rv"><h3 data-i18n="join.s2t">Come for a visit</h3><p data-i18n="join.s2">Tour the rooms, meet the teachers and ask every question you have.</p></div>
+        <div class="step rv"><h3 data-i18n="join.s3t">Settle in gently</h3><p data-i18n="join.s3">We plan a gradual start so your child, and you, feel confident from day one.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap" style="max-width:820px">
+      <div class="head center rv"><span class="kicker" data-i18n="faq.kicker">Questions</span><h2 data-i18n="faq.title">Things families often ask</h2></div>
+      <details><summary data-i18n="faq.q1">Can I visit before I decide?</summary><p data-i18n="faq.a1">Yes, please do. Send us the form below and we will arrange a tour at a time that suits you.</p></details>
+      <details><summary data-i18n="faq.q2">What ages do you take?</summary><p data-i18n="faq.a2">See our programmes above. Tell us your child's date of birth in the form and we will explain which group is right.</p></details>
+      <details><summary data-i18n="faq.q3">How do I know my child is safe?</summary><p data-i18n="faq.a3">Children are checked in and out securely, only named people may collect them, and we keep the right number of adults in every room.</p></details>
+      <details><summary data-i18n="faq.q4">What about fees?</summary><p data-i18n="faq.a4">Fees depend on the programme and days. We will send a clear breakdown when you enquire, with nothing hidden.</p></details>
+      <details><summary data-i18n="faq.q5">What if my child has allergies or special needs?</summary><p data-i18n="faq.a5">Tell us everything during your visit. Allergies, medical needs and routines are recorded and followed by the whole team.</p></details>
+      <details><summary data-i18n="faq.q6">Do you speak Arabic and English with the children?</summary><p data-i18n="faq.a6">Yes. Both languages are part of the day, in songs, stories and conversation.</p></details>
+      <details><summary data-i18n="faq.q7">How will I hear about my child's day?</summary><p data-i18n="faq.a7">Through our parent app: photos, meals, naps and a daily report, plus messages with the team.</p></details>
+    </div>
+  </section>
+
+  <!-- ENQUIRY -->
+  <section id="enquire" class="tint">
+    <div class="wrap" style="max-width:780px">
+      <div class="head center rv"><span class="kicker" data-i18n="form.kicker">Book a visit</span><h2 data-i18n="form.title">Tell us about your child</h2><p class="note" data-i18n="form.note">We will get back to you soon. Only our team sees what you send.</p></div>
+      <div class="formcard rv">
+        <div id="status" role="status" aria-live="polite"></div>
+        <form id="enquiryForm" novalidate>
+          <div class="row2">
+            <label><span data-i18n="form.family">Your name</span><input name="family_name" required autocomplete="name" /></label>
+            <label><span data-i18n="form.child">Child's name</span><input name="child_name" required /></label>
+          </div>
+          <div class="row2">
+            <label><span data-i18n="form.phone">Phone</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" /></label>
+            <label><span data-i18n="form.email">E-mail</span><input name="email" type="email" autocomplete="email" /></label>
+          </div>
+          <div class="row2">
+            <label><span data-i18n="form.dob">Child's date of birth</span><input name="child_date_of_birth" type="date" /></label>
+            <label><span data-i18n="form.start">Wished start date</span><input name="desired_start_date" type="date" /></label>
+          </div>
+          <label><span data-i18n="form.contact">How should we contact you?</span>
+            <select name="preferred_contact"><option value="phone" data-i18n="form.byPhone">Phone</option><option value="email" data-i18n="form.byEmail">E-mail</option></select>
+          </label>
+          <label><span data-i18n="form.message">Anything you would like us to know</span><textarea name="message"></textarea></label>
+          <div class="hp" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off" /></label></div>
+          <div id="captchaBox"></div>
+          <button class="btn" type="submit" id="send" data-i18n="form.send">Send</button>
+        </form>
+      </div>
     </div>
   </section>
 </main>
 
 <footer>
-  <div class="wrap">
-    <strong id="footName"></strong>
-    <p id="contactLine"></p>
-    <p class="note" style="color:#e7d3c5" data-i18n="footer.privacy">We use your details only to answer your enquiry and never share them.</p>
+  <div class="wrap fgrid">
+    <div><strong style="font-family:Fredoka,sans-serif;font-size:1.3rem" id="footName"></strong><p data-i18n="footer.tag">Early years care and learning, in English and Arabic.</p><p class="note" style="color:#e7d3c5" data-i18n="footer.privacy">We use your details only to answer your enquiry and never share them.</p></div>
+    <div><h4 data-i18n="footer.explore">Explore</h4><p><a href="#why" data-i18n="nav.why">Why us</a><br /><a href="#programmes" data-i18n="nav.programmes">Programmes</a><br /><a href="#day" data-i18n="nav.day">A day with us</a><br /><a href="#faq" data-i18n="nav.faq">Questions</a></p></div>
+    <div><h4 data-i18n="footer.contact">Contact</h4><p id="contactLine"></p><p><a href="#enquire" data-i18n="nav.enquire">Book a visit</a></p></div>
   </div>
 </footer>
+
+<div class="mcta"><a class="btn" href="#enquire" data-i18n="nav.enquire">Book a visit</a></div>
+<div class="fab" id="fab" hidden><a id="wa" href="#" aria-label="WhatsApp" rel="noopener">💬</a></div>
 <script src="config.js"></script>
 <script src="app.js"></script>
 </body>

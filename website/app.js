@@ -1,4 +1,4 @@
-/* Nursery website: English/Arabic text, centre name from the NMS server, and the enquiry form that sends to the centre's pipeline. */
+/* Nursery website: English/Arabic text, centre name and programmes from the NMS server, and the enquiry form that sends to the centre's pipeline. */
 (function () {
   'use strict'
   var cfg = window.SITE_CONFIG || {}
@@ -7,43 +7,131 @@
   var T = {
     en: {
       skip: 'Skip to content', brand: 'Bright Futures',
-      nav: { about: 'About', day: 'A day with us', parents: 'Parents', faq: 'Questions', enquire: 'Ask about a place' },
-      hero: { kicker: 'Early years in the UAE', title: 'A happy, safe place where every child is known and loved', lead: 'Small groups, caring teachers and a calm, playful day. We keep you close to your child\'s day, in English and Arabic.', cta1: 'Book a visit', cta2: 'See a day with us' },
-      about: { kicker: 'Why families choose us', title: 'Care you can see, learning you can feel', c1t: 'Known and loved', c1: 'Every child has a key person who knows their routines, likes and needs.', c2t: 'Safe by design', c2: 'Secure check-in and check-out, named pick-up people and the right number of staff in every room, all day.', c3t: 'English and Arabic', c3: 'Songs, stories and conversations in both languages so children grow confident in each.', c4t: 'Close to your child\'s day', c4: 'Photos, meals, naps and daily reports in our parent app, with messages to the team.' },
-      day: { kicker: 'A day with us', title: 'A gentle rhythm of play, rest and discovery', s1t: 'Warm welcome', s1: 'Children are greeted by name and settle in with free play.', s2t: 'Circle time and stories', s2: 'Songs, languages and storytelling to start the day together.', s3t: 'Play and learning', s3: 'Indoor and outdoor activities for movement, creativity and early skills.', s4t: 'Healthy meals and rest', s4: 'Nutritious food that respects every family\'s needs, then a quiet rest.', s5t: 'Home with a daily report', s5: 'You hear how the day went, with photos and notes, before you arrive.' },
-      parents: { kicker: 'For parents', title: 'Everything in one place', c1t: 'Parent app', c1: 'See the feed, daily reports and messages, and choose which alerts you get.', c2t: 'Invoices and forms', c2: 'View invoices, fill in forms and read newsletters without paper.', c3t: 'Your privacy', c3: 'Photos and details are shared only with your family. We follow UAE data-protection rules.', portal: 'Parent sign-in' },
-      faq: { kicker: 'Questions', title: 'Things families often ask', q1: 'Can I visit before I decide?', a1: 'Yes. Send us the form below and we will arrange a tour at a time that suits you.', q2: 'What ages do you take?', a2: 'Tell us your child\'s date of birth in the form and we will explain which group is right.', q3: 'How do I know my child is safe?', a3: 'Children are checked in and out securely, only named people may collect them, and we keep staff cover in every room.', q4: 'What about fees?', a4: 'Fees depend on the programme and days. We will send a clear breakdown when you enquire.' },
-      form: { kicker: 'Ask about a place', title: 'Tell us about your child', note: 'We will get back to you soon. Only our team sees what you send.', family: 'Your name', child: 'Child\'s name', phone: 'Phone', email: 'E-mail', dob: 'Child\'s date of birth', start: 'Wished start date', contact: 'How should we contact you?', byPhone: 'Phone', byEmail: 'E-mail', message: 'Anything you would like us to know', send: 'Send', sending: 'Sending...', needNames: 'Please tell us your name and your child\'s name.', needContact: 'Please give a phone number or an e-mail so we can reach you.', ok: 'Thank you! We have your message and will be in touch soon.', fail: 'Sorry, we could not send this just now. Please try again in a moment.', limit: 'Too many tries. Please wait a minute and try again.', closed: 'This form is not open right now. Please call us instead.' },
-      footer: { privacy: 'We use your details only to answer your enquiry and never share them.' },
+      nav: { why: 'Why us', programmes: 'Programmes', day: 'A day with us', learning: 'Learning', safety: 'Safety', faq: 'Questions', enquire: 'Book a visit' },
+      hero: { kicker: 'Early years in the UAE', t1: 'A happy, safe place where every child is', t2: 'known and loved', lead: 'Small groups, caring teachers and a calm, playful day. We keep you close to your child\'s day, in English and Arabic.', cta1: 'Book a visit', cta2: 'See a day with us' },
+      badge: { safe: 'Secure check-in', bi: 'English + Arabic', small: 'Small groups', app: 'Parent app', ratio: 'Never more than {n} children per adult' },
+      why: { kicker: 'Why families choose us', title: 'Care you can see, learning you can feel', lead: 'Choosing a nursery is one of the biggest decisions you make. Here is what you can expect from us, every single day.', c1t: 'Known and loved', c1: 'Every child has a key person who knows their routines, favourite songs, comfort habits and needs, so settling in feels natural.', c2t: 'Safe by design', c2: 'Secure check-in and check-out, named pick-up people only, and the right number of adults in every room, all day long.', c3t: 'English and Arabic', c3: 'Songs, stories and daily conversations in both languages, so children grow confident in each and proud of their heritage.', c4t: 'Close to your child\'s day', c4: 'Photos, meals, naps and a daily report in our parent app, with direct messages to the team. Never wonder how the day went.', c5t: 'Healthy and mindful', c5: 'Nutritious meals that respect every family\'s needs, allergy care taken seriously, and rest when little bodies need it.', c6t: 'Learning through play', c6: 'A rich, play-based programme built on the early years framework, so curiosity, language and confidence grow together.' },
+      prog: { kicker: 'Our programmes', title: 'A place for every age', lead: 'Each group has its own space, routine and teachers, so your child gets what suits their stage.', days: '{n} days a week', hours: '{a} to {b}', age: 'Ages {a} to {b}', m: 'months', y: 'years' },
+      day: { kicker: 'A day with us', title: 'A gentle rhythm of play, rest and discovery', lead: 'Children thrive on routine. Our day flows from calm arrival to joyful play, healthy meals and quiet rest, and you hear all about it before pick-up.', cta: 'Come and see it', s1t: 'Warm welcome', s1: 'Children are greeted by name, settle in and start with free play.', s2t: 'Circle time and stories', s2: 'Songs, languages, rhymes and storytelling to begin the day together.', s3t: 'Play and learning', s3: 'Art, building, sensory play, movement and outdoor exploration.', s4t: 'Healthy meals and rest', s4: 'Nutritious food, then a quiet rest or calm activities for each child\'s need.', s5t: 'Home with a daily report', s5: 'You see photos and notes from the day, so there is always something to talk about.' },
+      learn: { kicker: 'How children learn here', title: 'Seven areas of learning, all through play', lead: 'We follow the Early Years Foundation Stage, the framework used by the best early years settings, and we track each child\'s progress with you.', a1: 'Communication and language', a1d: 'Listening, talking, stories', a2: 'Physical development', a2d: 'Moving, balance, fine skills', a3: 'Personal, social and emotional', a3d: 'Friends, feelings, confidence', a4: 'Literacy', a4d: 'Books, sounds, first writing', a5: 'Mathematics', a5d: 'Numbers, shapes, patterns', a6: 'Understanding the world', a6d: 'Nature, people, our community', a7: 'Expressive arts and design', a7d: 'Music, art, imagination' },
+      life: { kicker: 'Life at nursery', title: 'Where curiosity gets to play', p1: 'Messy art mornings', p2: 'Music and movement', p3: 'Garden and outdoor play', p4: 'Story corner', p5: 'Water and sensory play', p6: 'Building and problem solving' },
+      safe: { kicker: 'Safety and wellbeing', title: 'Peace of mind, built into every day', lead: 'You should never have to wonder whether your child is safe. These are the things we do, not just promise.', l1: 'Secure check-in and check-out with a scanned card, recorded every time', l2: 'Only the people you name may collect your child, with identity checked', l3: 'Staff-to-child ratios watched live, so every room always has enough adults', l4: 'Allergies and medical needs recorded and visible to the team, even with no signal', l5: 'Photos and details shared only with your own family, under UAE data-protection rules', cardt: 'Your child\'s wellbeing comes first', card: 'From the first conversation we learn about your child\'s health, diet and routines, and the whole team follows them every day.' },
+      app: { kicker: 'For parents', title: 'Your child\'s day, in your pocket', lead: 'Our parent app keeps you close, without interrupting your own day.', l1: 'Photos, meals, naps and activities as they happen', l2: 'A daily report every afternoon, in English or Arabic', l3: 'Message the team directly and get alerts you choose', l4: 'Invoices, forms and newsletters in one place, no paper', portal: 'Parent sign-in', screenTitle: 'Today', live: 'Live', s1: 'Activity', p1: 'Painted a rainbow and shared the crayons!', s2: 'Lunch', p2: 'Ate all the vegetables today.', s3: 'Nap', p3: 'Slept peacefully for an hour.' },
+      voices: { kicker: 'What parents say', title: 'Families who trust us' },
+      join: { kicker: 'Joining us', title: 'Three easy steps to a place', s1t: 'Tell us about your child', s1: 'Send the short form below. It takes two minutes and we reply quickly.', s2t: 'Come for a visit', s2: 'Tour the rooms, meet the teachers and ask every question you have.', s3t: 'Settle in gently', s3: 'We plan a gradual start so your child, and you, feel confident from day one.' },
+      faq: { kicker: 'Questions', title: 'Things families often ask', q1: 'Can I visit before I decide?', a1: 'Yes, please do. Send us the form below and we will arrange a tour at a time that suits you.', q2: 'What ages do you take?', a2: 'See our programmes above. Tell us your child\'s date of birth in the form and we will explain which group is right.', q3: 'How do I know my child is safe?', a3: 'Children are checked in and out securely, only named people may collect them, and we keep the right number of adults in every room.', q4: 'What about fees?', a4: 'Fees depend on the programme and days. We will send a clear breakdown when you enquire, with nothing hidden.', q5: 'What if my child has allergies or special needs?', a5: 'Tell us everything during your visit. Allergies, medical needs and routines are recorded and followed by the whole team.', q6: 'Do you speak Arabic and English with the children?', a6: 'Yes. Both languages are part of the day, in songs, stories and conversation.', q7: 'How will I hear about my child\'s day?', a7: 'Through our parent app: photos, meals, naps and a daily report, plus messages with the team.' },
+      form: { kicker: 'Book a visit', title: 'Tell us about your child', note: 'We will get back to you soon. Only our team sees what you send.', family: 'Your name', child: 'Child\'s name', phone: 'Phone', email: 'E-mail', dob: 'Child\'s date of birth', start: 'Wished start date', contact: 'How should we contact you?', byPhone: 'Phone', byEmail: 'E-mail', message: 'Anything you would like us to know', send: 'Send', sending: 'Sending...', needNames: 'Please tell us your name and your child\'s name.', needContact: 'Please give a phone number or an e-mail so we can reach you.', ok: 'Thank you! We have your message and will be in touch soon.', fail: 'Sorry, we could not send this just now. Please try again in a moment.', limit: 'Too many tries. Please wait a minute and try again.', closed: 'This form is not open right now. Please call us instead.' },
+      footer: { tag: 'Early years care and learning, in English and Arabic.', privacy: 'We use your details only to answer your enquiry and never share them.', explore: 'Explore', contact: 'Contact' },
       contact: { phone: 'Phone', email: 'E-mail' },
     },
     ar: {
       skip: 'انتقل إلى المحتوى', brand: 'برايت فيوتشرز',
-      nav: { about: 'من نحن', day: 'يوم في الحضانة', parents: 'أولياء الأمور', faq: 'أسئلة', enquire: 'اسأل عن مكان' },
-      hero: { kicker: 'السنوات الأولى في الإمارات', title: 'مكان سعيد وآمن يعرف فيه كل طفل ويُحَب', lead: 'مجموعات صغيرة ومعلمات حنونات ويوم هادئ ومرح. نبقيك قريباً من يوم طفلك، بالعربية والإنجليزية.', cta1: 'احجز زيارة', cta2: 'شاهد يوماً معنا' },
-      about: { kicker: 'لماذا تختارنا العائلات', title: 'رعاية تراها وتعلّم تشعر به', c1t: 'معروف ومحبوب', c1: 'لكل طفل معلمة مرافقة تعرف عاداته وما يحبه واحتياجاته.', c2t: 'آمن بالتصميم', c2: 'تسجيل دخول وخروج آمن، وأشخاص محددون للاستلام، وعدد كافٍ من الموظفين في كل غرفة طوال اليوم.', c3t: 'عربي وإنجليزي', c3: 'أغانٍ وقصص وحوارات باللغتين لينمو الأطفال بثقة في كل منهما.', c4t: 'قريب من يوم طفلك', c4: 'صور ووجبات وقيلولة وتقارير يومية في تطبيق أولياء الأمور، مع رسائل إلى الفريق.' },
-      day: { kicker: 'يوم معنا', title: 'إيقاع لطيف من اللعب والراحة والاكتشاف', s1t: 'استقبال دافئ', s1: 'نستقبل الأطفال بأسمائهم ويبدؤون باللعب الحر.', s2t: 'وقت الحلقة والقصص', s2: 'أغانٍ ولغات وحكايات لنبدأ اليوم معاً.', s3t: 'لعب وتعلّم', s3: 'أنشطة داخلية وخارجية للحركة والإبداع والمهارات المبكرة.', s4t: 'وجبات صحية وراحة', s4: 'طعام مغذٍّ يراعي احتياجات كل عائلة، ثم راحة هادئة.', s5t: 'العودة مع تقرير يومي', s5: 'تعرفين كيف كان اليوم، مع صور وملاحظات، قبل وصولك.' },
-      parents: { kicker: 'لأولياء الأمور', title: 'كل شيء في مكان واحد', c1t: 'تطبيق أولياء الأمور', c1: 'شاهد الخلاصة والتقارير اليومية والرسائل، واختر التنبيهات التي تصلك.', c2t: 'الفواتير والنماذج', c2: 'اطّلع على الفواتير واملأ النماذج واقرأ النشرات دون ورق.', c3t: 'خصوصيتك', c3: 'الصور والتفاصيل تُشارَك مع عائلتك فقط. نلتزم بقواعد حماية البيانات في الإمارات.', portal: 'دخول أولياء الأمور' },
-      faq: { kicker: 'أسئلة', title: 'ما تسأل عنه العائلات غالباً', q1: 'هل يمكنني الزيارة قبل أن أقرر؟', a1: 'نعم. أرسل لنا النموذج أدناه وسننظم جولة في وقت يناسبك.', q2: 'ما الأعمار التي تقبلونها؟', a2: 'اكتب تاريخ ميلاد طفلك في النموذج وسنوضح لك المجموعة المناسبة.', q3: 'كيف أعرف أن طفلي بأمان؟', a3: 'يُسجَّل دخول الأطفال وخروجهم بأمان، ولا يستلمهم إلا الأشخاص المحددون، ونحافظ على عدد كافٍ من الموظفين في كل غرفة.', q4: 'ماذا عن الرسوم؟', a4: 'تعتمد الرسوم على البرنامج والأيام. سنرسل لك تفصيلاً واضحاً عند استفسارك.' },
-      form: { kicker: 'اسأل عن مكان', title: 'حدّثنا عن طفلك', note: 'سنعود إليك قريباً. لا يرى ما ترسله إلا فريقنا.', family: 'اسمك', child: 'اسم الطفل', phone: 'الهاتف', email: 'البريد الإلكتروني', dob: 'تاريخ ميلاد الطفل', start: 'تاريخ البدء المطلوب', contact: 'كيف نتواصل معك؟', byPhone: 'الهاتف', byEmail: 'البريد الإلكتروني', message: 'أي شيء تودّ أن نعرفه', send: 'إرسال', sending: 'جارٍ الإرسال...', needNames: 'يرجى كتابة اسمك واسم طفلك.', needContact: 'يرجى كتابة رقم هاتف أو بريد إلكتروني لنتمكن من الوصول إليك.', ok: 'شكراً لك! وصلتنا رسالتك وسنتواصل معك قريباً.', fail: 'عذراً، تعذر الإرسال الآن. يرجى المحاولة بعد قليل.', limit: 'محاولات كثيرة. يرجى الانتظار دقيقة ثم المحاولة.', closed: 'النموذج غير متاح الآن. يرجى الاتصال بنا.' },
-      footer: { privacy: 'نستخدم بياناتك للرد على استفسارك فقط ولا نشاركها مع أحد.' },
+      nav: { why: 'لماذا نحن', programmes: 'البرامج', day: 'يوم معنا', learning: 'التعلّم', safety: 'الأمان', faq: 'أسئلة', enquire: 'احجز زيارة' },
+      hero: { kicker: 'السنوات الأولى في الإمارات', t1: 'مكان سعيد وآمن يكون فيه كل طفل', t2: 'معروفاً ومحبوباً', lead: 'مجموعات صغيرة ومعلمات حنونات ويوم هادئ ومرح. نبقيك قريباً من يوم طفلك، بالعربية والإنجليزية.', cta1: 'احجز زيارة', cta2: 'شاهد يوماً معنا' },
+      badge: { safe: 'تسجيل دخول آمن', bi: 'عربي + إنجليزي', small: 'مجموعات صغيرة', app: 'تطبيق أولياء الأمور', ratio: 'لا يزيد عن {n} أطفال لكل بالغ' },
+      why: { kicker: 'لماذا تختارنا العائلات', title: 'رعاية تراها وتعلّم تشعر به', lead: 'اختيار الحضانة من أهم قراراتك. هذا ما يمكنك توقعه منا كل يوم.', c1t: 'معروف ومحبوب', c1: 'لكل طفل معلمة مرافقة تعرف عاداته وأغانيه المفضلة وما يريحه واحتياجاته، فيكون الاعتياد طبيعياً.', c2t: 'آمن بالتصميم', c2: 'تسجيل دخول وخروج آمن، وأشخاص محددون فقط للاستلام، وعدد كافٍ من البالغين في كل غرفة طوال اليوم.', c3t: 'عربي وإنجليزي', c3: 'أغانٍ وقصص وحوارات يومية باللغتين، ليكبر الأطفال بثقة في كل منهما وفخر بهويتهم.', c4t: 'قريب من يوم طفلك', c4: 'صور ووجبات وقيلولة وتقرير يومي في تطبيق أولياء الأمور، مع رسائل مباشرة إلى الفريق. لن تتساءل أبداً كيف كان اليوم.', c5t: 'صحي وواعٍ', c5: 'وجبات مغذية تراعي احتياجات كل عائلة، واهتمام جاد بالحساسية، وراحة عندما تحتاجها الأجسام الصغيرة.', c6t: 'تعلّم باللعب', c6: 'برنامج غني قائم على اللعب ومبني على إطار السنوات المبكرة، لتنمو الفضول واللغة والثقة معاً.' },
+      prog: { kicker: 'برامجنا', title: 'مكان لكل عمر', lead: 'لكل مجموعة مساحتها وروتينها ومعلماتها، فيحصل طفلك على ما يناسب مرحلته.', days: '{n} أيام في الأسبوع', hours: 'من {a} إلى {b}', age: 'الأعمار من {a} إلى {b}', m: 'شهراً', y: 'سنوات' },
+      day: { kicker: 'يوم معنا', title: 'إيقاع لطيف من اللعب والراحة والاكتشاف', lead: 'الأطفال يزدهرون بالروتين. يسير يومنا من وصول هادئ إلى لعب مبهج ووجبات صحية وراحة هادئة، وتعرفين كل شيء قبل الاستلام.', cta: 'تعالَ وشاهد', s1t: 'استقبال دافئ', s1: 'نستقبل الأطفال بأسمائهم، ويبدؤون باللعب الحر.', s2t: 'وقت الحلقة والقصص', s2: 'أغانٍ ولغات وأناشيد وحكايات لنبدأ اليوم معاً.', s3t: 'لعب وتعلّم', s3: 'فن وبناء ولعب حسي وحركة واستكشاف في الهواء الطلق.', s4t: 'وجبات صحية وراحة', s4: 'طعام مغذٍّ، ثم راحة هادئة أو أنشطة هادئة حسب حاجة كل طفل.', s5t: 'العودة مع تقرير يومي', s5: 'تشاهدين صوراً وملاحظات من اليوم، فيكون هناك دائماً ما تتحدثان عنه.' },
+      learn: { kicker: 'كيف يتعلم الأطفال هنا', title: 'سبعة مجالات تعلّم، كلها باللعب', lead: 'نتبع إطار مرحلة التأسيس للسنوات المبكرة المستخدم في أفضل الحضانات، ونتابع تقدم كل طفل معك.', a1: 'التواصل واللغة', a1d: 'الاستماع والحديث والقصص', a2: 'النمو الجسدي', a2d: 'الحركة والتوازن والمهارات الدقيقة', a3: 'النمو الشخصي والاجتماعي والعاطفي', a3d: 'الأصدقاء والمشاعر والثقة', a4: 'القراءة والكتابة', a4d: 'الكتب والأصوات وأول الكتابة', a5: 'الرياضيات', a5d: 'الأرقام والأشكال والأنماط', a6: 'فهم العالم', a6d: 'الطبيعة والناس ومجتمعنا', a7: 'الفنون والتعبير', a7d: 'الموسيقى والفن والخيال' },
+      life: { kicker: 'الحياة في الحضانة', title: 'حيث يلعب الفضول', p1: 'صباحات الفن الممتعة', p2: 'الموسيقى والحركة', p3: 'الحديقة واللعب في الهواء الطلق', p4: 'ركن القصص', p5: 'اللعب بالماء واللعب الحسي', p6: 'البناء وحل المشكلات' },
+      safe: { kicker: 'الأمان والرعاية', title: 'راحة بال في كل يوم', lead: 'لا ينبغي أن تتساءل يوماً إن كان طفلك بأمان. هذه أشياء نفعلها، لا نعد بها فقط.', l1: 'تسجيل دخول وخروج آمن ببطاقة ممسوحة، يُسجَّل في كل مرة', l2: 'لا يستلم طفلك إلا من تحدّدهم، مع التحقق من الهوية', l3: 'نسب الموظفين إلى الأطفال تُراقَب لحظة بلحظة ليكون في كل غرفة بالغون كفاية', l4: 'الحساسية والاحتياجات الطبية مسجلة ومرئية للفريق حتى بدون إشارة', l5: 'الصور والتفاصيل تُشارَك مع عائلتك فقط وفق قواعد حماية البيانات في الإمارات', cardt: 'سلامة طفلك أولاً', card: 'منذ أول حديث نتعرف على صحة طفلك وغذائه وروتينه، ويتبعها الفريق كله كل يوم.' },
+      app: { kicker: 'لأولياء الأمور', title: 'يوم طفلك في جيبك', lead: 'يبقيك تطبيقنا قريباً دون أن يقاطع يومك.', l1: 'صور ووجبات وقيلولة وأنشطة لحظة حدوثها', l2: 'تقرير يومي كل عصر، بالعربية أو الإنجليزية', l3: 'راسل الفريق مباشرة واختر التنبيهات التي تصلك', l4: 'الفواتير والنماذج والنشرات في مكان واحد، بلا ورق', portal: 'دخول أولياء الأمور', screenTitle: 'اليوم', live: 'مباشر', s1: 'نشاط', p1: 'رسم قوس قزح وشارك الألوان!', s2: 'غداء', p2: 'أكل كل الخضار اليوم.', s3: 'قيلولة', p3: 'نام بهدوء لمدة ساعة.' },
+      voices: { kicker: 'ماذا يقول أولياء الأمور', title: 'عائلات تثق بنا' },
+      join: { kicker: 'الانضمام إلينا', title: 'ثلاث خطوات سهلة للحصول على مكان', s1t: 'حدّثنا عن طفلك', s1: 'أرسل النموذج القصير أدناه. يستغرق دقيقتين ونرد بسرعة.', s2t: 'تعالَ لزيارة', s2: 'تجوّل في الغرف، وقابل المعلمات، واسأل كل ما لديك من أسئلة.', s3t: 'اعتياد لطيف', s3: 'نخطط لبداية تدريجية ليشعر طفلك وأنت بالثقة منذ اليوم الأول.' },
+      faq: { kicker: 'أسئلة', title: 'ما تسأل عنه العائلات غالباً', q1: 'هل يمكنني الزيارة قبل أن أقرر؟', a1: 'نعم بالتأكيد. أرسل لنا النموذج أدناه وسننظم جولة في وقت يناسبك.', q2: 'ما الأعمار التي تقبلونها؟', a2: 'اطّلع على برامجنا أعلاه. اكتب تاريخ ميلاد طفلك في النموذج وسنوضح لك المجموعة المناسبة.', q3: 'كيف أعرف أن طفلي بأمان؟', a3: 'يُسجَّل دخول الأطفال وخروجهم بأمان، ولا يستلمهم إلا الأشخاص المحددون، ونحافظ على عدد كافٍ من البالغين في كل غرفة.', q4: 'ماذا عن الرسوم؟', a4: 'تعتمد الرسوم على البرنامج والأيام. سنرسل لك تفصيلاً واضحاً عند استفسارك دون أي رسوم خفية.', q5: 'ماذا لو كان لدى طفلي حساسية أو احتياجات خاصة؟', a5: 'أخبرنا بكل شيء أثناء الزيارة. الحساسية والاحتياجات الطبية والروتين مسجلة ويتبعها الفريق كله.', q6: 'هل تتحدثون العربية والإنجليزية مع الأطفال؟', a6: 'نعم. اللغتان جزء من اليوم، في الأغاني والقصص والحوار.', q7: 'كيف سأعرف عن يوم طفلي؟', a7: 'عبر تطبيق أولياء الأمور: صور ووجبات وقيلولة وتقرير يومي، ورسائل مع الفريق.' },
+      form: { kicker: 'احجز زيارة', title: 'حدّثنا عن طفلك', note: 'سنعود إليك قريباً. لا يرى ما ترسله إلا فريقنا.', family: 'اسمك', child: 'اسم الطفل', phone: 'الهاتف', email: 'البريد الإلكتروني', dob: 'تاريخ ميلاد الطفل', start: 'تاريخ البدء المطلوب', contact: 'كيف نتواصل معك؟', byPhone: 'الهاتف', byEmail: 'البريد الإلكتروني', message: 'أي شيء تودّ أن نعرفه', send: 'إرسال', sending: 'جارٍ الإرسال...', needNames: 'يرجى كتابة اسمك واسم طفلك.', needContact: 'يرجى كتابة رقم هاتف أو بريد إلكتروني لنتمكن من الوصول إليك.', ok: 'شكراً لك! وصلتنا رسالتك وسنتواصل معك قريباً.', fail: 'عذراً، تعذر الإرسال الآن. يرجى المحاولة بعد قليل.', limit: 'محاولات كثيرة. يرجى الانتظار دقيقة ثم المحاولة.', closed: 'النموذج غير متاح الآن. يرجى الاتصال بنا.' },
+      footer: { tag: 'رعاية وتعليم للسنوات المبكرة، بالعربية والإنجليزية.', privacy: 'نستخدم بياناتك للرد على استفسارك فقط ولا نشاركها مع أحد.', explore: 'استكشف', contact: 'تواصل معنا' },
       contact: { phone: 'الهاتف', email: 'البريد الإلكتروني' },
     },
   }
 
   var lang = 'en'
   try { lang = localStorage.getItem('site.lang') || ((navigator.language || 'en').slice(0, 2) === 'ar' ? 'ar' : 'en') } catch (e) { lang = 'en' }
-  var centreName = null
+  var centre = null
   var captchaRead = null
+  var closed = false
+  var EMOJI = ['🍼', '🧸', '🎨', '🎒', '📚', '🌟']
 
   function get(path) { return path.split('.').reduce(function (o, k) { return o && o[k] }, T[lang]) }
+  function fill(text, vars) { return String(text).replace(/\{(\w+)\}/g, function (_, k) { return vars[k] }) }
+  function pickText(obj) { return obj ? (obj[lang] || obj.en || Object.values(obj)[0] || '') : '' }
+  function nameOf() { return centre ? pickText(centre.name) : T[lang].brand }
+  function months(n) { return n < 24 ? n + ' ' + get('prog.m') : (Math.round(n / 12 * 10) / 10) + ' ' + get('prog.y') }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e }
+
+  function paintProgrammes() {
+    var box = document.getElementById('progs')
+    var sec = document.getElementById('programmes')
+    box.innerHTML = ''
+    var list = centre && centre.programmes ? centre.programmes : []
+    sec.hidden = list.length === 0
+    list.forEach(function (p, i) {
+      var card = el('div', 'prog rv in')
+      card.appendChild(el('span', 'emoji', EMOJI[i % EMOJI.length]))
+      card.appendChild(el('span', 'age', fill(get('prog.age'), { a: months(p.min_age_months), b: months(p.max_age_months) })))
+      card.appendChild(el('h3', null, pickText(p.name)))
+      if (p.description) card.appendChild(el('p', null, pickText(p.description)))
+      var ul = el('ul')
+      ul.appendChild(el('li', null, '📅 ' + fill(get('prog.days'), { n: p.days_per_week })))
+      ul.appendChild(el('li', null, '🕘 ' + fill(get('prog.hours'), { a: p.start_time, b: p.end_time })))
+      card.appendChild(ul)
+      box.appendChild(card)
+    })
+  }
+
+  function paintExtras() {
+    var n = document.getElementById('notice')
+    if (cfg.notice && pickText(cfg.notice)) {
+      n.hidden = false
+      n.textContent = ''
+      var a = el('a', null, pickText(cfg.notice))
+      a.href = cfg.notice.link || '#enquire'
+      n.appendChild(a)
+    }
+    var quotes = cfg.testimonials || []
+    document.getElementById('voices').hidden = quotes.length === 0
+    var qbox = document.getElementById('quotes')
+    qbox.innerHTML = ''
+    quotes.forEach(function (q) {
+      var d = el('figure', 'quote rv in'); d.style.margin = '0'
+      d.appendChild(el('p', null, '“' + pickText(q.text) + '”'))
+      d.appendChild(el('cite', null, q.name || ''))
+      qbox.appendChild(d)
+    })
+    var photos = cfg.photos || []
+    if (photos.length) {
+      var g = document.getElementById('gallery')
+      g.innerHTML = ''
+      photos.forEach(function (p) {
+        var s = el('div', 'shot rv in')
+        var img = el('img'); img.src = p.src; img.alt = pickText(p.label); img.loading = 'lazy'
+        s.appendChild(img)
+        s.appendChild(el('span', 'label', pickText(p.label)))
+        g.appendChild(s)
+      })
+    }
+    var rb = document.getElementById('ratioBadge')
+    if (centre && centre.children_per_adult_at_most) {
+      rb.hidden = false
+      document.getElementById('ratioText').textContent = fill(get('badge.ratio'), { n: centre.children_per_adult_at_most })
+    }
+    if (cfg.phone) {
+      var digits = cfg.phone.replace(/[^\d]/g, '')
+      document.getElementById('fab').hidden = false
+      document.getElementById('wa').href = 'https://wa.me/' + digits
+    }
+    var ld = { '@context': 'https://schema.org', '@type': 'ChildCare', name: nameOf() }
+    if (cfg.phone) ld.telephone = cfg.phone
+    if (cfg.email) ld.email = cfg.email
+    document.getElementById('ld').textContent = JSON.stringify(ld)
+  }
 
   function paint() {
     var rtl = lang === 'ar'
     document.documentElement.lang = lang
     document.documentElement.dir = rtl ? 'rtl' : 'ltr'
-    document.querySelectorAll('[data-i18n]').forEach(function (el) { var v = get(el.getAttribute('data-i18n')); if (v) el.textContent = v })
-    var name = centreName ? (centreName[lang] || centreName.en || Object.values(centreName)[0]) : T[lang].brand
+    document.querySelectorAll('[data-i18n]').forEach(function (e) { var v = get(e.getAttribute('data-i18n')); if (v) e.textContent = v })
+    var name = nameOf()
     document.getElementById('brandName').textContent = name
     document.getElementById('footName').textContent = name
     document.title = name
@@ -57,6 +145,8 @@
     document.getElementById('contactLine').textContent = parts.join(' · ')
     var portal = document.getElementById('portal')
     if (cfg.portalUrl) { portal.hidden = false; portal.href = cfg.portalUrl }
+    paintProgrammes()
+    paintExtras()
   }
 
   function say(kind, text) {
@@ -67,7 +157,6 @@
     p.className = 'msg ' + kind
     p.textContent = text
     box.appendChild(p)
-    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }
 
   function loadCaptcha(siteKey) {
@@ -84,23 +173,38 @@
     document.head.appendChild(s)
   }
 
-  var closed = false
-  fetch(base + '/enquiry-form/' + encodeURIComponent(cfg.centreSlug || ''))
+  fetch(base + '/centre/' + encodeURIComponent(cfg.centreSlug || ''))
     .then(function (r) { return r.json() })
     .then(function (j) {
-      if (j && j.success && j.data) {
-        centreName = j.data.name
-        if (j.data.captcha_site_key) loadCaptcha(j.data.captcha_site_key)
-      } else { closed = true }
+      if (j && j.success && j.data) { centre = j.data } else { closed = true }
       paint()
     })
     .catch(function () { closed = true })
+  fetch(base + '/enquiry-form/' + encodeURIComponent(cfg.centreSlug || ''))
+    .then(function (r) { return r.json() })
+    .then(function (j) { if (j && j.success && j.data && j.data.captcha_site_key) loadCaptcha(j.data.captcha_site_key) })
+    .catch(function () { /* the form still works with the other guards */ })
 
   document.getElementById('lang').addEventListener('click', function () {
     lang = lang === 'en' ? 'ar' : 'en'
     try { localStorage.setItem('site.lang', lang) } catch (e) { /* the choice just is not remembered */ }
     paint()
   })
+
+  var burger = document.getElementById('burger')
+  var nav = document.getElementById('nav')
+  burger.addEventListener('click', function () {
+    var open = nav.classList.toggle('open')
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false')
+  })
+  nav.addEventListener('click', function (e) { if (e.target.tagName === 'A') { nav.classList.remove('open'); burger.setAttribute('aria-expanded', 'false') } })
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target) } })
+    }, { threshold: 0.12 })
+    document.querySelectorAll('.rv').forEach(function (n) { io.observe(n) })
+  } else { document.querySelectorAll('.rv').forEach(function (n) { n.classList.add('in') }) }
 
   document.getElementById('enquiryForm').addEventListener('submit', function (ev) {
     ev.preventDefault()

@@ -6,7 +6,8 @@ The public website of the nursery: a plain, fast, bilingual (English / Arabic, r
 - `config.js` is the only settings file: the centre's web name inside NMS (`centreSlug`), where the NMS server is (`apiBase`), optional phone, e-mail, address and the parent sign-in link.
 - The nursery name shown in the header and footer is read from NMS (Settings > centre profile), so it always matches the system.
 - Wording lives in `app.js` (English and Arabic side by side). Look and feel is in `styles.css`.
-- Fees, opening hours and photos are deliberately not on the page: add them when the centre gives approved wording.
+- The programmes (names, ages, days, hours) and the "never more than N children per adult" badge come live from NMS (Centre structure > Programmes and Rooms), so they never go out of date. Nothing about fees is published.
+- Optional in `config.js`: a notice bar, real parent comments, and real photos for the gallery. Comments and photos are left empty on purpose: add only real ones with permission (empty = the section is hidden / illustrated tiles stay).
 
 ## Run it here
 ```bash
