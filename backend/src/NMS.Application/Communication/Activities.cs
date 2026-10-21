@@ -208,6 +208,41 @@ internal static class ActivityVisibility
     }
 }
 
+public static class ActivityBatch
+{
+    /// <summary>Builds the screen rows for a whole page with five queries in total, instead of four per post.</summary>
+    internal static async Task<List<ActivityDto>> ToDtosAsync(IAppDbContext db, IReadOnlyList<Guid> ids, IReadOnlyList<Guid>? ownOnly, CancellationToken ct)
+    {
+        if (ids.Count == 0)
+        {
+            return [];
+        }
+
+        var posts = await db.ActivityPosts.AsNoTracking().Where(p => ids.Contains(p.Id)).ToListAsync(ct);
+        var links = await db.ActivityPostStudents.AsNoTracking().Where(x => ids.Contains(x.PostId)).Select(x => new { x.PostId, x.StudentId }).ToListAsync(ct);
+        var attached = await db.ActivityPostMedia.AsNoTracking().Where(x => ids.Contains(x.PostId)).OrderBy(x => x.SortOrder)
+            .Select(x => new { x.PostId, x.MediaId, x.SortOrder }).ToListAsync(ct);
+        var mediaIds = attached.Select(a => a.MediaId).Distinct().ToList();
+        var types = await db.MediaFiles.AsNoTracking().Where(m => mediaIds.Contains(m.Id)).Select(m => new { m.Id, m.ContentType }).ToDictionaryAsync(m => m.Id, m => m.ContentType, ct);
+        var userIds = posts.Select(p => p.PostedByUserId).Distinct().ToList();
+        var names = await db.AppUsers.AsNoTracking().Where(u => userIds.Contains(u.Id)).Select(u => new { u.Id, Name = u.FirstName + " " + u.LastName }).ToDictionaryAsync(u => u.Id, u => u.Name, ct);
+
+        var byId = posts.ToDictionary(p => p.Id);
+        return ids.Where(byId.ContainsKey).Select(id =>
+        {
+            var post = byId[id];
+            var students = links.Where(l => l.PostId == id).Select(l => l.StudentId).ToList();
+            if (ownOnly is not null)
+            {
+                students = students.Where(ownOnly.Contains).ToList();
+            }
+
+            var media = attached.Where(a => a.PostId == id).Select(a => new AttachedMedia(a.MediaId, types.GetValueOrDefault(a.MediaId) ?? string.Empty)).ToList();
+            return new ActivityDto(post.Id, post.Type, post.Caption, post.PostedByUserId, names.GetValueOrDefault(post.PostedByUserId), post.RoomId, students, media, post.ApprovalStatus, post.RejectionReason, post.CreatedAt);
+        }).ToList();
+    }
+}
+
 public sealed class ListActivitiesHandler(IAppDbContext db, IAccessScope scope, ICurrentUser current)
     : IRequestHandler<ListActivitiesQuery, Result<CursorPage<ActivityDto>>>
 {
@@ -227,12 +262,7 @@ public sealed class ListActivitiesHandler(IAppDbContext db, IAccessScope scope, 
         var page = await posts.ToCursorPageAsync(request.Cursor, request.Limit,
             p => new ActivityHeader(p.Id, p.CreatedAt), ct);
         var own = await scope.GetOwnStudentIdsAsync(ct);
-        var items = new List<ActivityDto>();
-        foreach (var header in page.Items)
-        {
-            var post = await db.ActivityPosts.AsNoTracking().FirstAsync(p => p.Id == header.Id, ct);
-            items.Add(await ActivityVisibility.ToDtoAsync(db, post, own, ct));
-        }
+        var items = await ActivityBatch.ToDtosAsync(db, page.Items.Select(h => h.Id).ToList(), own, ct);
 
         return Result<CursorPage<ActivityDto>>.Success(new CursorPage<ActivityDto>(items, page.NextCursor, page.HasMore, page.Limit));
     }

@@ -190,5 +190,18 @@ public class AccessControlTests(NmsApiFixture api)
 
         reply.Message.Headers.GetValues("X-Content-Type-Options").Should().Contain("nosniff");
         reply.Message.Headers.GetValues("X-Frame-Options").Should().Contain("DENY");
+        reply.Message.Headers.GetValues("Content-Security-Policy").Should().ContainSingle().Which.Should().Contain("default-src 'none'");
+    }
+
+    [Theory]
+    [InlineData("/api/v1/audit-logs?from=not-a-date")]
+    [InlineData("/api/v1/enquiries?from=not-a-date")]
+    [InlineData("/api/v1/calendar/events")]
+    [InlineData("/api/v1/attendance/report/monthly")]
+    public async Task A_missing_or_unreadable_query_value_is_a_400_never_a_500(string path)
+    {
+        var reply = await api.Admin.GetAsync(path);
+
+        reply.Status.Should().Be(HttpStatusCode.BadRequest, reply.Raw);
     }
 }

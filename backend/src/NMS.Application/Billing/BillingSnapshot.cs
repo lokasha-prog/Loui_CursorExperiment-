@@ -39,11 +39,14 @@ public sealed class BillingSnapshotHandler(IAppDbContext db, CentreCalendar cale
         var end = start.AddMonths(1).AddDays(-1);
         var live = db.Invoices.AsNoTracking().Where(i => i.Status != InvoiceStatuses.Draft && i.Status != InvoiceStatuses.Cancelled);
 
-        var billed = await live.Where(i => i.IssueDate >= start && i.IssueDate <= end).SumAsync(i => (long?)i.TotalFils, ct) ?? 0;
-        var collected = await db.InvoicePayments.AsNoTracking().Where(p => p.PaymentDate >= start && p.PaymentDate <= end).SumAsync(p => (long?)p.AmountFils, ct) ?? 0;
-        var overdue = await live.Where(i => i.Status == InvoiceStatuses.Overdue).SumAsync(i => (long?)(i.TotalFils - i.PaidFils), ct) ?? 0;
-        var outstanding = await live.Where(i => i.Status == InvoiceStatuses.Issued || i.Status == InvoiceStatuses.PartiallyPaid)
-            .SumAsync(i => (long?)(i.TotalFils - i.PaidFils), ct) ?? 0;
+        // Money figures are added up in the database in as few queries as possible; this screen is opened by every manager all day.
+        var open = await live.GroupBy(_ => 1).Select(g => new
+        {
+            Overdue = g.Sum(i => i.Status == InvoiceStatuses.Overdue ? i.TotalFils - i.PaidFils : 0L),
+            Outstanding = g.Sum(i => i.Status == InvoiceStatuses.Issued || i.Status == InvoiceStatuses.PartiallyPaid ? i.TotalFils - i.PaidFils : 0L),
+        }).FirstOrDefaultAsync(ct);
+        var overdue = open?.Overdue ?? 0;
+        var outstanding = open?.Outstanding ?? 0;
         var expenses = await db.Expenses.AsNoTracking().Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end).SumAsync(e => (long?)e.AmountFils, ct) ?? 0;
         var todays = await live.Where(i => i.IssueDate == today).Select(i => i.TotalFils).ToListAsync(ct);
 
@@ -60,16 +63,17 @@ public sealed class BillingSnapshotHandler(IAppDbContext db, CentreCalendar cale
         var ids = late.Select(l => l.StudentId).ToList();
         var names = await db.Students.AsNoTracking().Where(s => ids.Contains(s.Id)).ToDictionaryAsync(s => s.Id, s => s.FirstName + " " + s.LastName, ct);
 
-        var trend = new List<MonthFigure>();
-        for (var i = 5; i >= 0; i--)
-        {
-            var from = start.AddMonths(-i);
-            var to = from.AddMonths(1).AddDays(-1);
-            trend.Add(new MonthFigure(
-                from.ToString("yyyy-MM"),
-                await live.Where(x => x.IssueDate >= from && x.IssueDate <= to).SumAsync(x => (long?)x.TotalFils, ct) ?? 0,
-                await db.InvoicePayments.AsNoTracking().Where(p => p.PaymentDate >= from && p.PaymentDate <= to).SumAsync(p => (long?)p.AmountFils, ct) ?? 0));
-        }
+        var trendStart = start.AddMonths(-5);
+        var billedByMonth = (await live.Where(x => x.IssueDate >= trendStart && x.IssueDate <= end)
+            .GroupBy(x => new { x.IssueDate.Year, x.IssueDate.Month }).Select(g => new { g.Key.Year, g.Key.Month, Total = g.Sum(x => x.TotalFils) }).ToListAsync(ct))
+            .ToDictionary(x => (x.Year, x.Month), x => x.Total);
+        var collectedByMonth = (await db.InvoicePayments.AsNoTracking().Where(p => p.PaymentDate >= trendStart && p.PaymentDate <= end)
+            .GroupBy(p => new { p.PaymentDate.Year, p.PaymentDate.Month }).Select(g => new { g.Key.Year, g.Key.Month, Total = g.Sum(p => p.AmountFils) }).ToListAsync(ct))
+            .ToDictionary(x => (x.Year, x.Month), x => x.Total);
+        var trend = Enumerable.Range(0, 6).Select(n => trendStart.AddMonths(n))
+            .Select(d => new MonthFigure(d.ToString("yyyy-MM"), billedByMonth.GetValueOrDefault((d.Year, d.Month)), collectedByMonth.GetValueOrDefault((d.Year, d.Month)))).ToList();
+        var billed = billedByMonth.GetValueOrDefault((start.Year, start.Month));
+        var collected = collectedByMonth.GetValueOrDefault((start.Year, start.Month));
 
         return Result<BillingSnapshotDto>.Success(new BillingSnapshotDto(
             start.ToString("yyyy-MM"), billed, collected, overdue, outstanding, expenses, collected - expenses, todays.Count, todays.Sum(), recent,

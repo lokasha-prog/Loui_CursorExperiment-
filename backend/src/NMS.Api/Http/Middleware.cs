@@ -33,6 +33,14 @@ public sealed class SecurityHeadersMiddleware(RequestDelegate next)
         headers["X-Frame-Options"] = "DENY";
         headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
         headers["Cache-Control"] = "no-store";
+
+        // The API only returns data and files, never pages, so nothing on a response may load or run anything.
+        headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'";
+        if (context.Request.IsHttps)
+        {
+            headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
+        }
+
         return next(context);
     }
 }
@@ -44,6 +52,14 @@ public static class ExceptionHandling
         app.UseExceptionHandler(handler => handler.Run(async context =>
         {
             var feature = context.Features.Get<IExceptionHandlerFeature>();
+
+            // A missing or badly written query value (for example a date that is not a date) is the caller's mistake, not ours.
+            if (feature?.Error is BadHttpRequestException)
+            {
+                await ApiResults.Error(context, StatusCodes.Status400BadRequest, "VALIDATION_ERROR", "The request is not valid. Check the values you sent.").ExecuteAsync(context);
+                return;
+            }
+
             var logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("Unhandled");
             if (feature is not null)
             {
