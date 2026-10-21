@@ -211,7 +211,8 @@
       "children": "الأطفال",
       "sharedObs": "لحظات شُوركت معك",
       "reports": "تقارير جاهزة",
-      "currency": "درهم"
+      "currency": "درهم",
+      "teachersActive": "معلمات يسجلن هذا الأسبوع"
     }
   },
   "students": {

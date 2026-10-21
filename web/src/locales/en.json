@@ -211,7 +211,8 @@
       "children": "Children",
       "sharedObs": "Moments shared with you",
       "reports": "Reports ready",
-      "currency": "AED"
+      "currency": "AED",
+      "teachersActive": "Teachers recording this week"
     }
   },
   "students": {

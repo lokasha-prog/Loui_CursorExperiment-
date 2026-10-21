@@ -22,7 +22,7 @@ public sealed record BillingOverview(long BilledFils, long CollectedFils, long O
 public sealed record AdmissionsOverview(int OpenEnquiries, int NewLast30Days, int ToursNext7Days, int StaleOver7Days, int AdmissionStepsOverdue);
 
 public sealed record LearningOverview(
-    int Curricula, int Lessons, int ObservationsLast30Days, int ConcernsLast30Days, int AssessmentsToApprove, int AssessmentsInProgress, int ReportsShared, int ChildrenWithoutObservation30Days);
+    int Curricula, int Lessons, int ObservationsLast30Days, int ConcernsLast30Days, int AssessmentsToApprove, int AssessmentsInProgress, int ReportsShared, int ChildrenWithoutObservation30Days, int TeachersRecordingThisWeek, int Teachers);
 
 public sealed record FamilyLearningOverview(int Children, int SharedObservations, int ReportsReady);
 
@@ -100,7 +100,9 @@ public sealed class SystemOverviewHandler(IAppDbContext db, IAccessScope scope, 
                 await db.AssessmentRuns.AsNoTracking().CountAsync(r => r.Status == AssessmentStatuses.Completed && !r.ParentApproved && visible.Contains(r.StudentId), ct),
                 await db.AssessmentRuns.AsNoTracking().CountAsync(r => r.Status == AssessmentStatuses.Draft && visible.Contains(r.StudentId), ct),
                 await db.AssessmentRuns.AsNoTracking().CountAsync(r => r.ParentApproved && visible.Contains(r.StudentId), ct),
-                Math.Max(0, visibleCount - observed));
+                Math.Max(0, visibleCount - observed),
+                await db.Observations.AsNoTracking().Where(o => o.ObservedAt >= clock.UtcNow.AddDays(-7)).Select(o => o.ObserverUserId).Distinct().CountAsync(ct),
+                await db.AppUserRoles.AsNoTracking().Where(ur => ur.Role!.Name == "teacher").Select(ur => ur.AppUserId).Distinct().CountAsync(ct));
         }
 
         FamilyLearningOverview? familyLearning = null;

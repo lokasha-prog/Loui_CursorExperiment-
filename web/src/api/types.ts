@@ -980,7 +980,7 @@ export interface SystemOverview {
   admissions: { open_enquiries: number; new_last30_days: number; tours_next7_days: number; stale_over7_days: number; admission_steps_overdue: number } | null
   learning: {
     curricula: number; lessons: number; observations_last30_days: number; concerns_last30_days: number; assessments_to_approve: number; assessments_in_progress: number
-    reports_shared: number; children_without_observation30_days: number
+    reports_shared: number; children_without_observation30_days: number; teachers_recording_this_week: number; teachers: number
   } | null
   family: { children: number; shared_observations: number; reports_ready: number } | null
   communication: { posts_to_approve: number; newsletters_last30_days: number; live_forms: number; documents: number } | null

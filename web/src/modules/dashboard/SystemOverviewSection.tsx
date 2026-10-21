@@ -78,6 +78,7 @@ export function SystemOverviewSection() {
             <Stat label={t('dashboard.overview.toApprove')} value={d.learning.assessments_to_approve} alert={d.learning.assessments_to_approve > 0} />
             <Stat label={t('dashboard.overview.shared')} value={d.learning.reports_shared} />
             <Stat label={t('dashboard.overview.unobserved')} value={d.learning.children_without_observation30_days} />
+            <Stat label={t('dashboard.overview.teachersActive')} value={`${d.learning.teachers_recording_this_week} / ${d.learning.teachers}`} />
           </Block>
         )}
         {d.family && (
