@@ -68,6 +68,8 @@ public static class NotificationEndpoints
         routes.MapGet("/api/v1/students/{id:guid}/emergency-report", async (Guid id, string? language, HttpContext http, ISender s, CancellationToken ct) =>
             Pdf(http, await s.Send(new EmergencyReportQuery(id, null, language ?? "en"), ct)))
             .WithTags("Emergency").RequireAuthorization(Permissions.AttendanceWrite);
+        routes.MapGet("/api/v1/emergency/data", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new EmergencyDataQuery(), ct))).WithTags("Emergency").RequireAuthorization(Permissions.AttendanceWrite);
         routes.MapGet("/api/v1/rooms/{id:guid}/emergency-report", async (Guid id, string? language, HttpContext http, ISender s, CancellationToken ct) =>
             Pdf(http, await s.Send(new EmergencyReportQuery(null, id, language ?? "en"), ct)))
             .WithTags("Emergency").RequireAuthorization(Permissions.AttendanceWrite);

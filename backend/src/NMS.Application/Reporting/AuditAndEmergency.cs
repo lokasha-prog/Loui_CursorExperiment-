@@ -143,3 +143,44 @@ public sealed class EmergencyReportHandler(
         return Result<EmergencyReportFile>.Success(new EmergencyReportFile(pdf, $"emergency-{(request.RoomId is not null ? "room" : "child")}-{clock.UtcNow:yyyyMMdd-HHmm}.pdf"));
     }
 }
+
+public sealed record EmergencyDataQuery : IRequest<Result<EmergencyReportData>>;
+
+/// <summary>
+/// Everything the emergency sheet holds for every child the person may see, as data, so the phone app can keep it for use with no signal.
+/// Taking it is recorded in the change history like printing a sheet.
+/// </summary>
+public sealed class EmergencyDataHandler(IAppDbContext db, IAccessScope scope, ICurrentUser current, ITenantContext tenant, IClock clock)
+    : IRequestHandler<EmergencyDataQuery, Result<EmergencyReportData>>
+{
+    public async Task<Result<EmergencyReportData>> Handle(EmergencyDataQuery request, CancellationToken ct)
+    {
+        var students = db.Students.AsNoTracking().Where(s => s.Status == StudentStatuses.Active || s.Status == StudentStatuses.OnHold);
+        var rooms = await scope.GetVisibleRoomIdsAsync(ct);
+        if (rooms is not null)
+        {
+            students = students.Where(s => s.RoomId != null && rooms.Contains(s.RoomId.Value));
+        }
+
+        var list = await students.Include(s => s.StudentGuardians).ThenInclude(sg => sg.Guardian).OrderBy(s => s.FirstName).ToListAsync(ct);
+        var roomNames = await db.Rooms.AsNoTracking().ToDictionaryAsync(r => r.Id, r => r.Name.GetValueOrDefault("en"), ct);
+        var centre = await db.Tenants.AsNoTracking().Where(t => t.Id == tenant.TenantId).Select(t => t.Name).FirstAsync(ct);
+        var children = list.Select(s => new EmergencyChild(
+            $"{s.FirstName} {s.LastName}",
+            string.IsNullOrWhiteSpace(s.FirstNameArabic) ? null : $"{s.FirstNameArabic} {s.LastNameArabic}",
+            s.DateOfBirth, s.Gender, s.RoomId is { } r ? roomNames.GetValueOrDefault(r) : null,
+            s.AllergyInfo, s.MedicalNotes, s.DietaryRequirements, s.PrimaryLanguage,
+            s.StudentGuardians.Where(sg => sg.Guardian is not null).OrderByDescending(sg => sg.Guardian!.IsPrimaryContact)
+                .Select(sg => new EmergencyContact(
+                    $"{sg.Guardian!.FirstName} {sg.Guardian.LastName}", sg.Guardian.Relationship, sg.Guardian.Phone, sg.Guardian.Email,
+                    sg.Guardian.CanPickup, sg.Guardian.IsPrimaryContact)).ToList())).ToList();
+
+        db.AuditLogs.Add(new AuditLog
+        {
+            TenantId = tenant.TenantId, UserId = current.UserId, UserEmail = current.Email, EntityType = "centre", EntityId = tenant.TenantId,
+            Action = AuditActions.Export, IpAddress = current.IpAddress, UserAgent = current.UserAgent, RequestId = current.RequestId, OccurredAt = clock.UtcNow,
+        });
+        await db.SaveChangesAsync(ct);
+        return Result<EmergencyReportData>.Success(new EmergencyReportData(centre.GetValueOrDefault("en") ?? string.Empty, "Emergency data", clock.UtcNow, "en", children));
+    }
+}

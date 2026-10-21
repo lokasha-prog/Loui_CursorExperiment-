@@ -39,4 +39,25 @@ public class MobileAuthTests(NmsApiFixture api)
         (await refreshed.Content.ReadAsStringAsync()).Should().Contain("refresh_token");
         notPhone.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
+
+    [Fact]
+    public async Task The_emergency_data_for_offline_use_is_for_attendance_staff_only_and_is_written_to_the_change_history()
+    {
+        var teacher = await api.CreateUserAsync("teacher");
+        var parent = await api.CreateUserAsync("parent");
+        var room = await api.CreateRoomAsync();
+        var child = await api.CreateStudentAsync(room, $"fam-{Guid.NewGuid():N}@test.local", medical: "Asthma, inhaler in bag");
+        await api.Admin.PostAsync($"/api/v1/students/{child}/actions/transition-status", new { status = "active" });
+
+        var data = await api.Admin.GetAsync("/api/v1/emergency/data");
+        var asParent = await parent.Client.GetAsync("/api/v1/emergency/data");
+        var asTeacher = await teacher.Client.GetAsync("/api/v1/emergency/data");
+        var audit = await api.Admin.GetAsync("/api/v1/audit-logs?action=export&limit=5");
+
+        data.Status.Should().Be(HttpStatusCode.OK);
+        data.Data.GetProperty("children").EnumerateArray().Should().Contain(c => c.GetProperty("medical").GetString() == "Asthma, inhaler in bag");
+        asParent.Status.Should().Be(HttpStatusCode.Forbidden);
+        asTeacher.Status.Should().Be(HttpStatusCode.OK);
+        audit.Items.Should().NotBeEmpty();
+    }
 }
