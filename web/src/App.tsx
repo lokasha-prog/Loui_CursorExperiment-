@@ -18,6 +18,7 @@ const StaffPage = lazy(() => import('@/modules/staff/StaffPage'))
 const RoomsPage = lazy(() => import('@/modules/rooms/RoomsPage'))
 const JourneyPage = lazy(() => import('@/modules/learning/JourneyPage'))
 const LearningPage = lazy(() => import('@/modules/learning/LearningPage'))
+const GroupPage = lazy(() => import('@/modules/group/GroupPage'))
 const UsersPage = lazy(() => import('@/modules/users/UsersPage'))
 const AttendancePage = lazy(() => import('@/modules/attendance/AttendancePage'))
 const ReportsPage = lazy(() => import('@/modules/attendance/ReportsPage'))
@@ -116,6 +117,7 @@ export function AppRoutes() {
           <Route path="/forms" element={<RequirePermission permission="forms.read"><FormsPage /></RequirePermission>} />
           <Route path="/newsletters" element={<RequirePermission permission="messaging.read"><NewslettersPage /></RequirePermission>} />
           <Route path="/journey" element={<RequirePermission permission="journey.read"><JourneyPage /></RequirePermission>} />
+          <Route path="/group" element={<RequirePermission permission="group.read"><GroupPage /></RequirePermission>} />
           <Route path="/learning" element={<RequirePermission permission="learning.read"><LearningPage /></RequirePermission>} />
           <Route path="/resources" element={<RequirePermission permission="resources.read"><ResourcesPage /></RequirePermission>} />
           <Route path="/tools" element={<RequirePermission permission="tools.use"><ToolsPage /></RequirePermission>} />

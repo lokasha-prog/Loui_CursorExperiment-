@@ -188,6 +188,7 @@ app.MapCentreStructureEndpoints();
 app.MapStudentEndpoints();
 app.MapStaffEndpoints();
 app.MapAttendanceEndpoints();
+app.MapCentreGroupEndpoints();
 app.MapCommunicationEndpoints();
 app.MapNotificationEndpoints();
 app.MapBillingEndpoints();

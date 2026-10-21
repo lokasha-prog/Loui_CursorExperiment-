@@ -46,6 +46,8 @@ public static class Permissions
     public const string LearningWrite = "learning.write";
     public const string LearningApprove = "learning.approve";
     public const string JourneyRead = "journey.read";
+    public const string GroupRead = "group.read";
+    public const string GroupManage = "group.manage";
 
     /// <summary>Rooms, programs, groups and labels are readable by any staff role (spec 08 §15.4 "Staff+").</summary>
     public const string CentreStructureRead = "centre_structure.read";

@@ -988,3 +988,12 @@ export interface SystemOverview {
 
 export interface MilestoneSuggestion { milestone_id: string; code: string; statement: Record<string, string>; area_id: string; age_band_id: string; score: number }
 export interface LessonDraft { title: Record<string, string>; description: Record<string, string>; materials: string[]; objectives: string[]; language: string; model: string }
+
+export interface GroupCentre { id: string; slug: string; name: Record<string, string>; is_head: boolean; status: string }
+export interface CentreFigures {
+  centre_id: string; slug: string; name: Record<string, string>; is_head: boolean
+  students: number; staff: number; present_today: number; joined_this_month: number; left_this_month: number
+  attendance_days: number; open_days: number; billed_fils: number; collected_fils: number; overdue_fils: number; expenses_fils: number; open_enquiries: number
+}
+export interface GroupOverview { date: string; centres: CentreFigures[]; total: CentreFigures }
+export interface GroupReportTable { title: string; subtitle: string | null; columns: string[]; rows: (string | number | null)[][]; summary: { label: string; value: string }[] }

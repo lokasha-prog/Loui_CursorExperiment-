@@ -1,6 +1,9 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, authApi, type Page } from './client'
 import type {
+  GroupCentre,
+  GroupOverview,
+  GroupReportTable,
   MyNewsletter,
   NewsletterDetail,
   NewsletterItem,
@@ -1039,3 +1042,27 @@ export const useLessonDraft = () =>
     mutationFn: (q: { frameworkId: string; areaId?: string; ageBandId?: string; theme?: string; language: string }) =>
       api.get<LessonDraft>('/ai/lesson-draft', { framework_id: q.frameworkId, area_id: q.areaId || undefined, age_band_id: q.ageBandId || undefined, theme: q.theme || undefined, language: q.language }),
   })
+
+export const useGroupOverview = (enabled = true) => useQuery({ queryKey: ['group-overview'], enabled, queryFn: () => api.get<GroupOverview>('/group/overview') })
+export const useMyCentres = () => useQuery({ queryKey: ['my-centres'], queryFn: () => api.get<GroupCentre[]>('/group/my-centres') })
+export const useGroupReport = (kind: string, lang: string) =>
+  useQuery({ queryKey: ['group-report', kind, lang], queryFn: () => api.get<GroupReportTable>(`/group/reports/${kind}`, { lang }) })
+
+export function useProvisionCentre() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { name: string; name_arabic?: string; slug: string }) => api.post<GroupCentre>('/group/centres', body),
+    onSuccess: () => Promise.all(['group-overview', 'my-centres', 'group-report'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
+
+export const useAssignStaffToCentre = () =>
+  useMutation({ mutationFn: (body: { email: string; centre_id: string; role: string }) => api.post<void>('/group/staff-assignments', body) })
+
+export function useTransferStudent() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (v: { studentId: string; toCentreId: string; reason?: string }) => api.post<string>(`/group/students/${v.studentId}/transfer`, { to_centre_id: v.toCentreId, reason: v.reason }),
+    onSuccess: () => Promise.all(['students', 'student-options', 'group-overview'].map((key) => client.invalidateQueries({ queryKey: [key] }))),
+  })
+}
