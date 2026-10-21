@@ -25,7 +25,7 @@ public sealed record FrameworkDetailDto(
 
 public sealed record LessonDto(
     Guid Id, Text Title, Text? Description, Guid FrameworkId, Guid? AreaId, Guid? AgeBandId, Guid? RoomId, int DurationMinutes,
-    IReadOnlyList<string> Materials, IReadOnlyList<string> Objectives, Dictionary<string, string> Links, IReadOnlyList<Guid> MilestoneIds, DateTimeOffset CreatedAt) : ICursorItem;
+    IReadOnlyList<string> Materials, IReadOnlyList<string> Objectives, Dictionary<string, string> Links, IReadOnlyList<Guid> MilestoneIds, bool IsTemplate, DateTimeOffset CreatedAt) : ICursorItem;
 
 public sealed record ListFrameworksQuery : IRequest<Result<IReadOnlyList<FrameworkSummaryDto>>>;
 
@@ -53,13 +53,13 @@ public sealed record SaveMilestoneCommand(Guid FrameworkId, Guid? Id, Guid AreaI
 
 public sealed record DeletePartCommand(Guid FrameworkId, string Kind, Guid Id) : IRequest<Result<FrameworkDetailDto>>;
 
-public sealed record ListLessonsQuery(Guid? FrameworkId, Guid? AreaId, Guid? AgeBandId, Guid? RoomId, string? Search, string? Cursor, int? Limit) : IRequest<Result<CursorPage<LessonDto>>>;
+public sealed record ListLessonsQuery(Guid? FrameworkId, Guid? AreaId, Guid? AgeBandId, Guid? RoomId, string? Search, bool? Templates, string? Cursor, int? Limit) : IRequest<Result<CursorPage<LessonDto>>>;
 
 public sealed record GetLessonQuery(Guid Id) : IRequest<Result<LessonDto>>;
 
 public sealed record SaveLessonCommand(
     Guid? Id, Text Title, Text? Description, Guid FrameworkId, Guid? AreaId, Guid? AgeBandId, Guid? RoomId, int DurationMinutes,
-    IReadOnlyList<string>? Materials, IReadOnlyList<string>? Objectives, Dictionary<string, string>? Links, IReadOnlyList<Guid>? MilestoneIds) : IRequest<Result<LessonDto>>;
+    IReadOnlyList<string>? Materials, IReadOnlyList<string>? Objectives, Dictionary<string, string>? Links, IReadOnlyList<Guid>? MilestoneIds, bool IsTemplate = false) : IRequest<Result<LessonDto>>;
 
 public sealed record DeleteLessonCommand(Guid Id) : IRequest<Result>;
 
@@ -173,7 +173,7 @@ internal static class LearningMap
 
     public static LessonDto ToDto(Lesson l) =>
         new(l.Id, l.Title, l.Description, l.FrameworkId, l.AreaId, l.AgeBandId, l.RoomId, l.DurationMinutes, l.Materials, l.Objectives, l.Links,
-            l.MilestoneIds.Select(Guid.Parse).ToList(), l.CreatedAt);
+            l.MilestoneIds.Select(Guid.Parse).ToList(), l.IsTemplate, l.CreatedAt);
 }
 
 public sealed class ListFrameworksHandler(IAppDbContext db) : IRequestHandler<ListFrameworksQuery, Result<IReadOnlyList<FrameworkSummaryDto>>>
@@ -520,6 +520,7 @@ public sealed class ListLessonsHandler(IAppDbContext db, IAccessScope scope) : I
         if (request.AreaId is { } a) lessons = lessons.Where(l => l.AreaId == a);
         if (request.AgeBandId is { } b) lessons = lessons.Where(l => l.AgeBandId == b);
         if (request.RoomId is { } r) lessons = lessons.Where(l => l.RoomId == r);
+        lessons = request.Templates == true ? lessons.Where(l => l.IsTemplate) : lessons.Where(l => !l.IsTemplate);
 
         var page = await lessons.ToCursorPageAsync(request.Cursor, request.Limit, l => new LessonHeader(l.Id, l.CreatedAt), ct);
         var ids = page.Items.Select(h => h.Id).ToList();
@@ -612,6 +613,7 @@ public sealed class SaveLessonHandler(IAppDbContext db, IAccessScope scope) : IR
         row.Objectives = (request.Objectives ?? []).Select(o => o.Trim()).ToList();
         row.Links = request.Links ?? [];
         row.MilestoneIds = milestoneIds.Select(m => m.ToString()).ToList();
+        row.IsTemplate = request.IsTemplate;
         await db.SaveChangesAsync(ct);
         return Result<LessonDto>.Success(LearningMap.ToDto(row));
     }

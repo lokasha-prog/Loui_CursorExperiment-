@@ -80,6 +80,9 @@ public class Lesson : TenantEntity
     public Dictionary<string, string> Links { get; set; } = [];
 
     public List<string> MilestoneIds { get; set; } = [];
+
+    /// <summary>A reusable plan for an age group. Teachers copy it into their own lessons.</summary>
+    public bool IsTemplate { get; set; }
 }
 
 public static class ObservationTypes

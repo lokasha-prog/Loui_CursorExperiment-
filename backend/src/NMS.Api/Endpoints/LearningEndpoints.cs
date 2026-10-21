@@ -18,7 +18,7 @@ public sealed record MilestoneRequest(Guid AreaId, Guid AgeBandId, string Code, 
 
 public sealed record LessonRequest(
     Dictionary<string, string> Title, Dictionary<string, string>? Description, Guid FrameworkId, Guid? AreaId, Guid? AgeBandId, Guid? RoomId, int? DurationMinutes,
-    IReadOnlyList<string>? Materials, IReadOnlyList<string>? Objectives, Dictionary<string, string>? Links, IReadOnlyList<Guid>? MilestoneIds);
+    IReadOnlyList<string>? Materials, IReadOnlyList<string>? Objectives, Dictionary<string, string>? Links, IReadOnlyList<Guid>? MilestoneIds, bool? IsTemplate);
 
 /// <summary>Learning module, part one: the curriculum a centre follows (its own data) and the lessons that use it.</summary>
 public static class LearningEndpoints
@@ -54,10 +54,17 @@ public static class LearningEndpoints
         f.MapDelete("/{id:guid}/{kind}/{partId:guid}", async (Guid id, string kind, Guid partId, HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(new DeletePartCommand(id, kind.Replace('-', '_').TrimEnd('s'), partId), ct))).RequireAuthorization(Permissions.SettingsWrite);
 
+        routes.MapGet("/api/v1/learning/suggest-milestones", async ([FromQuery(Name = "framework_id")] Guid frameworkId, string text, [FromQuery(Name = "area_id")] Guid? areaId, [FromQuery(Name = "age_band_id")] Guid? ageBandId,
+            HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new SuggestMilestonesQuery(frameworkId, text ?? string.Empty, areaId, ageBandId), ct))).WithTags("Learning").RequireAuthorization(Permissions.LearningWrite);
+        routes.MapGet("/api/v1/ai/lesson-draft", async ([FromQuery(Name = "framework_id")] Guid frameworkId, [FromQuery(Name = "area_id")] Guid? areaId, [FromQuery(Name = "age_band_id")] Guid? ageBandId,
+            string? theme, string? language, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new LessonDraftQuery(frameworkId, areaId, ageBandId, theme, language ?? "en"), ct))).WithTags("AI Brain").RequireAuthorization(Permissions.LearningWrite);
+
         var l = routes.MapGroup("/api/v1/learning/lessons").WithTags("Learning");
         l.MapGet("/", async ([FromQuery(Name = "framework_id")] Guid? frameworkId, [FromQuery(Name = "area_id")] Guid? areaId, [FromQuery(Name = "age_band_id")] Guid? ageBandId,
-            [FromQuery(Name = "room_id")] Guid? roomId, string? search, string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>
-            ApiResults.FromPage(http, await s.Send(new ListLessonsQuery(frameworkId, areaId, ageBandId, roomId, search, cursor, limit), ct))).RequireAuthorization(Permissions.LearningRead);
+            [FromQuery(Name = "room_id")] Guid? roomId, string? search, bool? templates, string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.FromPage(http, await s.Send(new ListLessonsQuery(frameworkId, areaId, ageBandId, roomId, search, templates, cursor, limit), ct))).RequireAuthorization(Permissions.LearningRead);
         l.MapGet("/{id:guid}", async (Guid id, HttpContext http, ISender s, CancellationToken ct) => ApiResults.From(http, await s.Send(new GetLessonQuery(id), ct))).RequireAuthorization(Permissions.LearningRead);
         l.MapPost("/", async (LessonRequest b, HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(Save(null, b), ct), StatusCodes.Status201Created)).RequireAuthorization(Permissions.LearningWrite);
@@ -71,5 +78,5 @@ public static class LearningEndpoints
     }
 
     private static SaveLessonCommand Save(Guid? id, LessonRequest b) =>
-        new(id, b.Title, b.Description, b.FrameworkId, b.AreaId, b.AgeBandId, b.RoomId, b.DurationMinutes ?? 30, b.Materials, b.Objectives, b.Links, b.MilestoneIds);
+        new(id, b.Title, b.Description, b.FrameworkId, b.AreaId, b.AgeBandId, b.RoomId, b.DurationMinutes ?? 30, b.Materials, b.Objectives, b.Links, b.MilestoneIds, b.IsTemplate ?? false);
 }
