@@ -88,6 +88,8 @@ public sealed class NmsDbContext(
 
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
 
+    public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
+
     public DbSet<NMS.Application.Feedback.FeedbackNote> FeedbackNotes => Set<NMS.Application.Feedback.FeedbackNote>();
 
     public DbSet<NMS.Application.Reporting.AuditRetentionSetting> AuditRetentionSettings => Set<NMS.Application.Reporting.AuditRetentionSetting>();

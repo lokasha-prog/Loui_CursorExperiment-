@@ -17,6 +17,7 @@ public static class NotificationChannels
     public const string InApp = "in_app";
     public const string Email = "email";
     public const string Sms = "sms";
+    public const string Push = "push";
 }
 
 public static class DeliveryStatuses
@@ -75,4 +76,16 @@ public class NotificationPreference : TenantEntity
     public bool InApp { get; set; } = true;
 
     public bool Email { get; set; }
+}
+
+/// <summary>A phone that signed in and agreed to get alerts. One person can have several phones.</summary>
+public class DeviceToken : TenantEntity
+{
+    public Guid UserId { get; set; }
+
+    public string Token { get; set; } = string.Empty;
+
+    public string Platform { get; set; } = "android";
+
+    public DateTimeOffset LastSeenAt { get; set; }
 }

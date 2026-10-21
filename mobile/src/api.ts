@@ -123,4 +123,5 @@ export const api = {
   get: async <T>(path: string) => (await request<T>('GET', path)).data,
   page: async <T>(path: string) => (await request<T[]>('GET', path)).data,
   post: async <T>(path: string, body?: unknown) => (await request<T>('POST', path, body ?? {})).data,
+  put: async <T>(path: string, body?: unknown) => (await request<T>('PUT', path, body ?? {})).data,
 }

@@ -39,6 +39,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
 
     public FakeSmsSender Sms { get; } = new();
 
+    public FakePushSender Push { get; } = new();
+
     public string BootstrapToken { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(24));
 
     public string AdminEmail { get; } = $"admin-{Guid.NewGuid():N}@test.local";
@@ -80,6 +82,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
             services.AddSingleton<NMS.Application.Notifications.IEmailSender>(Email);
             services.RemoveAll<NMS.Application.Notifications.ISmsSender>();
             services.AddSingleton<NMS.Application.Notifications.ISmsSender>(Sms);
+            services.RemoveAll<NMS.Application.Notifications.IPushSender>();
+            services.AddSingleton<NMS.Application.Notifications.IPushSender>(Push);
         });
     }
 
@@ -435,6 +439,23 @@ public sealed class FakeEmailSender : NMS.Application.Notifications.IEmailSender
         lock (Sent)
         {
             Sent.Add((to, subject, body));
+        }
+
+        return Task.FromResult(NMS.Shared.Results.Result.Success());
+    }
+}
+
+public sealed class FakePushSender : NMS.Application.Notifications.IPushSender
+{
+    public List<(string Token, string Title, string Body)> Sent { get; } = [];
+
+    public bool IsConfigured => true;
+
+    public Task<NMS.Shared.Results.Result> SendAsync(string token, string title, string body, CancellationToken cancellationToken)
+    {
+        lock (Sent)
+        {
+            Sent.Add((token, title, body));
         }
 
         return Task.FromResult(NMS.Shared.Results.Result.Success());

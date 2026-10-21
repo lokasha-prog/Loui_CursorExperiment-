@@ -42,3 +42,15 @@ public sealed class NotificationPreferenceConfiguration : IEntityTypeConfigurati
         builder.HasIndex(n => new { n.TenantId, n.CreatedAt });
     }
 }
+
+public sealed class DeviceTokenConfiguration : IEntityTypeConfiguration<DeviceToken>
+{
+    public void Configure(EntityTypeBuilder<DeviceToken> builder)
+    {
+        builder.ToTable("DeviceTokens");
+        builder.Property(d => d.Token).HasMaxLength(200).IsRequired();
+        builder.Property(d => d.Platform).HasMaxLength(20).IsRequired();
+        builder.HasIndex(d => new { d.TenantId, d.Token }).IsUnique().HasFilter("[IsDeleted] = 0");
+        builder.HasIndex(d => new { d.TenantId, d.UserId });
+    }
+}

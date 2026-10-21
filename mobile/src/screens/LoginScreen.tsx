@@ -49,7 +49,7 @@ export function LoginScreen() {
       {DEV_LOGIN && (
         <Card>
           <Body muted>Test users (this computer only)</Body>
-          {['it', 'teacher', 'centre_admin'].map((role) => <Btn key={role} kind="secondary" label={role} onPress={() => void devSignIn(role)} />)}
+          {['it', 'teacher', 'parent'].map((role) => <Btn key={role} kind="secondary" label={role} onPress={() => void devSignIn(role)} />)}
         </Card>
       )}
       <LanguageSwitch lang={lang} setLang={setLang} />

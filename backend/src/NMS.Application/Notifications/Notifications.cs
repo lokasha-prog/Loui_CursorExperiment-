@@ -13,6 +13,14 @@ using NMS.Shared.Results;
 namespace NMS.Application.Notifications;
 
 /// <summary>Sends a text message. Not set up (no provider keys) means nothing is sent and deliveries are skipped.</summary>
+/// <summary>Sends a phone alert (push). Not set up means nothing is sent and deliveries are skipped.</summary>
+public interface IPushSender
+{
+    bool IsConfigured { get; }
+
+    Task<Result> SendAsync(string token, string title, string body, CancellationToken cancellationToken);
+}
+
 public interface ISmsSender
 {
     bool IsConfigured { get; }
@@ -81,6 +89,7 @@ public sealed class Notifier(IAppDbContext db, ITenantContext tenant, IClock clo
         var created = new List<Guid>();
         var smsOn = tier == NotificationTiers.Critical && await db.CentreSettings.AsNoTracking().Select(s => (bool?)s.SmsEnabled).FirstOrDefaultAsync(ct) == true;
         var phones = smsOn ? await PhonesAsync(userIds, ct) : [];
+        var devices = (await db.DeviceTokens.AsNoTracking().Where(d => userIds.Contains(d.UserId)).Select(d => new { d.UserId, d.Token }).ToListAsync(ct)).ToLookup(d => d.UserId, d => d.Token);
         foreach (var user in users)
         {
             var pref = prefs.FirstOrDefault(p => p.UserId == user.Id);
@@ -102,6 +111,14 @@ public sealed class Notifier(IAppDbContext db, ITenantContext tenant, IClock clo
                     NextAttemptAt = clock.UtcNow, SentAt = clock.UtcNow, Recipient = user.Id.ToString(),
                 });
                 created.Add(user.Id);
+                foreach (var token in devices[user.Id])
+                {
+                    db.NotificationDeliveries.Add(new NotificationDelivery
+                    {
+                        NotificationId = notification.Id, Channel = NotificationChannels.Push, Status = DeliveryStatuses.Pending,
+                        NextAttemptAt = clock.UtcNow, Recipient = token,
+                    });
+                }
             }
 
             if (email)
@@ -209,6 +226,50 @@ public sealed class MarkReadHandler(IAppDbContext db, ICurrentUser current, IClo
     }
 }
 
+public sealed record RegisterDeviceCommand(string Token, string? Platform) : IRequest<Result>;
+
+public sealed record RemoveDeviceCommand(string Token) : IRequest<Result>;
+
+public sealed class RegisterDeviceValidator : AbstractValidator<RegisterDeviceCommand>
+{
+    public RegisterDeviceValidator()
+    {
+        RuleFor(c => c.Token).NotEmpty().MaximumLength(200);
+        RuleFor(c => c.Platform).Must(p => p is null or "android" or "ios" or "web").WithMessage("Platform must be android, ios or web.");
+    }
+}
+
+/// <summary>Remembers a phone for alerts. The same phone signing in as someone else moves to the new person.</summary>
+public sealed class RegisterDeviceHandler(IAppDbContext db, ICurrentUser current, IClock clock) : IRequestHandler<RegisterDeviceCommand, Result>
+{
+    public async Task<Result> Handle(RegisterDeviceCommand request, CancellationToken ct)
+    {
+        var row = await db.DeviceTokens.FirstOrDefaultAsync(d => d.Token == request.Token, ct);
+        if (row is null)
+        {
+            row = new DeviceToken { Token = request.Token };
+            db.DeviceTokens.Add(row);
+        }
+
+        row.UserId = current.UserId;
+        row.Platform = request.Platform ?? "android";
+        row.LastSeenAt = clock.UtcNow;
+        await db.SaveChangesAsync(ct);
+        return Result.Success();
+    }
+}
+
+public sealed class RemoveDeviceHandler(IAppDbContext db, ICurrentUser current) : IRequestHandler<RemoveDeviceCommand, Result>
+{
+    public async Task<Result> Handle(RemoveDeviceCommand request, CancellationToken ct)
+    {
+        var rows = await db.DeviceTokens.Where(d => d.Token == request.Token && d.UserId == current.UserId).ToListAsync(ct);
+        db.DeviceTokens.RemoveRange(rows);
+        await db.SaveChangesAsync(ct);
+        return Result.Success();
+    }
+}
+
 public sealed class GetPreferencesHandler(IAppDbContext db, ICurrentUser current) : IRequestHandler<GetPreferencesQuery, Result<IReadOnlyList<PreferenceDto>>>
 {
     public async Task<Result<IReadOnlyList<PreferenceDto>>> Handle(GetPreferencesQuery request, CancellationToken ct)
@@ -249,7 +310,7 @@ public sealed class SetPreferencesHandler(IAppDbContext db, ICurrentUser current
     }
 }
 
-public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSender mail, ISmsSender sms, IClock clock, CentreCalendar calendar) : IRequestHandler<RunNotificationDispatchCommand, Result<int>>
+public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSender mail, ISmsSender sms, IPushSender push, IClock clock, CentreCalendar calendar) : IRequestHandler<RunNotificationDispatchCommand, Result<int>>
 {
     private static readonly TimeSpan[] Backoff = [TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15)];
 
@@ -257,7 +318,7 @@ public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSende
     {
         var now = clock.UtcNow;
         var due = await db.NotificationDeliveries
-            .Where(d => (d.Channel == NotificationChannels.Email || d.Channel == NotificationChannels.Sms) && d.Status == DeliveryStatuses.Pending && d.NextAttemptAt <= now)
+            .Where(d => (d.Channel == NotificationChannels.Email || d.Channel == NotificationChannels.Sms || d.Channel == NotificationChannels.Push) && d.Status == DeliveryStatuses.Pending && d.NextAttemptAt <= now)
             .OrderBy(d => d.NextAttemptAt).Take(50).ToListAsync(ct);
         if (due.Count == 0)
         {
@@ -278,11 +339,12 @@ public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSende
         foreach (var delivery in due)
         {
             var isSms = delivery.Channel == NotificationChannels.Sms;
-            var configured = isSms ? sms.IsConfigured : mail.IsConfigured;
+            var isPush = delivery.Channel == NotificationChannels.Push;
+            var configured = isSms ? sms.IsConfigured : isPush ? push.IsConfigured : mail.IsConfigured;
             if (!configured || string.IsNullOrWhiteSpace(delivery.Recipient) || !notes.TryGetValue(delivery.NotificationId, out var note))
             {
                 delivery.Status = DeliveryStatuses.Skipped;
-                delivery.Error = configured ? "No recipient" : isSms ? "Text messages are not set up" : "E-mail is not set up";
+                delivery.Error = configured ? "No recipient" : isSms ? "Text messages are not set up" : isPush ? "Phone alerts are not set up" : "E-mail is not set up";
                 continue;
             }
 
@@ -296,7 +358,9 @@ public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSende
             var lang = languages.GetValueOrDefault(note.UserId, "en");
             var result = isSms
                 ? await sms.SendAsync(delivery.Recipient, $"{Pick(note.Title, lang)}: {Pick(note.Body, lang)}", ct)
-                : await mail.SendAsync(delivery.Recipient, Pick(note.Title, lang), Pick(note.Body, lang), ct);
+                : isPush
+                    ? await push.SendAsync(delivery.Recipient, Pick(note.Title, lang), Pick(note.Body, lang), ct)
+                    : await mail.SendAsync(delivery.Recipient, Pick(note.Title, lang), Pick(note.Body, lang), ct);
             delivery.Attempts++;
             if (result.IsSuccess)
             {

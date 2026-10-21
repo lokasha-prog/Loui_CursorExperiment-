@@ -9,6 +9,8 @@ namespace NMS.Api.Endpoints;
 
 public sealed record PreferencesRequest(IReadOnlyList<PreferenceDto> Preferences);
 
+public sealed record DeviceRequest(string Token, string? Platform);
+
 public sealed record RetentionRequest(int RetentionDays, bool AutoPurgeEnabled);
 
 public sealed record PurgeRequest(bool Confirm);
@@ -35,6 +37,16 @@ public static class NotificationEndpoints
         {
             var result = await s.Send(new MarkReadCommand(null), ct);
             return result.IsFailure ? ApiResults.Failure(http, result.Errors) : ApiResults.Ok(http, new { marked = result.Value });
+        }).RequireAuthorization(Permissions.DashboardView);
+        n.MapPost("/devices", async (DeviceRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+        {
+            var result = await s.Send(new RegisterDeviceCommand(body.Token, body.Platform), ct);
+            return result.IsFailure ? ApiResults.Failure(http, result.Errors) : Results.NoContent();
+        }).RequireAuthorization(Permissions.DashboardView);
+        n.MapPost("/devices/actions/remove", async (DeviceRequest body, HttpContext http, ISender s, CancellationToken ct) =>
+        {
+            var result = await s.Send(new RemoveDeviceCommand(body.Token), ct);
+            return result.IsFailure ? ApiResults.Failure(http, result.Errors) : Results.NoContent();
         }).RequireAuthorization(Permissions.DashboardView);
         n.MapGet("/preferences", async (HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(new GetPreferencesQuery(), ct)))

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { api, ApiError } from '../api'
+import { useAuth } from '../auth'
 import { useI18n, pick } from '../i18n'
 import { Banner, Body, Btn, Card, Field, Heading, Pill, Row, Screen, Title } from '../ui'
 
@@ -9,6 +10,7 @@ const TYPES = ['diary', 'food', 'toilet', 'mood', 'announcement'] as const
 
 export function FeedScreen() {
   const { t, lang } = useI18n()
+  const { can } = useAuth()
   const [posts, setPosts] = useState<Post[]>([])
   const [type, setType] = useState<(typeof TYPES)[number]>('diary')
   const [caption, setCaption] = useState('')
@@ -38,13 +40,13 @@ export function FeedScreen() {
     <Screen refreshing={busy} onRefresh={() => void load()}>
       <Title>{t('tabs.feed')}</Title>
       {message && <Banner tone={message.tone} text={message.text} />}
-      <Card>
+      {can('activities.write') && <Card>
         <Heading>{t('newPost')}</Heading>
         <Body muted>{t('postType')}</Body>
         <Row>{TYPES.map((k) => <Btn key={k} kind={k === type ? 'primary' : 'secondary'} label={t(`types.${k}`)} onPress={() => setType(k)} />)}</Row>
         <Field label={t('caption')} value={caption} onChangeText={setCaption} multiline numberOfLines={3} style={{ minHeight: 80 }} />
         <Btn label={t('post')} onPress={() => void post()} busy={busy} disabled={!caption.trim()} />
-      </Card>
+      </Card>}
       {posts.length === 0 ? <Body muted>{t('noPosts')}</Body> : posts.map((p) => (
         <Card key={p.id}>
           <Row><Pill tone="info" label={t(`types.${p.type as (typeof TYPES)[number]}`)} /><Pill tone={p.status === 'approved' ? 'ok' : p.status === 'rejected' ? 'danger' : 'warn'} label={t(`approval.${p.status}`)} /></Row>

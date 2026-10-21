@@ -16,7 +16,8 @@ const CACHE = 'nms.emergency'
 
 export function MoreScreen() {
   const { t, lang, setLang } = useI18n()
-  const { me, signOut, biometric, canUseBiometric, setBiometric } = useAuth()
+  const { me, signOut, biometric, canUseBiometric, setBiometric, can } = useAuth()
+  const staff = can('attendance.write')
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [emergency, setEmergency] = useState<Emergency | null>(null)
   const [search, setSearch] = useState('')
@@ -42,9 +43,9 @@ export function MoreScreen() {
   }, [])
 
   useEffect(() => {
-    void loadAlerts()
+    if (staff) void loadAlerts()
     void store.get<Emergency>(CACHE).then((cached) => cached && setEmergency(cached))
-  }, [loadAlerts])
+  }, [loadAlerts, staff])
 
   const shown = (emergency?.children ?? []).filter((c) => `${c.name} ${c.arabic_name ?? ''}`.toLowerCase().includes(search.toLowerCase()))
 
@@ -57,7 +58,7 @@ export function MoreScreen() {
         <Body muted>{me?.email} · {pick(me?.tenant.name, lang)}</Body>
       </Card>
 
-      <Card>
+      {staff && <Card>
         <Heading>{t('alerts')}</Heading>
         {alerts.length === 0 ? <Body muted>{t('noAlerts')}</Body> : alerts.map((a) => (
           <View key={a.id} style={{ gap: 2, paddingVertical: 4 }}>
@@ -65,9 +66,9 @@ export function MoreScreen() {
             <Body muted>{pick(a.body, lang)}</Body>
           </View>
         ))}
-      </Card>
+      </Card>}
 
-      <Card>
+      {staff && <Card>
         <Heading>{t('emergency')}</Heading>
         <Body muted>{t('emergencyBody')}</Body>
         {offline && <Banner tone="info" text={t('noConnection')} />}
@@ -89,7 +90,7 @@ export function MoreScreen() {
             ))}
           </Card>
         ))}
-      </Card>
+      </Card>}
 
       <Card>
         <Heading>{t('language')}</Heading>

@@ -111,6 +111,8 @@ public interface IAppDbContext
 
     DbSet<NotificationPreference> NotificationPreferences { get; }
 
+    DbSet<DeviceToken> DeviceTokens { get; }
+
     DbSet<NMS.Application.Feedback.FeedbackNote> FeedbackNotes { get; }
 
     DbSet<NMS.Application.Reporting.AuditRetentionSetting> AuditRetentionSettings { get; }
