@@ -1,5 +1,9 @@
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import { useJourney, useParentReports } from '@/api/hooks'
+import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/toaster'
+import { downloadLearningReport } from './ReportsTab'
 import { Badge, Card, EmptyState, Skeleton } from '@/components/ui/surfaces'
 import { formatDate } from '@/lib/format'
 import { localized } from '@/lib/utils'
@@ -12,6 +16,11 @@ export function JourneyView({ studentId }: { studentId: string }) {
   const lang = i18n.language
   const journey = useJourney(studentId)
   const reports = useParentReports(studentId)
+  const [busy, setBusy] = useState(false)
+  const print = async (kind: string, extra: Record<string, string> = {}) => {
+    setBusy(true)
+    try { await downloadLearningReport(kind, { student_id: studentId, variant: 'parent', language: lang === 'ar' ? 'ar' : 'en', format: 'pdf', ...extra }); toast.success(t('learning.reports.done')) } catch { toast.error(t('errors.UNKNOWN')) } finally { setBusy(false) }
+  }
 
   if (!studentId) return <EmptyState title={t('learning.journey.pick')} description={t('learning.journey.pickHint')} />
   if (journey.isLoading) return <Skeleton className="h-48" />
@@ -19,6 +28,11 @@ export function JourneyView({ studentId }: { studentId: string }) {
   const items = journey.data?.items ?? []
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap gap-2">
+        <Button variant="secondary" disabled={busy} onClick={() => void print('journey')}>{t('learning.reports.journeyPdf')}</Button>
+        <Button variant="secondary" disabled={busy} onClick={() => void print('progress')}>{t('learning.reports.progressPdf')}</Button>
+        <Button variant="secondary" disabled={busy} onClick={() => void print('student_milestone')}>{t('learning.reports.milestonesPdf')}</Button>
+      </div>
       {(reports.data ?? []).length > 0 && (
         <section aria-labelledby="jv-reports">
           <h2 id="jv-reports" className="mb-3 text-base font-bold">{t('learning.journey.reports')}</h2>
@@ -27,6 +41,7 @@ export function JourneyView({ studentId }: { studentId: string }) {
               <Card key={r.id} className="p-4">
                 <h3 className="font-bold">{localized(r.template_name, lang)} · {r.term}</h3>
                 <p className="text-xs text-muted-foreground">{formatDate(r.assessed_on, lang)}</p>
+                <Button size="sm" variant="ghost" disabled={busy} onClick={() => void print('snapshot', { run_id: r.id })}>{t('learning.reports.reportPdf')}</Button>
                 {r.summary && <p className="mt-2 text-sm">{localized(r.summary, lang)}</p>}
                 <ul className="mt-3 space-y-2">
                   {r.areas.map((a, i) => (

@@ -16,6 +16,7 @@ import { can, useAuth } from '@/stores/auth'
 import { AssessmentsTab } from './AssessmentsTab'
 import { JourneyView } from './JourneyView'
 import { ObservationsTab } from './ObservationsTab'
+import { ReportsTab } from './ReportsTab'
 
 const lines = (text: string) => text.split('\n').map((l) => l.trim()).filter(Boolean)
 
@@ -322,7 +323,7 @@ export default function LearningPage() {
   const { t } = useTranslation()
   const me = useAuth((s) => s.me)
   const [tab, setTab] = useState('lessons')
-  const tabs = ['lessons', 'observations', 'assessments', 'journey', 'curriculum']
+  const tabs = ['lessons', 'observations', 'assessments', 'journey', 'reports', 'curriculum']
   const [journeyStudent, setJourneyStudent] = useState('')
   const students = useStudentOptions()
   return (
@@ -343,6 +344,7 @@ export default function LearningPage() {
           <div className="mb-4"><Select value={journeyStudent} onChange={(e) => setJourneyStudent(e.target.value)} aria-label={t('learning.obs.child')} className="w-64"><option value="">{t('learning.journey.pick')}</option>{(students.data ?? []).map((st) => <option key={st.id} value={st.id}>{st.first_name} {st.last_name}</option>)}</Select></div>
           <JourneyView studentId={journeyStudent} />
         </TabsPrimitive.Content>
+        <TabsPrimitive.Content value="reports"><ReportsTab /></TabsPrimitive.Content>
         <TabsPrimitive.Content value="curriculum"><CurriculumTab canManage={can(me, 'settings.write')} /></TabsPrimitive.Content>
       </TabsPrimitive.Root>
     </>

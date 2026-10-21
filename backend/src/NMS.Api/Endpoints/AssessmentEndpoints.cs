@@ -65,6 +65,15 @@ public static class AssessmentEndpoints
             return result.IsFailure ? ApiResults.Failure(http, result.Errors) : Results.NoContent();
         }).RequireAuthorization(Permissions.LearningWrite);
 
+        routes.MapGet("/api/v1/learning/reports/{kind}", async (string kind, [FromQuery(Name = "student_id")] Guid? studentId, [FromQuery(Name = "run_id")] Guid? runId, [FromQuery(Name = "room_id")] Guid? roomId,
+            [FromQuery(Name = "template_id")] Guid? templateId, [FromQuery(Name = "term_a")] string? termA, [FromQuery(Name = "term_b")] string? termB, string? variant, string? language, string? format,
+            HttpContext http, ISender s, CancellationToken ct) =>
+        {
+            var result = await s.Send(new LearningReportQuery(kind, studentId, runId, roomId, templateId, termA, termB, variant ?? "staff", language ?? "en", format ?? "pdf"), ct);
+            return result.IsFailure ? ApiResults.Failure(http, result.Errors)
+                : Results.File(result.Value.Content, result.Value.ContentType, $"learning-{kind}.{result.Value.Extension}");
+        }).WithTags("Learning").RequireAuthorization(Permissions.JourneyRead);
+
         routes.MapGet("/api/v1/learning/journey/{studentId:guid}", async (Guid studentId, HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(new JourneyQuery(studentId), ct))).WithTags("Learning").RequireAuthorization(Permissions.JourneyRead);
         routes.MapGet("/api/v1/learning/parent-reports/{studentId:guid}", async (Guid studentId, HttpContext http, ISender s, CancellationToken ct) =>

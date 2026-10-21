@@ -1825,7 +1825,8 @@
       "curriculum": "Curriculum",
       "observations": "Observations",
       "assessments": "Assessments",
-      "journey": "Learning journey"
+      "journey": "Learning journey",
+      "reports": "Reports"
     },
     "framework": "Curriculum",
     "area": "Development area",
@@ -1977,6 +1978,34 @@
         "observation": "Moment",
         "assessment": "Report"
       }
+    },
+    "reports": {
+      "intro": "Make a learning report as a PDF. The family version shows plain levels and kind words only, from approved reports and shared moments.",
+      "kind": "Report",
+      "variant": "Version",
+      "variantHint": "Staff: full detail. Family: plain language, safe to hand to parents.",
+      "staffOnly": "This report is for staff only",
+      "staff": "Staff (full detail)",
+      "parent": "Family (plain language)",
+      "kinds": {
+        "progress": "Assessment progress",
+        "snapshot": "Assessment report (one assessment)",
+        "comparison": "Comparison between two terms",
+        "class_milestone": "Class milestones",
+        "student_milestone": "Child's milestones",
+        "journey": "Learning journey"
+      },
+      "run": "Assessment",
+      "termA": "First term",
+      "termB": "Second term",
+      "format": "File",
+      "download": "Download",
+      "making": "Making...",
+      "done": "Report ready",
+      "journeyPdf": "Learning journey (PDF)",
+      "progressPdf": "Progress over time (PDF)",
+      "milestonesPdf": "What my child can do (PDF)",
+      "reportPdf": "Download this report"
     }
   },
   "journeyPage": {
