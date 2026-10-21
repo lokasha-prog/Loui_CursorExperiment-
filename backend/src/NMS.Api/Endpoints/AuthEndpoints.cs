@@ -18,7 +18,11 @@ public sealed record BootstrapRequest(
     string AdminLastName,
     string AdminPassword);
 
-public sealed record SessionResponse(string AccessToken, DateTimeOffset ExpiresAt, MeDto Me);
+public sealed record SessionResponse(
+    string AccessToken, DateTimeOffset ExpiresAt, MeDto Me,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? RefreshToken = null);
+
+public sealed record MobileRefreshRequest(string? RefreshToken);
 
 public static class AuthEndpoints
 {
@@ -69,6 +73,11 @@ public static class AuthEndpoints
             }
 
             var token = http.Request.Cookies[RefreshCookie];
+            if (string.IsNullOrEmpty(token) && IsMobile(http))
+            {
+                token = (await http.Request.ReadFromJsonAsync<MobileRefreshRequest>(ct))?.RefreshToken;
+            }
+
             if (string.IsNullOrEmpty(token))
             {
                 return ApiResults.Error(http, StatusCodes.Status401Unauthorized, "UNAUTHORIZED", "Session expired.");
@@ -105,8 +114,12 @@ public static class AuthEndpoints
     internal static IResult Respond(HttpContext http, AuthSession session)
     {
         http.Response.Cookies.Append(RefreshCookie, session.RefreshToken, CookieOptions(http, session.RefreshTokenExpiresAt));
-        return ApiResults.Ok(http, new SessionResponse(session.AccessToken, session.AccessTokenExpiresAt, session.Me));
+
+        // The phone app cannot read an HttpOnly cookie, so it is also given the refresh token to keep in the phone's secure store.
+        return ApiResults.Ok(http, new SessionResponse(session.AccessToken, session.AccessTokenExpiresAt, session.Me, IsMobile(http) ? session.RefreshToken : null));
     }
+
+    internal static bool IsMobile(HttpContext http) => string.Equals(http.Request.Headers["X-NMS-Client"], "mobile", StringComparison.OrdinalIgnoreCase);
 
     private static CookieOptions CookieOptions(HttpContext http, DateTimeOffset? expires) => new()
     {
