@@ -3,7 +3,7 @@
 The public website of the nursery: a plain, fast, bilingual (English / Arabic, right-to-left) site with an enquiry form that goes straight into the NMS enquiry pipeline. No build step, no framework.
 
 ## Change it
-- `config.js` is the only settings file: the centre's web name inside NMS (`centreSlug`), where the NMS server is (`apiBase`), optional phone, e-mail, address and the parent sign-in link.
+- `config.js` is the only settings file: the centre's web name inside NMS (`centreSlug`), where the NMS server is (`apiBase`), optional phone, e-mail, address and `portalUrl`, the NMS web app sign-in page that the "Sign in" and "Parent sign-in" buttons open (parents, teachers and managers all sign in there; the website never handles passwords).
 - The nursery name shown in the header and footer is read from NMS (Settings > centre profile), so it always matches the system.
 - Wording lives in `app.js` (English and Arabic side by side). Look and feel is in `styles.css`.
 - The programmes (names, ages, days, hours) and the "never more than N children per adult" badge come live from NMS (Centre structure > Programmes and Rooms), so they never go out of date. Nothing about fees is published.

@@ -8,7 +8,7 @@
   var T = {
     en: {
       skip: 'Skip to content', brand: 'Bright Futures',
-      nav: { why: 'Why us', programmes: 'Programmes', day: 'A day with us', learning: 'Learning', safety: 'Safety', faq: 'Questions', enquire: 'Book a visit' },
+      nav: { why: 'Why us', programmes: 'Programmes', day: 'A day with us', learning: 'Learning', safety: 'Safety', faq: 'Questions', enquire: 'Book a visit', signin: 'Sign in' },
       hero: { kicker: 'Early years in the UAE', t1: 'A happy, safe place where every child is', words: ['known', 'loved', 'curious', 'confident', 'learning'], lead: 'Small groups, caring teachers and a calm, playful day. We keep you close to your child\'s day, and to their learning, in English and Arabic.', cta1: 'Book a visit', cta2: 'See how children learn here' },
       marquee: ['Play-based learning', 'English + Arabic', 'Secure check-in', 'Learning journey', 'Parent app', 'Healthy meals', 'Small groups', 'Caring key person', 'Daily reports', 'Early Years Foundation Stage'],
       badge: { safe: 'Secure check-in', bi: 'English + Arabic', learn: 'Learning journey', app: 'Parent app', ratio: 'Never more than {n} children per adult' },
@@ -30,7 +30,7 @@
     },
     ar: {
       skip: 'انتقل إلى المحتوى', brand: 'برايت فيوتشرز',
-      nav: { why: 'لماذا نحن', programmes: 'البرامج', day: 'يوم معنا', learning: 'التعلّم', safety: 'الأمان', faq: 'أسئلة', enquire: 'احجز زيارة' },
+      nav: { why: 'لماذا نحن', programmes: 'البرامج', day: 'يوم معنا', learning: 'التعلّم', safety: 'الأمان', faq: 'أسئلة', enquire: 'احجز زيارة', signin: 'تسجيل الدخول' },
       hero: { kicker: 'السنوات الأولى في الإمارات', t1: 'مكان سعيد وآمن يكون فيه كل طفل', words: ['معروفاً', 'محبوباً', 'فضولياً', 'واثقاً', 'متعلّماً'], lead: 'مجموعات صغيرة ومعلمات حنونات ويوم هادئ ومرح. نبقيك قريباً من يوم طفلك ومن تعلّمه، بالعربية والإنجليزية.', cta1: 'احجز زيارة', cta2: 'شاهد كيف يتعلم الأطفال هنا' },
       marquee: ['تعلّم باللعب', 'عربي + إنجليزي', 'تسجيل دخول آمن', 'رحلة التعلّم', 'تطبيق أولياء الأمور', 'وجبات صحية', 'مجموعات صغيرة', 'معلمة مرافقة حنونة', 'تقارير يومية', 'مرحلة التأسيس للسنوات المبكرة'],
       badge: { safe: 'تسجيل دخول آمن', bi: 'عربي + إنجليزي', learn: 'رحلة التعلّم', app: 'تطبيق أولياء الأمور', ratio: 'لا يزيد عن {n} أطفال لكل بالغ' },
@@ -150,8 +150,9 @@
     if (cfg.email) parts.push(T[lang].contact.email + ': ' + cfg.email)
     if (cfg.address && (cfg.address[lang] || cfg.address.en)) parts.push(cfg.address[lang] || cfg.address.en)
     $('contactLine').textContent = parts.join(' · ')
-    var portal = $('portal')
-    if (cfg.portalUrl) { portal.hidden = false; portal.href = cfg.portalUrl }
+    // Sign-in goes to the NMS web app (parents, teachers and managers all sign in there); the address is a setting.
+    var login = cfg.portalUrl || '/login'
+    $('portal').href = login; $('signin').href = login
     $('rot').textContent = (get('hero.words') || [''])[rotIndex % get('hero.words').length]
     paintProgrammes(); paintMarquee(); paintExtras(); staggerAll(); sunStep()
   }
