@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bright Futures Nursery</title>
-  <meta name="description" content="A warm, safe, bilingual nursery in the UAE where every child is known, loved and learning. Book a visit today." />
+  <meta name="description" content="A warm, safe, bilingual nursery in the UAE where every child is known, loved and learning, with a learning journey parents can follow. Book a visit today." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23b13f25'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23f6c453'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,9 +14,10 @@
 </head>
 <body>
 <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+<div class="progress" id="progress" aria-hidden="true"></div>
 <div class="notice" id="notice" hidden></div>
 
-<header class="top">
+<header class="top" id="topbar">
   <div class="wrap bar">
     <a class="brand" href="#top"><span class="logo" aria-hidden="true">☀</span><span id="brandName" data-i18n="brand">Bright Futures</span></a>
     <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu">☰</button>
@@ -37,64 +38,72 @@
   <!-- HERO -->
   <section class="hero" id="top">
     <span class="blob a"></span><span class="blob b"></span><span class="blob c"></span>
+    <span class="spark s1" aria-hidden="true">✦</span><span class="spark s2" aria-hidden="true">✦</span><span class="spark s3" aria-hidden="true">✦</span><span class="spark s4" aria-hidden="true">✦</span>
     <div class="wrap grid">
       <div class="rv">
         <span class="kicker" data-i18n="hero.kicker">Early years in the UAE</span>
-        <h1><span data-i18n="hero.t1">A happy, safe place where every child is</span> <em data-i18n="hero.t2">known and loved</em></h1>
-        <p class="lead" data-i18n="hero.lead">Small groups, caring teachers and a calm, playful day. We keep you close to your child's day, in English and Arabic.</p>
+        <h1><span data-i18n="hero.t1">A happy, safe place where every child is</span> <em class="rot" id="rot" aria-live="off">known</em></h1>
+        <p class="lead" data-i18n="hero.lead">Small groups, caring teachers and a calm, playful day. We keep you close to your child's day, and to their learning, in English and Arabic.</p>
         <div class="cta">
-          <a class="btn" href="#enquire" data-i18n="hero.cta1">Book a visit</a>
-          <a class="btn ghost" href="#day" data-i18n="hero.cta2">See a day with us</a>
+          <a class="btn pulse" href="#enquire" data-i18n="hero.cta1">Book a visit</a>
+          <a class="btn ghost" href="#learning" data-i18n="hero.cta2">See how children learn here</a>
         </div>
         <div class="badges">
           <span class="badge">🛡 <span data-i18n="badge.safe">Secure check-in</span></span>
           <span class="badge">🌍 <span data-i18n="badge.bi">English + Arabic</span></span>
-          <span class="badge">👩‍🏫 <span data-i18n="badge.small">Small groups</span></span>
+          <span class="badge">🌱 <span data-i18n="badge.learn">Learning journey</span></span>
           <span class="badge">📱 <span data-i18n="badge.app">Parent app</span></span>
           <span class="badge" id="ratioBadge" hidden>💛 <span id="ratioText"></span></span>
         </div>
       </div>
-      <svg class="hero-art rv" viewBox="0 0 520 480" role="img" aria-hidden="true">
-        <circle cx="260" cy="250" r="220" fill="#fde3cf"/>
-        <circle cx="410" cy="95" r="52" fill="#f6c453"/>
-        <g stroke="#f6c453" stroke-width="6" stroke-linecap="round"><path d="M410 22v-18M410 168v18M337 95h-18M483 95h18M358 43l-13-13M462 147l13 13M462 43l13-13M358 147l-13 13"/></g>
-        <ellipse cx="120" cy="110" rx="52" ry="24" fill="#fff"/><ellipse cx="150" cy="96" rx="36" ry="22" fill="#fff"/><ellipse cx="96" cy="100" rx="32" ry="18" fill="#fff"/>
-        <path d="M30 420 Q150 330 270 400 T510 380 V480 H30Z" fill="#cdebd7"/>
-        <path d="M0 450 Q160 390 300 440 T520 430 V480 H0Z" fill="#9bd3b0"/>
-        <rect x="150" y="250" width="230" height="150" rx="24" fill="#b13f25"/>
-        <polygon points="128,262 265,150 402,262" fill="#8f3019"/>
-        <rect x="236" y="320" width="62" height="80" rx="12" fill="#fff"/><circle cx="288" cy="362" r="4" fill="#b13f25"/>
-        <rect x="172" y="288" width="50" height="46" rx="10" fill="#fde2d3"/><rect x="312" y="288" width="50" height="46" rx="10" fill="#fde2d3"/>
-        <circle cx="265" cy="214" r="20" fill="#fff"/><path d="M265 202v12l8 5" stroke="#b13f25" stroke-width="4" fill="none" stroke-linecap="round"/>
-        <!-- children -->
-        <g><circle cx="90" cy="385" r="24" fill="#ffd9b8"/><path d="M66 378q24-30 48 0" fill="#5a3a24"/><circle cx="82" cy="387" r="3" fill="#1f2937"/><circle cx="98" cy="387" r="3" fill="#1f2937"/><path d="M82 396q8 7 16 0" stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="68" y="408" width="44" height="46" rx="16" fill="#1f7a6d"/></g>
-        <g><circle cx="430" cy="395" r="22" fill="#e9b88f"/><path d="M408 392q22-34 44 0" fill="#2b1d16"/><circle cx="422" cy="397" r="3" fill="#1f2937"/><circle cx="438" cy="397" r="3" fill="#1f2937"/><path d="M423 405q7 6 14 0" stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="410" y="416" width="40" height="42" rx="14" fill="#f6c453"/></g>
-        <g><path d="M470 330v-60" stroke="#8f3019" stroke-width="3"/><ellipse cx="470" cy="250" rx="22" ry="28" fill="#fcd9d4"/><path d="M470 330v-60M448 252c0-18 12-28 22-28" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/></g>
-        <g><path d="M60 330v-50" stroke="#8f3019" stroke-width="3"/><ellipse cx="60" cy="262" rx="20" ry="26" fill="#cfeaf7"/></g>
-      </svg>
+      <div class="scene rv" aria-hidden="true">
+        <svg class="hero-art" viewBox="0 0 520 480">
+          <circle cx="260" cy="250" r="220" fill="#fde3cf"/>
+          <g class="sun"><circle cx="410" cy="95" r="52" fill="#f6c453"/>
+            <g class="rays" stroke="#f6c453" stroke-width="6" stroke-linecap="round"><path d="M410 22v-18M410 168v18M337 95h-18M483 95h18M358 43l-13-13M462 147l13 13M462 43l13-13M358 147l-13 13"/></g></g>
+          <g class="cloud c1"><ellipse cx="120" cy="110" rx="52" ry="24" fill="#fff"/><ellipse cx="150" cy="96" rx="36" ry="22" fill="#fff"/><ellipse cx="96" cy="100" rx="32" ry="18" fill="#fff"/></g>
+          <g class="cloud c2"><ellipse cx="330" cy="40" rx="36" ry="16" fill="#fff" opacity=".9"/><ellipse cx="352" cy="32" rx="24" ry="14" fill="#fff" opacity=".9"/></g>
+          <path d="M30 420 Q150 330 270 400 T510 380 V480 H30Z" fill="#cdebd7"/>
+          <path d="M0 450 Q160 390 300 440 T520 430 V480 H0Z" fill="#9bd3b0"/>
+          <rect x="150" y="250" width="230" height="150" rx="24" fill="#b13f25"/>
+          <polygon points="128,262 265,150 402,262" fill="#8f3019"/>
+          <rect x="236" y="320" width="62" height="80" rx="12" fill="#fff"/><circle cx="288" cy="362" r="4" fill="#b13f25"/>
+          <rect class="win" x="172" y="288" width="50" height="46" rx="10" fill="#fde2d3"/><rect class="win w2" x="312" y="288" width="50" height="46" rx="10" fill="#fde2d3"/>
+          <circle cx="265" cy="214" r="20" fill="#fff"/><path d="M265 202v12l8 5" stroke="#b13f25" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <g class="kid k1"><circle cx="90" cy="385" r="24" fill="#ffd9b8"/><path d="M66 378q24-30 48 0" fill="#5a3a24"/><circle cx="82" cy="387" r="3" fill="#1f2937"/><circle cx="98" cy="387" r="3" fill="#1f2937"/><path d="M82 396q8 7 16 0" stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="68" y="408" width="44" height="46" rx="16" fill="#1f7a6d"/></g>
+          <g class="kid k2"><circle cx="430" cy="395" r="22" fill="#e9b88f"/><path d="M408 392q22-34 44 0" fill="#2b1d16"/><circle cx="422" cy="397" r="3" fill="#1f2937"/><circle cx="438" cy="397" r="3" fill="#1f2937"/><path d="M423 405q7 6 14 0" stroke="#1f2937" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="410" y="416" width="40" height="42" rx="14" fill="#f6c453"/></g>
+          <g class="balloon b1"><path d="M470 330v-60" stroke="#8f3019" stroke-width="3"/><ellipse cx="470" cy="250" rx="22" ry="28" fill="#fcd9d4"/></g>
+          <g class="balloon b2"><path d="M60 330v-50" stroke="#8f3019" stroke-width="3"/><ellipse cx="60" cy="262" rx="20" ry="26" fill="#cfeaf7"/></g>
+          <g class="butterfly"><path d="M0 0q-14-14-18 0q4 12 18 0zM0 0q14-14 18 0q-4 12-18 0z" fill="#e07a5f"/></g>
+        </svg>
+      </div>
     </div>
     <svg class="wave" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path d="M0 40 Q360 0 720 40 T1440 40 V80 H0Z" fill="#fff"/></svg>
   </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee" aria-hidden="true"><div class="track" id="marquee"></div></div>
 
   <!-- WHY US -->
   <section id="why" class="alt">
     <div class="wrap">
       <div class="head center rv"><span class="kicker" data-i18n="why.kicker">Why families choose us</span><h2 data-i18n="why.title">Care you can see, learning you can feel</h2><p data-i18n="why.lead">Choosing a nursery is one of the biggest decisions you make. Here is what you can expect from us, every single day.</p></div>
       <div class="cards">
-        <div class="card c1 rv"><div class="ico" aria-hidden="true">💛</div><h3 data-i18n="why.c1t">Known and loved</h3><p data-i18n="why.c1">Every child has a key person who knows their routines, favourite songs, comfort habits and needs, so settling in feels natural.</p></div>
-        <div class="card c2 rv"><div class="ico" aria-hidden="true">🛡</div><h3 data-i18n="why.c2t">Safe by design</h3><p data-i18n="why.c2">Secure check-in and check-out, named pick-up people only, and the right number of adults in every room, all day long.</p></div>
-        <div class="card c3 rv"><div class="ico" aria-hidden="true">🌍</div><h3 data-i18n="why.c3t">English and Arabic</h3><p data-i18n="why.c3">Songs, stories and daily conversations in both languages, so children grow confident in each and proud of their heritage.</p></div>
-        <div class="card c4 rv"><div class="ico" aria-hidden="true">📱</div><h3 data-i18n="why.c4t">Close to your child's day</h3><p data-i18n="why.c4">Photos, meals, naps and a daily report in our parent app, with direct messages to the team. Never wonder how the day went.</p></div>
-        <div class="card c5 rv"><div class="ico" aria-hidden="true">🥗</div><h3 data-i18n="why.c5t">Healthy and mindful</h3><p data-i18n="why.c5">Nutritious meals that respect every family's needs, allergy care taken seriously, and rest when little bodies need it.</p></div>
-        <div class="card c6 rv"><div class="ico" aria-hidden="true">🎨</div><h3 data-i18n="why.c6t">Learning through play</h3><p data-i18n="why.c6">A rich, play-based programme built on the early years framework, so curiosity, language and confidence grow together.</p></div>
+        <div class="card tilt c1 rv"><div class="ico" aria-hidden="true">💛</div><h3 data-i18n="why.c1t">Known and loved</h3><p data-i18n="why.c1">Every child has a key person who knows their routines, favourite songs, comfort habits and needs.</p></div>
+        <div class="card tilt c2 rv"><div class="ico" aria-hidden="true">🛡</div><h3 data-i18n="why.c2t">Safe by design</h3><p data-i18n="why.c2">Secure check-in and check-out, named pick-up people only, and the right number of adults in every room.</p></div>
+        <div class="card tilt c3 rv"><div class="ico" aria-hidden="true">🌍</div><h3 data-i18n="why.c3t">English and Arabic</h3><p data-i18n="why.c3">Songs, stories and daily conversations in both languages, so children grow confident in each.</p></div>
+        <div class="card tilt c4 rv"><div class="ico" aria-hidden="true">🌱</div><h3 data-i18n="why.c4t">Learning you can follow</h3><p data-i18n="why.c4">We record what your child does and learns, and share it with you in a learning journey and termly reports.</p></div>
+        <div class="card tilt c5 rv"><div class="ico" aria-hidden="true">🥗</div><h3 data-i18n="why.c5t">Healthy and mindful</h3><p data-i18n="why.c5">Nutritious meals that respect every family's needs, allergy care taken seriously, and rest when little bodies need it.</p></div>
+        <div class="card tilt c6 rv"><div class="ico" aria-hidden="true">📱</div><h3 data-i18n="why.c6t">Close to your child's day</h3><p data-i18n="why.c6">Photos, meals, naps and a daily report in our parent app, with direct messages to the team.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- PROGRAMMES (from the nursery system) -->
+  <!-- PROGRAMMES (live from the nursery system) -->
   <section id="programmes" class="tint" hidden>
     <div class="wrap">
       <div class="head center rv"><span class="kicker" data-i18n="prog.kicker">Our programmes</span><h2 data-i18n="prog.title">A place for every age</h2><p data-i18n="prog.lead">Each group has its own space, routine and teachers, so your child gets what suits their stage.</p></div>
+      <div class="facts rv" id="facts"></div>
       <div class="progs" id="progs"></div>
     </div>
   </section>
@@ -106,14 +115,19 @@
         <span class="kicker" data-i18n="day.kicker">A day with us</span>
         <h2 data-i18n="day.title">A gentle rhythm of play, rest and discovery</h2>
         <p data-i18n="day.lead">Children thrive on routine. Our day flows from calm arrival to joyful play, healthy meals and quiet rest, and you hear all about it before pick-up.</p>
+        <div class="sky" id="sky" aria-hidden="true">
+          <span class="sunball" id="sunball"></span>
+          <svg viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M0 120 Q200 -40 400 120" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="3" stroke-dasharray="6 8"/></svg>
+          <span class="skylabel" id="skylabel"></span>
+        </div>
         <a class="btn teal" href="#enquire" data-i18n="day.cta">Come and see it</a>
       </div>
-      <div class="timeline rv">
-        <div class="tl" data-i="1"><strong>🌅 <span data-i18n="day.s1t">Warm welcome</span></strong><br /><span data-i18n="day.s1">Children are greeted by name, settle in and start with free play.</span></div>
-        <div class="tl" data-i="2"><strong>🎶 <span data-i18n="day.s2t">Circle time and stories</span></strong><br /><span data-i18n="day.s2">Songs, languages, rhymes and storytelling to begin the day together.</span></div>
-        <div class="tl" data-i="3"><strong>🎨 <span data-i18n="day.s3t">Play and learning</span></strong><br /><span data-i18n="day.s3">Art, building, sensory play, movement and outdoor exploration.</span></div>
-        <div class="tl" data-i="4"><strong>🍎 <span data-i18n="day.s4t">Healthy meals and rest</span></strong><br /><span data-i18n="day.s4">Nutritious food, then a quiet rest or calm activities for each child's need.</span></div>
-        <div class="tl" data-i="5"><strong>🏡 <span data-i18n="day.s5t">Home with a daily report</span></strong><br /><span data-i18n="day.s5">You see photos and notes from the day, so there is always something to talk about.</span></div>
+      <div class="timeline" id="timeline">
+        <div class="tl rv" data-i="1"><strong>🌅 <span data-i18n="day.s1t">Warm welcome</span></strong><br /><span data-i18n="day.s1">Children are greeted by name, settle in and start with free play.</span></div>
+        <div class="tl rv" data-i="2"><strong>🎶 <span data-i18n="day.s2t">Circle time and stories</span></strong><br /><span data-i18n="day.s2">Songs, languages, rhymes and storytelling to begin the day together.</span></div>
+        <div class="tl rv" data-i="3"><strong>🎨 <span data-i18n="day.s3t">Play and learning</span></strong><br /><span data-i18n="day.s3">Planned lessons, art, building, sensory play, movement and outdoor exploration.</span></div>
+        <div class="tl rv" data-i="4"><strong>🍎 <span data-i18n="day.s4t">Healthy meals and rest</span></strong><br /><span data-i18n="day.s4">Nutritious food, then a quiet rest or calm activities for each child's need.</span></div>
+        <div class="tl rv" data-i="5"><strong>🏡 <span data-i18n="day.s5t">Home with a daily report</span></strong><br /><span data-i18n="day.s5">You see photos and notes from the day, so there is always something to talk about.</span></div>
       </div>
     </div>
   </section>
@@ -121,20 +135,80 @@
   <!-- LEARNING -->
   <section id="learning" class="tint">
     <div class="wrap">
-      <div class="head center rv"><span class="kicker" data-i18n="learn.kicker">How children learn here</span><h2 data-i18n="learn.title">Seven areas of learning, all through play</h2><p data-i18n="learn.lead">We follow the Early Years Foundation Stage, the framework used by the best early years settings, and we track each child's progress with you.</p></div>
-      <div class="tiles">
-        <div class="tile rv" style="background:var(--rose)"><span class="e">🗣</span><span data-i18n="learn.a1">Communication and language</span><small data-i18n="learn.a1d">Listening, talking, stories</small></div>
-        <div class="tile rv" style="background:var(--leaf)"><span class="e">🤸</span><span data-i18n="learn.a2">Physical development</span><small data-i18n="learn.a2d">Moving, balance, fine skills</small></div>
-        <div class="tile rv" style="background:var(--sky)"><span class="e">🤝</span><span data-i18n="learn.a3">Personal, social and emotional</span><small data-i18n="learn.a3d">Friends, feelings, confidence</small></div>
-        <div class="tile rv" style="background:var(--lilac)"><span class="e">📖</span><span data-i18n="learn.a4">Literacy</span><small data-i18n="learn.a4d">Books, sounds, first writing</small></div>
-        <div class="tile rv" style="background:#fff0b8"><span class="e">🔢</span><span data-i18n="learn.a5">Mathematics</span><small data-i18n="learn.a5d">Numbers, shapes, patterns</small></div>
-        <div class="tile rv" style="background:var(--peach)"><span class="e">🌳</span><span data-i18n="learn.a6">Understanding the world</span><small data-i18n="learn.a6d">Nature, people, our community</small></div>
-        <div class="tile rv" style="background:#e6f4c8"><span class="e">🎭</span><span data-i18n="learn.a7">Expressive arts and design</span><small data-i18n="learn.a7d">Music, art, imagination</small></div>
+      <div class="head center rv"><span class="kicker" data-i18n="learn.kicker">How children learn here</span><h2 data-i18n="learn.title">Learning you can watch grow</h2><p data-i18n="learn.lead">We follow the Early Years Foundation Stage, the framework used by the best early years settings. Every child's learning is planned, observed, assessed and shared with you.</p></div>
+
+      <div class="split tree-split">
+        <div class="tree rv" id="tree" aria-hidden="true">
+          <svg viewBox="0 0 420 420">
+            <ellipse cx="210" cy="398" rx="160" ry="14" fill="#cdebd7"/>
+            <path class="trunk" d="M210 396 C204 330 214 280 210 220 C206 170 214 130 210 90" fill="none" stroke="#8f5b3a" stroke-width="14" stroke-linecap="round"/>
+            <path class="branch" d="M210 300 C170 290 140 270 110 240M210 260 C250 250 285 232 316 204M210 200 C180 188 156 170 140 140M210 170 C240 160 262 142 280 118" fill="none" stroke="#8f5b3a" stroke-width="8" stroke-linecap="round"/>
+            <g class="leaf" data-n="0" style="--d:0"><ellipse cx="96" cy="228" rx="30" ry="18" transform="rotate(-30 96 228)" fill="#ef8a7e"/><text x="96" y="232" text-anchor="middle" font-size="18">🗣</text></g>
+            <g class="leaf" data-n="1" style="--d:1"><ellipse cx="330" cy="194" rx="30" ry="18" transform="rotate(25 330 194)" fill="#7cc6a0"/><text x="330" y="199" text-anchor="middle" font-size="18">🤸</text></g>
+            <g class="leaf" data-n="2" style="--d:2"><ellipse cx="124" cy="130" rx="30" ry="18" transform="rotate(-35 124 130)" fill="#7fc3e3"/><text x="124" y="135" text-anchor="middle" font-size="18">🤝</text></g>
+            <g class="leaf" data-n="3" style="--d:3"><ellipse cx="296" cy="108" rx="30" ry="18" transform="rotate(30 296 108)" fill="#b8a7ec"/><text x="296" y="113" text-anchor="middle" font-size="18">📖</text></g>
+            <g class="leaf" data-n="4" style="--d:4"><ellipse cx="170" cy="70" rx="30" ry="18" transform="rotate(-15 170 70)" fill="#f4cf5b"/><text x="170" y="75" text-anchor="middle" font-size="18">🔢</text></g>
+            <g class="leaf" data-n="5" style="--d:5"><ellipse cx="252" cy="58" rx="30" ry="18" transform="rotate(15 252 58)" fill="#f5b78c"/><text x="252" y="63" text-anchor="middle" font-size="18">🌳</text></g>
+            <g class="leaf" data-n="6" style="--d:6"><ellipse cx="210" cy="28" rx="30" ry="18" fill="#bfe08a"/><text x="210" y="34" text-anchor="middle" font-size="18">🎭</text></g>
+          </svg>
+        </div>
+        <div class="areas" id="areas">
+          <button class="area rv" type="button" data-n="0" style="--c:#fcd9d4"><span class="e">🗣</span><span><b data-i18n="learn.a1">Communication and language</b><small data-i18n="learn.a1d">Listening, talking, stories</small></span></button>
+          <button class="area rv" type="button" data-n="1" style="--c:#cdebd7"><span class="e">🤸</span><span><b data-i18n="learn.a2">Physical development</b><small data-i18n="learn.a2d">Moving, balance, fine skills</small></span></button>
+          <button class="area rv" type="button" data-n="2" style="--c:#cfeaf7"><span class="e">🤝</span><span><b data-i18n="learn.a3">Personal, social and emotional</b><small data-i18n="learn.a3d">Friends, feelings, confidence</small></span></button>
+          <button class="area rv" type="button" data-n="3" style="--c:#e3dcf8"><span class="e">📖</span><span><b data-i18n="learn.a4">Literacy</b><small data-i18n="learn.a4d">Books, sounds, first writing</small></span></button>
+          <button class="area rv" type="button" data-n="4" style="--c:#fff0b8"><span class="e">🔢</span><span><b data-i18n="learn.a5">Mathematics</b><small data-i18n="learn.a5d">Numbers, shapes, patterns</small></span></button>
+          <button class="area rv" type="button" data-n="5" style="--c:#fde3cf"><span class="e">🌳</span><span><b data-i18n="learn.a6">Understanding the world</b><small data-i18n="learn.a6d">Nature, people, our community</small></span></button>
+          <button class="area rv" type="button" data-n="6" style="--c:#e6f4c8"><span class="e">🎭</span><span><b data-i18n="learn.a7">Expressive arts and design</b><small data-i18n="learn.a7d">Music, art, imagination</small></span></button>
+        </div>
       </div>
+
+      <!-- the learning loop -->
+      <div class="head center rv" style="margin-top:70px"><h3 class="h3big" data-i18n="loop.title">How we follow your child's learning</h3><p data-i18n="loop.lead">Four steps, repeated all year, so nothing about your child's progress is left to chance.</p></div>
+      <div class="loop" id="loop">
+        <div class="loopstep rv"><span class="num">1</span><div class="lico" aria-hidden="true">🗓</div><h4 data-i18n="loop.s1t">Plan</h4><p data-i18n="loop.s1">Teachers plan lessons for each age group and room, linked to the areas of learning and the milestones we want to reach.</p></div>
+        <div class="loopstep rv"><span class="num">2</span><div class="lico" aria-hidden="true">🔍</div><h4 data-i18n="loop.s2t">Observe</h4><p data-i18n="loop.s2">We watch and note what each child does and says, with the milestone it shows. Quick notes and photos, every week.</p></div>
+        <div class="loopstep rv"><span class="num">3</span><div class="lico" aria-hidden="true">✅</div><h4 data-i18n="loop.s3t">Assess</h4><p data-i18n="loop.s3">Each term, a checklist for your child's age shows what is secure, emerging or still to come.</p></div>
+        <div class="loopstep rv"><span class="num">4</span><div class="lico" aria-hidden="true">💌</div><h4 data-i18n="loop.s4t">Share</h4><p data-i18n="loop.s4">A manager checks a plain-language report before you see it. You read it in the app, in English or Arabic.</p></div>
+      </div>
+
+      <!-- showcase -->
+      <div class="showcase rv">
+        <div class="tabs" role="tablist" aria-label="Learning examples" id="stabs">
+          <button role="tab" type="button" id="tab-obs" aria-controls="panel-obs" aria-selected="true" data-i18n="show.t1">Moments we capture</button>
+          <button role="tab" type="button" id="tab-journey" aria-controls="panel-journey" aria-selected="false" data-i18n="show.t2">Learning journey</button>
+          <button role="tab" type="button" id="tab-report" aria-controls="panel-report" aria-selected="false" data-i18n="show.t3">Termly report</button>
+        </div>
+        <p class="example" data-i18n="show.example">Example of what parents see. Names and details are illustrations.</p>
+        <div class="panel" role="tabpanel" id="panel-obs" aria-labelledby="tab-obs">
+          <div class="obs"><span class="chip" data-i18n="show.o1c">Maths</span><p data-i18n="show.o1">Counted seven stones without help and matched them to the number card.</p><small>Tue 10:15</small></div>
+          <div class="obs"><span class="chip alt1" data-i18n="show.o2c">Communication</span><p data-i18n="show.o2">Told the group how she helped a friend put on their shoes.</p><small>Wed 09:40</small></div>
+          <div class="obs"><span class="chip alt2" data-i18n="show.o3c">Creative</span><p data-i18n="show.o3">Mixed blue and yellow paint and shouted: green!</p><small>Thu 11:05</small></div>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-journey" aria-labelledby="tab-journey" hidden>
+          <ol class="mini-line">
+            <li><b data-i18n="show.j1t">Report ready</b><span data-i18n="show.j1">Autumn term report approved by the manager</span></li>
+            <li><b data-i18n="show.j2t">Moment</b><span data-i18n="show.j2">First time writing the letters of her name</span></li>
+            <li><b data-i18n="show.j3t">Moment</b><span data-i18n="show.j3">Climbed the big frame and jumped down proudly</span></li>
+            <li><b data-i18n="show.j4t">Moment</b><span data-i18n="show.j4">Joined in with the Arabic rhyme at circle time</span></li>
+          </ol>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-report" aria-labelledby="tab-report" hidden>
+          <p class="sum" data-i18n="show.sum">Layla is growing in confidence. She loves stories and is starting to join words into sentences in both languages.</p>
+          <ul class="levels">
+            <li><span data-i18n="learn.a1">Communication and language</span><div class="bar"><i style="--w:82%"></i></div><b class="lv" data-i18n="show.l1">Going strong</b></li>
+            <li><span data-i18n="learn.a2">Physical development</span><div class="bar"><i style="--w:64%"></i></div><b class="lv" data-i18n="show.l2">Growing well</b></li>
+            <li><span data-i18n="learn.a5">Mathematics</span><div class="bar"><i style="--w:38%"></i></div><b class="lv" data-i18n="show.l3">Just starting</b></li>
+            <li><span data-i18n="learn.a7">Expressive arts and design</span><div class="bar"><i style="--w:76%"></i></div><b class="lv" data-i18n="show.l1">Going strong</b></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="promise rv"><span aria-hidden="true">🤍</span><p data-i18n="loop.promise">Every report is read by a teacher before you see it, and the words are kind, plain and honest. If we ever have a worry about your child, we will talk to you in person first.</p></div>
     </div>
   </section>
 
-  <!-- ACTIVITIES / GALLERY -->
+  <!-- LIFE -->
   <section id="life" class="alt">
     <div class="wrap">
       <div class="head center rv"><span class="kicker" data-i18n="life.kicker">Life at nursery</span><h2 data-i18n="life.title">Where curiosity gets to play</h2></div>
@@ -157,15 +231,15 @@
         <h2 data-i18n="safe.title">Peace of mind, built into every day</h2>
         <p data-i18n="safe.lead">You should never have to wonder whether your child is safe. These are the things we do, not just promise.</p>
         <ul class="checks">
-          <li data-i18n="safe.l1">Secure check-in and check-out with a scanned card, recorded every time</li>
-          <li data-i18n="safe.l2">Only the people you name may collect your child, with identity checked</li>
-          <li data-i18n="safe.l3">Staff-to-child ratios watched live, so every room always has enough adults</li>
-          <li data-i18n="safe.l4">Allergies and medical needs recorded and visible to the team, even with no signal</li>
-          <li data-i18n="safe.l5">Photos and details shared only with your own family, under UAE data-protection rules</li>
+          <li class="rv" data-i18n="safe.l1">Secure check-in and check-out with a scanned card, recorded every time</li>
+          <li class="rv" data-i18n="safe.l2">Only the people you name may collect your child, with identity checked</li>
+          <li class="rv" data-i18n="safe.l3">Staff-to-child ratios watched live, so every room always has enough adults</li>
+          <li class="rv" data-i18n="safe.l4">Allergies and medical needs recorded and visible to the team, even with no signal</li>
+          <li class="rv" data-i18n="safe.l5">Photos and details shared only with your own family, under UAE data-protection rules</li>
         </ul>
       </div>
       <div class="rv">
-        <div class="card" style="background:linear-gradient(135deg,#fff,#dff3ee)"><div class="ico" aria-hidden="true">🩺</div><h3 data-i18n="safe.cardt">Your child's wellbeing comes first</h3><p data-i18n="safe.card">From the first conversation we learn about your child's health, diet and routines, and the whole team follows them every day.</p></div>
+        <div class="card shield"><div class="ico big" aria-hidden="true">🩺</div><h3 data-i18n="safe.cardt">Your child's wellbeing comes first</h3><p data-i18n="safe.card">From the first conversation we learn about your child's health, diet and routines, and the whole team follows them every day.</p></div>
       </div>
     </div>
   </section>
@@ -174,22 +248,32 @@
   <section id="parents" class="alt">
     <div class="wrap split">
       <div class="phone rv" aria-hidden="true">
-        <div class="screen">
+        <div class="notch"></div>
+        <div class="screen s-a">
           <div class="top"><span data-i18n="app.screenTitle">Today</span><span class="chip" data-i18n="app.live">Live</span></div>
           <div class="post"><div class="pic g1">🎨</div><span class="chip" data-i18n="app.s1">Activity</span> <span data-i18n="app.p1">Painted a rainbow and shared the crayons!</span><small>10:20</small></div>
           <div class="post"><div class="pic g3">🥗</div><span class="chip" data-i18n="app.s2">Lunch</span> <span data-i18n="app.p2">Ate all the vegetables today.</span><small>12:05</small></div>
           <div class="post"><div class="pic g2">😴</div><span class="chip" data-i18n="app.s3">Nap</span> <span data-i18n="app.p3">Slept peacefully for an hour.</span><small>13:30</small></div>
         </div>
+        <div class="screen s-b">
+          <div class="top"><span data-i18n="app.learnTitle">Layla's learning</span><span class="chip" data-i18n="app.new">New</span></div>
+          <div class="post"><span class="chip" data-i18n="app.r1">Report ready</span> <span data-i18n="app.r2">Autumn term: growing in confidence and loving stories.</span><div class="bar"><i style="--w:78%"></i></div></div>
+          <div class="post"><span class="chip alt1" data-i18n="learn.a5">Mathematics</span> <span data-i18n="app.m1">Counted to ten and sorted shapes.</span><small>Tue</small></div>
+          <div class="post"><span class="chip alt2" data-i18n="learn.a7">Expressive arts and design</span> <span data-i18n="app.m2">Mixed colours and named them all.</span><small>Thu</small></div>
+        </div>
+        <span class="toast t1" data-i18n="app.toast1">🔔 A new learning report is ready</span>
+        <span class="toast t2" data-i18n="app.toast2">📷 New photos from today</span>
       </div>
       <div class="rv">
         <span class="kicker" data-i18n="app.kicker">For parents</span>
-        <h2 data-i18n="app.title">Your child's day, in your pocket</h2>
+        <h2 data-i18n="app.title">Your child's day and learning, in your pocket</h2>
         <p data-i18n="app.lead">Our parent app keeps you close, without interrupting your own day.</p>
         <ul class="checks">
-          <li data-i18n="app.l1">Photos, meals, naps and activities as they happen</li>
-          <li data-i18n="app.l2">A daily report every afternoon, in English or Arabic</li>
-          <li data-i18n="app.l3">Message the team directly and get alerts you choose</li>
-          <li data-i18n="app.l4">Invoices, forms and newsletters in one place, no paper</li>
+          <li class="rv" data-i18n="app.l1">Photos, meals, naps and activities as they happen</li>
+          <li class="rv" data-i18n="app.l2">A daily report every afternoon, in English or Arabic</li>
+          <li class="rv" data-i18n="app.l5">Your child's learning journey and approved termly reports</li>
+          <li class="rv" data-i18n="app.l3">Message the team directly and get alerts you choose</li>
+          <li class="rv" data-i18n="app.l4">Invoices, forms and newsletters in one place, no paper</li>
         </ul>
         <p style="margin-top:18px"><a class="btn ghost" id="portal" href="#" hidden data-i18n="app.portal">Parent sign-in</a></p>
       </div>
@@ -220,13 +304,15 @@
   <section id="faq">
     <div class="wrap" style="max-width:820px">
       <div class="head center rv"><span class="kicker" data-i18n="faq.kicker">Questions</span><h2 data-i18n="faq.title">Things families often ask</h2></div>
-      <details><summary data-i18n="faq.q1">Can I visit before I decide?</summary><p data-i18n="faq.a1">Yes, please do. Send us the form below and we will arrange a tour at a time that suits you.</p></details>
-      <details><summary data-i18n="faq.q2">What ages do you take?</summary><p data-i18n="faq.a2">See our programmes above. Tell us your child's date of birth in the form and we will explain which group is right.</p></details>
-      <details><summary data-i18n="faq.q3">How do I know my child is safe?</summary><p data-i18n="faq.a3">Children are checked in and out securely, only named people may collect them, and we keep the right number of adults in every room.</p></details>
-      <details><summary data-i18n="faq.q4">What about fees?</summary><p data-i18n="faq.a4">Fees depend on the programme and days. We will send a clear breakdown when you enquire, with nothing hidden.</p></details>
-      <details><summary data-i18n="faq.q5">What if my child has allergies or special needs?</summary><p data-i18n="faq.a5">Tell us everything during your visit. Allergies, medical needs and routines are recorded and followed by the whole team.</p></details>
-      <details><summary data-i18n="faq.q6">Do you speak Arabic and English with the children?</summary><p data-i18n="faq.a6">Yes. Both languages are part of the day, in songs, stories and conversation.</p></details>
-      <details><summary data-i18n="faq.q7">How will I hear about my child's day?</summary><p data-i18n="faq.a7">Through our parent app: photos, meals, naps and a daily report, plus messages with the team.</p></details>
+      <details class="rv"><summary data-i18n="faq.q1">Can I visit before I decide?</summary><p data-i18n="faq.a1">Yes, please do. Send us the form below and we will arrange a tour at a time that suits you.</p></details>
+      <details class="rv"><summary data-i18n="faq.q2">What ages do you take?</summary><p data-i18n="faq.a2">See our programmes above. Tell us your child's date of birth in the form and we will explain which group is right.</p></details>
+      <details class="rv"><summary data-i18n="faq.q3">How do I know my child is safe?</summary><p data-i18n="faq.a3">Children are checked in and out securely, only named people may collect them, and we keep the right number of adults in every room.</p></details>
+      <details class="rv"><summary data-i18n="faq.q8">How do you track my child's learning?</summary><p data-i18n="faq.a8">Teachers note what your child does each week, linked to the areas of learning. Each term we complete an age-appropriate checklist. You see the moments you are shared and a plain-language termly report.</p></details>
+      <details class="rv"><summary data-i18n="faq.q9">Who sees the reports before I do?</summary><p data-i18n="faq.a9">A manager reads and approves every family report first. Worries are never put in the app: we speak to you personally.</p></details>
+      <details class="rv"><summary data-i18n="faq.q10">What if my child needs extra support?</summary><p data-i18n="faq.a10">We notice early, talk with you, and plan together. Teachers record concerns privately so the right support starts quickly.</p></details>
+      <details class="rv"><summary data-i18n="faq.q4">What about fees?</summary><p data-i18n="faq.a4">Fees depend on the programme and days. We will send a clear breakdown when you enquire, with nothing hidden.</p></details>
+      <details class="rv"><summary data-i18n="faq.q5">What if my child has allergies or special needs?</summary><p data-i18n="faq.a5">Tell us everything during your visit. Allergies, medical needs and routines are recorded and followed by the whole team.</p></details>
+      <details class="rv"><summary data-i18n="faq.q6">Do you speak Arabic and English with the children?</summary><p data-i18n="faq.a6">Yes. Both languages are part of the day, in songs, stories and conversation.</p></details>
     </div>
   </section>
 
@@ -265,13 +351,14 @@
 <footer>
   <div class="wrap fgrid">
     <div><strong style="font-family:Fredoka,sans-serif;font-size:1.3rem" id="footName"></strong><p data-i18n="footer.tag">Early years care and learning, in English and Arabic.</p><p class="note" style="color:#e7d3c5" data-i18n="footer.privacy">We use your details only to answer your enquiry and never share them.</p></div>
-    <div><h4 data-i18n="footer.explore">Explore</h4><p><a href="#why" data-i18n="nav.why">Why us</a><br /><a href="#programmes" data-i18n="nav.programmes">Programmes</a><br /><a href="#day" data-i18n="nav.day">A day with us</a><br /><a href="#faq" data-i18n="nav.faq">Questions</a></p></div>
+    <div><h4 data-i18n="footer.explore">Explore</h4><p><a href="#why" data-i18n="nav.why">Why us</a><br /><a href="#programmes" data-i18n="nav.programmes">Programmes</a><br /><a href="#learning" data-i18n="nav.learning">Learning</a><br /><a href="#faq" data-i18n="nav.faq">Questions</a></p></div>
     <div><h4 data-i18n="footer.contact">Contact</h4><p id="contactLine"></p><p><a href="#enquire" data-i18n="nav.enquire">Book a visit</a></p></div>
   </div>
 </footer>
 
 <div class="mcta"><a class="btn" href="#enquire" data-i18n="nav.enquire">Book a visit</a></div>
 <div class="fab" id="fab" hidden><a id="wa" href="#" aria-label="WhatsApp" rel="noopener">💬</a></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
 <script src="config.js"></script>
 <script src="app.js"></script>
 </body>
