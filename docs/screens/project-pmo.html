@@ -622,7 +622,7 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-21 GST (Sprint 20 started)",
+    lastUpdated: "2026-10-21 GST (Sprint 20 screens, dashboard and tests)",
     updatedBy: "Claude Code",
     overallPct: 53,
 
@@ -644,8 +644,9 @@
         [true, "Learning screen in English and Arabic; starter EYFS loader"],
         [true, "Data model for observations, assessment templates, runs, scores and parent approval"],
         [true, "Observation, assessment and journey API with permissions and parent-safe versions"],
-        [false, "Screens: observations, assessments, learning journey"],
-        [false, "Tests and loader data (2 through the screen, about 10 through the API)"],
+        [true, "Screens: observations, assessments, learning journey, parent My-child-learning page"],
+        [true, "Dashboard now collective for the whole system (role-aware blocks incl. learning)"],
+        [true, "Tests (+20 backend, +7 web) and loader data (2 through the screen, 15 through the API)"],
         [false, "Reports and phone app capture (Sprints 21-24)"]
       ]
     },
@@ -680,7 +681,7 @@
       18: { status: "active",  pct: 25, title: "Go-Live · Phase 1 Complete",   notes: "Done: nursery public website (English/Arabic, enquiry form into the pipeline), incident response runbook, customer onboarding guide, app security policy. Open (needs people/accounts): production deploy, first paid customers, legal sign-off, outside pen test, native Arabic QA", deliverables: "2 on-prem + 3 SaaS live" },
       // Phase 2 (19-26)
       19: { status: "active",  pct: 55, title: "EYFS Framework (1/2)",         notes: "Done: curriculum frameworks as the centre's own data (areas, age bands, milestones, import by code, EN/AR), lessons module (create/search/filter by curriculum, area, age band, room; materials, objectives, links, milestones; teachers limited to their rooms), Learning screen, starter EYFS loader (7 areas, 6 bands, 42 milestones). Open: lesson plan templates per age group, observations and assessments (Sprint 20)", deliverables: "EYFS module" },
-      20: { status: "active",  pct: 40, title: "EYFS Framework (2/2)",         notes: "Done: observation, assessment template/run/score, parent approval and learning journey data model and API (parent-safe versions, concern alerts to managers). Next: screens, tests, data", deliverables: "Observations, assessments" },
+      20: { status: "active",  pct: 80, title: "EYFS Framework (2/2)",         notes: "Done: observations (formal/informal/concern, share with family, concern alerts), assessment checklists, scoring, completion and manager approval of a plain parent version, learning journey (staff and parent views), Learning screen tabs, parent My-child-learning page, whole-centre dashboard (people, money, enrolment, learning, communication; role-aware, family view), loaders. Open: lesson plan templates, reports PDFs (Sprint 22), phone capture (Sprint 23)", deliverables: "Observations, assessments" },
       21: { status: "pending", pct: 0,  title: "Montessori + AI Observations", notes: "Montessori curriculum, AI dictation for observations", deliverables: "Montessori, AI features" },
       22: { status: "pending", pct: 0,  title: "Assessment Reports",           notes: "5 report types, dual staff/parent views, PDF generation", deliverables: "Assessment reports" },
       23: { status: "pending", pct: 0,  title: "Mobile Maturity (1/2)",        notes: "Offline cache, full notifications, learning journey view", deliverables: "Mobile offline" },

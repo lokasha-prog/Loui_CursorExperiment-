@@ -68,6 +68,13 @@ import type {
   FrameworkSummary,
   Lesson,
   LessonInput,
+  Observation,
+  ObservationInput,
+  AssessmentTemplate,
+  AssessmentRun,
+  ParentReport,
+  Journey,
+  SystemOverview,
   Briefing,
   BriefingArea,
   AttendanceRow,
@@ -962,3 +969,58 @@ export function useDeleteLesson() {
     onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['lessons'] }), client.invalidateQueries({ queryKey: ['frameworks'] })]),
   })
 }
+
+export const useObservations = (filters: { studentId?: string; type?: string }) =>
+  useInfiniteList<Observation>(['observations'], '/learning/observations', { student_id: filters.studentId || undefined, type: filters.type || undefined })
+
+export function useSaveObservation() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: ObservationInput) => api.post<Observation>('/learning/observations', body),
+    onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['observations'] }), client.invalidateQueries({ queryKey: ['journey'] })]),
+  })
+}
+
+export function useDeleteObservation() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/learning/observations/${id}`),
+    onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['observations'] }), client.invalidateQueries({ queryKey: ['journey'] })]),
+  })
+}
+
+export const useAssessmentTemplates = () => useQuery({ queryKey: ['assessment-templates'], queryFn: () => api.get<AssessmentTemplate[]>('/learning/assessment-templates') })
+
+export function useSaveTemplate() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { name: Record<string, string>; framework_id: string; age_band_id?: string | null; scoring_kind: string; milestone_ids: string[] }) => api.post<AssessmentTemplate>('/learning/assessment-templates', body),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['assessment-templates'] }),
+  })
+}
+
+export const useAssessmentRuns = (filters: { studentId?: string }) => useInfiniteList<AssessmentRun>(['assessment-runs'], '/learning/assessments', { student_id: filters.studentId || undefined })
+
+export const useAssessmentRun = (id: string) => useQuery({ queryKey: ['assessment-run', id], enabled: !!id, queryFn: () => api.get<AssessmentRun>(`/learning/assessments/${id}`) })
+
+function useRunMutation<TBody>(run: (body: TBody) => Promise<AssessmentRun>) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: run,
+    onSuccess: (r) => {
+      client.setQueryData(['assessment-run', r.id], r)
+      return Promise.all([client.invalidateQueries({ queryKey: ['assessment-runs'] }), client.invalidateQueries({ queryKey: ['assessment-templates'] }), client.invalidateQueries({ queryKey: ['journey'] }), client.invalidateQueries({ queryKey: ['parent-reports'] })])
+    },
+  })
+}
+
+export const useStartRun = () => useRunMutation((body: { template_id: string; student_id: string; term: string }) => api.post<AssessmentRun>('/learning/assessments', body))
+export const useSaveScores = (id: string) =>
+  useRunMutation((body: { scores: { milestone_id: string; score: number; note?: string }[]; staff_summary?: Record<string, string>; parent_summary?: Record<string, string> }) => api.put<AssessmentRun>(`/learning/assessments/${id}/scores`, body))
+export const useCompleteRun = (id: string) => useRunMutation(() => api.post<AssessmentRun>(`/learning/assessments/${id}/actions/complete`))
+export const useApproveRun = (id: string) => useRunMutation(() => api.post<AssessmentRun>(`/learning/assessments/${id}/actions/approve`))
+
+export const useJourney = (studentId: string) => useQuery({ queryKey: ['journey', studentId], enabled: !!studentId, queryFn: () => api.get<Journey>(`/learning/journey/${studentId}`) })
+export const useParentReports = (studentId: string) => useQuery({ queryKey: ['parent-reports', studentId], enabled: !!studentId, queryFn: () => api.get<ParentReport[]>(`/learning/parent-reports/${studentId}`) })
+
+export const useSystemOverview = () => useQuery({ queryKey: ['system-overview'], queryFn: () => api.get<SystemOverview>('/dashboard/system'), refetchInterval: 60_000 })

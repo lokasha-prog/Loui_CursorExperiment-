@@ -955,3 +955,33 @@ export interface LessonInput {
   title: Localized_; description?: Localized_ | null; framework_id: string; area_id?: string | null; age_band_id?: string | null; room_id?: string | null
   duration_minutes: number; materials: string[]; objectives: string[]; links?: Record<string, string>; milestone_ids?: string[]
 }
+
+export interface Observation {
+  id: string; student_id: string; student_name: string | null; observer_name: string | null; observed_at: string; type: 'formal' | 'informal' | 'concern'
+  framework_id: string | null; area_id: string | null; age_band_id: string | null; milestone_ids: string[]; notes: Localized_; media_ids: string[]; share_with_parents: boolean; created_at: string
+}
+export interface ObservationInput {
+  student_id: string; type: string; framework_id?: string | null; area_id?: string | null; age_band_id?: string | null; milestone_ids?: string[]; notes: Localized_; share_with_parents: boolean
+}
+export interface AssessmentTemplate { id: string; name: Localized_; framework_id: string; age_band_id: string | null; scoring_kind: 'binary' | 'three_point'; milestone_ids: string[]; runs: number }
+export interface ScoreLine { milestone_id: string; code: string; statement: Localized_; area_id: string; score: number; note: string | null }
+export interface AssessmentRun {
+  id: string; template_id: string; template_name: Localized_; scoring_kind: 'binary' | 'three_point'; student_id: string; student_name: string | null; term: string; assessed_on: string
+  status: 'draft' | 'completed'; parent_approved: boolean; approved_at: string | null; staff_summary: Localized_ | null; parent_summary: Localized_ | null; progress_percent: number; scores: ScoreLine[]
+}
+export interface ParentReport { id: string; template_name: Localized_; student_name: string | null; term: string; assessed_on: string; approved_at: string | null; summary: Localized_ | null; areas: { name: Localized_; level: 'secure' | 'growing' | 'starting'; percent: number }[] }
+export interface JourneyItem { kind: 'observation' | 'assessment'; id: string; at: string; type: string | null; area_id: string | null; area_name: Localized_ | null; title: Localized_ | null; text: Localized_ | null; media_ids: string[]; percent: number | null }
+export interface Journey { student_id: string; student_name: string | null; items: JourneyItem[] }
+
+export interface SystemOverview {
+  date: string
+  people: { students: number; staff: number; rooms: number; present_today: number; rooms_short: number } | null
+  billing: { billed_fils: number; collected_fils: number; overdue_fils: number; overdue_invoices: number; expenses_fils: number } | null
+  admissions: { open_enquiries: number; new_last30_days: number; tours_next7_days: number; stale_over7_days: number; admission_steps_overdue: number } | null
+  learning: {
+    curricula: number; lessons: number; observations_last30_days: number; concerns_last30_days: number; assessments_to_approve: number; assessments_in_progress: number
+    reports_shared: number; children_without_observation30_days: number
+  } | null
+  family: { children: number; shared_observations: number; reports_ready: number } | null
+  communication: { posts_to_approve: number; newsletters_last30_days: number; live_forms: number; documents: number } | null
+}

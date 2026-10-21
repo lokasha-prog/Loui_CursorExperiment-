@@ -2,7 +2,7 @@ import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { Clock, Plus, Search, Trash2, Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { flatten, useDeleteLesson, useFramework, useFrameworks, useImportFramework, useLessons, useRoomOptions, useSaveFramework, useSaveLesson } from '@/api/hooks'
+import { flatten, useStudentOptions, useDeleteLesson, useFramework, useFrameworks, useImportFramework, useLessons, useRoomOptions, useSaveFramework, useSaveLesson } from '@/api/hooks'
 import type { FrameworkDetail, Lesson } from '@/api/types'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ListError, ListSkeleton, LoadMore } from '@/components/shared/ListState'
@@ -13,6 +13,9 @@ import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { localized } from '@/lib/utils'
 import { can, useAuth } from '@/stores/auth'
+import { AssessmentsTab } from './AssessmentsTab'
+import { JourneyView } from './JourneyView'
+import { ObservationsTab } from './ObservationsTab'
 
 const lines = (text: string) => text.split('\n').map((l) => l.trim()).filter(Boolean)
 
@@ -295,7 +298,9 @@ export default function LearningPage() {
   const { t } = useTranslation()
   const me = useAuth((s) => s.me)
   const [tab, setTab] = useState('lessons')
-  const tabs = ['lessons', 'curriculum']
+  const tabs = ['lessons', 'observations', 'assessments', 'journey', 'curriculum']
+  const [journeyStudent, setJourneyStudent] = useState('')
+  const students = useStudentOptions()
   return (
     <>
       <PageHeader title={t('learning.title')} subtitle={t('learning.subtitle')} />
@@ -308,6 +313,12 @@ export default function LearningPage() {
           ))}
         </TabsPrimitive.List>
         <TabsPrimitive.Content value="lessons"><LessonsTab canWrite={can(me, 'learning.write')} /></TabsPrimitive.Content>
+        <TabsPrimitive.Content value="observations"><ObservationsTab canWrite={can(me, 'learning.write')} /></TabsPrimitive.Content>
+        <TabsPrimitive.Content value="assessments"><AssessmentsTab canWrite={can(me, 'learning.write')} canApprove={can(me, 'learning.approve')} /></TabsPrimitive.Content>
+        <TabsPrimitive.Content value="journey">
+          <div className="mb-4"><Select value={journeyStudent} onChange={(e) => setJourneyStudent(e.target.value)} aria-label={t('learning.obs.child')} className="w-64"><option value="">{t('learning.journey.pick')}</option>{(students.data ?? []).map((st) => <option key={st.id} value={st.id}>{st.first_name} {st.last_name}</option>)}</Select></div>
+          <JourneyView studentId={journeyStudent} />
+        </TabsPrimitive.Content>
         <TabsPrimitive.Content value="curriculum"><CurriculumTab canManage={can(me, 'settings.write')} /></TabsPrimitive.Content>
       </TabsPrimitive.Root>
     </>

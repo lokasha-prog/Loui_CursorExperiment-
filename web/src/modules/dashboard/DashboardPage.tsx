@@ -8,6 +8,7 @@ import { Card, Skeleton } from '@/components/ui/surfaces'
 import { AiBriefingCard } from '@/modules/ai/AiBriefingCard'
 import { AiInsightsCard } from '@/modules/ai/AiInsightsCard'
 import { RatioCards } from '@/modules/attendance/RatioCards'
+import { SystemOverviewSection } from './SystemOverviewSection'
 import { can, isParentOnly, useAuth } from '@/stores/auth'
 
 function Count({ pages, loading }: { pages?: { items: unknown[]; pagination: { has_more: boolean } }[]; loading: boolean }) {
@@ -67,6 +68,8 @@ export default function DashboardPage() {
           </Kpi>
         )}
       </div>
+
+      <SystemOverviewSection />
 
       {canSeeAttendance && (
         <section className="mb-8" aria-labelledby="today-heading">

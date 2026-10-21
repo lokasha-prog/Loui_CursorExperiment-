@@ -63,7 +63,8 @@
     "forms": "Forms",
     "newsletters": "Newsletters",
     "resources": "Resources",
-    "learning": "Learning"
+    "learning": "Learning",
+    "journey": "My child's learning"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -170,7 +171,48 @@
     "staffHere": "Staff here",
     "pendingLeave": "Leave waiting for a decision",
     "roomsShort": "Rooms needing staff",
-    "liveCover": "Live staff cover"
+    "liveCover": "Live staff cover",
+    "overview": {
+      "title": "The whole centre at a glance",
+      "subtitle": "Every part of the system in one place. Select a block to open it.",
+      "people": "People and rooms",
+      "students": "Children",
+      "staff": "Staff",
+      "rooms": "Rooms",
+      "present": "Here today",
+      "short": "Rooms short of staff",
+      "billing": "Money this month",
+      "billed": "Billed",
+      "collected": "Collected",
+      "overdue": "Overdue",
+      "overdueInvoices": "{{count}} invoices",
+      "expenses": "Spent",
+      "admissions": "Enrolment",
+      "open": "Open enquiries",
+      "fresh": "New in 30 days",
+      "tours": "Tours this week",
+      "stale": "No contact for 7+ days",
+      "steps": "Overdue admission steps",
+      "learning": "Learning",
+      "curricula": "Curricula",
+      "lessons": "Lessons",
+      "obs": "Observations (30 days)",
+      "concerns": "Concerns (30 days)",
+      "toApprove": "Reports to approve",
+      "inProgress": "Assessments in progress",
+      "shared": "Reports shared with parents",
+      "unobserved": "Children with no observation in 30 days",
+      "communication": "Communication and library",
+      "posts": "Posts to approve",
+      "news": "Newsletters (30 days)",
+      "forms": "Live forms",
+      "docs": "Documents",
+      "family": "My children's learning",
+      "children": "Children",
+      "sharedObs": "Moments shared with you",
+      "reports": "Reports ready",
+      "currency": "AED"
+    }
   },
   "students": {
     "title": "Students",
@@ -1780,7 +1822,10 @@
     "subtitle": "The curriculum your centre follows and the lessons planned from it.",
     "tabs": {
       "lessons": "Lessons",
-      "curriculum": "Curriculum"
+      "curriculum": "Curriculum",
+      "observations": "Observations",
+      "assessments": "Assessments",
+      "journey": "Learning journey"
     },
     "framework": "Curriculum",
     "area": "Development area",
@@ -1831,6 +1876,101 @@
       "count": "{{count}} milestones",
       "emptyTree": "No areas yet",
       "emptyTreeHint": "Import the areas, age bands and milestones to see them here."
+    },
+    "obs": {
+      "new": "New observation",
+      "saved": "Observation saved",
+      "deleted": "Observation deleted",
+      "confirmDelete": "Delete this observation?",
+      "child": "Child",
+      "type": "Type",
+      "types": {
+        "informal": "Informal",
+        "formal": "Formal",
+        "concern": "Concern"
+      },
+      "allChildren": "All children",
+      "allTypes": "All types",
+      "notesEn": "What you saw (English)",
+      "notesAr": "What you saw (Arabic)",
+      "milestones": "Milestones seen",
+      "share": "Share with the family in their learning journey",
+      "concernPrivate": "Concerns are never shared with the family; managers are alerted",
+      "shared": "Shared",
+      "by": "By {{name}}",
+      "empty": "No observations yet",
+      "emptyHint": "Record what you see children do, with the area and milestones."
+    },
+    "assess": {
+      "start": "Start assessment",
+      "template": "Checklist",
+      "term": "Term",
+      "termHint": "For example Autumn 2026",
+      "newTemplate": "New checklist",
+      "templateSaved": "Checklist saved",
+      "templateNeeds": "Give it a name, choose a curriculum and pick at least one milestone.",
+      "templates": "{{count}} checklists",
+      "scoring": "Scoring",
+      "kinds": {
+        "three_point": "Three levels",
+        "binary": "Yes / not yet"
+      },
+      "pickMilestones": "Milestones in this checklist ({{count}} chosen)",
+      "all": "Select all",
+      "none": "Clear",
+      "open": "Open",
+      "empty": "No assessments yet",
+      "emptyNoTemplate": "A manager needs to create a checklist first.",
+      "emptyHint": "Start one for a child and a term.",
+      "status": {
+        "draft": "In progress",
+        "completed": "Completed"
+      },
+      "approved": "Parent version approved",
+      "notApproved": "Parent version not approved",
+      "progress": "Progress {{percent}}%",
+      "three_point": {
+        "0": "Not yet",
+        "1": "Emerging",
+        "2": "Secure"
+      },
+      "binary": {
+        "0": "Not yet",
+        "1": "Achieved"
+      },
+      "note": "Note",
+      "parentEn": "Summary for the family (English)",
+      "parentAr": "Summary for the family (Arabic)",
+      "parentHint": "Kind, plain words. No codes or concerns.",
+      "staffNotes": "Staff notes",
+      "save": "Save scores and summaries",
+      "saved": "Saved",
+      "complete": "Mark completed",
+      "completed": "Marked completed",
+      "approve": "Approve parent version",
+      "approvedToast": "Approved. The family has been told."
+    },
+    "journey": {
+      "pick": "Choose a child",
+      "pickHint": "Pick a child to see their learning journey.",
+      "reports": "Learning reports",
+      "timeline": "Timeline",
+      "empty": "Nothing here yet",
+      "emptyHint": "Moments and reports will appear as they are recorded.",
+      "levels": {
+        "secure": "Going strong",
+        "growing": "Growing well",
+        "starting": "Just starting"
+      },
+      "kinds": {
+        "observation": "Moment",
+        "assessment": "Report"
+      }
     }
+  },
+  "journeyPage": {
+    "title": "My child's learning",
+    "subtitle": "Moments and reports your child's teachers have shared with you.",
+    "none": "No children are linked to your account yet."
   }
 }

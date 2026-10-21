@@ -67,6 +67,11 @@ public static class AttendanceEndpoints
             .WithTags("AI Brain")
             .RequireAuthorization(Permissions.AttendanceOverride);
 
+        routes.MapGet("/api/v1/dashboard/system", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new SystemOverviewQuery(), ct)))
+            .WithTags("Dashboard")
+            .RequireAuthorization(Permissions.DashboardView);
+
         // AI Brain briefings for management: each area needs the permission for the data it summarises.
         foreach (var (area, permission) in new[]
         {
