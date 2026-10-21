@@ -4,7 +4,7 @@ import { api, ApiError } from '../api'
 import { cached } from '../cache'
 import { doOrQueue } from '../queue'
 import { useI18n } from '../i18n'
-import { Banner, Body, Btn, Card, Field, Heading, Pill, Row, Screen, Title } from '../ui'
+import { Banner, Body, Btn, Card, Empty, Field, Heading, Hero, Pill, Row, Screen, Title } from '../ui'
 
 interface Thread { id: string; subject: string; last_message_preview: string | null; last_sender_name: string | null; unread: boolean }
 interface Detail { id: string; subject: string; can_reply: boolean; messages: { id: string; sender_name: string | null; from_staff: boolean; body: string; created_at: string }[] }
@@ -45,9 +45,8 @@ export function MessagesScreen() {
 
   if (open) {
     return (
-      <Screen>
-        <Btn kind="secondary" label={t('back')} onPress={() => { setOpen(null); void load() }} />
-        <Title>{open.subject}</Title>
+      <Screen onBack={() => { setOpen(null); void load() }} backLabel={t('back')}>
+        <Hero title={open.subject} icon="chatbubbles" />
         {error && <Banner tone="danger" text={error} />}
         {open.messages.map((m) => (
           <Card key={m.id} style={{ backgroundColor: m.from_staff ? '#E6F4F5' : '#FFFFFF' }}>
@@ -68,8 +67,8 @@ export function MessagesScreen() {
 
   return (
     <Screen refreshing={busy} onRefresh={() => void load()}>
-      <Title>{t('messages')}</Title>
-      {threads.length === 0 ? <Body muted>{t('noMessages')}</Body> : threads.map((th) => (
+      <Hero title={t('messages')} icon="chatbubbles" />
+      {threads.length === 0 ? <Empty icon="chatbubble-outline" text={t('noMessages')} /> : threads.map((th) => (
         <Pressable key={th.id} accessibilityRole="button" onPress={() => void show(th.id)}>
           <Card>
             <Row><Heading>{th.subject}</Heading>{th.unread && <Pill tone="info" label={t('unread')} />}</Row>

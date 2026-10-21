@@ -3,7 +3,7 @@ import { View } from 'react-native'
 import { api } from '../api'
 import { cached } from '../cache'
 import { pick, useI18n } from '../i18n'
-import { Banner, Body, Btn, Card, Heading, Loading, Pill, Row, Screen, Title, color } from '../ui'
+import { Banner, Body, Btn, Card, Chip, Heading, Hero, Loading, Pill, Row, Screen, Title, color } from '../ui'
 
 interface Child { id: string; first_name: string; last_name: string }
 interface Level { name: Record<string, string>; level: 'secure' | 'growing' | 'starting'; percent: number }
@@ -48,9 +48,9 @@ export function LearningScreen() {
 
   return (
     <Screen refreshing={busy} onRefresh={() => void loadLearning(child)}>
-      <Title>{t('learningTitle')}</Title>
+      <Hero title={t('learningTitle')} icon="leaf" />
       {offline && <Banner tone="info" text={t('updatedOffline')} />}
-      {children.length > 1 && <Row>{children.map((c) => <Btn key={c.id} kind={c.id === child ? 'primary' : 'secondary'} label={c.first_name} onPress={() => setChild(c.id)} />)}</Row>}
+      {children.length > 1 && <Row>{children.map((c) => <Chip key={c.id} active={c.id === child} label={c.first_name} onPress={() => setChild(c.id)} />)}</Row>}
       {busy && reports.length === 0 && items.length === 0 ? <Loading /> : (
         <>
           {reports.length > 0 && <Heading>{t('learnReports')}</Heading>}

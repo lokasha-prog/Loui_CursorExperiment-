@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Linking, Switch, View } from 'react-native'
+import { Linking, Pressable, Switch, Text, View } from 'react-native'
 import { api, isOffline } from '../api'
 import { useAuth } from '../auth'
 import { store } from '../core'
 import { pick, useI18n } from '../i18n'
-import { Banner, Body, Btn, Card, Field, Heading, Pill, Row, Screen, Title } from '../ui'
+import { Banner, Body, Btn, Card, Empty, Field, Heading, Hero, IconChip, Pill, Row, Screen, Section, type Tone, color } from '../ui'
 import { LanguageSwitch } from './LoginScreen'
 import { ApprovalsOps, CalendarOps, CentreOps, ChildrenOps, EnquiriesOps, InvoicesOps, LeaveOps, NewslettersOps, opsWords } from './ops'
-import { Pressable } from 'react-native'
 
 interface Alert { id: string; tier: string; title: Record<string, string>; body: Record<string, string>; read: boolean; created_at: string }
 interface Contact { name: string; relationship: string; phone: string | null; can_pickup: boolean; is_primary: boolean }
@@ -28,16 +27,17 @@ export function MoreScreen() {
   const [view, setView] = useState<string | null>(null)
   const w = opsWords(lang)
   const parent = !!me?.roles.includes('parent')
-  const menu = [
-    { id: 'centre', icon: '◉', title: w.centre, hint: w.centreHint, show: can('attendance.override') },
-    { id: 'children', icon: '☺', title: w.children, hint: w.childrenHint, show: !parent && can('students.read') },
-    { id: 'leave', icon: '✈', title: w.leave, hint: w.leaveHint, show: !parent && can('attendance.read') },
-    { id: 'approvals', icon: '✔', title: w.approvals, hint: w.approvalsHint, show: can('activities.approve') },
-    { id: 'enquiries', icon: '☎', title: w.enquiries, hint: w.enquiriesHint, show: can('enquiries.read') },
-    { id: 'invoices', icon: '▤', title: w.invoices, hint: w.invoicesHint, show: can('billing.read') },
-    { id: 'calendar', icon: '▦', title: w.calendar, hint: w.calendarHint, show: can('calendar.read') },
-    { id: 'newsletters', icon: '✉', title: w.newsletters, hint: w.newslettersHint, show: can('messaging.read') },
-  ].filter((m) => m.show)
+  type Item = { id: string; icon: React.ComponentProps<typeof IconChip>['name']; tone: Tone; title: string; show: boolean }
+  const menu = ([
+    { id: 'centre', icon: 'stats-chart', tone: 'primary', title: w.centre, show: can('attendance.override') },
+    { id: 'children', icon: 'people', tone: 'sun', title: w.children, show: !parent && can('students.read') },
+    { id: 'leave', icon: 'airplane', tone: 'sky', title: w.leave, show: !parent && can('attendance.read') },
+    { id: 'approvals', icon: 'checkmark-done', tone: 'mint', title: w.approvals, show: can('activities.approve') },
+    { id: 'enquiries', icon: 'call', tone: 'accent', title: w.enquiries, show: can('enquiries.read') },
+    { id: 'invoices', icon: 'wallet', tone: 'lilac', title: w.invoices, show: can('billing.read') },
+    { id: 'calendar', icon: 'calendar', tone: 'sky', title: w.calendar, show: can('calendar.read') },
+    { id: 'newsletters', icon: 'newspaper', tone: 'sun', title: w.newsletters, show: can('messaging.read') },
+  ] satisfies Item[]).filter((m) => m.show)
 
   const loadAlerts = useCallback(async () => {
     try { setAlerts(await api.page<Alert>('/notifications?limit=20')) } catch { /* offline */ }
@@ -76,12 +76,17 @@ export function MoreScreen() {
 
   return (
     <Screen>
-      <Title>{t('more')}</Title>
-      {menu.map((m) => (
-        <Pressable key={m.id} accessibilityRole="button" accessibilityLabel={m.title} onPress={() => setView(m.id)}>
-          <Card><Row><Heading>{m.icon}  {m.title}</Heading></Row><Body muted>{m.hint}</Body></Card>
-        </Pressable>
-      ))}
+      <Hero title={t('more')} subtitle={[me?.first_name, me?.last_name].filter(Boolean).join(' ') || me?.email} icon="grid" />
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+        {menu.map((m) => (
+          <Pressable key={m.id} accessibilityRole="button" accessibilityLabel={m.title} onPress={() => setView(m.id)} style={({ pressed }) => ({ flexBasis: '47%', flexGrow: 1, opacity: pressed ? 0.85 : 1 })}>
+            <Card style={{ gap: 12, minHeight: 112 }}>
+              <IconChip name={m.icon} tone={m.tone} size={46} />
+              <Text style={{ fontSize: 15, fontWeight: '800', color: color.ink }}>{m.title}</Text>
+            </Card>
+          </Pressable>
+        ))}
+      </View>
       <Card>
         <Heading>{t('profile')}</Heading>
         <Body>{[me?.first_name, me?.last_name].filter(Boolean).join(' ') || me?.email}</Body>
@@ -90,7 +95,7 @@ export function MoreScreen() {
 
       {staff && <Card>
         <Heading>{t('alerts')}</Heading>
-        {alerts.length === 0 ? <Body muted>{t('noAlerts')}</Body> : alerts.map((a) => (
+        {alerts.length === 0 ? <Empty icon="notifications-off-outline" text={t('noAlerts')} /> : alerts.map((a) => (
           <View key={a.id} style={{ gap: 2, paddingVertical: 4 }}>
             <Row>{a.tier === 'critical' && <Pill tone="danger" label={t('critical')} />}<Body bold>{pick(a.title, lang)}</Body></Row>
             <Body muted>{pick(a.body, lang)}</Body>

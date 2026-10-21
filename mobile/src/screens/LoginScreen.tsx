@@ -4,7 +4,8 @@ import { DEV_LOGIN } from '../api'
 import { apiBase, setApiUrl } from '../core'
 import { useAuth } from '../auth'
 import { useI18n, pick, type Lang } from '../i18n'
-import { Banner, Body, Btn, Card, Field, Heading, Screen, Title } from '../ui'
+import { Ionicons } from '@expo/vector-icons'
+import { Banner, Body, Btn, Card, Chip, Field, Heading, Row, Screen, Title, color } from '../ui'
 
 export function LoginScreen() {
   const { t, lang, setLang } = useI18n()
@@ -32,7 +33,12 @@ export function LoginScreen() {
 
   return (
     <Screen>
-      <View style={{ alignItems: 'center', paddingVertical: 24, gap: 6 }}>
+      <View style={{ alignItems: 'center', paddingTop: 28, paddingBottom: 12, gap: 10 }}>
+        <View style={{ width: 84, height: 84, borderRadius: 28, backgroundColor: color.primary, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          <View style={{ position: 'absolute', top: -18, right: -14, width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(255,255,255,0.14)' }} />
+          <View style={{ position: 'absolute', bottom: -20, left: -10, width: 50, height: 50, borderRadius: 25, backgroundColor: 'rgba(245,181,68,0.35)' }} />
+          <Ionicons name="happy" size={46} color={color.white} />
+        </View>
         <Title>{t('appName')}</Title>
         <Body muted>{t('staffApp')}</Body>
       </View>
@@ -46,7 +52,7 @@ export function LoginScreen() {
         <Card>
           <Field label={t('email')} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
           <Field label={t('password')} value={password} onChangeText={setPassword} secureTextEntry autoComplete="password" />
-          <Btn label={busy ? t('signingIn') : t('signIn')} onPress={() => void submit()} busy={busy} disabled={!email || !password} />
+          <Btn icon="log-in" label={busy ? t('signingIn') : t('signIn')} onPress={() => void submit()} busy={busy} disabled={!email || !password} />
         </Card>
       )}
       <Card>
@@ -57,7 +63,7 @@ export function LoginScreen() {
       {DEV_LOGIN && (
         <Card>
           <Body muted>Test users (this computer only)</Body>
-          {['it', 'teacher', 'parent'].map((role) => <Btn key={role} kind="secondary" label={role} onPress={() => void devSignIn(role)} />)}
+          {['it', 'teacher', 'parent'].map((role) => <Btn key={role} kind="secondary" icon="flash" label={role} onPress={() => void devSignIn(role)} />)}
         </Card>
       )}
       <LanguageSwitch lang={lang} setLang={setLang} />
@@ -68,10 +74,9 @@ export function LoginScreen() {
 export function LanguageSwitch({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
   const { t } = useI18n()
   return (
-    <View style={{ gap: 8 }}>
-      <Btn kind={lang === 'en' ? 'primary' : 'secondary'} label={t('english')} onPress={() => setLang('en')} />
-      <Btn kind={lang === 'ar' ? 'primary' : 'secondary'} label={t('arabic')} onPress={() => setLang('ar')} />
-    </View>
+    <Row gap={10}>
+      <Chip active={lang === 'en'} label={t('english')} onPress={() => setLang('en')} />
+      <Chip active={lang === 'ar'} label={t('arabic')} onPress={() => setLang('ar')} />
+    </Row>
   )
 }
-

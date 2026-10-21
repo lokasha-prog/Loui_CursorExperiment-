@@ -5,7 +5,7 @@ import { api, ApiError, upload } from '../api'
 import { cached } from '../cache'
 import { useI18n } from '../i18n'
 import { doOrQueue } from '../queue'
-import { Banner, Body, Btn, Card, Field, Heading, Row, Screen, Title } from '../ui'
+import { Banner, Body, Btn, Card, Chip, Field, Heading, Hero, Row, Screen, Title } from '../ui'
 
 interface Child { id: string; first_name: string; last_name: string }
 const TYPES = ['informal', 'formal', 'concern'] as const
@@ -63,7 +63,7 @@ export function ObserveScreen() {
 
   return (
     <Screen>
-      <Title>{t('observe')}</Title>
+      <Hero title={t('observe')} icon="eye" />
       {message && <Banner tone={message.tone} text={message.text} />}
       <Card>
         <Heading>{t('pickChild')}</Heading>
@@ -79,7 +79,7 @@ export function ObserveScreen() {
       {child && (
         <Card>
           <Body muted>{t('obsType')}</Body>
-          <Row>{TYPES.map((k) => <Btn key={k} kind={k === type ? 'primary' : 'secondary'} label={t(`obsTypes.${k}`)} onPress={() => setType(k)} />)}</Row>
+          <Row>{TYPES.map((k) => <Chip key={k} active={k === type} label={t(`obsTypes.${k}`)} onPress={() => setType(k)} />)}</Row>
           <Field label={t('obsNotes')} value={notes} onChangeText={setNotes} multiline numberOfLines={4} style={{ minHeight: 100 }} />
           <Row>
             <Body>{type === 'concern' ? t('obsConcernPrivate') : t('obsShare')}</Body>
@@ -87,9 +87,9 @@ export function ObserveScreen() {
           </Row>
           <View style={{ gap: 8 }}>
             <Body muted>{photo ? t('obsPhotoTaken') : t('obsPhoto')}</Body>
-            <Row><Btn kind="secondary" label={t('takePhoto')} onPress={() => void pickPhoto(true)} /><Btn kind="secondary" label={t('choosePhoto')} onPress={() => void pickPhoto(false)} /></Row>
+            <Row><Btn kind="secondary" icon="camera" label={t('takePhoto')} onPress={() => void pickPhoto(true)} /><Btn kind="secondary" icon="image" label={t('choosePhoto')} onPress={() => void pickPhoto(false)} /></Row>
           </View>
-          <Btn label={t('obsSave')} onPress={() => void save()} busy={busy} disabled={!notes.trim()} />
+          <Btn icon="checkmark" label={t('obsSave')} onPress={() => void save()} busy={busy} disabled={!notes.trim()} />
         </Card>
       )}
     </Screen>

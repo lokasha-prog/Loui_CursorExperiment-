@@ -5,7 +5,8 @@ import { useAuth } from '../auth'
 import { cached } from '../cache'
 import { pick, useI18n } from '../i18n'
 import { doOrQueue } from '../queue'
-import { Banner, Body, Btn, Card, Field, Heading, Pill, Row, Screen, Title } from '../ui'
+import { Ionicons } from '@expo/vector-icons'
+import { Banner, Body, Btn, Card, Chip, Empty, Field, Heading, Hero, Pill, Row, Screen, color } from '../ui'
 
 /** Words for the operational screens, kept together so both languages stay in step. */
 const words = {
@@ -77,13 +78,8 @@ function useLoaded<T>(key: string, fetcher: () => Promise<T>, initial: T) {
   return { data, busy, offline, error, reload: load }
 }
 
-function Top({ title, onBack, w }: { title: string; onBack: () => void; w: Words }) {
-  return (
-    <View style={{ gap: 8 }}>
-      <Btn kind="secondary" label={w.back} onPress={onBack} />
-      <Title>{title}</Title>
-    </View>
-  )
+function Top({ title }: { title: string; onBack?: () => void; w?: Words }) {
+  return <Hero title={title} />
 }
 
 function Status({ offline, error, w }: { offline: boolean; error: string | null; w: Words }) {
@@ -106,11 +102,11 @@ export function ChildrenOps({ onBack }: { onBack: () => void }) {
 
   if (open) return <ChildProfile id={open} onBack={() => setOpen(null)} />
   return (
-    <Screen refreshing={list.busy} onRefresh={() => void list.reload()}>
-      <Top title={w.children} onBack={onBack} w={w} />
+    <Screen refreshing={list.busy} onRefresh={() => void list.reload()} onBack={onBack} backLabel={w.back}>
+      <Top title={w.children} />
       <Field label={w.search} value={search} onChangeText={setSearch} />
       <Status offline={list.offline} error={list.error} w={w} />
-      {list.data.length === 0 && !list.busy ? <Body muted>{w.none}</Body> : list.data.map((c) => (
+      {list.data.length === 0 && !list.busy ? <Empty text={w.none} /> : list.data.map((c) => (
         <Pressable key={c.id} accessibilityRole="button" onPress={() => setOpen(c.id)}><Card><Body bold>{name(c)}</Body></Card></Pressable>
       ))}
     </Screen>
@@ -124,8 +120,8 @@ function ChildProfile({ id, onBack }: { id: string; onBack: () => void }) {
   const family = useLoaded<Guardian[]>(`ops.child.${id}.family`, () => api.page<Guardian>(`/students/${id}/guardians`), [])
   const c = detail.data
   return (
-    <Screen refreshing={detail.busy} onRefresh={() => { void detail.reload(); void family.reload() }}>
-      <Top title={c ? (lang === 'ar' && (c as ChildRow).first_name_arabic ? `${(c as ChildRow).first_name_arabic} ${(c as ChildRow).last_name_arabic ?? ''}` : `${c.first_name} ${c.last_name}`) : '...'} onBack={onBack} w={w} />
+    <Screen refreshing={detail.busy} onRefresh={() => { void detail.reload(); void family.reload() }} onBack={onBack} backLabel={w.back}>
+      <Top title={c ? (lang === 'ar' && (c as ChildRow).first_name_arabic ? `${(c as ChildRow).first_name_arabic} ${(c as ChildRow).last_name_arabic ?? ''}` : `${c.first_name} ${c.last_name}`) : '...'} />
       <Status offline={detail.offline} error={detail.error} w={w} />
       {c && (
         <Card>
@@ -139,7 +135,7 @@ function ChildProfile({ id, onBack }: { id: string; onBack: () => void }) {
         <Card key={g.id}>
           <Body bold>{g.first_name} {g.last_name} · {g.relationship}</Body>
           <Row>{g.is_primary && <Pill tone="info" label={w.mainContact} />}{g.can_pickup && <Pill tone="ok" label={w.pickup} />}</Row>
-          {g.phone ? <Btn kind="secondary" label={`${w.call} ${g.phone}`} onPress={() => void Linking.openURL(`tel:${g.phone}`)} /> : null}
+          {g.phone ? <Btn kind="secondary" icon="call" label={`${w.call} ${g.phone}`} onPress={() => void Linking.openURL(`tel:${g.phone}`)} /> : null}
         </Card>
       ))}
     </Screen>
@@ -188,20 +184,16 @@ export function LeaveOps({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <Screen refreshing={leaves.busy} onRefresh={() => void leaves.reload()}>
-      <Top title={w.leave} onBack={onBack} w={w} />
+    <Screen refreshing={leaves.busy} onRefresh={() => void leaves.reload()} onBack={onBack} backLabel={w.back}>
+      <Top title={w.leave} />
       <Status offline={leaves.offline} error={leaves.error} w={w} />
       {note && <Banner tone="info" text={note} />}
       <Card>
         <Heading>{w.newLeave}</Heading>
         <Body muted>{w.child}</Body>
-        <Row>{kids.data.slice(0, 40).map((k) => (
-          <Pressable key={k.id} onPress={() => setChildId(k.id)}><Pill tone={childId === k.id ? 'ok' : 'neutral'} label={`${k.first_name} ${k.last_name[0] ?? ''}.`} /></Pressable>
-        ))}</Row>
+        <Row>{kids.data.slice(0, 40).map((k) => <Chip key={k.id} active={childId === k.id} label={`${k.first_name} ${k.last_name[0] ?? ''}.`} onPress={() => setChildId(k.id)} />)}</Row>
         <Body muted>{w.type}</Body>
-        <Row>{studentTypes.map((x) => (
-          <Pressable key={x.id} onPress={() => setTypeId(x.id)}><Pill tone={(typeId || studentTypes[0]?.id) === x.id ? 'ok' : 'neutral'} label={pick(x.name, lang)} /></Pressable>
-        ))}</Row>
+        <Row>{studentTypes.map((x) => <Chip key={x.id} active={(typeId || studentTypes[0]?.id) === x.id} label={pick(x.name, lang)} onPress={() => setTypeId(x.id)} />)}</Row>
         <Field label={w.from} value={from} onChangeText={setFrom} />
         <Field label={w.to} value={to} onChangeText={setTo} />
         <Field label={w.reason} value={reason} onChangeText={setReason} />
@@ -213,7 +205,7 @@ export function LeaveOps({ onBack }: { onBack: () => void }) {
           <Body muted>{pick(l.leave_type_name, lang)} · {l.start_date} → {l.end_date}</Body>
           {l.reason ? <Body>{l.reason}</Body> : null}
           {manage && l.status === 'submitted' && (
-            <Row><Btn label={w.approve} onPress={() => void decide(l.id, 'approve')} /><Btn kind="secondary" label={w.reject} onPress={() => void decide(l.id, 'reject')} /></Row>
+            <Row><Btn icon="checkmark" label={w.approve} onPress={() => void decide(l.id, 'approve')} /><Btn kind="danger" icon="close" label={w.reject} onPress={() => void decide(l.id, 'reject')} /></Row>
           )}
         </Card>
       ))}
@@ -234,16 +226,16 @@ export function ApprovalsOps({ onBack }: { onBack: () => void }) {
     try { await api.post(`/activities/${id}/actions/${action}`, action === 'reject' ? { reason: 'Not suitable' } : undefined); void posts.reload() } catch (e) { setNote(message(e, w)) }
   }
   return (
-    <Screen refreshing={posts.busy} onRefresh={() => void posts.reload()}>
-      <Top title={w.approvals} onBack={onBack} w={w} />
+    <Screen refreshing={posts.busy} onRefresh={() => void posts.reload()} onBack={onBack} backLabel={w.back}>
+      <Top title={w.approvals} />
       <Status offline={posts.offline} error={posts.error} w={w} />
       {note && <Banner tone="danger" text={note} />}
-      {posts.data.length === 0 && !posts.busy ? <Body muted>{w.none}</Body> : posts.data.map((p) => (
+      {posts.data.length === 0 && !posts.busy ? <Empty text={w.none} /> : posts.data.map((p) => (
         <Card key={p.id}>
           <Row><Pill tone="info" label={p.type} /><Body muted>{p.posted_by_name ?? ''}</Body></Row>
           <Body>{pick(p.caption, lang)}</Body>
           {p.media.length > 0 && <Body muted>{p.media.length} · {w.noPhotoPreview}</Body>}
-          <Row><Btn label={w.approve} onPress={() => void decide(p.id, 'approve')} /><Btn kind="secondary" label={w.reject} onPress={() => void decide(p.id, 'reject')} /></Row>
+          <Row><Btn icon="checkmark" label={w.approve} onPress={() => void decide(p.id, 'approve')} /><Btn kind="danger" icon="close" label={w.reject} onPress={() => void decide(p.id, 'reject')} /></Row>
         </Card>
       ))}
     </Screen>
@@ -275,8 +267,8 @@ export function EnquiriesOps({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <Screen refreshing={list.busy} onRefresh={() => { void list.reload(); void tours.reload() }}>
-      <Top title={w.enquiries} onBack={onBack} w={w} />
+    <Screen refreshing={list.busy} onRefresh={() => { void list.reload(); void tours.reload() }} onBack={onBack} backLabel={w.back}>
+      <Top title={w.enquiries} />
       <Status offline={list.offline} error={list.error} w={w} />
       {note && <Banner tone="info" text={note} />}
       {tours.data.length > 0 && (
@@ -285,18 +277,18 @@ export function EnquiriesOps({ onBack }: { onBack: () => void }) {
           {tours.data.map((t) => <Body key={t.id}>{new Date(t.starts_at).toLocaleString()} · {t.family_name} ({t.child_name})</Body>)}
         </Card>
       )}
-      {list.data.length === 0 && !list.busy ? <Body muted>{w.none}</Body> : list.data.map((e) => (
+      {list.data.length === 0 && !list.busy ? <Empty text={w.none} /> : list.data.map((e) => (
         <Pressable key={e.id} accessibilityRole="button" onPress={() => setOpen(open === e.id ? null : e.id)}>
           <Card>
             <Row><Body bold>{e.family_name}</Body><Pill tone={e.stage === 'enrolled' ? 'ok' : 'info'} label={stage(e.stage)} /></Row>
             <Body muted>{e.child_name} · {e.enquiry_date}</Body>
             {open === e.id && (
               <View style={{ gap: 8 }}>
-                {e.phone ? <Btn kind="secondary" label={`${w.call} ${e.phone}`} onPress={() => void Linking.openURL(`tel:${e.phone}`)} /> : null}
+                {e.phone ? <Btn kind="secondary" icon="call" label={`${w.call} ${e.phone}`} onPress={() => void Linking.openURL(`tel:${e.phone}`)} /> : null}
                 {write && (
                   <>
                     <Body muted>{w.stage}</Body>
-                    <Row>{STAGES.map((s) => <Pressable key={s} onPress={() => void change(e.id, s)}><Pill tone={e.stage === s ? 'ok' : 'neutral'} label={stage(s)} /></Pressable>)}</Row>
+                    <Row>{STAGES.map((s) => <Chip key={s} active={e.stage === s} label={stage(s)} onPress={() => void change(e.id, s)} />)}</Row>
                     <Field label={w.noteHint} value={text} onChangeText={setText} multiline />
                     <Btn label={w.saveNote} onPress={() => void addNote(e.id)} disabled={!text.trim()} />
                   </>
@@ -327,8 +319,8 @@ export function CentreOps({ onBack }: { onBack: () => void }) {
     <View style={{ minWidth: '45%', flexGrow: 1 }}><Heading>{alert ? `⚠ ${value}` : String(value)}</Heading><Body muted>{label}</Body></View>
   )
   return (
-    <Screen refreshing={o.busy} onRefresh={() => void o.reload()}>
-      <Top title={w.centre} onBack={onBack} w={w} />
+    <Screen refreshing={o.busy} onRefresh={() => void o.reload()} onBack={onBack} backLabel={w.back}>
+      <Top title={w.centre} />
       <Status offline={o.offline} error={o.error} w={w} />
       {d?.people && <Card><Row><Stat label={w.students} value={d.people.students} /><Stat label={w.staff} value={d.people.staff} /></Row><Row><Stat label={w.here} value={d.people.present_today} /><Stat label={w.short} value={d.people.rooms_short} alert={d.people.rooms_short > 0} /></Row></Card>}
       {d?.billing && <Card><Row><Stat label={`${w.billed} (${w.aed})`} value={money(d.billing.billed_fils, lang)} /><Stat label={`${w.collected} (${w.aed})`} value={money(d.billing.collected_fils, lang)} /></Row><Stat label={`${w.overdue} (${w.aed})`} value={money(d.billing.overdue_fils, lang)} alert={d.billing.overdue_fils > 0} /></Card>}
@@ -346,10 +338,10 @@ export function CalendarOps({ onBack }: { onBack: () => void }) {
   const { lang } = useI18n()
   const events = useLoaded<Occurrence[]>('ops.calendar', () => api.get<Occurrence[]>(`/calendar/events?from=${today()}&to=${inDays(30)}`), [])
   return (
-    <Screen refreshing={events.busy} onRefresh={() => void events.reload()}>
-      <Top title={w.calendar} onBack={onBack} w={w} />
+    <Screen refreshing={events.busy} onRefresh={() => void events.reload()} onBack={onBack} backLabel={w.back}>
+      <Top title={w.calendar} />
       <Status offline={events.offline} error={events.error} w={w} />
-      {events.data.length === 0 && !events.busy ? <Body muted>{w.none}</Body> : events.data.map((e, i) => (
+      {events.data.length === 0 && !events.busy ? <Empty text={w.none} /> : events.data.map((e, i) => (
         <Card key={`${e.event_id}${i}`}>
           <Row><Body bold>{pick(e.title, lang)}</Body><Pill tone="info" label={e.type} /></Row>
           <Body muted>{e.is_all_day ? `${new Date(e.starts_at).toLocaleDateString()} · ${w.allDay}` : new Date(e.starts_at).toLocaleString()}</Body>
@@ -394,12 +386,12 @@ export function InvoicesOps({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <Screen refreshing={list.busy} onRefresh={() => void list.reload()}>
-      <Top title={w.invoices} onBack={onBack} w={w} />
+    <Screen refreshing={list.busy} onRefresh={() => void list.reload()} onBack={onBack} backLabel={w.back}>
+      <Top title={w.invoices} />
       <Status offline={list.offline} error={list.error} w={w} />
       {note && <Banner tone="info" text={note} />}
       {family && config.data && !config.data.enabled && <Body muted>{w.payOff}</Body>}
-      {list.data.length === 0 && !list.busy ? <Body muted>{w.none}</Body> : list.data.map((i) => {
+      {list.data.length === 0 && !list.busy ? <Empty text={w.none} /> : list.data.map((i) => {
         const owed = i.total_fils - i.paid_fils
         const open = owed > 0 && ['issued', 'partially_paid', 'overdue'].includes(i.status)
         return (
@@ -408,7 +400,7 @@ export function InvoicesOps({ onBack }: { onBack: () => void }) {
             <Body muted>{i.student_name ?? ''} · {w.due} {i.due_date}</Body>
             <Body>{w.total}: {w.aed} {money(i.total_fils, lang)}  ·  {w.paid}: {money(i.paid_fils, lang)}</Body>
             {open && <Body bold>{w.owed}: {w.aed} {money(owed, lang)}</Body>}
-            {open && family && config.data?.enabled && <Btn label={w.payNow} onPress={() => void pay(i.id)} busy={busy === i.id} />}
+            {open && family && config.data?.enabled && <Btn icon="card" label={w.payNow} onPress={() => void pay(i.id)} busy={busy === i.id} />}
           </Card>
         )
       })}
@@ -431,18 +423,18 @@ export function NewslettersOps({ onBack }: { onBack: () => void }) {
   const issue = useLoaded<ReadNews | null>(`ops.news.${open}.${lang}`, () => (open ? api.get<ReadNews>(`/newsletters/${open}/read?language=${lang}`) : Promise.resolve(null)), null)
   if (open) {
     return (
-      <Screen refreshing={issue.busy}>
-        <Top title={issue.data ? pick(issue.data.title, lang) : '...'} onBack={() => { setOpen(null); void list.reload() }} w={w} />
+      <Screen refreshing={issue.busy} onBack={() => { setOpen(null); void list.reload() }} backLabel={w.back}>
+        <Top title={issue.data ? pick(issue.data.title, lang) : '...'} />
         <Status offline={issue.offline} error={issue.error} w={w} />
         {issue.data && <Card><Body>{plain(issue.data.body)}</Body></Card>}
       </Screen>
     )
   }
   return (
-    <Screen refreshing={list.busy} onRefresh={() => void list.reload()}>
-      <Top title={w.newsletters} onBack={onBack} w={w} />
+    <Screen refreshing={list.busy} onRefresh={() => void list.reload()} onBack={onBack} backLabel={w.back}>
+      <Top title={w.newsletters} />
       <Status offline={list.offline} error={list.error} w={w} />
-      {list.data.length === 0 && !list.busy ? <Body muted>{w.none}</Body> : list.data.map((n) => (
+      {list.data.length === 0 && !list.busy ? <Empty text={w.none} /> : list.data.map((n) => (
         <Pressable key={n.id} accessibilityRole="button" onPress={() => setOpen(n.id)}>
           <Card><Row><Body bold>{pick(n.title, lang)}</Body>{!n.opened && <Pill tone="info" label={w.newNews} />}</Row><Body muted>{n.published_at ? new Date(n.published_at).toLocaleDateString() : ''}</Body></Card>
         </Pressable>

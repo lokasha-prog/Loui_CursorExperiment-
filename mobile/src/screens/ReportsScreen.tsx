@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { api } from '../api'
 import { cached } from '../cache'
 import { pick, useI18n } from '../i18n'
-import { Body, Card, Heading, Pill, Row, Screen, Title } from '../ui'
+import { Body, Card, Empty, Heading, Hero, Pill, Row, Screen, Title } from '../ui'
 
 interface Report { id: string; student_name: string; date: string; activity_count: number; check_in_at: string | null; check_out_at: string | null; summary: Record<string, string> }
 const time = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '')
@@ -23,8 +23,8 @@ export function ReportsScreen() {
 
   return (
     <Screen refreshing={busy} onRefresh={() => void load()}>
-      <Title>{t('tabs.reports')}</Title>
-      {rows.length === 0 ? <Body muted>{t('noReports')}</Body> : rows.map((r) => (
+      <Hero title={t('tabs.reports')} icon="document-text" />
+      {rows.length === 0 ? <Empty icon="document-text-outline" text={t('noReports')} /> : rows.map((r) => (
         <Card key={r.id}>
           <Row><Heading>{r.student_name}</Heading><Pill tone="info" label={r.date} /></Row>
           <Body>{pick(r.summary, lang)}</Body>

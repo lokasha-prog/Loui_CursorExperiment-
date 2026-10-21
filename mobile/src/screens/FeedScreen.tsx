@@ -5,7 +5,7 @@ import { cached } from '../cache'
 import { doOrQueue } from '../queue'
 import { useAuth } from '../auth'
 import { useI18n, pick } from '../i18n'
-import { Banner, Body, Btn, Card, Field, Heading, Pill, Row, Screen, Title } from '../ui'
+import { Banner, Body, Btn, Card, Chip, Empty, Field, Heading, Hero, Pill, Row, Screen } from '../ui'
 
 interface Post { id: string; type: string; caption: Record<string, string> | null; posted_by_name: string | null; status: 'pending' | 'approved' | 'rejected'; created_at: string }
 const TYPES = ['diary', 'food', 'toilet', 'mood', 'announcement'] as const
@@ -43,17 +43,17 @@ export function FeedScreen() {
 
   return (
     <Screen refreshing={busy} onRefresh={() => void load()}>
-      <Title>{t('tabs.feed')}</Title>
+      <Hero title={t('tabs.feed')} icon="images" />
       {offline && <Banner tone="info" text={t('updatedOffline')} />}
       {message && <Banner tone={message.tone} text={message.text} />}
       {can('activities.write') && <Card>
         <Heading>{t('newPost')}</Heading>
         <Body muted>{t('postType')}</Body>
-        <Row>{TYPES.map((k) => <Btn key={k} kind={k === type ? 'primary' : 'secondary'} label={t(`types.${k}`)} onPress={() => setType(k)} />)}</Row>
+        <Row>{TYPES.map((k) => <Chip key={k} active={k === type} label={t(`types.${k}`)} onPress={() => setType(k)} />)}</Row>
         <Field label={t('caption')} value={caption} onChangeText={setCaption} multiline numberOfLines={3} style={{ minHeight: 80 }} />
-        <Btn label={t('post')} onPress={() => void post()} busy={busy} disabled={!caption.trim()} />
+        <Btn icon="send" label={t('post')} onPress={() => void post()} busy={busy} disabled={!caption.trim()} />
       </Card>}
-      {posts.length === 0 ? <Body muted>{t('noPosts')}</Body> : posts.map((p) => (
+      {posts.length === 0 ? <Empty icon="images-outline" text={t('noPosts')} /> : posts.map((p) => (
         <Card key={p.id}>
           <Row><Pill tone="info" label={t(`types.${p.type as (typeof TYPES)[number]}`)} /><Pill tone={p.status === 'approved' ? 'ok' : p.status === 'rejected' ? 'danger' : 'warn'} label={t(`approval.${p.status}`)} /></Row>
           <Body>{pick(p.caption, lang)}</Body>

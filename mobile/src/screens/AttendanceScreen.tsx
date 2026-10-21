@@ -4,7 +4,7 @@ import { View } from 'react-native'
 import { api, ApiError } from '../api'
 import { useI18n } from '../i18n'
 import { doOrQueue, queue } from '../queue'
-import { Banner, Body, Btn, Card, Field, Heading, Pill, Row, Screen, Title } from '../ui'
+import { Banner, Body, Btn, Card, Empty, Field, Heading, Hero, Pill, Row, Screen, Title } from '../ui'
 
 interface Row_ { id: string; person_name: string | null; person_type: string; check_in_at: string | null; check_out_at: string | null; status: 'pending' | 'present' | 'absent' | 'late' | 'early_leave' }
 
@@ -63,7 +63,7 @@ export function AttendanceScreen() {
 
   return (
     <Screen refreshing={busy} onRefresh={() => void load()}>
-      <Title>{t('tabs.attendance')}</Title>
+      <Hero title={t('tabs.attendance')} icon="checkmark-circle" />
       {message && <Banner tone={message.tone} text={message.text} />}
       <Card>
         <Heading>{t('scan')}</Heading>
@@ -74,12 +74,12 @@ export function AttendanceScreen() {
             </View>
           ) : <Banner text={t('cameraNeeded')} />
         ) : null}
-        <Btn kind="secondary" label={camera ? t('closeCamera') : t('openCamera')} onPress={() => { if (!permission?.granted) void requestPermission(); setCamera((c) => !c) }} />
+        <Btn kind="secondary" icon="camera" label={camera ? t('closeCamera') : t('openCamera')} onPress={() => { if (!permission?.granted) void requestPermission(); setCamera((c) => !c) }} />
         {camera && <Body muted>{t('scanHint')}</Body>}
         <Field label={t('typeCode')} value={code} onChangeText={setCode} autoCapitalize="characters" />
         <Row>
-          <View style={{ flex: 1 }}><Btn label={t('checkIn')} onPress={() => void act('check-in', code)} busy={busy} disabled={!code} /></View>
-          <View style={{ flex: 1 }}><Btn kind="secondary" label={t('checkOut')} onPress={() => void act('check-out', code)} busy={busy} disabled={!code} /></View>
+          <View style={{ flex: 1 }}><Btn icon="log-in" label={t('checkIn')} onPress={() => void act('check-in', code)} busy={busy} disabled={!code} /></View>
+          <View style={{ flex: 1 }}><Btn kind="secondary" icon="log-out" label={t('checkOut')} onPress={() => void act('check-out', code)} busy={busy} disabled={!code} /></View>
         </Row>
       </Card>
       {waiting > 0 && (
@@ -89,7 +89,7 @@ export function AttendanceScreen() {
         </Card>
       )}
       <Heading>{t('list')}</Heading>
-      {rows.length === 0 ? <Body muted>{t('nobody')}</Body> : rows.map((r) => (
+      {rows.length === 0 ? <Empty icon="people-outline" text={t('nobody')} /> : rows.map((r) => (
         <Card key={r.id}>
           <Row><Body bold>{r.person_name ?? '—'}</Body><Pill tone={tone(r.status)} label={t(`status.${r.status}`)} /></Row>
           <Body muted>{[time(r.check_in_at), time(r.check_out_at)].filter(Boolean).join(' → ')}</Body>
