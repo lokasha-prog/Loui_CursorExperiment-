@@ -130,6 +130,10 @@ public interface IAppDbContext
     DbSet<InvoiceLine> InvoiceLines { get; }
 
     DbSet<InvoicePayment> InvoicePayments { get; }
+    DbSet<PaymentSession> PaymentSessions { get; }
+    DbSet<PaymentRefund> PaymentRefunds { get; }
+    DbSet<GatewayEvent> GatewayEvents { get; }
+    DbSet<SavedPaymentMethod> SavedPaymentMethods { get; }
     DbSet<Expense> Expenses { get; }
     DbSet<NMS.Domain.Forms.Form> Forms { get; }
     DbSet<NMS.Domain.Forms.FormVersion> FormVersions { get; }

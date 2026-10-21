@@ -8,17 +8,19 @@ namespace NMS.IntegrationTests;
 [Collection(ApiCollection.Name)]
 public class CentreGroupTests(NmsApiFixture api)
 {
-    private async Task<(Guid Id, string Slug)> NewBranchAsync()
+    private async Task<ApiClient> OwnerAsync() => (await api.CreateUserAsync("super_admin")).Client;
+
+    private async Task<(Guid Id, string Slug)> NewBranchAsync(ApiClient owner)
     {
         var slug = $"branch-{Guid.NewGuid():N}"[..20];
-        var made = await api.Admin.PostAsync("/api/v1/group/centres", new { name = "Branch Centre", name_arabic = "فرع", slug });
+        var made = await owner.PostAsync("/api/v1/group/centres", new { name = "Branch Centre", name_arabic = "فرع", slug });
         made.Status.Should().Be(HttpStatusCode.Created, made.Raw);
         return (made.Data.GetProperty("id").GetGuid(), slug);
     }
 
-    private async Task<ApiClient> BranchClientAsync(Guid id)
+    private async Task<ApiClient> BranchClientAsync(ApiClient owner, Guid id)
     {
-        var switched = await api.Admin.PostAsync("/api/v1/group/switch", new { centre_id = id });
+        var switched = await owner.PostAsync("/api/v1/group/switch", new { centre_id = id });
         switched.Status.Should().Be(HttpStatusCode.OK, switched.Raw);
         var branch = api.NewClient();
         branch.SetBearer(switched.Data.GetProperty("access_token").GetString()!);
@@ -28,12 +30,13 @@ public class CentreGroupTests(NmsApiFixture api)
     [Fact]
     public async Task The_group_owner_adds_a_centre_signs_in_once_and_switches_to_it()
     {
-        var (id, slug) = await NewBranchAsync();
+        var owner = await OwnerAsync();
+        var (id, slug) = await NewBranchAsync(owner);
 
-        var mine = await api.Admin.GetAsync("/api/v1/group/my-centres");
+        var mine = await owner.GetAsync("/api/v1/group/my-centres");
         mine.Items.Select(c => c.GetProperty("id").GetGuid()).Should().Contain([api.TenantId, id]);
 
-        var switched = await api.Admin.PostAsync("/api/v1/group/switch", new { centre_id = id });
+        var switched = await owner.PostAsync("/api/v1/group/switch", new { centre_id = id });
         switched.Status.Should().Be(HttpStatusCode.OK, switched.Raw);
         switched.Data.GetProperty("me").GetProperty("tenant").GetProperty("slug").GetString().Should().Be(slug);
     }
@@ -41,16 +44,18 @@ public class CentreGroupTests(NmsApiFixture api)
     [Fact]
     public async Task A_slug_already_in_use_and_a_branch_adding_a_branch_are_refused()
     {
-        var (id, slug) = await NewBranchAsync();
-        (await api.Admin.PostAsync("/api/v1/group/centres", new { name = "Again", slug })).Status.Should().Be(HttpStatusCode.Conflict);
+        var owner = await OwnerAsync();
+        var (id, slug) = await NewBranchAsync(owner);
+        (await owner.PostAsync("/api/v1/group/centres", new { name = "Again", slug })).Status.Should().Be(HttpStatusCode.Conflict);
 
-        var branch = await BranchClientAsync(id);
+        var branch = await BranchClientAsync(owner, id);
         (await branch.PostAsync("/api/v1/group/centres", new { name = "Nested", slug = $"nested-{Guid.NewGuid():N}"[..20] })).Status.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]
     public async Task Staff_and_other_people_cannot_see_group_figures()
     {
+        var owner = await OwnerAsync();
         var teacher = await api.CreateUserAsync("teacher");
         (await teacher.Client.GetAsync("/api/v1/group/overview")).Status.Should().Be(HttpStatusCode.Forbidden);
         (await teacher.Client.PostAsync("/api/v1/group/centres", new { name = "X", slug = "xxx-yyy" })).Status.Should().Be(HttpStatusCode.Forbidden);
@@ -60,11 +65,12 @@ public class CentreGroupTests(NmsApiFixture api)
     [Fact]
     public async Task The_group_dashboard_and_reports_cover_every_centre_and_a_branch_cannot_read_the_head_data()
     {
-        var (id, _) = await NewBranchAsync();
+        var owner = await OwnerAsync();
+        var (id, _) = await NewBranchAsync(owner);
         var child = await api.CreateStudentAsync();
         (await api.Admin.PostAsync($"/api/v1/students/{child}/actions/transition-status", new { status = "active" })).Status.Should().Be(HttpStatusCode.OK);
 
-        var overview = await api.Admin.GetAsync("/api/v1/group/overview");
+        var overview = await owner.GetAsync("/api/v1/group/overview");
         overview.Status.Should().Be(HttpStatusCode.OK, overview.Raw);
         var centres = overview.Data.GetProperty("centres").EnumerateArray().ToList();
         centres.Should().Contain(c => c.GetProperty("centre_id").GetGuid() == id);
@@ -74,34 +80,35 @@ public class CentreGroupTests(NmsApiFixture api)
 
         foreach (var kind in new[] { "attendance", "revenue", "enrolment" })
         {
-            var report = await api.Admin.GetAsync($"/api/v1/group/reports/{kind}?lang=ar");
+            var report = await owner.GetAsync($"/api/v1/group/reports/{kind}?lang=ar");
             report.Status.Should().Be(HttpStatusCode.OK, report.Raw);
             report.Data.GetProperty("rows").GetArrayLength().Should().Be(centres.Count + 1);
         }
 
-        (await api.Admin.GetAsync("/api/v1/group/reports/nonsense")).Status.Should().Be(HttpStatusCode.BadRequest);
-        (await api.Admin.GetAsync("/api/v1/group/reports/revenue?format=excel")).Status.Should().Be(HttpStatusCode.OK);
+        (await owner.GetAsync("/api/v1/group/reports/nonsense")).Status.Should().Be(HttpStatusCode.BadRequest);
+        (await owner.GetAsync("/api/v1/group/reports/revenue?format=excel")).Status.Should().Be(HttpStatusCode.OK);
 
-        var branch = await BranchClientAsync(id);
+        var branch = await BranchClientAsync(owner, id);
         (await branch.GetAsync($"/api/v1/students/{child}")).Status.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task A_child_moves_to_another_centre_with_family_and_both_sides_keep_a_record()
     {
-        var (id, _) = await NewBranchAsync();
+        var owner = await OwnerAsync();
+        var (id, _) = await NewBranchAsync(owner);
         var parent = $"mum-{Guid.NewGuid():N}@test.local";
         var child = await api.CreateStudentAsync(guardianEmail: parent, medical: "Peanut allergy");
         await api.Admin.PostAsync($"/api/v1/students/{child}/actions/transition-status", new { status = "active" });
 
-        var moved = await api.Admin.PostAsync($"/api/v1/group/students/{child}/transfer", new { to_centre_id = id, reason = "Family moved" });
+        var moved = await owner.PostAsync($"/api/v1/group/students/{child}/transfer", new { to_centre_id = id, reason = "Family moved" });
         moved.Status.Should().Be(HttpStatusCode.OK, moved.Raw);
         var newId = moved.Data.GetGuid();
 
         (await api.Admin.GetAsync($"/api/v1/students/{child}")).Data.GetProperty("status").GetString().Should().Be("transferred");
-        (await api.Admin.PostAsync($"/api/v1/group/students/{child}/transfer", new { to_centre_id = id })).Status.Should().Be(HttpStatusCode.UnprocessableEntity);
+        (await owner.PostAsync($"/api/v1/group/students/{child}/transfer", new { to_centre_id = id })).Status.Should().Be(HttpStatusCode.UnprocessableEntity);
 
-        var branch = await BranchClientAsync(id);
+        var branch = await BranchClientAsync(owner, id);
         var copy = await branch.GetAsync($"/api/v1/students/{newId}");
         copy.Status.Should().Be(HttpStatusCode.OK, copy.Raw);
         copy.Data.GetProperty("status").GetString().Should().Be("active");
@@ -111,13 +118,14 @@ public class CentreGroupTests(NmsApiFixture api)
     [Fact]
     public async Task A_teacher_can_be_given_a_second_centre_with_their_own_role_there()
     {
-        var (id, slug) = await NewBranchAsync();
+        var owner = await OwnerAsync();
+        var (id, slug) = await NewBranchAsync(owner);
         var teacher = await api.CreateUserAsync("teacher");
 
-        var assigned = await api.Admin.PostAsync("/api/v1/group/staff-assignments", new { email = teacher.Email, centre_id = id, role = "accounts" });
+        var assigned = await owner.PostAsync("/api/v1/group/staff-assignments", new { email = teacher.Email, centre_id = id, role = "accounts" });
         assigned.Status.Should().Be(HttpStatusCode.NoContent, assigned.Raw);
-        (await api.Admin.PostAsync("/api/v1/group/staff-assignments", new { email = teacher.Email, centre_id = id, role = "accounts" })).Status.Should().Be(HttpStatusCode.Conflict);
-        (await api.Admin.PostAsync("/api/v1/group/staff-assignments", new { email = teacher.Email, centre_id = id, role = "parent" })).Status.Should().Be(HttpStatusCode.BadRequest);
+        (await owner.PostAsync("/api/v1/group/staff-assignments", new { email = teacher.Email, centre_id = id, role = "accounts" })).Status.Should().Be(HttpStatusCode.Conflict);
+        (await owner.PostAsync("/api/v1/group/staff-assignments", new { email = teacher.Email, centre_id = id, role = "parent" })).Status.Should().Be(HttpStatusCode.BadRequest);
 
         // Same password now matches two centres, so the person is asked which one; no password is typed again to switch.
         var both = await api.NewClient().PostAsync("/api/v1/auth/login", new { email = teacher.Email, password = teacher.Password });

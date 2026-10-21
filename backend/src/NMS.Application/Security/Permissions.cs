@@ -24,6 +24,7 @@ public static class Permissions
     public const string BillingWrite = "billing.write";
     public const string InvoicesGenerate = "invoices.generate";
     public const string PaymentsRecord = "payments.record";
+    public const string PaymentsRefund = "payments.refund";
     public const string EnquiriesRead = "enquiries.read";
     public const string EnquiriesWrite = "enquiries.write";
     public const string ToursRead = "tours.read";
@@ -72,7 +73,7 @@ public static class RolePermissions
             Permissions.AttendanceRead, Permissions.AttendanceWrite, Permissions.AttendanceOverride,
             Permissions.ActivitiesRead, Permissions.ActivitiesWrite, Permissions.ActivitiesApprove,
             Permissions.MessagingRead, Permissions.MessagingWrite, Permissions.MessagingBroadcast,
-            Permissions.BillingRead, Permissions.BillingWrite, Permissions.InvoicesGenerate, Permissions.PaymentsRecord,
+            Permissions.BillingRead, Permissions.BillingWrite, Permissions.InvoicesGenerate, Permissions.PaymentsRecord, Permissions.PaymentsRefund,
             Permissions.EnquiriesRead, Permissions.EnquiriesWrite, Permissions.ToursRead, Permissions.ToursWrite,
             Permissions.CalendarRead, Permissions.CalendarWrite, Permissions.FormsRead, Permissions.FormsWrite,
             Permissions.ToolsUse, Permissions.ReportsView, Permissions.ReportsGenerate,
@@ -113,7 +114,7 @@ public static class RolePermissions
         [
             .. Everyone,
             Permissions.StaffRead,
-            Permissions.BillingRead, Permissions.BillingWrite, Permissions.InvoicesGenerate, Permissions.PaymentsRecord,
+            Permissions.BillingRead, Permissions.BillingWrite, Permissions.InvoicesGenerate, Permissions.PaymentsRecord, Permissions.PaymentsRefund,
             Permissions.ReportsView, Permissions.ReportsGenerate, Permissions.CentreStructureRead, Permissions.ResourcesRead,
         ],
         [SystemRoles.Marketing] =

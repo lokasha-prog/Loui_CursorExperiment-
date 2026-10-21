@@ -22,7 +22,7 @@ public sealed class JobsOptions
 public sealed class ScheduledJobsService(IServiceScopeFactory scopes, Microsoft.Extensions.Options.IOptions<JobsOptions> options, ILogger<ScheduledJobsService> logger)
     : BackgroundService
 {
-    private static readonly IRequest<NMS.Shared.Results.Result<int>>[] Jobs = [new RunDailyCloseCommand(), new NMS.Application.Communication.RunDailyReportsCommand(), new NMS.Application.Notifications.RunNotificationDispatchCommand(), new NMS.Application.Reporting.RunAuditRetentionCommand(), new NMS.Application.Billing.RunBillingCommand(), new NMS.Application.Billing.RunRemindersCommand(), new NMS.Application.Enquiries.RunTourRemindersCommand(), new NMS.Application.Enquiries.RunOutboundEmailCommand(), new NMS.Application.Forms.RunAdmissionRemindersCommand(), new NMS.Application.Reporting.RunReportMaintenanceCommand(), new NMS.Application.Newsletters.RunNewsletterSendsCommand()];
+    private static readonly IRequest<NMS.Shared.Results.Result<int>>[] Jobs = [new RunDailyCloseCommand(), new NMS.Application.Communication.RunDailyReportsCommand(), new NMS.Application.Notifications.RunNotificationDispatchCommand(), new NMS.Application.Reporting.RunAuditRetentionCommand(), new NMS.Application.Billing.RunBillingCommand(), new NMS.Application.Billing.RunRemindersCommand(), new NMS.Application.Payments.RunPaymentReconciliationCommand(), new NMS.Application.Enquiries.RunTourRemindersCommand(), new NMS.Application.Enquiries.RunOutboundEmailCommand(), new NMS.Application.Forms.RunAdmissionRemindersCommand(), new NMS.Application.Reporting.RunReportMaintenanceCommand(), new NMS.Application.Newsletters.RunNewsletterSendsCommand()];
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

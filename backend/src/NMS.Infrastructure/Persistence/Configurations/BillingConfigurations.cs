@@ -97,7 +97,7 @@ public sealed class InvoicePaymentConfiguration : IEntityTypeConfiguration<Invoi
         builder.Property(p => p.Notes).HasMaxLength(500);
         builder.HasIndex(p => new { p.TenantId, p.InvoiceId });
         builder.HasIndex(p => new { p.TenantId, p.PaymentDate });
-        builder.ToTable(t => t.HasCheckConstraint("CK_InvoicePayments_Amount", "[AmountFils] > 0"));
+        builder.ToTable(t => t.HasCheckConstraint("CK_InvoicePayments_Amount", "[AmountFils] <> 0"));
     }
 }
 
@@ -139,5 +139,65 @@ public sealed class ReminderLogConfiguration : IEntityTypeConfiguration<Reminder
         builder.HasOne<Invoice>().WithMany().HasForeignKey(r => r.InvoiceId);
         builder.HasIndex(r => new { r.TenantId, r.InvoiceId, r.Kind, r.OffsetDays }).IsUnique();
         builder.ToTable(t => t.HasCheckConstraint("CK_ReminderLogs_Kind", "[Kind] IN (N'before_due', N'overdue')"));
+    }
+}
+
+public sealed class PaymentSessionConfiguration : IEntityTypeConfiguration<PaymentSession>
+{
+    public void Configure(EntityTypeBuilder<PaymentSession> builder)
+    {
+        builder.ToTable("PaymentSessions");
+        builder.Property(p => p.Gateway).HasMaxLength(20).IsRequired();
+        builder.Property(p => p.Reference).HasMaxLength(60).IsRequired();
+        builder.Property(p => p.GatewayReference).HasMaxLength(120);
+        builder.Property(p => p.Currency).HasMaxLength(3).IsRequired();
+        builder.Property(p => p.Status).HasMaxLength(20).IsRequired();
+        builder.Property(p => p.FailureReason).HasMaxLength(500);
+        builder.HasIndex(p => p.Reference).IsUnique();
+        builder.HasIndex(p => new { p.TenantId, p.InvoiceId });
+        builder.HasIndex(p => new { p.TenantId, p.Status, p.CreatedAt });
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_PaymentSessions_Amount", "[AmountFils] > 0 AND [RefundedFils] >= 0 AND [RefundedFils] <= [AmountFils]");
+            t.HasCheckConstraint("CK_PaymentSessions_Status", "[Status] IN (N'pending', N'paid', N'failed', N'cancelled', N'expired', N'needs_review', N'partially_refunded', N'refunded')");
+        });
+    }
+}
+
+public sealed class PaymentRefundConfiguration : IEntityTypeConfiguration<PaymentRefund>
+{
+    public void Configure(EntityTypeBuilder<PaymentRefund> builder)
+    {
+        builder.ToTable("PaymentRefunds");
+        builder.Property(p => p.Reason).HasMaxLength(300);
+        builder.Property(p => p.GatewayReference).HasMaxLength(120);
+        builder.HasIndex(p => new { p.TenantId, p.SessionId });
+        builder.ToTable(t => t.HasCheckConstraint("CK_PaymentRefunds_Amount", "[AmountFils] > 0"));
+    }
+}
+
+public sealed class GatewayEventConfiguration : IEntityTypeConfiguration<GatewayEvent>
+{
+    public void Configure(EntityTypeBuilder<GatewayEvent> builder)
+    {
+        builder.ToTable("GatewayEvents");
+        builder.Property(e => e.Gateway).HasMaxLength(20).IsRequired();
+        builder.Property(e => e.EventId).HasMaxLength(150).IsRequired();
+        builder.Property(e => e.Reference).HasMaxLength(60).IsRequired();
+        builder.Property(e => e.Outcome).HasMaxLength(20).IsRequired();
+        builder.HasIndex(e => new { e.TenantId, e.Gateway, e.EventId }).IsUnique();
+    }
+}
+
+public sealed class SavedPaymentMethodConfiguration : IEntityTypeConfiguration<SavedPaymentMethod>
+{
+    public void Configure(EntityTypeBuilder<SavedPaymentMethod> builder)
+    {
+        builder.ToTable("SavedPaymentMethods");
+        builder.Property(m => m.Gateway).HasMaxLength(20).IsRequired();
+        builder.Property(m => m.Token).HasMaxLength(200).IsRequired();
+        builder.Property(m => m.Brand).HasMaxLength(30).IsRequired();
+        builder.Property(m => m.Last4).HasMaxLength(4).IsRequired();
+        builder.HasIndex(m => new { m.TenantId, m.UserId });
     }
 }

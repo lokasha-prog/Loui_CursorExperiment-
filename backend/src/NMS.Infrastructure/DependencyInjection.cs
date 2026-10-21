@@ -57,6 +57,13 @@ public static class DependencyInjection
             .Validate(o => o.DefaultDueDays is >= 0 and <= 365, "Billing:DefaultDueDays must be between 0 and 365.")
             .ValidateOnStart();
         services.AddSingleton<NMS.Application.Billing.IInvoiceRenderer, QuestInvoiceRenderer>();
+        services.AddOptions<NMS.Application.Payments.PaymentOptions>().Bind(configuration.GetSection(NMS.Application.Payments.PaymentOptions.Section))
+            .Validate(o => o.Provider is "none" or "sandbox" or "telr", "Payments:Provider must be none, sandbox or telr.")
+            .ValidateOnStart();
+        services.AddSingleton<NMS.Infrastructure.Payments.SandboxLedger>();
+        services.AddSingleton<NMS.Application.Payments.IPaymentGateway, NMS.Infrastructure.Payments.SandboxGateway>();
+        services.AddHttpClient<NMS.Infrastructure.Payments.TelrGateway>();
+        services.AddTransient<NMS.Application.Payments.IPaymentGateway>(sp => sp.GetRequiredService<NMS.Infrastructure.Payments.TelrGateway>());
         services.AddSingleton<NMS.Application.Reporting.IReportRenderer, NMS.Infrastructure.Services.ReportRenderer>();
         services.AddSingleton<NMS.Application.Tools.IIdCardRenderer, NMS.Infrastructure.Services.QuestIdCardRenderer>();
         services.AddSingleton<NMS.Application.Tools.ICertificateRenderer, NMS.Infrastructure.Services.QuestCertificateRenderer>();

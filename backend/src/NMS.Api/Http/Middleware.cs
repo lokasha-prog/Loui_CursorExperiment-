@@ -44,7 +44,10 @@ public sealed class SecurityHeadersMiddleware(RequestDelegate next)
         // The web app itself may use its own files plus the two outside services it needs: Google Fonts and the captcha on the public enquiry form.
         var path = context.Request.Path;
         var isData = path.StartsWithSegments("/api") || path.StartsWithSegments("/hubs") || path.StartsWithSegments("/health") || path.StartsWithSegments("/openapi");
-        headers["Content-Security-Policy"] = isData ? "default-src 'none'; frame-ancestors 'none'" : WebAppPolicy;
+        // The pretend payment page (development only) is plain HTML with inline styling and one form that posts back to this API.
+        headers["Content-Security-Policy"] = isData ? "default-src 'none'; frame-ancestors 'none'"
+            : path.StartsWithSegments("/pay") ? "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'"
+            : WebAppPolicy;
         if (context.Request.IsHttps)
         {
             headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";

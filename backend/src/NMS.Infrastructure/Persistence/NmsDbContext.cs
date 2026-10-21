@@ -128,6 +128,10 @@ public sealed class NmsDbContext(
     public DbSet<InvoiceLine> InvoiceLines => Set<InvoiceLine>();
 
     public DbSet<InvoicePayment> InvoicePayments => Set<InvoicePayment>();
+    public DbSet<PaymentSession> PaymentSessions => Set<PaymentSession>();
+    public DbSet<PaymentRefund> PaymentRefunds => Set<PaymentRefund>();
+    public DbSet<GatewayEvent> GatewayEvents => Set<GatewayEvent>();
+    public DbSet<SavedPaymentMethod> SavedPaymentMethods => Set<SavedPaymentMethod>();
     public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<NMS.Domain.Forms.Form> Forms => Set<NMS.Domain.Forms.Form>();
     public DbSet<NMS.Domain.Forms.FormVersion> FormVersions => Set<NMS.Domain.Forms.FormVersion>();

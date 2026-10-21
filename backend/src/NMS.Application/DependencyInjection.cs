@@ -18,6 +18,8 @@ public static class DependencyInjection
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ShortCacheBehavior<,>));
         services.AddScoped<NMS.Application.Notifications.Notifier>();
         services.AddScoped<NMS.Application.CentreGroups.CentreRunner>();
+        services.AddScoped<NMS.Application.Payments.PaymentApplier>();
+        services.AddScoped<NMS.Application.Payments.PaymentGateways>();
         services.AddScoped<NMS.Application.Billing.InvoiceGenerator>();
         services.AddScoped<NMS.Application.Billing.BillingSettingsReader>();
         services.AddScoped<NMS.Application.Settings.CentreSettingsReader>();

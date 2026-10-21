@@ -43,6 +43,8 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
 
     public string BootstrapToken { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(24));
 
+    public string PaymentSecret { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(24));
+
     public string AdminEmail { get; } = $"admin-{Guid.NewGuid():N}@test.local";
 
     public string AdminPassword { get; } = NewPassword();
@@ -73,6 +75,9 @@ public sealed class NmsApiFixture : WebApplicationFactory<Program>, IAsyncLifeti
         builder.UseSetting("RateLimiting:LoginPerMinute", "100000");
         builder.UseSetting("RateLimiting:SessionPerMinute", "100000");
         builder.UseSetting("Auth:RefreshReuseGraceSeconds", GraceSeconds.ToString());
+        builder.UseSetting("Payments:Provider", "sandbox"); // the pretend payment company, signed with a per-run secret
+        builder.UseSetting("Payments:WebhookSecret", PaymentSecret);
+        builder.UseSetting("Payments:PendingMinutesBeforeCheck", "0");
         // Tests never call the real AI provider.
         builder.ConfigureServices(services =>
         {
