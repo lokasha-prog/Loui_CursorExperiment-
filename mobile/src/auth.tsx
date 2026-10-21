@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { Platform } from 'react-native'
 import { api, devLogin as apiDevLogin, hasSavedSession, login as apiLogin, refreshSession, setSignedOutHandler, signOut as apiSignOut, type Me } from './api'
 import { store } from './core'
+import { clearCache } from './cache'
 import { disablePush } from './push'
 
 interface Auth {
@@ -73,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await disablePush()
       await apiSignOut()
       await store.remove('nms.me')
+      await clearCache()
       setMe(null)
     },
     unlock: async () => {

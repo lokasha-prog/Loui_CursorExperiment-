@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { api, ApiError } from '../api'
+import { cached } from '../cache'
+import { doOrQueue } from '../queue'
 import { useAuth } from '../auth'
 import { useI18n, pick } from '../i18n'
 import { Banner, Body, Btn, Card, Field, Heading, Pill, Row, Screen, Title } from '../ui'
@@ -15,19 +17,22 @@ export function FeedScreen() {
   const [type, setType] = useState<(typeof TYPES)[number]>('diary')
   const [caption, setCaption] = useState('')
   const [busy, setBusy] = useState(false)
+  const [offline, setOffline] = useState(false)
   const [message, setMessage] = useState<{ text: string; tone: 'info' | 'danger' } | null>(null)
 
   const load = useCallback(async () => {
-    try { setPosts(await api.page<Post>('/activities?limit=30')) } catch { /* offline */ }
+    const r = await cached('feed', () => api.page<Post>('/activities?limit=30'))
+    setPosts(r.data ?? [])
+    setOffline(r.offline)
   }, [])
   useEffect(() => { void load() }, [load])
 
   const post = async () => {
     setBusy(true)
     try {
-      await api.post('/activities', { type, caption: { [lang]: caption.trim() }, student_ids: [], media_ids: [] })
+      const sent = await doOrQueue('/activities', { type, caption: { [lang]: caption.trim() }, student_ids: [], media_ids: [] }, 'feed post')
       setCaption('')
-      setMessage({ text: t('posted'), tone: 'info' })
+      setMessage({ text: sent === 'done' ? t('posted') : t('savedForLater'), tone: 'info' })
       await load()
     } catch (error) {
       setMessage({ text: error instanceof ApiError ? error.message : t('retry'), tone: 'danger' })
@@ -39,6 +44,7 @@ export function FeedScreen() {
   return (
     <Screen refreshing={busy} onRefresh={() => void load()}>
       <Title>{t('tabs.feed')}</Title>
+      {offline && <Banner tone="info" text={t('updatedOffline')} />}
       {message && <Banner tone={message.tone} text={message.text} />}
       {can('activities.write') && <Card>
         <Heading>{t('newPost')}</Heading>

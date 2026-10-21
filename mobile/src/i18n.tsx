@@ -7,7 +7,7 @@ export type Lang = 'en' | 'ar'
 const en = {
   appName: 'Bright Futures', staffApp: 'Staff app', email: 'E-mail', password: 'Password', signIn: 'Sign in', signOut: 'Sign out', signingIn: 'Signing in...', chooseCentre: 'Choose your centre',
   signInFailed: 'Please check your e-mail and password.', noConnection: 'No connection. Showing what was saved.', biometric: 'Unlock with fingerprint or face', biometricOn: 'Fingerprint / face unlock', unlock: 'Unlock',
-  tabs: { dashboard: 'Today', attendance: 'Attendance', feed: 'Feed', messages: 'Messages', more: 'More', reports: 'Day report', alerts: 'Alerts' },
+  tabs: { dashboard: 'Today', attendance: 'Attendance', feed: 'Feed', messages: 'Messages', more: 'More', reports: 'Day report', alerts: 'Alerts', learning: 'Learning', observe: 'Observe' },
   today: 'Today', children: 'Children', present: 'Present', absent: 'Absent', notArrived: 'Not yet here', onLeave: 'On leave', staffPresent: 'Staff here', roomsShort: 'Rooms short of staff', pendingLeave: 'Leave requests waiting',
   ratio: 'Staff cover', short: 'Short', ok: 'Covered', staffNeeded: '{{present}} here, {{required}} needed', childrenHere: '{{count}} children',
   scan: 'Scan a child or staff card', typeCode: 'Or type the number', checkIn: 'Check in', checkOut: 'Check out', checkedIn: 'Checked in', checkedOut: 'Checked out', savedForLater: 'Saved. It will be sent when there is signal.',
@@ -23,6 +23,11 @@ const en = {
   updated: 'Updated {{when}}', refresh: 'Refresh now', refreshing: 'Refreshing...', noCache: 'Not saved on this phone yet. Connect and press Refresh now.', call: 'Call', allergies: 'Allergies', medical: 'Medical', dietary: 'Diet', contacts: 'Parents and carers', pickup: 'May collect', primary: 'Main contact', searchChild: 'Search a child',
   retry: 'Try again', loading: 'Loading...', cancel: 'Cancel', close: 'Close', back: 'Back',
   briefing: 'AI briefing for management', briefingRun: 'Write briefing', briefingBusy: 'Reading the figures...', briefingDown: 'The AI Brain is not available right now.',
+  learningTitle: 'Learning journey', pickChild: 'Choose a child', noChildren: 'No children linked to this account.', learnReports: 'Reports', learnTimeline: 'Moments and reports', noLearning: 'Nothing here yet. Moments and reports will appear as they are shared.',
+  levels: { secure: 'Going strong', growing: 'Growing well', starting: 'Just starting' }, kindMoment: 'Moment', kindReport: 'Report',
+  observe: 'Record an observation', obsType: 'Type', obsTypes: { informal: 'Informal', formal: 'Formal', concern: 'Concern' }, obsNotes: 'What you saw', obsShare: 'Share with the family', obsConcernPrivate: 'Concerns are never shared with the family',
+  obsSave: 'Save observation', obsSaved: 'Observation saved.', obsQueued: 'Saved on this phone. It will be sent when there is signal.', obsPhoto: 'Add a photo', obsPhotoTaken: 'Photo added', obsPhotoNeedsSignal: 'The photo needs a signal, so only the note was saved.', takePhoto: 'Take photo', choosePhoto: 'Choose photo', search: 'Search',
+  updatedOffline: 'Showing the last saved copy.', unsent: '{{count}} waiting to be sent',
   noReports: 'No day reports yet.', arrived: 'Arrived', left: 'Left', moments: '{{count}} moments shared', markAllRead: 'Mark all as read', preferences: 'How we reach you', inApp: 'In the app', byEmail: 'By e-mail',
   tiers: { critical: 'Urgent alerts', operational: 'Daily updates', informational: 'News and reminders' }, urgentLocked: 'Urgent alerts always reach you.', pushOn: 'Phone alerts', pushOff: 'Phone alerts are off', pushEnable: 'Turn on phone alerts',
 }
@@ -30,7 +35,7 @@ const en = {
 const ar: typeof en = {
   appName: 'برايت فيوتشرز', staffApp: 'تطبيق الموظفين', email: 'البريد الإلكتروني', password: 'كلمة المرور', signIn: 'تسجيل الدخول', signOut: 'تسجيل الخروج', signingIn: 'جارٍ الدخول...', chooseCentre: 'اختر مركزك',
   signInFailed: 'يرجى التحقق من البريد الإلكتروني وكلمة المرور.', noConnection: 'لا يوجد اتصال. نعرض ما تم حفظه.', biometric: 'افتح بالبصمة أو الوجه', biometricOn: 'فتح القفل بالبصمة / الوجه', unlock: 'فتح',
-  tabs: { dashboard: 'اليوم', attendance: 'الحضور', feed: 'الخلاصة', messages: 'الرسائل', more: 'المزيد', reports: 'تقرير اليوم', alerts: 'التنبيهات' },
+  tabs: { dashboard: 'اليوم', attendance: 'الحضور', feed: 'الخلاصة', messages: 'الرسائل', more: 'المزيد', reports: 'تقرير اليوم', alerts: 'التنبيهات', learning: 'التعلّم', observe: 'ملاحظة' },
   today: 'اليوم', children: 'الأطفال', present: 'حاضر', absent: 'غائب', notArrived: 'لم يصل بعد', onLeave: 'في إجازة', staffPresent: 'الموظفون الحاضرون', roomsShort: 'غرف ينقصها موظفون', pendingLeave: 'طلبات إجازة بالانتظار',
   ratio: 'تغطية الموظفين', short: 'ناقص', ok: 'مغطّى', staffNeeded: 'الحاضر {{present}}، المطلوب {{required}}', childrenHere: '{{count}} أطفال',
   scan: 'امسح بطاقة طفل أو موظف', typeCode: 'أو اكتب الرقم', checkIn: 'تسجيل دخول', checkOut: 'تسجيل خروج', checkedIn: 'تم تسجيل الدخول', checkedOut: 'تم تسجيل الخروج', savedForLater: 'تم الحفظ. سيُرسل عند توفر الإشارة.',
@@ -46,6 +51,11 @@ const ar: typeof en = {
   updated: 'آخر تحديث {{when}}', refresh: 'حدّث الآن', refreshing: 'جارٍ التحديث...', noCache: 'غير محفوظة على هذا الهاتف بعد. اتصل واضغط حدّث الآن.', call: 'اتصال', allergies: 'الحساسية', medical: 'طبي', dietary: 'الغذاء', contacts: 'أولياء الأمور والمرافقون', pickup: 'يمكنه الاستلام', primary: 'جهة الاتصال الرئيسية', searchChild: 'ابحث عن طفل',
   retry: 'حاول مرة أخرى', loading: 'جارٍ التحميل...', cancel: 'إلغاء', close: 'إغلاق', back: 'رجوع',
   briefing: 'موجز الذكاء الاصطناعي للإدارة', briefingRun: 'اكتب الموجز', briefingBusy: 'جارٍ قراءة الأرقام...', briefingDown: 'العقل الذكي غير متاح الآن.',
+  learningTitle: 'رحلة التعلّم', pickChild: 'اختر طفلاً', noChildren: 'لا يوجد أطفال مرتبطون بهذا الحساب.', learnReports: 'التقارير', learnTimeline: 'لحظات وتقارير', noLearning: 'لا شيء هنا بعد. ستظهر اللحظات والتقارير عند مشاركتها.',
+  levels: { secure: 'متمكّن', growing: 'ينمو بشكل جيد', starting: 'في البداية' }, kindMoment: 'لحظة', kindReport: 'تقرير',
+  observe: 'تسجيل ملاحظة', obsType: 'النوع', obsTypes: { informal: 'غير رسمية', formal: 'رسمية', concern: 'قلق' }, obsNotes: 'ما رأيته', obsShare: 'شاركها مع الأسرة', obsConcernPrivate: 'لا تُشارَك حالات القلق مع الأسرة أبداً',
+  obsSave: 'حفظ الملاحظة', obsSaved: 'تم حفظ الملاحظة.', obsQueued: 'تم الحفظ على هذا الهاتف. ستُرسل عند توفر الإشارة.', obsPhoto: 'أضف صورة', obsPhotoTaken: 'تمت إضافة الصورة', obsPhotoNeedsSignal: 'الصورة تحتاج إشارة، لذا حُفظت الملاحظة فقط.', takePhoto: 'التقاط صورة', choosePhoto: 'اختيار صورة', search: 'بحث',
+  updatedOffline: 'نعرض آخر نسخة محفوظة.', unsent: '{{count}} بانتظار الإرسال',
   noReports: 'لا توجد تقارير يومية بعد.', arrived: 'وصل', left: 'غادر', moments: 'تمت مشاركة {{count}} لحظات', markAllRead: 'تحديد الكل كمقروء', preferences: 'كيف نتواصل معك', inApp: 'داخل التطبيق', byEmail: 'بالبريد الإلكتروني',
   tiers: { critical: 'تنبيهات عاجلة', operational: 'تحديثات يومية', informational: 'أخبار وتذكيرات' }, urgentLocked: 'التنبيهات العاجلة تصلك دائماً.', pushOn: 'تنبيهات الهاتف', pushOff: 'تنبيهات الهاتف متوقفة', pushEnable: 'تفعيل تنبيهات الهاتف',
 }

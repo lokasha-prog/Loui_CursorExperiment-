@@ -622,22 +622,22 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-21 GST (Sprint 22 reports built)",
+    lastUpdated: "2026-10-21 GST (Sprint 23 phone app maturity)",
     updatedBy: "Claude Code",
     overallPct: 53,
 
 
     hero: {
-      pills: [["info", "PHASE 1 · FULL PRODUCT"], ["amber", "SPRINT 22 · ASSESSMENT REPORTS"], ["info", "PEOPLE WORK RUNS IN PARALLEL"]],
+      pills: [["info", "PHASE 1 · FULL PRODUCT"], ["amber", "SPRINT 23 · MOBILE MATURITY"], ["info", "PEOPLE WORK RUNS IN PARALLEL"]],
       title: 'Where are we? <span class="text-amber-700">Pilot-ready, now building Phase 2.</span>',
       text: "The MVP and Phase 1 engineering are built: attendance, safe pick-up, billing, enquiries and tours, calendar, forms, reports, newsletters, the staff and parent phone apps, the nursery website, the accessibility, security and speed work, and the first half of the learning module (curriculum and lessons). Work now continues on observations, assessments and the learning journey. What needs people rather than code: the pilot nursery's UAT and onboarding, the outside security test, legal sign-off, store accounts and the first customers."
     },
     focus: {
-      heading: "Current Focus · Sprint 22",
+      heading: "Current Focus · Sprint 23",
       pill: "ACTIVE",
-      title: "Assessment reports in PDF for staff and families",
-      text: "Five learning reports plus the learning journey, as PDF in English and Arabic. Staff get the full detail; families get a plain-language version made only from approved reports and shared moments, with no scores, codes, notes or concerns.",
-      listTitle: "Sprint 21-22 checklist",
+      title: "Phone app: offline use, learning journey and observation capture",
+      text: "The phone app keeps a saved copy of what people read, sends what they did with no signal when it returns, shows parents their child's learning journey, and lets teachers record observations with a photo in a few taps.",
+      listTitle: "Sprint 22-23 checklist",
       items: [
         [true, "Curriculum frameworks, areas, age bands and milestones (entered or imported, never built in)"],
         [true, "Lessons with materials, objectives, links and milestones; teachers see only their rooms"],
@@ -649,7 +649,8 @@
         [true, "Tests (+20 backend, +7 web) and loader data (2 through the screen, 15 through the API)"],
         [true, "Montessori curriculum starter, lesson plan templates, AI lesson-idea helper, milestone suggestions"],
         [true, "Five report types + learning journey as PDF, staff and family versions, EN/AR"],
-        [false, "Phone capture of observations and learning journey on the phone (Sprint 23)"]
+        [true, "Phone: saved copies, offline queue, learning journey, observation capture with photo"],
+        [false, "Store builds, push for every alert tier on real devices (Sprint 24)"]
       ]
     },
     next: [
@@ -685,8 +686,8 @@
       19: { status: "active",  pct: 55, title: "EYFS Framework (1/2)",         notes: "Done: curriculum frameworks as the centre's own data (areas, age bands, milestones, import by code, EN/AR), lessons module (create/search/filter by curriculum, area, age band, room; materials, objectives, links, milestones; teachers limited to their rooms), Learning screen, starter EYFS loader (7 areas, 6 bands, 42 milestones). Open: lesson plan templates per age group, observations and assessments (Sprint 20)", deliverables: "EYFS module" },
       20: { status: "active",  pct: 80, title: "EYFS Framework (2/2)",         notes: "Done: observations (formal/informal/concern, share with family, concern alerts), assessment checklists, scoring, completion and manager approval of a plain parent version, learning journey (staff and parent views), Learning screen tabs, parent My-child-learning page, whole-centre dashboard (people, money, enrolment, learning, communication; role-aware, family view), loaders. Test data now at pilot-day scale: about 200 children in 8 classes, 37 staff, 270+ observations, 90+ assessments. Open: lesson plan templates, reports PDFs (Sprint 22), phone capture (Sprint 23)", deliverables: "Observations, assessments" },
       21: { status: "done",    pct: 100, title: "Montessori + AI Observations", notes: "Montessori starter curriculum (5 areas, 4 bands, 20 milestones EN/AR), lesson plan templates per age group, AI lesson-idea helper (curriculum names and theme only), milestone suggestions matched inside the system. AI dictation of children's notes deliberately held until the data-protection sign-off", deliverables: "Montessori, AI features" },
-      22: { status: "active",  pct: 70, title: "Assessment Reports",           notes: "Done: the five reports (assessment progress, assessment report, comparison between terms, class milestones, child milestones) plus the learning journey as PDF in English and Arabic; staff version with codes, scores and notes (also Excel/JSON); family version with plain levels only, from manager-approved reports and shared moments; Reports tab and parent download buttons. Open: visual polish of the PDFs, tests on real data volumes", deliverables: "Assessment reports" },
-      23: { status: "pending", pct: 0,  title: "Mobile Maturity (1/2)",        notes: "Offline cache, full notifications, learning journey view", deliverables: "Mobile offline" },
+      22: { status: "done",    pct: 100, title: "Assessment Reports",           notes: "Five learning reports (progress, assessment, comparison, class milestones, child milestones) plus the learning journey as PDF in English and Arabic; staff version with codes, scores and notes (also Excel/JSON); family version with plain levels only from approved reports and shared moments; Reports tab and parent download buttons; checked visually", deliverables: "Assessment reports" },
+      23: { status: "active",  pct: 70, title: "Mobile Maturity (1/2)",        notes: "Done: phone keeps a saved copy of feed, messages, alerts, day reports, learning and emergency data and shows it with no signal; posts, replies, attendance and observations made offline are saved and sent automatically (every 20 s); parent Learning screen (journey and approved reports); staff Observe screen (child, type, note, share, photo); sign-out wipes saved copies. Open: real-phone testing, push on a device", deliverables: "Mobile offline" },
       24: { status: "pending", pct: 0,  title: "Mobile Maturity (2/2)",        notes: "Push for all tiers, App Store + Play Store submission", deliverables: "Mobile apps live" },
       25: { status: "pending", pct: 0,  title: "Performance + Service Extraction Decision", notes: "Load test, decide on Notification/Media extraction", deliverables: "Perf sign-off, ADRs" },
       26: { status: "pending", pct: 0,  title: "Phase 2 Go-Live",              notes: "L&A module live in 3+ nurseries, 4.5+ app rating", deliverables: "Phase 2 sign-off" },

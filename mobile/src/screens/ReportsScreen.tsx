@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../api'
+import { cached } from '../cache'
 import { pick, useI18n } from '../i18n'
 import { Body, Card, Heading, Pill, Row, Screen, Title } from '../ui'
 
@@ -14,7 +15,8 @@ export function ReportsScreen() {
 
   const load = useCallback(async () => {
     setBusy(true)
-    try { setRows(await api.page<Report>('/daily-reports?limit=30')) } catch { /* offline */ }
+    const r = await cached('daily-reports', () => api.page<Report>('/daily-reports?limit=30'))
+    setRows(r.data ?? [])
     setBusy(false)
   }, [])
   useEffect(() => { void load() }, [load])

@@ -17,6 +17,7 @@
     "expo": "~51.0.28",
     "expo-auth-session": "~5.5.2",
     "expo-camera": "~15.0.16",
+    "expo-image-picker": "~15.1.0",
     "expo-local-authentication": "~14.0.1",
     "expo-notifications": "~0.28.19",
     "expo-router": "~3.5.24",

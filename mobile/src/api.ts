@@ -125,3 +125,22 @@ export const api = {
   post: async <T>(path: string, body?: unknown) => (await request<T>('POST', path, body ?? {})).data,
   put: async <T>(path: string, body?: unknown) => (await request<T>('PUT', path, body ?? {})).data,
 }
+
+/** Sends a photo or file taken on the phone. Returns what the server stored. */
+export async function upload<T>(path: string, uri: string, name: string, type: string): Promise<T> {
+  const form = new FormData()
+  if (uri.startsWith('data:') || uri.startsWith('blob:') || uri.startsWith('http')) {
+    form.append('file', await (await fetch(uri)).blob(), name)
+  } else {
+    form.append('file', { uri, name, type } as unknown as Blob)
+  }
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}/api/v1${path}`, { method: 'POST', headers: { 'X-NMS-Client': 'mobile', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) }, body: form })
+  } catch {
+    throw new ApiError(0, 'NETWORK', 'No connection')
+  }
+  const json = await parse(response)
+  if (!response.ok) throw new ApiError(response.status, json?.errors?.[0]?.code ?? 'UNKNOWN', json?.errors?.[0]?.message ?? response.statusText)
+  return json.data as T
+}

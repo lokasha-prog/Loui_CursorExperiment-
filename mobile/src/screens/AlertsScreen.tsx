@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Switch, View } from 'react-native'
 import { api, ApiError } from '../api'
+import { cached } from '../cache'
 import { useAuth } from '../auth'
 import { pick, useI18n } from '../i18n'
 import { enablePush, pushStatus } from '../push'
@@ -21,7 +22,7 @@ export function AlertsScreen() {
   const load = useCallback(async () => {
     setBusy(true)
     try {
-      setAlerts(await api.page<Alert>('/notifications?limit=30'))
+      setAlerts((await cached('alerts', () => api.page<Alert>('/notifications?limit=30'))).data ?? [])
       if (can('notifications.preferences')) setPrefs(await api.get<Pref[]>('/notifications/preferences'))
     } catch { /* offline */ }
     setPush(await pushStatus())

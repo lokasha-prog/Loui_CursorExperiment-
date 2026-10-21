@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
 import { api, ApiError } from '../api'
+import { cached } from '../cache'
+import { doOrQueue } from '../queue'
 import { useI18n } from '../i18n'
 import { Banner, Body, Btn, Card, Field, Heading, Pill, Row, Screen, Title } from '../ui'
 
@@ -16,19 +18,24 @@ export function MessagesScreen() {
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    try { setThreads(await api.page<Thread>('/messages/threads?limit=50')) } catch { /* offline */ }
+    const r = await cached('threads', () => api.page<Thread>('/messages/threads?limit=50'))
+    setThreads(r.data ?? [])
   }, [])
   useEffect(() => { void load() }, [load])
 
-  const show = async (id: string) => setOpen(await api.get<Detail>(`/messages/threads/${id}`))
+  const show = async (id: string) => {
+    const r = await cached(`thread.${id}`, () => api.get<Detail>(`/messages/threads/${id}`))
+    if (r.data) setOpen(r.data)
+  }
 
   const send = async () => {
     if (!open) return
     setBusy(true)
     try {
-      await api.post(`/messages/threads/${open.id}/messages`, { body: text.trim() })
+      const sent = await doOrQueue(`/messages/threads/${open.id}/messages`, { body: text.trim() }, 'reply')
       setText('')
-      await show(open.id)
+      if (sent === 'done') await show(open.id)
+      else setError(t('savedForLater'))
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t('retry'))
     } finally {
