@@ -1752,5 +1752,26 @@
     "numbers": "Numbered list",
     "link": "Add link",
     "linkPrompt": "Web address (https://...)"
+  },
+  "briefing": {
+    "run": "Write briefing",
+    "figures": "Figures used",
+    "privacy": "Only totals (counts, amounts, percentages) are shared with the AI provider. No names, photos or health details ever leave your centre.",
+    "overview": {
+      "title": "Today's briefing for management",
+      "subtitle": "The state of the centre today and what to act on this week."
+    },
+    "finance": {
+      "title": "Money briefing",
+      "subtitle": "Collection, overdue ageing, spending and what to do about it."
+    },
+    "admissions": {
+      "title": "Enrolment briefing",
+      "subtitle": "Enquiry pipeline, best sources, overdue follow-ups and how full the centre is."
+    },
+    "people": {
+      "title": "Staffing briefing",
+      "subtitle": "Cover, lateness, absence and leave pressure."
+    }
   }
 }

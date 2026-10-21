@@ -67,6 +67,20 @@ public static class AttendanceEndpoints
             .WithTags("AI Brain")
             .RequireAuthorization(Permissions.AttendanceOverride);
 
+        // AI Brain briefings for management: each area needs the permission for the data it summarises.
+        foreach (var (area, permission) in new[]
+        {
+            (BriefingAreas.Overview, Permissions.AttendanceOverride), (BriefingAreas.Finance, Permissions.BillingRead),
+            (BriefingAreas.Admissions, Permissions.EnquiriesRead), (BriefingAreas.People, Permissions.StaffRead),
+        })
+        {
+            var captured = area;
+            routes.MapGet($"/api/v1/ai/briefing/{area}", async (string? language, HttpContext http, ISender s, CancellationToken ct) =>
+                ApiResults.From(http, await s.Send(new ManagementBriefingQuery(captured, language ?? "en"), ct)))
+                .WithTags("AI Brain")
+                .RequireAuthorization(permission);
+        }
+
         var types = routes.MapGroup("/api/v1/leave-types").WithTags("Leaves");
         types.MapGet("/", async (string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.FromPage(http, await s.Send(new ListLeaveTypesQuery(cursor, limit), ct)))

@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api, isOffline } from '../api'
+import { useAuth } from '../auth'
 import { useI18n, pick } from '../i18n'
 import { store } from '../core'
-import { Banner, Body, Card, Heading, Loading, Pill, Row, Screen, Title } from '../ui'
+import { Banner, Body, Btn, Card, Heading, Loading, Pill, Row, Screen, Title } from '../ui'
 
 interface Summary { students_present: number; students_absent: number; students_not_yet_arrived: number; students_on_leave: number; active_students: number; staff_present: number; active_staff: number; rooms_in_breach: number; pending_leave_requests: number }
 interface Ratio { room_id: string; name: Record<string, string>; students_present: number; staff_present: number; staff_required: number; is_breach: boolean }
 
 export function TodayScreen() {
   const { t, lang } = useI18n()
+  const { can } = useAuth()
+  const [brief, setBrief] = useState<string | null>(null)
+  const [briefBusy, setBriefBusy] = useState(false)
   const [summary, setSummary] = useState<Summary | null>(null)
   const [rooms, setRooms] = useState<Ratio[]>([])
   const [offline, setOffline] = useState(false)
@@ -32,6 +36,12 @@ export function TodayScreen() {
     }
   }, [])
 
+  const askBrain = async () => {
+    setBriefBusy(true)
+    try { setBrief((await api.get<{ summary: string }>(`/ai/briefing/overview?language=${lang}`)).summary) } catch { setBrief(t('briefingDown')) }
+    setBriefBusy(false)
+  }
+
   useEffect(() => { void load().catch(() => setBusy(false)) }, [load])
 
   const tile = (label: string, value: number | string) => (
@@ -51,6 +61,13 @@ export function TodayScreen() {
           <Row>{tile(t('absent'), summary.students_absent)}{tile(t('onLeave'), summary.students_on_leave)}</Row>
           <Row>{tile(t('staffPresent'), `${summary.staff_present}/${summary.active_staff}`)}{tile(t('pendingLeave'), summary.pending_leave_requests)}</Row>
           {summary.rooms_in_breach > 0 && <Banner tone="danger" text={`${t('roomsShort')}: ${summary.rooms_in_breach}`} />}
+          {can('attendance.override') && (
+            <Card>
+              <Heading>{t('briefing')}</Heading>
+              {brief ? <Body>{brief}</Body> : null}
+              <Btn kind="secondary" label={briefBusy ? t('briefingBusy') : t('briefingRun')} onPress={() => void askBrain()} busy={briefBusy} />
+            </Card>
+          )}
           <Heading>{t('ratio')}</Heading>
           {rooms.map((r) => (
             <Card key={r.room_id}>

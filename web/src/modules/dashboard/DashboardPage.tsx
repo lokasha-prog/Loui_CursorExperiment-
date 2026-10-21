@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { useDashboardSummary, useRooms, useStaff, useStudents } from '@/api/hooks'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, Skeleton } from '@/components/ui/surfaces'
+import { AiBriefingCard } from '@/modules/ai/AiBriefingCard'
 import { AiInsightsCard } from '@/modules/ai/AiInsightsCard'
 import { RatioCards } from '@/modules/attendance/RatioCards'
 import { can, isParentOnly, useAuth } from '@/stores/auth'
@@ -109,6 +110,7 @@ export default function DashboardPage() {
         </section>
       )}
 
+      {can(me, 'attendance.override') && <AiBriefingCard area="overview" />}
       {can(me, 'attendance.override') && <AiInsightsCard />}
 
       <div className="grid gap-6 lg:grid-cols-2">

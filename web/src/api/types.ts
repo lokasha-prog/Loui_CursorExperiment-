@@ -265,6 +265,17 @@ export interface AttendanceInsights {
   approved_leave_requests: number
 }
 
+export type BriefingArea = 'overview' | 'finance' | 'admissions' | 'people'
+
+export interface Briefing {
+  area: BriefingArea
+  summary: string
+  language: 'en' | 'ar'
+  model: string
+  generated_at: string
+  facts: { label: string; value: string }[]
+}
+
 export interface MonthlyRow {
   person_id: string
   name: string

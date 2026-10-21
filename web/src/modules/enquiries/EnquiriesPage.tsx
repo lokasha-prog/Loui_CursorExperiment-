@@ -12,6 +12,7 @@ import { formatDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { can, useAuth } from '@/stores/auth'
 import { EnquiryDialog, SOURCES } from './EnquiryDialog'
+import { AiBriefingCard } from '@/modules/ai/AiBriefingCard'
 import { TasksTab } from './TasksTab'
 import { ToursTab } from './ToursTab'
 
@@ -113,6 +114,7 @@ export default function EnquiriesPage() {
   return (
     <>
       <PageHeader title={t('enquiries.title')} subtitle={t('enquiries.subtitle')} />
+      {tab === 'pipeline' && <AiBriefingCard area="admissions" />}
       <TabsPrimitive.Root value={tab} onValueChange={setTab}>
         <TabsPrimitive.List className="mb-5 flex gap-1 overflow-x-auto border-b">
           {tabs.map((key) => (

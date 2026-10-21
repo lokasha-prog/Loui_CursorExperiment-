@@ -22,6 +22,7 @@ const en = {
   emergency: 'Emergency information', emergencyBody: 'Allergies, medical notes and parent phone numbers for every child. Saved on this phone so it works with no signal.',
   updated: 'Updated {{when}}', refresh: 'Refresh now', refreshing: 'Refreshing...', noCache: 'Not saved on this phone yet. Connect and press Refresh now.', call: 'Call', allergies: 'Allergies', medical: 'Medical', dietary: 'Diet', contacts: 'Parents and carers', pickup: 'May collect', primary: 'Main contact', searchChild: 'Search a child',
   retry: 'Try again', loading: 'Loading...', cancel: 'Cancel', close: 'Close', back: 'Back',
+  briefing: 'AI briefing for management', briefingRun: 'Write briefing', briefingBusy: 'Reading the figures...', briefingDown: 'The AI Brain is not available right now.',
   noReports: 'No day reports yet.', arrived: 'Arrived', left: 'Left', moments: '{{count}} moments shared', markAllRead: 'Mark all as read', preferences: 'How we reach you', inApp: 'In the app', byEmail: 'By e-mail',
   tiers: { critical: 'Urgent alerts', operational: 'Daily updates', informational: 'News and reminders' }, urgentLocked: 'Urgent alerts always reach you.', pushOn: 'Phone alerts', pushOff: 'Phone alerts are off', pushEnable: 'Turn on phone alerts',
 }
@@ -44,6 +45,7 @@ const ar: typeof en = {
   emergency: 'معلومات الطوارئ', emergencyBody: 'الحساسية والملاحظات الطبية وأرقام أولياء الأمور لكل طفل. محفوظة على هذا الهاتف لتعمل بدون إشارة.',
   updated: 'آخر تحديث {{when}}', refresh: 'حدّث الآن', refreshing: 'جارٍ التحديث...', noCache: 'غير محفوظة على هذا الهاتف بعد. اتصل واضغط حدّث الآن.', call: 'اتصال', allergies: 'الحساسية', medical: 'طبي', dietary: 'الغذاء', contacts: 'أولياء الأمور والمرافقون', pickup: 'يمكنه الاستلام', primary: 'جهة الاتصال الرئيسية', searchChild: 'ابحث عن طفل',
   retry: 'حاول مرة أخرى', loading: 'جارٍ التحميل...', cancel: 'إلغاء', close: 'إغلاق', back: 'رجوع',
+  briefing: 'موجز الذكاء الاصطناعي للإدارة', briefingRun: 'اكتب الموجز', briefingBusy: 'جارٍ قراءة الأرقام...', briefingDown: 'العقل الذكي غير متاح الآن.',
   noReports: 'لا توجد تقارير يومية بعد.', arrived: 'وصل', left: 'غادر', moments: 'تمت مشاركة {{count}} لحظات', markAllRead: 'تحديد الكل كمقروء', preferences: 'كيف نتواصل معك', inApp: 'داخل التطبيق', byEmail: 'بالبريد الإلكتروني',
   tiers: { critical: 'تنبيهات عاجلة', operational: 'تحديثات يومية', informational: 'أخبار وتذكيرات' }, urgentLocked: 'التنبيهات العاجلة تصلك دائماً.', pushOn: 'تنبيهات الهاتف', pushOff: 'تنبيهات الهاتف متوقفة', pushEnable: 'تفعيل تنبيهات الهاتف',
 }

@@ -15,6 +15,7 @@ import { Alert, Avatar, Card, Dialog, DialogContent, DialogHeader, EmptyState, T
 import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { emptyToNull, formatDate, todayIso } from '@/lib/format'
+import { AiBriefingCard } from '@/modules/ai/AiBriefingCard'
 import { initials } from '@/lib/utils'
 import { can, useAuth } from '@/stores/auth'
 
@@ -198,6 +199,7 @@ export default function StaffPage() {
           )
         }
       />
+      {can(me, 'attendance.override') && <AiBriefingCard area="people" />}
       <div className="mb-4 flex flex-wrap gap-3">
         <div className="relative min-w-[220px] flex-1">
           <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />

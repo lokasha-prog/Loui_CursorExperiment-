@@ -205,7 +205,7 @@
           <div class="absolute inset-0 flex flex-col items-center justify-center">
             <div class="font-heading text-4xl font-bold text-slate-900" id="overallPct">53%</div>
             <div class="text-[10px] font-mono text-slate-500 uppercase">Overall</div>
-            <div class="text-[10px] font-mono text-slate-400">13 of 30 sprints</div>
+            <div class="text-[10px] font-mono text-slate-400" id="kpiOverallSub">0 of 30 sprints</div>
           </div>
         </div>
       </div>
@@ -217,47 +217,47 @@
             <i data-lucide="folder-open" class="w-4 h-4 text-amber-600"></i>
             <span class="pill pill-done">READY</span>
           </div>
-          <div class="font-heading text-2xl font-bold text-slate-900">62</div>
+          <div class="font-heading text-2xl font-bold text-slate-900" id="kpiAssets">62</div>
           <div class="text-[10px] font-mono text-slate-500 uppercase">Assets Built</div>
         </div>
         <div class="nursery-card p-4">
           <div class="flex items-center justify-between mb-1">
             <i data-lucide="git-branch" class="w-4 h-4 text-purple-600"></i>
-            <span class="pill pill-info">5/30</span>
+            <span class="pill pill-info" id="kpiSprintsPill">5/30</span>
           </div>
-          <div class="font-heading text-2xl font-bold text-slate-900">5</div>
+          <div class="font-heading text-2xl font-bold text-slate-900" id="kpiSprints">5</div>
           <div class="text-[10px] font-mono text-slate-500 uppercase">Sprints Done</div>
         </div>
         <div class="nursery-card p-4">
           <div class="flex items-center justify-between mb-1">
             <i data-lucide="rocket" class="w-4 h-4 text-info-600" style="color:#0EA5E9"></i>
-            <span class="pill pill-info">0/3</span>
+            <span class="pill pill-info" id="kpiPhasesPill">0/3</span>
           </div>
-          <div class="font-heading text-2xl font-bold text-slate-900">0</div>
+          <div class="font-heading text-2xl font-bold text-slate-900" id="kpiPhases">0</div>
           <div class="text-[10px] font-mono text-slate-500 uppercase">Phases Live</div>
         </div>
         <div class="nursery-card p-4">
           <div class="flex items-center justify-between mb-1">
             <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
-            <span class="pill pill-pending">PENDING</span>
+            <span class="pill pill-pending" id="kpiPilotPill">PENDING</span>
           </div>
-          <div class="font-heading text-2xl font-bold text-slate-900">0</div>
+          <div class="font-heading text-2xl font-bold text-slate-900" id="kpiPilot">0</div>
           <div class="text-[10px] font-mono text-slate-500 uppercase">Pilot Nurseries</div>
         </div>
         <div class="nursery-card p-4">
           <div class="flex items-center justify-between mb-1">
             <i data-lucide="bug" class="w-4 h-4 text-red-600"></i>
-            <span class="pill pill-done">0</span>
+            <span class="pill pill-done" id="kpiBugsPill">0</span>
           </div>
-          <div class="font-heading text-2xl font-bold text-slate-900">0</div>
+          <div class="font-heading text-2xl font-bold text-slate-900" id="kpiBugs">0</div>
           <div class="text-[10px] font-mono text-slate-500 uppercase">Open Bugs</div>
         </div>
         <div class="nursery-card p-4">
           <div class="flex items-center justify-between mb-1">
             <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600"></i>
-            <span class="pill pill-amber">3 OPEN</span>
+            <span class="pill pill-amber" id="kpiRisksPill">3 OPEN</span>
           </div>
-          <div class="font-heading text-2xl font-bold text-slate-900">3</div>
+          <div class="font-heading text-2xl font-bold text-slate-900" id="kpiRisks">3</div>
           <div class="text-[10px] font-mono text-slate-500 uppercase">Risks</div>
         </div>
       </div>
@@ -654,7 +654,7 @@
   // After each sprint, update the corresponding entry. The page recalculates on load.
 
   const PROJECT_STATE = {
-    lastUpdated: "2026-10-21 GST (parent phone app built)",
+    lastUpdated: "2026-10-21 GST (Sprint 17 in progress)",
     updatedBy: "Claude Code",
     overallPct: 53,
 
@@ -678,7 +678,7 @@
       14: { status: "done",    pct: 100, title: "Reports + RTL QA Pass",        notes: "Newsletter builder (safe rich text, audiences, scheduling, open and click counts, AI draft), resource centre (folders, versions, download log), Arabic right-to-left sweep of all 20 screens on desktop and phone, speed test with 100 simultaneous users (slowest 95th percentile 0.9 s), security pass (no vulnerable packages, react-router upgraded)", deliverables: "RTL sign-off, load test" },
       15: { status: "done",    pct: 100, title: "Mobile App (1/2)",             notes: "Staff phone app (Expo): sign-in with fingerprint/face unlock, Today dashboard and staff cover, attendance by camera scan or typed card number with offline queue, feed posting, messages, alerts, emergency information saved on the phone for use with no signal, English/Arabic right-to-left. Phone sign-in keeps its session in the secure store (server hands the phone a refresh token). Push alerts and store builds come with Sprint 16/24", deliverables: "Staff mobile app" },
       16: { status: "done",    pct: 100, title: "Mobile App (2/2)",             notes: "Same phone app now shows a parent view (by role): feed, day reports, messages, alerts with read/unread, how-we-reach-you choices per tier, English/Arabic right-to-left. Server: phones register for alerts (device table, Expo push sender, delivery step in the 15-minute dispatch; off until Push:Provider=expo; removed on sign-out). Store builds and push on a real phone need Apple/Google accounts and a project id", deliverables: "Parent mobile app" },
-      17: { status: "pending", pct: 0,  title: "QA + Security + UAT",          notes: "Pen test, WCAG audit, load test, UAT with pilot", deliverables: "Pen test report, sign-off" },
+      17: { status: "active",  pct: 30,  title: "QA + Security + UAT",          notes: "Done so far: accessibility scan (axe, WCAG 2.1 AA) of 25 screens in English and Arabic is clean after colour fixes; security smoke script. Next: 500-user speed test, security test pack, UAT pack, end-to-end tests", deliverables: "Pen test report, sign-off" },
       18: { status: "pending", pct: 0,  title: "Go-Live · Phase 1 Complete",   notes: "Production deploy, first paid customers", deliverables: "2 on-prem + 3 SaaS live" },
       // Phase 2 (19-26)
       19: { status: "pending", pct: 0,  title: "EYFS Framework (1/2)",         notes: "Curriculum, development areas, age bands, lessons", deliverables: "EYFS module" },
@@ -705,6 +705,7 @@
       { severity: "warning",  title: "Single on-site computer holds all data", mitigation: "Nightly verified backups are scripted; copy them off the computer and rehearse a restore before go-live." }
     ],
 
+    assetsBuilt: 62,
     pilotNurseries: 0,
     openBugs: 0,
     phasesLive: 0
@@ -759,12 +760,35 @@
 
   function updateOverallProgress() {
     const ring = document.getElementById('overallRing');
-    const pct = PROJECT_STATE.overallPct;
+    // Overall % is the average of every sprint's own %, so it can never drift from the sprint list.
+    const all = Object.entries(PROJECT_STATE.sprints).filter(([id]) => +id >= 1).map(([, x]) => x); // Sprint 0 is set-up, the plan counts sprints 1-30
+    const pct = Math.round(all.reduce((sum, x) => sum + x.pct, 0) / all.length);
+    PROJECT_STATE.overallPct = pct;
     const circumference = 264; // 2 * PI * 42
     const offset = circumference - (circumference * pct / 100);
     ring.style.strokeDashoffset = offset;
     document.getElementById('overallPct').textContent = pct + '%';
     document.getElementById('lastUpdated').textContent = PROJECT_STATE.lastUpdated;
+    updateKpis();
+  }
+
+  // Every number in the KPI tiles comes from PROJECT_STATE, so editing the state is all that is needed.
+  function updateKpis() {
+    const sprints = Object.entries(PROJECT_STATE.sprints).filter(([id]) => +id >= 1).map(([, x]) => x);
+    const done = sprints.filter(x => x.status === 'done').length;
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('kpiOverallSub', done + ' of ' + sprints.length + ' sprints');
+    set('kpiAssets', PROJECT_STATE.assetsBuilt);
+    set('kpiSprints', done);
+    set('kpiSprintsPill', done + '/' + sprints.length);
+    set('kpiPhases', PROJECT_STATE.phasesLive);
+    set('kpiPhasesPill', PROJECT_STATE.phasesLive + '/3');
+    set('kpiPilot', PROJECT_STATE.pilotNurseries);
+    set('kpiPilotPill', PROJECT_STATE.pilotNurseries > 0 ? 'LIVE' : 'PENDING');
+    set('kpiBugs', PROJECT_STATE.openBugs);
+    set('kpiBugsPill', PROJECT_STATE.openBugs);
+    set('kpiRisks', PROJECT_STATE.risks.length);
+    set('kpiRisksPill', PROJECT_STATE.risks.length + ' OPEN');
   }
 
   // ─── Theme Studio + Toast ───

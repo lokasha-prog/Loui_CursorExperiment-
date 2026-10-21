@@ -64,6 +64,8 @@ import type {
   MonthlyReport,
   RatioBreach,
   AttendanceInsights,
+  Briefing,
+  BriefingArea,
   AttendanceRow,
   CheckOutRequest,
   CreateLeaveRequest,
@@ -315,6 +317,10 @@ export const useAttendanceInsights = () =>
     mutationFn: ({ days, language }: { days: number; language: string }) =>
       api.get<AttendanceInsights>('/ai/attendance-summary', { days, language }),
   })
+
+/** Asks the AI Brain for a management briefing on one area (overview, finance, admissions, people). Only totals are sent to the provider. */
+export const useBriefing = (area: BriefingArea) =>
+  useMutation({ mutationFn: (language: string) => api.get<Briefing>(`/ai/briefing/${area}`, { language }) })
 
 // ── Reports ─────────────────────────────────────────────────────────────────
 

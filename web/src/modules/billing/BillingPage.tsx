@@ -16,6 +16,7 @@ import { ExpensesTab } from './ExpensesTab'
 import { FeePlanDialog } from './FeePlanDialog'
 import { InvoiceDialog, statusTone } from './InvoiceDialog'
 import { NewInvoiceDialog } from './NewInvoiceDialog'
+import { AiBriefingCard } from '@/modules/ai/AiBriefingCard'
 import { ReportsTab } from './ReportsTab'
 import { SettingsTab } from './SettingsTab'
 
@@ -216,6 +217,7 @@ export default function BillingPage() {
   return (
     <>
       <PageHeader title={t('billing.title')} subtitle={parent ? t('billing.parentSubtitle') : t('billing.subtitle')} />
+      {canWrite && tab === 'overview' && <AiBriefingCard area="finance" />}
       <TabsPrimitive.Root value={tab} onValueChange={setTab}>
         {tabs.length > 1 && (
           <TabsPrimitive.List className="mb-5 flex gap-1 overflow-x-auto border-b">
