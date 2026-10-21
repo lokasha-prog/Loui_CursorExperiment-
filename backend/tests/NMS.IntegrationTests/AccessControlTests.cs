@@ -191,6 +191,10 @@ public class AccessControlTests(NmsApiFixture api)
         reply.Message.Headers.GetValues("X-Content-Type-Options").Should().Contain("nosniff");
         reply.Message.Headers.GetValues("X-Frame-Options").Should().Contain("DENY");
         reply.Message.Headers.GetValues("Content-Security-Policy").Should().ContainSingle().Which.Should().Contain("default-src 'none'");
+
+        var page = await api.NewClient().GetAsync("/login");
+        var policy = page.Message.Headers.GetValues("Content-Security-Policy").Single();
+        policy.Should().Contain("script-src 'self'").And.Contain("frame-ancestors 'none'").And.NotContain("'unsafe-eval'");
     }
 
     [Theory]

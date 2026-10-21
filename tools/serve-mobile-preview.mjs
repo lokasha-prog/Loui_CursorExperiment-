@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../mobile/dist/', import.meta.url))
 const api = { host: 'localhost', port: 5178 }
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.ico': 'image/x-icon' }
+const types = { '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.ico': 'image/x-icon' }
 
 http.createServer(async (req, res) => {
   if (req.url.startsWith('/api/')) {
