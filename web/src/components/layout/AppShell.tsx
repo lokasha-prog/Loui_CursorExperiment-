@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Baby, BarChart3, CalendarDays, ClipboardList, FolderOpen, IdCard, Newspaper, Inbox, Settings, Wallet, MessageCircleHeart, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
+import { Baby, BarChart3, CalendarDays, ClipboardList, FolderOpen, GraduationCap, IdCard, Newspaper, Inbox, Settings, Wallet, MessageCircleHeart, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
@@ -42,6 +42,7 @@ export function useNavItems(): NavItem[] {
     { to: '/audit', label: t('nav.audit'), icon: History, permission: 'audit_log.view' },
     { to: '/newsletters', label: t('nav.newsletters'), icon: Newspaper, permission: 'messaging.read' },
     { to: '/resources', label: t('nav.resources'), icon: FolderOpen, permission: 'resources.read' },
+    { to: '/learning', label: t('nav.learning'), icon: GraduationCap, permission: 'learning.read' },
     { to: '/forms', label: t('nav.forms'), icon: ClipboardList, permission: 'forms.read' },
     { to: '/tools', label: t('nav.tools'), icon: IdCard, permission: 'tools.use' },
     { to: '/users', label: t('nav.users'), icon: ShieldCheck, permission: 'user_management.manage' },

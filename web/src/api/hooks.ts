@@ -64,6 +64,10 @@ import type {
   MonthlyReport,
   RatioBreach,
   AttendanceInsights,
+  FrameworkDetail,
+  FrameworkSummary,
+  Lesson,
+  LessonInput,
   Briefing,
   BriefingArea,
   AttendanceRow,
@@ -913,3 +917,48 @@ export const useDeleteDocument = () => useResourceMutation((id: string) => api.d
 export const useResourceVersions = (id: string | null) => useQuery({ queryKey: ['resource-versions', id], enabled: !!id, queryFn: () => api.get<ResourceVersionItem[]>(`/resources/documents/${id}/versions`) })
 
 export const useResourceDownloads = (id: string | null) => useQuery({ queryKey: ['resource-downloads', id], enabled: !!id, queryFn: () => api.get<ResourceDownloadItem[]>(`/resources/documents/${id}/downloads`) })
+
+// ── Learning (curriculum and lessons) ───────────────────────────────────────
+
+export const useFrameworks = () => useQuery({ queryKey: ['frameworks'], queryFn: () => api.get<FrameworkSummary[]>('/learning/frameworks') })
+
+export const useFramework = (id: string) =>
+  useQuery({ queryKey: ['framework', id], enabled: !!id, queryFn: () => api.get<FrameworkDetail>(`/learning/frameworks/${id}`) })
+
+export function useSaveFramework() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { code: string; name: Record<string, string>; description?: Record<string, string> | null }) => api.post<FrameworkSummary>('/learning/frameworks', body),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['frameworks'] }),
+  })
+}
+
+export function useImportFramework(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: unknown) => api.post<FrameworkDetail>(`/learning/frameworks/${id}/import`, body),
+    onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['frameworks'] }), client.invalidateQueries({ queryKey: ['framework', id] })]),
+  })
+}
+
+export const useLessons = (filters: { frameworkId?: string; areaId?: string; ageBandId?: string; roomId?: string; search?: string }) =>
+  useInfiniteList<Lesson>(['lessons'], '/learning/lessons', {
+    framework_id: filters.frameworkId || undefined, area_id: filters.areaId || undefined, age_band_id: filters.ageBandId || undefined,
+    room_id: filters.roomId || undefined, search: filters.search || undefined,
+  })
+
+export function useSaveLesson(id?: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: LessonInput) => (id ? api.put<Lesson>(`/learning/lessons/${id}`, body) : api.post<Lesson>('/learning/lessons', body)),
+    onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['lessons'] }), client.invalidateQueries({ queryKey: ['frameworks'] })]),
+  })
+}
+
+export function useDeleteLesson() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/learning/lessons/${id}`),
+    onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['lessons'] }), client.invalidateQueries({ queryKey: ['frameworks'] })]),
+  })
+}

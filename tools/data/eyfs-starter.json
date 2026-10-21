@@ -1,0 +1,496 @@
+{
+ "areas": [
+  {
+   "code": "cal",
+   "name": {
+    "en": "Communication and Language",
+    "ar": "التواصل واللغة"
+   },
+   "sort_order": 1
+  },
+  {
+   "code": "pd",
+   "name": {
+    "en": "Physical Development",
+    "ar": "النمو الجسدي"
+   },
+   "sort_order": 2
+  },
+  {
+   "code": "psed",
+   "name": {
+    "en": "Personal, Social and Emotional Development",
+    "ar": "النمو الشخصي والاجتماعي والعاطفي"
+   },
+   "sort_order": 3
+  },
+  {
+   "code": "l",
+   "name": {
+    "en": "Literacy",
+    "ar": "القراءة والكتابة"
+   },
+   "sort_order": 4
+  },
+  {
+   "code": "m",
+   "name": {
+    "en": "Mathematics",
+    "ar": "الرياضيات"
+   },
+   "sort_order": 5
+  },
+  {
+   "code": "uw",
+   "name": {
+    "en": "Understanding the World",
+    "ar": "فهم العالم"
+   },
+   "sort_order": 6
+  },
+  {
+   "code": "ead",
+   "name": {
+    "en": "Expressive Arts and Design",
+    "ar": "الفنون والتعبير"
+   },
+   "sort_order": 7
+  }
+ ],
+ "age_bands": [
+  {
+   "code": "b0-11",
+   "name": {
+    "en": "0-11 months",
+    "ar": "0-11 شهراً"
+   },
+   "min_months": 0,
+   "max_months": 11
+  },
+  {
+   "code": "b8-20",
+   "name": {
+    "en": "8-20 months",
+    "ar": "8-20 شهراً"
+   },
+   "min_months": 8,
+   "max_months": 20
+  },
+  {
+   "code": "b16-26",
+   "name": {
+    "en": "16-26 months",
+    "ar": "16-26 شهراً"
+   },
+   "min_months": 16,
+   "max_months": 26
+  },
+  {
+   "code": "b22-36",
+   "name": {
+    "en": "22-36 months",
+    "ar": "22-36 شهراً"
+   },
+   "min_months": 22,
+   "max_months": 36
+  },
+  {
+   "code": "b30-50",
+   "name": {
+    "en": "30-50 months",
+    "ar": "30-50 شهراً"
+   },
+   "min_months": 30,
+   "max_months": 50
+  },
+  {
+   "code": "b40-60",
+   "name": {
+    "en": "40-60 months",
+    "ar": "40-60 شهراً"
+   },
+   "min_months": 40,
+   "max_months": 60
+  }
+ ],
+ "milestones": [
+  {
+   "area": "cal",
+   "age_band": "b0-11",
+   "code": "cal-b0-11",
+   "statement": {
+    "en": "Turns towards familiar voices and makes sounds back",
+    "ar": "يلتفت نحو الأصوات المألوفة ويرد بأصوات"
+   }
+  },
+  {
+   "area": "cal",
+   "age_band": "b8-20",
+   "code": "cal-b8-20",
+   "statement": {
+    "en": "Responds to their name and understands simple words",
+    "ar": "يستجيب لاسمه ويفهم كلمات بسيطة"
+   }
+  },
+  {
+   "area": "cal",
+   "age_band": "b16-26",
+   "code": "cal-b16-26",
+   "statement": {
+    "en": "Uses single words and starts to join two words together",
+    "ar": "يستخدم كلمات مفردة ويبدأ بالجمع بين كلمتين"
+   }
+  },
+  {
+   "area": "cal",
+   "age_band": "b22-36",
+   "code": "cal-b22-36",
+   "statement": {
+    "en": "Speaks in short sentences and listens to simple stories",
+    "ar": "يتحدث بجمل قصيرة ويستمع إلى قصص بسيطة"
+   }
+  },
+  {
+   "area": "cal",
+   "age_band": "b30-50",
+   "code": "cal-b30-50",
+   "statement": {
+    "en": "Holds a conversation and asks questions with who, what and why",
+    "ar": "يجري حواراً ويسأل أسئلة مثل من وماذا ولماذا"
+   }
+  },
+  {
+   "area": "cal",
+   "age_band": "b40-60",
+   "code": "cal-b40-60",
+   "statement": {
+    "en": "Retells a story in order and uses new words in play",
+    "ar": "يعيد سرد قصة بالترتيب ويستخدم كلمات جديدة في اللعب"
+   }
+  },
+  {
+   "area": "pd",
+   "age_band": "b0-11",
+   "code": "pd-b0-11",
+   "statement": {
+    "en": "Lifts their head, kicks and reaches for objects",
+    "ar": "يرفع رأسه ويركل ويمد يده نحو الأشياء"
+   }
+  },
+  {
+   "area": "pd",
+   "age_band": "b8-20",
+   "code": "pd-b8-20",
+   "statement": {
+    "en": "Sits, crawls and pulls up to stand with support",
+    "ar": "يجلس ويزحف ويقف بمساعدة"
+   }
+  },
+  {
+   "area": "pd",
+   "age_band": "b16-26",
+   "code": "pd-b16-26",
+   "statement": {
+    "en": "Walks independently and holds a crayon in a fist",
+    "ar": "يمشي باستقلالية ويمسك القلم بقبضة اليد"
+   }
+  },
+  {
+   "area": "pd",
+   "age_band": "b22-36",
+   "code": "pd-b22-36",
+   "statement": {
+    "en": "Runs, climbs low steps and feeds themselves with a spoon",
+    "ar": "يركض ويتسلق درجات منخفضة ويأكل بالملعقة وحده"
+   }
+  },
+  {
+   "area": "pd",
+   "age_band": "b30-50",
+   "code": "pd-b30-50",
+   "statement": {
+    "en": "Hops, balances briefly and uses a pencil with a good grip",
+    "ar": "يقفز على قدم ويتوازن قليلاً ويستخدم القلم بقبضة جيدة"
+   }
+  },
+  {
+   "area": "pd",
+   "age_band": "b40-60",
+   "code": "pd-b40-60",
+   "statement": {
+    "en": "Moves with control, catches a ball and writes some letters",
+    "ar": "يتحرك بتحكم ويلتقط الكرة ويكتب بعض الحروف"
+   }
+  },
+  {
+   "area": "psed",
+   "age_band": "b0-11",
+   "code": "psed-b0-11",
+   "statement": {
+    "en": "Gazes at faces and smiles back, settles with a familiar adult",
+    "ar": "ينظر إلى الوجوه ويبتسم ويهدأ مع بالغ مألوف"
+   }
+  },
+  {
+   "area": "psed",
+   "age_band": "b8-20",
+   "code": "psed-b8-20",
+   "statement": {
+    "en": "Shows preferences for people and enjoys playing alongside others",
+    "ar": "يظهر تفضيلاً للأشخاص ويستمتع باللعب بجانب الآخرين"
+   }
+  },
+  {
+   "area": "psed",
+   "age_band": "b16-26",
+   "code": "psed-b16-26",
+   "statement": {
+    "en": "Shows feelings through words and actions and seeks comfort",
+    "ar": "يعبر عن مشاعره بالكلمات والحركات ويطلب الطمأنينة"
+   }
+  },
+  {
+   "area": "psed",
+   "age_band": "b22-36",
+   "code": "psed-b22-36",
+   "statement": {
+    "en": "Plays with others, takes turns with help and shows pride",
+    "ar": "يلعب مع الآخرين وينتظر دوره بمساعدة ويظهر فخراً"
+   }
+  },
+  {
+   "area": "psed",
+   "age_band": "b30-50",
+   "code": "psed-b30-50",
+   "statement": {
+    "en": "Talks about feelings and makes friends, follows simple rules",
+    "ar": "يتحدث عن المشاعر ويكوّن صداقات ويتبع قواعد بسيطة"
+   }
+  },
+  {
+   "area": "psed",
+   "age_band": "b40-60",
+   "code": "psed-b40-60",
+   "statement": {
+    "en": "Manages feelings, works as part of a group and is confident to try",
+    "ar": "يدير مشاعره ويعمل ضمن مجموعة ويثق بالمحاولة"
+   }
+  },
+  {
+   "area": "l",
+   "age_band": "b0-11",
+   "code": "l-b0-11",
+   "statement": {
+    "en": "Looks at pictures in books and enjoys rhymes and songs",
+    "ar": "ينظر إلى صور الكتب ويستمتع بالأناشيد والأغاني"
+   }
+  },
+  {
+   "area": "l",
+   "age_band": "b8-20",
+   "code": "l-b8-20",
+   "statement": {
+    "en": "Turns pages with help and points to pictures when named",
+    "ar": "يقلّب الصفحات بمساعدة ويشير إلى الصور عند تسميتها"
+   }
+  },
+  {
+   "area": "l",
+   "age_band": "b16-26",
+   "code": "l-b16-26",
+   "statement": {
+    "en": "Joins in with repeated phrases and chooses favourite books",
+    "ar": "يشارك في العبارات المتكررة ويختار كتبه المفضلة"
+   }
+  },
+  {
+   "area": "l",
+   "age_band": "b22-36",
+   "code": "l-b22-36",
+   "statement": {
+    "en": "Recognises familiar words and signs, and makes marks to mean something",
+    "ar": "يتعرف على كلمات وإشارات مألوفة ويخط علامات لها معنى"
+   }
+  },
+  {
+   "area": "l",
+   "age_band": "b30-50",
+   "code": "l-b30-50",
+   "statement": {
+    "en": "Hears the first sound of words and writes their own name",
+    "ar": "يسمع أول صوت في الكلمات ويكتب اسمه"
+   }
+  },
+  {
+   "area": "l",
+   "age_band": "b40-60",
+   "code": "l-b40-60",
+   "statement": {
+    "en": "Blends sounds to read simple words and writes short sentences",
+    "ar": "يدمج الأصوات لقراءة كلمات بسيطة ويكتب جملاً قصيرة"
+   }
+  },
+  {
+   "area": "m",
+   "age_band": "b0-11",
+   "code": "m-b0-11",
+   "statement": {
+    "en": "Notices differences in amounts and enjoys exploring objects",
+    "ar": "يلاحظ الاختلاف في الكميات ويستمتع باستكشاف الأشياء"
+   }
+  },
+  {
+   "area": "m",
+   "age_band": "b8-20",
+   "code": "m-b8-20",
+   "statement": {
+    "en": "Fills and empties containers and notices when something is gone",
+    "ar": "يملأ الأوعية ويفرغها ويلاحظ غياب شيء ما"
+   }
+  },
+  {
+   "area": "m",
+   "age_band": "b16-26",
+   "code": "m-b16-26",
+   "statement": {
+    "en": "Sorts objects by one feature and uses words like more and big",
+    "ar": "يصنف الأشياء بحسب صفة واحدة ويستخدم كلمات مثل أكثر وكبير"
+   }
+  },
+  {
+   "area": "m",
+   "age_band": "b22-36",
+   "code": "m-b22-36",
+   "statement": {
+    "en": "Counts a few objects and recognises numerals to three",
+    "ar": "يعد بضعة أشياء ويتعرف على الأرقام حتى ثلاثة"
+   }
+  },
+  {
+   "area": "m",
+   "age_band": "b30-50",
+   "code": "m-b30-50",
+   "statement": {
+    "en": "Counts to ten, compares sizes and talks about shapes and patterns",
+    "ar": "يعد حتى عشرة ويقارن الأحجام ويتحدث عن الأشكال والأنماط"
+   }
+  },
+  {
+   "area": "m",
+   "age_band": "b40-60",
+   "code": "m-b40-60",
+   "statement": {
+    "en": "Adds and takes away within ten and solves simple problems",
+    "ar": "يجمع ويطرح ضمن العشرة ويحل مسائل بسيطة"
+   }
+  },
+  {
+   "area": "uw",
+   "age_band": "b0-11",
+   "code": "uw-b0-11",
+   "statement": {
+    "en": "Explores the feel of different materials with hands and mouth",
+    "ar": "يستكشف ملمس مواد مختلفة بيديه وفمه"
+   }
+  },
+  {
+   "area": "uw",
+   "age_band": "b8-20",
+   "code": "uw-b8-20",
+   "statement": {
+    "en": "Notices the sights and sounds around them and repeats actions",
+    "ar": "يلاحظ المشاهد والأصوات من حوله ويكرر الأفعال"
+   }
+  },
+  {
+   "area": "uw",
+   "age_band": "b16-26",
+   "code": "uw-b16-26",
+   "statement": {
+    "en": "Explores objects and shows interest in animals and plants",
+    "ar": "يستكشف الأشياء ويظهر اهتماماً بالحيوانات والنباتات"
+   }
+  },
+  {
+   "area": "uw",
+   "age_band": "b22-36",
+   "code": "uw-b22-36",
+   "statement": {
+    "en": "Talks about their family and notices changes in the weather",
+    "ar": "يتحدث عن عائلته ويلاحظ تغيّر الطقس"
+   }
+  },
+  {
+   "area": "uw",
+   "age_band": "b30-50",
+   "code": "uw-b30-50",
+   "statement": {
+    "en": "Talks about places and people they know, uses simple technology",
+    "ar": "يتحدث عن أماكن وأشخاص يعرفهم ويستخدم تقنية بسيطة"
+   }
+  },
+  {
+   "area": "uw",
+   "age_band": "b40-60",
+   "code": "uw-b40-60",
+   "statement": {
+    "en": "Understands past and present, compares living things and cultures",
+    "ar": "يفهم الماضي والحاضر ويقارن بين الكائنات الحية والثقافات"
+   }
+  },
+  {
+   "area": "ead",
+   "age_band": "b0-11",
+   "code": "ead-b0-11",
+   "statement": {
+    "en": "Moves to music and enjoys looking at bright colours",
+    "ar": "يتحرك مع الموسيقى ويستمتع بالنظر إلى الألوان الزاهية"
+   }
+  },
+  {
+   "area": "ead",
+   "age_band": "b8-20",
+   "code": "ead-b8-20",
+   "statement": {
+    "en": "Taps and bangs to make sounds and explores paint with hands",
+    "ar": "ينقر ويطرق لإحداث أصوات ويستكشف الطلاء بيديه"
+   }
+  },
+  {
+   "area": "ead",
+   "age_band": "b16-26",
+   "code": "ead-b16-26",
+   "statement": {
+    "en": "Joins in with songs, makes marks and enjoys pretend play",
+    "ar": "يشارك في الأغاني ويخط علامات ويستمتع باللعب التمثيلي"
+   }
+  },
+  {
+   "area": "ead",
+   "age_band": "b22-36",
+   "code": "ead-b22-36",
+   "statement": {
+    "en": "Sings simple songs, mixes colours and builds with blocks",
+    "ar": "يغني أغاني بسيطة ويمزج الألوان ويبني بالمكعبات"
+   }
+  },
+  {
+   "area": "ead",
+   "age_band": "b30-50",
+   "code": "ead-b30-50",
+   "statement": {
+    "en": "Creates with different materials and acts out stories",
+    "ar": "يبدع بمواد مختلفة ويمثّل القصص"
+   }
+  },
+  {
+   "area": "ead",
+   "age_band": "b40-60",
+   "code": "ead-b40-60",
+   "statement": {
+    "en": "Performs songs and dances, and plans and builds with purpose",
+    "ar": "يؤدي أغاني ورقصات ويخطط ويبني بهدف"
+   }
+  }
+ ]
+}

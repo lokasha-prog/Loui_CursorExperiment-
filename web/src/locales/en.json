@@ -62,7 +62,8 @@
     "tools": "Tools",
     "forms": "Forms",
     "newsletters": "Newsletters",
-    "resources": "Resources"
+    "resources": "Resources",
+    "learning": "Learning"
   },
   "errors": {
     "VALIDATION_ERROR": "Please check the highlighted fields.",
@@ -1772,6 +1773,64 @@
     "people": {
       "title": "Staffing briefing",
       "subtitle": "Cover, lateness, absence and leave pressure."
+    }
+  },
+  "learning": {
+    "title": "Learning",
+    "subtitle": "The curriculum your centre follows and the lessons planned from it.",
+    "tabs": {
+      "lessons": "Lessons",
+      "curriculum": "Curriculum"
+    },
+    "framework": "Curriculum",
+    "area": "Development area",
+    "band": "Age band",
+    "room": "Room",
+    "allRooms": "All rooms",
+    "allFrameworks": "All curricula",
+    "allAreas": "All areas",
+    "allBands": "All ages",
+    "search": "Search lessons",
+    "lesson": {
+      "new": "New lesson",
+      "edit": "Edit lesson",
+      "save": "Save lesson",
+      "saved": "Lesson saved",
+      "deleted": "Lesson deleted",
+      "confirmDelete": "Delete this lesson?",
+      "titleEn": "Title (English)",
+      "titleAr": "Title (Arabic)",
+      "descEn": "Description (English)",
+      "descAr": "Description (Arabic)",
+      "minutes": "Minutes",
+      "min": "{{count}} min",
+      "materials": "Materials",
+      "objectives": "Learning objectives",
+      "onePerLine": "One per line",
+      "links": "Links",
+      "linksHint": "One per line: the web address, then a space and its title",
+      "milestones": "Milestones this lesson supports",
+      "pickFramework": "Choose a curriculum first.",
+      "empty": "No lessons yet",
+      "emptyHint": "Add the first lesson, or change the filters."
+    },
+    "curriculum": {
+      "new": "New curriculum",
+      "created": "Curriculum created",
+      "code": "Short code",
+      "codeHint": "Lower-case letters and digits, for example eyfs",
+      "import": "Import areas and milestones",
+      "imported": "Imported",
+      "importRun": "Import",
+      "badJson": "That is not valid JSON.",
+      "importHint": "Paste JSON with areas, age_bands and milestones. Items with the same code are updated, new ones are added.",
+      "none": "No curriculum yet",
+      "noneHint": "Create one (for example EYFS), then import its areas, age bands and milestones.",
+      "noneStaff": "Ask a manager to set up the curriculum.",
+      "summary": "{{areas}} areas, {{bands}} age bands, {{milestones}} milestones",
+      "count": "{{count}} milestones",
+      "emptyTree": "No areas yet",
+      "emptyTreeHint": "Import the areas, age bands and milestones to see them here."
     }
   }
 }

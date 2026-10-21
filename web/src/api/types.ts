@@ -939,3 +939,19 @@ export interface ResourceDownloadItem {
   version: number
   at: string
 }
+
+export type Localized_ = Record<string, string>
+
+export interface FrameworkSummary { id: string; code: string; name: Localized_; description: Localized_ | null; areas: number; age_bands: number; milestones: number; lessons: number }
+export interface LearningArea { id: string; code: string; name: Localized_; sort_order: number }
+export interface LearningBand { id: string; code: string; name: Localized_; min_months: number; max_months: number }
+export interface LearningMilestone { id: string; area_id: string; age_band_id: string; code: string; statement: Localized_; sort_order: number }
+export interface FrameworkDetail { id: string; code: string; name: Localized_; description: Localized_ | null; areas: LearningArea[]; age_bands: LearningBand[]; milestones: LearningMilestone[] }
+export interface Lesson {
+  id: string; title: Localized_; description: Localized_ | null; framework_id: string; area_id: string | null; age_band_id: string | null; room_id: string | null
+  duration_minutes: number; materials: string[]; objectives: string[]; links: Record<string, string>; milestone_ids: string[]; created_at: string
+}
+export interface LessonInput {
+  title: Localized_; description?: Localized_ | null; framework_id: string; area_id?: string | null; age_band_id?: string | null; room_id?: string | null
+  duration_minutes: number; materials: string[]; objectives: string[]; links?: Record<string, string>; milestone_ids?: string[]
+}
