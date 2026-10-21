@@ -452,11 +452,14 @@ public sealed class FakePushSender : NMS.Application.Notifications.IPushSender
 
     public bool IsConfigured => true;
 
-    public Task<NMS.Shared.Results.Result> SendAsync(string token, string title, string body, CancellationToken cancellationToken)
+    public List<(string Token, string Tier, string? Link)> Meta { get; } = [];
+
+    public Task<NMS.Shared.Results.Result> SendAsync(string token, string title, string body, string tier, string? link, CancellationToken cancellationToken)
     {
         lock (Sent)
         {
             Sent.Add((token, title, body));
+            Meta.Add((token, tier, link));
         }
 
         return Task.FromResult(NMS.Shared.Results.Result.Success());

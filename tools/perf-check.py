@@ -7,6 +7,7 @@ Usage:  python tools/perf-check.py [--users 10] [--requests 100] [--api http://l
 """
 import argparse
 import json
+import random
 import statistics
 import time
 import urllib.request
@@ -35,7 +36,9 @@ PATHS = [
 ]
 
 
-def call(api, path, token):
+def call(api, path, token, think=0.0):
+    if think:
+        time.sleep(random.uniform(0, think))
     request = urllib.request.Request(api + path, headers={"Authorization": f"Bearer {token}"})
     started = time.perf_counter()
     try:
@@ -53,6 +56,7 @@ def main():
     parser.add_argument("--users", type=int, default=10)
     parser.add_argument("--requests", type=int, default=100)
     parser.add_argument("--limit", type=float, default=2.5)
+    parser.add_argument("--think", type=float, default=0.0, help="each caller waits a random 0..N seconds before asking, like a person")
     args = parser.parse_args()
 
     login = urllib.request.Request(
@@ -63,16 +67,17 @@ def main():
     first, last = month + "-01", month + "-28"
 
     failed_gate = False
-    print(f"{'screen data':58} {'p50':>7} {'p95':>7} {'max':>7}  errors")
+    print(f"{'screen data':58} {'p50':>7} {'p95':>7} {'p99':>7} {'max':>7}  errors")
     for template in PATHS:
         path = template.format(month=month, first=first, last=last)
         with ThreadPoolExecutor(max_workers=args.users) as pool:
-            results = list(pool.map(lambda _: call(args.api, path, token), range(args.requests)))
+            results = list(pool.map(lambda _: call(args.api, path, token, args.think), range(args.requests)))
         times = sorted(t for t, _ in results)
         errors = sum(1 for _, s in results if s != 200)
         p95 = times[int(len(times) * 0.95) - 1]
+        p99 = times[min(len(times) - 1, int(len(times) * 0.99))]
         failed_gate |= p95 > args.limit or errors > 0
-        print(f"{template[:58]:58} {statistics.median(times):6.3f}s {p95:6.3f}s {times[-1]:6.3f}s  {errors}")
+        print(f"{template[:58]:58} {statistics.median(times):6.3f}s {p95:6.3f}s {p99:6.3f}s {times[-1]:6.3f}s  {errors}")
     print("\nGATE:", "FAILED" if failed_gate else f"passed (95th percentile under {args.limit}s, no errors)")
 
 

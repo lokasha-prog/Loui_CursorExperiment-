@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { View } from 'react-native'
 import { DEV_LOGIN } from '../api'
+import { apiBase, setApiUrl } from '../core'
 import { useAuth } from '../auth'
 import { useI18n, pick, type Lang } from '../i18n'
 import { Banner, Body, Btn, Card, Field, Heading, Screen, Title } from '../ui'
@@ -13,6 +14,8 @@ export function LoginScreen() {
   const [centres, setCentres] = useState<{ slug: string; name: Record<string, string> }[] | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
+  const [server, setServer] = useState(apiBase())
+  const [serverSaved, setServerSaved] = useState(false)
 
   const submit = async (tenant?: string) => {
     setBusy(true)
@@ -46,6 +49,11 @@ export function LoginScreen() {
           <Btn label={busy ? t('signingIn') : t('signIn')} onPress={() => void submit()} busy={busy} disabled={!email || !password} />
         </Card>
       )}
+      <Card>
+        <Field label={t('serverAddress')} value={server} onChangeText={(v) => { setServer(v); setServerSaved(false) }} autoCapitalize="none" keyboardType="url" />
+        <Body muted>{t('serverHint')}</Body>
+        <Btn kind="secondary" label={serverSaved ? t('serverSaved') : t('serverSave')} onPress={() => void setApiUrl(server).then(() => setServerSaved(true))} />
+      </Card>
       {DEV_LOGIN && (
         <Card>
           <Body muted>Test users (this computer only)</Body>

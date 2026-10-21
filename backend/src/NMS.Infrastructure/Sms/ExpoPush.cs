@@ -18,7 +18,7 @@ public sealed class ExpoPushSender(HttpClient http, IOptions<PushOptions> option
 {
     public bool IsConfigured => options.Value.Provider == "expo";
 
-    public async Task<Result> SendAsync(string token, string title, string body, CancellationToken cancellationToken)
+    public async Task<Result> SendAsync(string token, string title, string body, string tier, string? link, CancellationToken cancellationToken)
     {
         if (!IsConfigured)
         {
@@ -27,7 +27,7 @@ public sealed class ExpoPushSender(HttpClient http, IOptions<PushOptions> option
 
         try
         {
-            using var response = await http.PostAsJsonAsync("https://exp.host/--/api/v2/push/send", new { to = token, title, body, sound = "default", priority = "high" }, cancellationToken);
+            using var response = await http.PostAsJsonAsync("https://exp.host/--/api/v2/push/send", new { to = token, title, body, sound = "default", priority = tier == "critical" ? "high" : "normal", channelId = tier, data = new { link, tier } }, cancellationToken);
             return response.IsSuccessStatusCode ? Result.Success() : Result.Failure(Error.InvalidState($"Push service answered {(int)response.StatusCode}."));
         }
         catch (HttpRequestException)

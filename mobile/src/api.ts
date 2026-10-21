@@ -1,4 +1,4 @@
-import { API_URL, secret } from './core'
+import { apiBase, secret } from './core'
 
 export interface Me {
   id: string
@@ -46,7 +46,7 @@ export function refreshSession(): Promise<Session | null> {
     const token = await secret.get(REFRESH_KEY)
     if (!token) return null
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/refresh`, { method: 'POST', headers: headers(), body: JSON.stringify({ refresh_token: token }) })
+      const response = await fetch(`${apiBase()}/api/v1/auth/refresh`, { method: 'POST', headers: headers(), body: JSON.stringify({ refresh_token: token }) })
       const body = await parse(response)
       if (!response.ok || !body?.data) {
         await secret.remove(REFRESH_KEY)
@@ -66,7 +66,7 @@ export function refreshSession(): Promise<Session | null> {
 }
 
 export async function login(email: string, password: string, tenant?: string): Promise<Session | { choose: { slug: string; name: Record<string, string> }[] }> {
-  const response = await fetch(`${API_URL}/api/v1/auth/login`, { method: 'POST', headers: headers(), body: JSON.stringify({ email, password, tenant: tenant ?? null }) })
+  const response = await fetch(`${apiBase()}/api/v1/auth/login`, { method: 'POST', headers: headers(), body: JSON.stringify({ email, password, tenant: tenant ?? null }) })
   const body = await parse(response)
   if (!response.ok) throw new ApiError(response.status, body?.errors?.[0]?.code ?? 'UNKNOWN', body?.errors?.[0]?.message ?? 'Sign-in failed')
   if (body.data?.choose_centre) return { choose: body.data.choose_centre }
@@ -80,7 +80,7 @@ export async function login(email: string, password: string, tenant?: string): P
 export const DEV_LOGIN = process.env.EXPO_PUBLIC_DEV_LOGIN === '1'
 
 export async function devLogin(role: string): Promise<Session> {
-  const response = await fetch(`${API_URL}/api/v1/dev/quick-login`, { method: 'POST', headers: headers(), body: JSON.stringify({ role }) })
+  const response = await fetch(`${apiBase()}/api/v1/dev/quick-login`, { method: 'POST', headers: headers(), body: JSON.stringify({ role }) })
   const body = await parse(response)
   if (!response.ok) throw new ApiError(response.status, 'DEV_LOGIN', 'Test sign-in is not available')
   const session = body.data as Session
@@ -93,7 +93,7 @@ export async function signOut() {
   const token = await secret.get(REFRESH_KEY)
   await secret.remove(REFRESH_KEY)
   accessToken = null
-  if (token) fetch(`${API_URL}/api/v1/auth/logout`, { method: 'POST', headers: headers(), body: JSON.stringify({ refresh_token: token }) }).catch(() => undefined)
+  if (token) fetch(`${apiBase()}/api/v1/auth/logout`, { method: 'POST', headers: headers(), body: JSON.stringify({ refresh_token: token }) }).catch(() => undefined)
 }
 
 export const hasSavedSession = async () => !!(await secret.get(REFRESH_KEY))
@@ -104,7 +104,7 @@ export const isOffline = (error: unknown) => error instanceof ApiError && error.
 export async function request<T>(method: string, path: string, body?: unknown, retry = true): Promise<{ data: T; next: string | null }> {
   let response: Response
   try {
-    response = await fetch(`${API_URL}/api/v1${path}`, { method, headers: headers(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}), body: body === undefined ? undefined : JSON.stringify(body) })
+    response = await fetch(`${apiBase()}/api/v1${path}`, { method, headers: headers(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}), body: body === undefined ? undefined : JSON.stringify(body) })
   } catch {
     throw new ApiError(0, 'NETWORK', 'No connection')
   }
@@ -136,7 +136,7 @@ export async function upload<T>(path: string, uri: string, name: string, type: s
   }
   let response: Response
   try {
-    response = await fetch(`${API_URL}/api/v1${path}`, { method: 'POST', headers: { 'X-NMS-Client': 'mobile', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) }, body: form })
+    response = await fetch(`${apiBase()}/api/v1${path}`, { method: 'POST', headers: { 'X-NMS-Client': 'mobile', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) }, body: form })
   } catch {
     throw new ApiError(0, 'NETWORK', 'No connection')
   }

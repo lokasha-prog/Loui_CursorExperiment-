@@ -13,6 +13,7 @@ import { MessagesScreen } from './src/screens/MessagesScreen'
 import { MoreScreen } from './src/screens/MoreScreen'
 import { ReportsScreen } from './src/screens/ReportsScreen'
 import { TodayScreen } from './src/screens/TodayScreen'
+import { onAlertTapped } from './src/push'
 import { queue } from './src/queue'
 import { Banner, Body, Btn, Loading, color } from './src/ui'
 
@@ -41,6 +42,13 @@ function Shell() {
   const { me, ready, locked, unlock } = useAuth()
   const [tab, setTab] = useState<string>('')
   const [waiting, setWaiting] = useState(0)
+
+  // Tapping an alert opens the screen it is about.
+  useEffect(() => onAlertTapped((link) => {
+    const map: Record<string, string> = { '/feed': 'feed', '/messages': 'messages', '/learning': me?.roles.includes('parent') ? 'learning' : 'feed', '/attendance': 'attendance', '/notifications': 'alerts' }
+    const id = map[link]
+    if (id) setTab(id)
+  }), [me])
 
   // Whatever was saved with no signal is sent as soon as there is some.
   useEffect(() => {

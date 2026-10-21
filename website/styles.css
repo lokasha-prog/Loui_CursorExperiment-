@@ -298,3 +298,16 @@ footer a { color: #ffd9c7; }
 
 .signin { font-weight: 800; text-decoration: none; color: var(--primary-dark); border: 2px solid var(--primary); border-radius: 999px; padding: 8px 18px; min-height: 42px; display: inline-flex; align-items: center; transition: background .15s, color .15s; }
 .signin:hover { background: var(--primary); color: #fff; }
+
+/* header stays on one line: nothing wraps, and the menu folds into the burger sooner */
+.brand, nav.main a, nav.main button, .signin { white-space: nowrap; }
+.brand { font-size: 1.15rem; }
+nav.main { gap: 18px; font-size: .95rem; }
+nav.main a.btn { padding: 10px 20px; min-height: 42px; }
+.signin { padding: 7px 16px; min-height: 40px; }
+@media (max-width: 1180px) {
+  .burger { display: block; }
+  nav.main { display: none; position: absolute; inset-inline: 0; top: 100%; background: #fff; flex-direction: column; align-items: stretch; padding: 16px 22px 22px; border-bottom: 1px solid var(--line); gap: 12px; }
+  nav.main.open { display: flex; }
+  nav.main .btn, nav.main .signin, nav.main .lang { justify-content: center; }
+}

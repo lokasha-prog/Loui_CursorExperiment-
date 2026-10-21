@@ -28,6 +28,7 @@ const en = {
   observe: 'Record an observation', obsType: 'Type', obsTypes: { informal: 'Informal', formal: 'Formal', concern: 'Concern' }, obsNotes: 'What you saw', obsShare: 'Share with the family', obsConcernPrivate: 'Concerns are never shared with the family',
   obsSave: 'Save observation', obsSaved: 'Observation saved.', obsQueued: 'Saved on this phone. It will be sent when there is signal.', obsPhoto: 'Add a photo', obsPhotoTaken: 'Photo added', obsPhotoNeedsSignal: 'The photo needs a signal, so only the note was saved.', takePhoto: 'Take photo', choosePhoto: 'Choose photo', search: 'Search',
   updatedOffline: 'Showing the last saved copy.', unsent: '{{count}} waiting to be sent',
+  serverAddress: 'Nursery server address', serverHint: 'Your nursery gives you this address, for example http://192.168.1.20:5178', serverSave: 'Save address', serverSaved: 'Saved',
   noReports: 'No day reports yet.', arrived: 'Arrived', left: 'Left', moments: '{{count}} moments shared', markAllRead: 'Mark all as read', preferences: 'How we reach you', inApp: 'In the app', byEmail: 'By e-mail',
   tiers: { critical: 'Urgent alerts', operational: 'Daily updates', informational: 'News and reminders' }, urgentLocked: 'Urgent alerts always reach you.', pushOn: 'Phone alerts', pushOff: 'Phone alerts are off', pushEnable: 'Turn on phone alerts',
 }
@@ -56,6 +57,7 @@ const ar: typeof en = {
   observe: 'تسجيل ملاحظة', obsType: 'النوع', obsTypes: { informal: 'غير رسمية', formal: 'رسمية', concern: 'قلق' }, obsNotes: 'ما رأيته', obsShare: 'شاركها مع الأسرة', obsConcernPrivate: 'لا تُشارَك حالات القلق مع الأسرة أبداً',
   obsSave: 'حفظ الملاحظة', obsSaved: 'تم حفظ الملاحظة.', obsQueued: 'تم الحفظ على هذا الهاتف. ستُرسل عند توفر الإشارة.', obsPhoto: 'أضف صورة', obsPhotoTaken: 'تمت إضافة الصورة', obsPhotoNeedsSignal: 'الصورة تحتاج إشارة، لذا حُفظت الملاحظة فقط.', takePhoto: 'التقاط صورة', choosePhoto: 'اختيار صورة', search: 'بحث',
   updatedOffline: 'نعرض آخر نسخة محفوظة.', unsent: '{{count}} بانتظار الإرسال',
+  serverAddress: 'عنوان خادم الحضانة', serverHint: 'تعطيك الحضانة هذا العنوان، مثل http://192.168.1.20:5178', serverSave: 'حفظ العنوان', serverSaved: 'تم الحفظ',
   noReports: 'لا توجد تقارير يومية بعد.', arrived: 'وصل', left: 'غادر', moments: 'تمت مشاركة {{count}} لحظات', markAllRead: 'تحديد الكل كمقروء', preferences: 'كيف نتواصل معك', inApp: 'داخل التطبيق', byEmail: 'بالبريد الإلكتروني',
   tiers: { critical: 'تنبيهات عاجلة', operational: 'تحديثات يومية', informational: 'أخبار وتذكيرات' }, urgentLocked: 'التنبيهات العاجلة تصلك دائماً.', pushOn: 'تنبيهات الهاتف', pushOff: 'تنبيهات الهاتف متوقفة', pushEnable: 'تفعيل تنبيهات الهاتف',
 }

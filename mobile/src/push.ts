@@ -18,6 +18,12 @@ export async function pushStatus(): Promise<'on' | 'off' | 'unavailable'> {
 /** Asks the person for permission, gets this phone's alert address and tells the server. Quietly does nothing if the build has no store project yet. */
 export async function enablePush(): Promise<void> {
   if (Platform.OS === 'web') return
+  if (Platform.OS === 'android') {
+    // One channel per tier, so urgent alerts can sound and show at once while news stays quiet.
+    await Notifications.setNotificationChannelAsync('critical', { name: 'Urgent', importance: Notifications.AndroidImportance.MAX, vibrationPattern: [0, 300, 200, 300] })
+    await Notifications.setNotificationChannelAsync('operational', { name: 'Daily updates', importance: Notifications.AndroidImportance.DEFAULT })
+    await Notifications.setNotificationChannelAsync('informational', { name: 'News and reminders', importance: Notifications.AndroidImportance.LOW })
+  }
   const asked = await Notifications.requestPermissionsAsync()
   if (!asked.granted) return
   const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId
@@ -33,4 +39,14 @@ export async function disablePush(): Promise<void> {
   if (!token) return
   try { await api.post('/notifications/devices/actions/remove', { token }) } catch { /* the token is dropped locally anyway */ }
   await store.remove(KEY)
+}
+
+/** Calls back with where a tapped alert leads (for example /feed), also when the app was closed. */
+export function onAlertTapped(open: (link: string) => void): () => void {
+  if (Platform.OS === 'web') return () => undefined
+  const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+    const link = response.notification.request.content.data?.link
+    if (typeof link === 'string') open(link)
+  })
+  return () => sub.remove()
 }

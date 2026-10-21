@@ -1,3 +1,4 @@
+﻿param([switch]$Lan)   # -Lan lets phones on the same network reach the API (also allow port 5178 in Windows Firewall)
 # Rebuilds the API into .run\api and starts it on http://localhost:5178 (development helper).
 # Runs the API from a copy so that building and testing never stop it.
 $root = Split-Path -Parent $PSScriptRoot
@@ -12,7 +13,7 @@ dotnet publish (Join-Path $root 'backend\src\NMS.Api') -c Debug -o $out --nologo
 if ($LASTEXITCODE -ne 0) { throw 'Publish failed' }
 
 $env:ASPNETCORE_ENVIRONMENT = 'Development'
-Start-Process -FilePath dotnet -ArgumentList 'NMS.Api.dll', '--urls', 'http://localhost:5178' `
+Start-Process -FilePath dotnet -ArgumentList 'NMS.Api.dll', '--urls', $(if ($Lan) { 'http://0.0.0.0:5178' } else { 'http://localhost:5178' }) `
     -WorkingDirectory $out -WindowStyle Hidden `
     -RedirectStandardOutput (Join-Path $env:TEMP 'nms-api.log') -RedirectStandardError (Join-Path $env:TEMP 'nms-api.err.log')
 Start-Sleep -Seconds 20

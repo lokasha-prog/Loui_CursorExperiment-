@@ -18,7 +18,8 @@ public interface IPushSender
 {
     bool IsConfigured { get; }
 
-    Task<Result> SendAsync(string token, string title, string body, CancellationToken cancellationToken);
+    /// <summary>Tier picks the phone's alert channel (urgent alerts sound and show at once); link is where tapping the alert leads.</summary>
+    Task<Result> SendAsync(string token, string title, string body, string tier, string? link, CancellationToken cancellationToken);
 }
 
 public interface ISmsSender
@@ -359,7 +360,7 @@ public sealed class RunNotificationDispatchHandler(IAppDbContext db, IEmailSende
             var result = isSms
                 ? await sms.SendAsync(delivery.Recipient, $"{Pick(note.Title, lang)}: {Pick(note.Body, lang)}", ct)
                 : isPush
-                    ? await push.SendAsync(delivery.Recipient, Pick(note.Title, lang), Pick(note.Body, lang), ct)
+                    ? await push.SendAsync(delivery.Recipient, Pick(note.Title, lang), Pick(note.Body, lang), note.Tier, note.Link, ct)
                     : await mail.SendAsync(delivery.Recipient, Pick(note.Title, lang), Pick(note.Body, lang), ct);
             delivery.Attempts++;
             if (result.IsSuccess)

@@ -2,7 +2,7 @@ import * as LocalAuthentication from 'expo-local-authentication'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Platform } from 'react-native'
 import { api, devLogin as apiDevLogin, hasSavedSession, login as apiLogin, refreshSession, setSignedOutHandler, signOut as apiSignOut, type Me } from './api'
-import { store } from './core'
+import { loadApiUrl, store } from './core'
 import { clearCache } from './cache'
 import { disablePush } from './push'
 
@@ -43,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setSignedOutHandler(() => setMe(null))
     void (async () => {
+      await loadApiUrl()
       const hardware = Platform.OS !== 'web' && (await LocalAuthentication.hasHardwareAsync()) && (await LocalAuthentication.isEnrolledAsync())
       setCanUse(hardware)
       const on = (await store.get<boolean>('nms.biometric')) === true && hardware

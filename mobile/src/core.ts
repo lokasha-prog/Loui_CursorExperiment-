@@ -3,7 +3,27 @@ import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
 
 /** Where the centre's server is. On an Android emulator the computer is 10.0.2.2; a real phone needs the server's address (EXPO_PUBLIC_API_URL). */
-export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? (Platform.OS === 'android' ? 'http://10.0.2.2:5178' : 'http://localhost:5178')
+const DEFAULT_URL = process.env.EXPO_PUBLIC_API_URL ?? (Platform.OS === 'android' ? 'http://10.0.2.2:5178' : 'http://localhost:5178')
+let current = DEFAULT_URL
+
+/** The address in use now: the one the person typed on the sign-in screen, or the built-in default. */
+export const apiBase = () => current
+
+/** Loads the address saved on this phone (call once at start). */
+export async function loadApiUrl() {
+  try {
+    const saved = await AsyncStorage.getItem('nms.apiUrl')
+    if (saved) current = saved
+  } catch {
+    // Keep the default.
+  }
+}
+
+/** Saves the nursery server address typed on the sign-in screen, for example http://192.168.1.20:5178. */
+export async function setApiUrl(url: string) {
+  current = url.trim().replace(/\/+$/, '') || DEFAULT_URL
+  try { await AsyncStorage.setItem('nms.apiUrl', current) } catch { /* not saved, still used until the app closes */ }
+}
 
 /** The refresh token is a secret, so on a phone it lives in the secure store; on the web preview it falls back to local storage. */
 export const secret = {

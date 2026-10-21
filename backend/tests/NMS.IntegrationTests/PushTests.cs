@@ -39,6 +39,7 @@ public class PushTests(NmsApiFixture api)
         await CauseShortageAsync();
         await DispatchAsync();
         api.Push.Sent.Should().Contain(m => m.Token == token && m.Title.Contains("needs more staff"));
+        api.Push.Meta.Should().Contain(m => m.Token == token && m.Tier == "critical");
 
         (await manager.Client.PostAsync("/api/v1/notifications/devices/actions/remove", new { token })).Status.Should().Be(HttpStatusCode.NoContent);
         api.Push.Sent.Clear();
