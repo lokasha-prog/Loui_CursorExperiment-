@@ -18,9 +18,11 @@ public class DevToolsTests(NmsApiFixture api)
     public async Task The_helper_does_not_exist_outside_development()
     {
         var list = await api.NewClient().GetAsync("/api/v1/dev/test-users");
+        var owner = await api.NewClient().GetAsync("/api/v1/dev/owner-login");
         var login = await api.NewClient().PostAsync("/api/v1/dev/quick-login", new { role = "teacher" });
 
         list.Status.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.Unauthorized);
+        owner.Status.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.Unauthorized);
         login.Status.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.Unauthorized);
     }
 

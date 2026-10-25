@@ -2,6 +2,7 @@
   "common": {
     "appName": "Bright Futures",
     "appTagline": "Nursery Management System",
+    "version": "Version {{version}}",
     "save": "Save",
     "saving": "Saving…",
     "cancel": "Cancel",
@@ -36,6 +37,13 @@
     "yes": "Yes",
     "no": "No"
   },
+  "confirm": {
+    "remove": "Remove",
+    "delete": "Delete",
+    "cancelInvoice": "Cancel invoice",
+    "keepInvoice": "Keep invoice",
+    "replaceLink": "Replace link"
+  },
   "nav": {
     "group": "All centres",
     "main": "Main menu",
@@ -53,11 +61,14 @@
     "leave": "Leave",
     "reports": "Reports",
     "feed": "Daily feed",
+    "gallery": "Gallery",
+    "myGallery": "My gallery",
     "messages": "Messages",
     "audit": "Audit log",
     "feedback": "Feedback",
     "billing": "Billing",
     "enquiries": "Enquiries",
+    "releaseNotes": "Release notes",
     "settings": "Settings",
     "calendar": "Calendar",
     "tools": "Tools",
@@ -77,6 +88,7 @@
     "RATE_LIMIT_EXCEEDED": "Too many attempts. Please wait a moment and try again.",
     "INTERNAL_ERROR": "Something went wrong on our side. Please try again.",
     "NETWORK": "We could not reach the server. Check your connection and try again.",
+    "AI_NOT_SET_UP": "The AI Brain isn't set up yet: no AI key has been added on the server. Ask your system administrator to add it.",
     "UNKNOWN": "Something went wrong. Please try again."
   },
   "validation": {
@@ -146,8 +158,7 @@
       "goToLogin": "Go to sign in"
     },
     "dev": {
-      "title": "Test users (this computer only)",
-      "note": "For development. Pick a role to enter as a test user. Use your own account for the Super administrator."
+      "pick": "Choose a test account"
     }
   },
   "dashboard": {
@@ -321,6 +332,34 @@
       "apply": "Apply change",
       "statusChanged": "Status updated",
       "sinceStatus": "Since {{date}}"
+    },
+    "gallery": {
+      "title": "Gallery",
+      "subtitle": "Photos and videos of {{name}}, shared with the family.",
+      "parentSubtitle": "Photos and videos the nursery has shared of {{name}}.",
+      "add": "Add photos",
+      "empty": "No photos yet",
+      "emptyStaff": "Add the first photo or video. The family will see it straight away.",
+      "emptyParent": "Photos the nursery shares of your child will appear here.",
+      "uploadTitle": "Add photos or videos",
+      "uploadDescription": "Pick one or more files. They are added to this child's gallery and the family is told.",
+      "files": "Photos or video",
+      "filesHint": "JPEG, PNG, GIF, WebP or MP4. Photos up to 10 MB, video up to 30 MB.",
+      "caption": "Caption (English)",
+      "captionAr": "Caption (Arabic)",
+      "submit": "Upload",
+      "uploading": "Uploading...",
+      "uploaded": "Added to the gallery",
+      "chooseFile": "Choose at least one file.",
+      "open": "Open photo",
+      "removeConfirm": "The family will no longer see it in the child's gallery or the daily feed.",
+      "removeTitle": "Remove this photo?",
+      "removeSharedTitle": "Remove this photo for everyone?",
+      "removing": "Removing...",
+      "removeSharedConfirm": "It is shared with the whole nursery, so every family will stop seeing it.",
+      "removed": "Removed from the gallery",
+      "remove": "Remove",
+      "by": "Shared by {{name}} on {{date}}"
     },
     "guardians": {
       "add": "Add guardian",
@@ -738,6 +777,69 @@
       "enquiries": "Enquiries and enrolments",
       "newEnquiries": "New enquiries",
       "sources": "Where enquiries come from"
+    }
+  },
+  "dataChat": {
+    "title": "Chat with data",
+    "conversation": "Conversation",
+    "emptyTitle": "What would you like to know?",
+    "emptyBody": "Ask in your own words. The AI Brain looks up the exact counts and shows how it worked them out.",
+    "examplesLabel": "Example questions",
+    "examples": {
+      "girlsPresent": "How many girls are present today in each room?",
+      "teachersOnLeave": "How many teachers are on leave today?",
+      "concerns": "How many concerns were recorded this month, by room?",
+      "overdue": "How much money is overdue?",
+      "branches": "Compare the branches this month"
+    },
+    "you": "You said:",
+    "assistant": "The AI Brain answered:",
+    "howWorkedOut": "How I worked it out ({{count}} look-ups)",
+    "thinking": "Looking it up...",
+    "questionLabel": "Your question",
+    "placeholder": "For example: how many children aged under 2 are absent today?",
+    "send": "Ask",
+    "clear": "Clear conversation",
+    "privacy": "Only counts and totals go to the AI provider, never names of children, parents or staff."
+  },
+  "releaseNotes": {
+    "title": "Release notes",
+    "subtitle": "Every version of Bright Futures and what changed in it. You are using version {{version}}.",
+    "version": "Version {{version}}",
+    "current": "You are here",
+    "preRelease": "Pre-release",
+    "earlierTitle": "Before version 1.0",
+    "earlierNote": "Pre-release versions, one for each development sprint, rebuilt from the project plan.",
+    "showEarlier": "Show {{count}} earlier versions",
+    "hideEarlier": "Hide earlier versions",
+    "englishOnly": "Release notes are written in English."
+  },
+  "gallery": {
+    "subtitle": "Every photo and video shared with families, newest first.",
+    "parentSubtitle": "Photos and videos of your children and of the whole nursery.",
+    "add": "Add photos",
+    "uploadTitle": "Add photos to the gallery",
+    "uploadDescription": "Choose who sees them. They appear straight away in the galleries of the children you choose.",
+    "wholeNursery": "Whole nursery",
+    "emptyStaff": "Photos shared with families will appear here.",
+    "emptyParent": "Photos the nursery shares of your children will appear here.",
+    "audience": {
+      "label": "Share with",
+      "centre": "This branch (every family)",
+      "room": "A room",
+      "group": "A group",
+      "children": "Chosen children",
+      "branches": "Chosen branches",
+      "allBranches": "All branches",
+      "whichRoom": "Room",
+      "whichGroup": "Group",
+      "groupHint": "Goes to the children in the group today.",
+      "whichChildren": "Children",
+      "whichBranches": "Branches",
+      "branchesHint": "Every family in each chosen branch sees it.",
+      "allBranchesNote": "Every family in every branch of the group will see these photos.",
+      "pick": "Choose...",
+      "chooseTarget": "Choose who to share with."
     }
   },
   "feed": {
@@ -1418,6 +1520,13 @@
     "next": "Next month",
     "addOn": "Add an event on {{date}}",
     "more": "+{{count}} more",
+    "details": {
+      "when": "When",
+      "repeats": "Repeats",
+      "addToMine": "Add to my calendar",
+      "deleted": "Event removed",
+      "confirmDeleteSeries": "This event repeats. Remove every date in the series?"
+    },
     "agendaEmpty": "Nothing this month",
     "agendaEmptyBody": "Switch on more layers or move to another month.",
     "tabs": {

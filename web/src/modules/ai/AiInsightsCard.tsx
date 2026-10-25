@@ -1,6 +1,6 @@
 import { Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { ApiError } from '@/api/client'
+import { aiErrorText } from './aiError'
 import { useAttendanceInsights } from '@/api/hooks'
 import { Button } from '@/components/ui/button'
 import { Alert, Card } from '@/components/ui/surfaces'
@@ -35,7 +35,7 @@ export function AiInsightsCard() {
       <div aria-live="polite" className="mt-4">
         {insights.isError && (
           <Alert tone="danger">
-            {insights.error instanceof ApiError && insights.error.status === 422 ? t('ai.down') : t('errors.UNKNOWN')}
+            {aiErrorText(insights.error, t)}
           </Alert>
         )}
         {result && (

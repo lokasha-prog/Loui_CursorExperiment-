@@ -14,6 +14,7 @@ import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { formatDate } from '@/lib/format'
 import { cn, localized } from '@/lib/utils'
 import { can, useAuth } from '@/stores/auth'
+import { confirmAction } from '@/components/shared/confirm'
 
 const size = (bytes: number) => (bytes >= 1_048_576 ? `${(bytes / 1_048_576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`)
 
@@ -195,7 +196,7 @@ export default function ResourcesPage() {
                 <button type="button" aria-pressed={folder === f.id} onClick={() => setFolder(f.id)} className={cn('flex-1 rounded-md px-3 py-2 text-start text-sm hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', f.parent_folder_id && 'ps-6', folder === f.id && 'bg-accent font-semibold')}>
                   {localized(f.name, i18n.language)} <span className="text-xs text-muted-foreground">({f.documents})</span>{f.audience === 'staff' && <Badge className="ms-1">{t('resources.audiences.staff')}</Badge>}
                 </button>
-                {canWrite && f.documents === 0 && <Button size="sm" variant="ghost" aria-label={t('common.delete')} onClick={() => { if (window.confirm(t('resources.confirmFolder'))) void run(() => removeFolder.mutateAsync(f.id)) }}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button>}
+                {canWrite && f.documents === 0 && <Button size="sm" variant="ghost" aria-label={t('common.delete')} onClick={() => void confirmAction({ title: t('resources.confirmFolder'), confirmLabel: t('confirm.remove') }).then((ok) => { if (ok) void run(() => removeFolder.mutateAsync(f.id)) })}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button>}
               </li>
             ))}
           </ul>
@@ -222,7 +223,7 @@ export default function ResourcesPage() {
                           <Button size="sm" onClick={() => void get(d)}><Download className="h-4 w-4" aria-hidden="true" />{t('resources.download')}</Button>
                           {canWrite && <Button size="sm" variant="secondary" onClick={() => { setTarget(d.id); picker.current?.click() }}>{t('resources.newVersion')}</Button>}
                           {canWrite && <Button size="sm" variant="ghost" aria-label={t('resources.history')} onClick={() => setHistory(d)}><History className="h-4 w-4" aria-hidden="true" /></Button>}
-                          {canWrite && <Button size="sm" variant="ghost" aria-label={t('common.delete')} onClick={() => { if (window.confirm(t('resources.confirmDelete'))) void run(() => removeDoc.mutateAsync(d.id)) }}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>}
+                          {canWrite && <Button size="sm" variant="ghost" aria-label={t('common.delete')} onClick={() => void confirmAction({ title: t('resources.confirmDelete'), confirmLabel: t('confirm.remove') }).then((ok) => { if (ok) void run(() => removeDoc.mutateAsync(d.id)) })}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>}
                         </span>
                       </li>
                     ))}

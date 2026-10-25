@@ -9,6 +9,7 @@ import { Alert, Dialog, DialogContent, DialogHeader, Skeleton } from '@/componen
 import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { localized } from '@/lib/utils'
+import { confirmAction } from '@/components/shared/confirm'
 
 const AUDIENCES = ['all', 'room', 'program']
 
@@ -137,7 +138,7 @@ function Editor({ id, onClose }: { id: string | null; onClose: () => void }) {
           <>
             <Button type="button" variant="secondary" disabled={save.isPending} onClick={() => void run(async () => { await persist() }, t('newsletters.saved'))}>{t('newsletters.saveDraft')}</Button>
             <Button type="button" variant="secondary" disabled={!at || action.isPending} onClick={() => void run(async () => { const sid = await persist(); await action.mutateAsync({ id: sid, action: 'schedule', at: new Date(at).toISOString() }) }, t('newsletters.scheduled'), true)}>{t('newsletters.schedule')}</Button>
-            <Button type="button" disabled={action.isPending} onClick={() => { if (window.confirm(t('newsletters.confirmSend'))) void run(async () => { const sid = await persist(); await action.mutateAsync({ id: sid, action: 'publish' }) }, t('newsletters.sent'), true) }}>{t('newsletters.sendNow')}</Button>
+            <Button type="button" disabled={action.isPending} onClick={() => void confirmAction({ title: t('newsletters.confirmSend'), confirmLabel: t('newsletters.sendNow'), tone: 'neutral' }).then((ok) => { if (ok) void run(async () => { const sid = await persist(); await action.mutateAsync({ id: sid, action: 'publish' }) }, t('newsletters.sent'), true) })}>{t('newsletters.sendNow')}</Button>
           </>
         )}
       </div>

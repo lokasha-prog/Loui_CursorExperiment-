@@ -179,6 +179,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/health/live", () => Results.Ok(new { status = "live" })).AllowAnonymous();
+app.MapGet("/api/v1/version", (HttpContext http) => ApiResults.Ok(http, new { version = ProductVersion.Current })).AllowAnonymous().WithTags("System");
 app.MapGet("/health/ready", async (NmsDbContext db, CancellationToken ct) =>
     await db.Database.CanConnectAsync(ct) ? Results.Ok(new { status = "ready" }) : Results.StatusCode(StatusCodes.Status503ServiceUnavailable))
     .AllowAnonymous();
@@ -216,7 +217,8 @@ if (DevToolsEndpoints.IsAvailable(app.Environment, app.Configuration))
 
 if (serveWeb)
 {
-    app.MapFallbackToFile("{*path:regex(^(?!api/|hubs/|health/).*$)}", "index.html").AllowAnonymous();
+    // A file path (for example /assets/*.js) must not match this route. A matched endpoint is served instead of the file on disk.
+    app.MapFallbackToFile("{*path:regex(^(?!api/|hubs/|health/)(?!.*\\.).*$)}", "index.html").AllowAnonymous();
 }
 
 app.Run();
@@ -244,3 +246,11 @@ public sealed class RateLimitOptions
 }
 
 public partial class Program;
+
+/// <summary>The product version (nms/VERSION, stamped into the assembly at build time; ADR-0009).</summary>
+public static class ProductVersion
+{
+    public static string Current { get; } =
+        System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(typeof(ProductVersion).Assembly)?
+            .InformationalVersion.Split('+')[0] ?? "0.0.0";
+}

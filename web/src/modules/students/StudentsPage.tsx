@@ -1,4 +1,4 @@
-import { Baby, ChevronRight, Plus, Search } from 'lucide-react'
+import { Baby, ChevronRight, GalleryHorizontalEnd, Plus, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -54,12 +54,22 @@ export default function StudentsPage() {
         title={parent ? t('students.myChildrenTitle') : t('students.title')}
         subtitle={t('students.subtitle')}
         action={
-          canCreate && (
-            <Button onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              {t('students.add')}
-            </Button>
-          )
+          <div className="flex flex-wrap gap-2">
+            {can(me, 'activities.read') && (
+              <Button asChild variant="secondary">
+                <Link to="/gallery">
+                  <GalleryHorizontalEnd className="h-4 w-4" aria-hidden="true" />
+                  {parent ? t('nav.myGallery') : t('nav.gallery')}
+                </Link>
+              </Button>
+            )}
+            {canCreate && (
+              <Button onClick={() => setCreateOpen(true)}>
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                {t('students.add')}
+              </Button>
+            )}
+          </div>
         }
       />
 

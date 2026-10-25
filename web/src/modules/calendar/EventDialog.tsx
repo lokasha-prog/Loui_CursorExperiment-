@@ -9,6 +9,7 @@ import { Alert, Dialog, DialogContent, DialogHeader, Skeleton } from '@/componen
 import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { localized } from '@/lib/utils'
+import { confirmAction } from '@/components/shared/confirm'
 
 const DAY_CODES = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
 const TYPES = ['regular', 'holiday', 'staff_only']
@@ -83,7 +84,7 @@ function Form({ event, startDate, onClose }: { event: CalendarEventDetail | null
   }
 
   const del = async () => {
-    if (!event || !window.confirm(t('calendar.confirmDelete'))) return
+    if (!event || !(await confirmAction({ title: t('calendar.confirmDelete'), confirmLabel: t('confirm.remove') }))) return
     try {
       await remove.mutateAsync(event.id)
       onClose()

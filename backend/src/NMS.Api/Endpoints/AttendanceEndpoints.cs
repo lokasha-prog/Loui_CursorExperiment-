@@ -77,6 +77,11 @@ public static class AttendanceEndpoints
             .WithTags("Dashboard")
             .RequireAuthorization(Permissions.SettingsWrite);
 
+        routes.MapPost("/api/v1/ai/chat", async (DataChatCommand body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(body, ct)))
+            .WithTags("AI Brain")
+            .RequireAuthorization(Permissions.AiChat);
+
         // AI Brain briefings for management: each area needs the permission for the data it summarises.
         foreach (var (area, permission) in new[]
         {

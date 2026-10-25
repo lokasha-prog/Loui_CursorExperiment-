@@ -74,7 +74,7 @@ public sealed class LessonDraftHandler(IAppDbContext db, IAiBrain brain) : IRequ
     {
         if (!brain.IsConfigured)
         {
-            return Error.InvalidState("The AI Brain is not set up yet.");
+            return AiErrors.NotSetUp;
         }
 
         var framework = await db.CurriculumFrameworks.AsNoTracking().FirstOrDefaultAsync(f => f.Id == request.FrameworkId, ct);

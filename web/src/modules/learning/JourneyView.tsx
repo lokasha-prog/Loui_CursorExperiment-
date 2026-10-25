@@ -1,3 +1,4 @@
+import { Route } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { useJourney, useParentReports } from '@/api/hooks'
@@ -22,7 +23,7 @@ export function JourneyView({ studentId }: { studentId: string }) {
     try { await downloadLearningReport(kind, { student_id: studentId, variant: 'parent', language: lang === 'ar' ? 'ar' : 'en', format: 'pdf', ...extra }); toast.success(t('learning.reports.done')) } catch { toast.error(t('errors.UNKNOWN')) } finally { setBusy(false) }
   }
 
-  if (!studentId) return <EmptyState title={t('learning.journey.pick')} description={t('learning.journey.pickHint')} />
+  if (!studentId) return <EmptyState icon={<Route className="h-7 w-7" aria-hidden="true" />} title={t('learning.journey.pick')} description={t('learning.journey.pickHint')} />
   if (journey.isLoading) return <Skeleton className="h-48" />
 
   const items = journey.data?.items ?? []
@@ -58,7 +59,7 @@ export function JourneyView({ studentId }: { studentId: string }) {
       )}
       <section aria-labelledby="jv-line">
         <h2 id="jv-line" className="mb-3 text-base font-bold">{t('learning.journey.timeline')}</h2>
-        {items.length === 0 ? <EmptyState title={t('learning.journey.empty')} description={t('learning.journey.emptyHint')} /> : (
+        {items.length === 0 ? <EmptyState icon={<Route className="h-7 w-7" aria-hidden="true" />} title={t('learning.journey.empty')} description={t('learning.journey.emptyHint')} /> : (
           <ol className="relative space-y-4 border-s-2 border-primary/30 ps-5">
             {items.map((i) => (
               <li key={`${i.kind}-${i.id}`} className="relative">

@@ -221,6 +221,13 @@ export const authApi = {
     return body.data
   },
 
+  /** Development helper: the owner's sign-in, or null when this computer is not allowed to see it. */
+  async devOwnerLogin(): Promise<{ name: string; email: string; password: string } | null> {
+    const response = await fetch(`${BASE}/dev/owner-login`, { credentials: 'same-origin' }).catch(() => null)
+    if (!response?.ok) return null
+    return (await parse<{ name: string; email: string; password: string }>(response))?.data ?? null
+  },
+
   /** Development helper: the list of test users, or null when the server does not offer it (always so outside local development). */
   async devTestUsers(): Promise<{ role: string; email: string; exists: boolean }[] | null> {
     const response = await fetch(`${BASE}/dev/test-users`, { credentials: 'same-origin' }).catch(() => null)

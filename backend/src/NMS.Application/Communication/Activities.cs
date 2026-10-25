@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using NMS.Application.Abstractions;
 using NMS.Application.Common;
 using NMS.Application.Security;
@@ -138,14 +139,19 @@ public sealed record ActivityDto(
     string? RejectionReason,
     DateTimeOffset CreatedAt) : ICursorItem;
 
-public sealed record ListActivitiesQuery(string? Status, Guid? StudentId, string? Cursor, int? Limit)
+/// <param name="IncludeShared">With a child: also the posts for everyone (no children named) in the whole centre or in the child's room.</param>
+public sealed record ListActivitiesQuery(string? Status, Guid? StudentId, string? Cursor, int? Limit, bool? WithMedia = null, bool? IncludeShared = null)
     : IRequest<Result<CursorPage<ActivityDto>>>;
 
+/// <param name="GroupId">Names every child currently in that group, as if each had been chosen.</param>
 public sealed record CreateActivityCommand(
-    string Type, Dictionary<string, string>? Caption, IReadOnlyList<Guid>? StudentIds, Guid? RoomId, IReadOnlyList<Guid>? MediaIds)
+    string Type, Dictionary<string, string>? Caption, IReadOnlyList<Guid>? StudentIds, Guid? RoomId, IReadOnlyList<Guid>? MediaIds, Guid? GroupId = null)
     : IRequest<Result<ActivityDto>>;
 
 public sealed record DecideActivityCommand(Guid Id, bool Approve, string? Reason) : IRequest<Result<ActivityDto>>;
+
+/// <summary>Takes a post down (for example a photo put in the wrong child's gallery); families stop seeing it and its files.</summary>
+public sealed record DeleteActivityCommand(Guid Id) : IRequest<Result>;
 
 /// <summary>Raised when a post becomes visible to families.</summary>
 public sealed record ActivityPublished(Guid TenantId, Guid PostId, IReadOnlyList<Guid> StudentIds, Guid? RoomId) : MediatR.INotification;
@@ -256,7 +262,21 @@ public sealed class ListActivitiesHandler(IAppDbContext db, IAccessScope scope, 
 
         if (request.StudentId is { } studentId)
         {
-            posts = posts.Where(p => db.ActivityPostStudents.Any(x => x.PostId == p.Id && x.StudentId == studentId));
+            if (request.IncludeShared == true)
+            {
+                var room = await db.Students.AsNoTracking().Where(st => st.Id == studentId).Select(st => st.RoomId).FirstOrDefaultAsync(ct);
+                posts = posts.Where(p => db.ActivityPostStudents.Any(x => x.PostId == p.Id && x.StudentId == studentId)
+                    || (!db.ActivityPostStudents.Any(x => x.PostId == p.Id) && (p.RoomId == null || p.RoomId == room)));
+            }
+            else
+            {
+                posts = posts.Where(p => db.ActivityPostStudents.Any(x => x.PostId == p.Id && x.StudentId == studentId));
+            }
+        }
+
+        if (request.WithMedia == true)
+        {
+            posts = posts.Where(p => db.ActivityPostMedia.Any(m => m.PostId == p.Id));
         }
 
         var page = await posts.ToCursorPageAsync(request.Cursor, request.Limit,
@@ -275,7 +295,24 @@ public sealed class CreateActivityHandler(IAppDbContext db, IAccessScope scope, 
 {
     public async Task<Result<ActivityDto>> Handle(CreateActivityCommand request, CancellationToken ct)
     {
-        var studentIds = (request.StudentIds ?? []).Distinct().ToList();
+        var studentIds = (request.StudentIds ?? []).ToList();
+        if (request.GroupId is { } groupId)
+        {
+            if (!await db.StudentGroups.AnyAsync(g => g.Id == groupId, ct))
+            {
+                return Error.Validation("The group was not found.", "group_id");
+            }
+
+            var members = await db.Students.AsNoTracking().Where(st => st.GroupId == groupId && st.Status == StudentStatuses.Active).Select(st => st.Id).ToListAsync(ct);
+            if (members.Count == 0)
+            {
+                return Error.Validation("There are no children in that group yet.", "group_id");
+            }
+
+            studentIds.AddRange(members);
+        }
+
+        studentIds = studentIds.Distinct().ToList();
         if (studentIds.Count > 0)
         {
             var rooms = await scope.GetVisibleRoomIdsAsync(ct);
@@ -368,5 +405,118 @@ public sealed class DecideActivityHandler(IAppDbContext db, ICurrentUser current
         }
 
         return Result<ActivityDto>.Success(await ActivityVisibility.ToDtoAsync(db, post, null, ct));
+    }
+}
+
+public sealed class DeleteActivityHandler(IAppDbContext db, IAccessScope scope, ICurrentUser current) : IRequestHandler<DeleteActivityCommand, Result>
+{
+    public async Task<Result> Handle(DeleteActivityCommand request, CancellationToken ct)
+    {
+        var visible = await ActivityVisibility.PostsAsync(db, scope, current, ct);
+        if (!await visible.AnyAsync(p => p.Id == request.Id, ct))
+        {
+            return Result.Failure(Error.NotFound("Post not found."));
+        }
+
+        var post = await db.ActivityPosts.FirstAsync(p => p.Id == request.Id, ct);
+        if (post.PostedByUserId != current.UserId && !current.HasPermission(Permissions.ActivitiesApprove))
+        {
+            return Result.Failure(Error.Forbidden("Only the person who posted it or a manager can remove this post."));
+        }
+
+        db.ActivityPosts.Remove(post);
+        await db.SaveChangesAsync(ct);
+        return Result.Success();
+    }
+}
+
+// ── Sharing with other centres of the group ─────────────────────────────────
+
+/// <summary>Shares photos with the whole of several centres in the group (all of them when none are named), as one post in each.</summary>
+public sealed record ShareWithCentresCommand(
+    Dictionary<string, string>? Caption, IReadOnlyList<Guid> MediaIds, IReadOnlyList<Guid>? CentreIds) : IRequest<Result<SharedWithCentresDto>>;
+
+public sealed record SharedWithCentresDto(int Centres);
+
+public sealed class ShareWithCentresValidator : AbstractValidator<ShareWithCentresCommand>
+{
+    public ShareWithCentresValidator()
+    {
+        RuleFor(c => c.MediaIds).Must(m => m is { Count: > 0 and <= 10 }).WithMessage("Add between 1 and 10 files.");
+        RuleFor(c => c.Caption!).Must(d => d.Values.All(v => v.Length <= 2000)).When(c => c.Caption is not null).WithMessage("The text is too long.");
+    }
+}
+
+/// <summary>
+/// Every centre keeps its own data, so each one gets its own copy of the files and its own post for the whole centre,
+/// published to that centre's families exactly like a post made there.
+/// </summary>
+public sealed class ShareWithCentresHandler(IAppDbContext db, ITenantContext tenant, ICurrentUser current, CentreGroups.CentreRunner runner, IClock clock)
+    : IRequestHandler<ShareWithCentresCommand, Result<SharedWithCentresDto>>
+{
+    public async Task<Result<SharedWithCentresDto>> Handle(ShareWithCentresCommand request, CancellationToken ct)
+    {
+        var mediaIds = request.MediaIds.Distinct().ToList();
+        var files = await db.MediaFiles.AsNoTracking()
+            .Where(m => mediaIds.Contains(m.Id) && m.ScanStatus == MediaStatuses.Approved && m.UploadedBy == current.UserId).ToListAsync(ct);
+        if (files.Count != mediaIds.Count)
+        {
+            return Error.Validation("One or more files were not found.", "media_ids");
+        }
+
+        var (_, group) = await CentreGroups.GroupMembers.OfAsync(db, tenant.TenantId, ct);
+        var active = group.Where(c => c.Status == "active").ToList();
+        var named = request.CentreIds?.Distinct().ToList() ?? [];
+        var targets = named.Count > 0 ? active.Where(c => named.Contains(c.Id)).ToList() : active;
+        if (targets.Count == 0 || (named.Count > 0 && targets.Count != named.Count))
+        {
+            return Error.Validation("One or more centres were not found in your group.", "centre_ids");
+        }
+
+        var caption = request.Caption?.Where(kv => !string.IsNullOrWhiteSpace(kv.Value)).ToDictionary(kv => kv.Key, kv => kv.Value.Trim());
+        var type = files.All(f => f.ContentType.StartsWith("video/", StringComparison.Ordinal)) ? ActivityTypes.Video : ActivityTypes.Photo;
+        var email = (current.Email ?? string.Empty).ToLowerInvariant();
+        var here = tenant.TenantId;
+        foreach (var centre in targets)
+        {
+            await runner.RunAsync(centre.Id, async sp =>
+            {
+                var branch = sp.GetRequiredService<IAppDbContext>();
+
+                // Shown as posted by the same person's account in that centre when they have one there.
+                var poster = centre.Id == here
+                    ? current.UserId
+                    : await branch.AppUsers.AsNoTracking().Where(u => u.Email == email).Select(u => (Guid?)u.Id).FirstOrDefaultAsync(ct) ?? current.UserId;
+                var post = new ActivityPost
+                {
+                    Type = type, Caption = caption, PostedByUserId = poster,
+                    ApprovalStatus = ApprovalStatuses.Approved, ApprovedBy = poster, ApprovedAt = clock.UtcNow,
+                };
+                branch.ActivityPosts.Add(post);
+                var order = 0;
+                foreach (var file in files)
+                {
+                    var mediaId = file.Id;
+                    if (centre.Id != here)
+                    {
+                        var copy = new MediaFile
+                        {
+                            UploadedBy = poster, FileName = file.FileName, ContentType = file.ContentType, SizeBytes = file.SizeBytes,
+                            ScanStatus = file.ScanStatus, ScanNote = file.ScanNote, Content = file.Content,
+                        };
+                        branch.MediaFiles.Add(copy);
+                        mediaId = copy.Id;
+                    }
+
+                    branch.ActivityPostMedia.Add(new ActivityPostMedia { PostId = post.Id, MediaId = mediaId, SortOrder = order++ });
+                }
+
+                await branch.SaveChangesAsync(ct);
+                await sp.GetRequiredService<IPublisher>().Publish(new ActivityPublished(centre.Id, post.Id, [], null), ct);
+                return post.Id;
+            });
+        }
+
+        return Result<SharedWithCentresDto>.Success(new SharedWithCentresDto(targets.Count));
     }
 }

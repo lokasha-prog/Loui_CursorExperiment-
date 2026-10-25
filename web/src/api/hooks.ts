@@ -341,6 +341,22 @@ export const useAttendanceInsights = () =>
 export const useBriefing = (area: BriefingArea) =>
   useMutation({ mutationFn: (language: string) => api.get<Briefing>(`/ai/briefing/${area}`, { language }) })
 
+export interface DataChatReply {
+  answer: string
+  language: string
+  model: string
+  generated_at: string
+  /** Each count the AI Brain looked up to answer, for "how I worked it out". */
+  lookups: { tool: string; arguments: string; result: string }[]
+}
+
+/** "Chat with data" (super administrator): a free question plus the conversation so far. */
+export const useDataChat = () =>
+  useMutation({
+    mutationFn: (body: { question: string; history: { role: 'user' | 'assistant'; content: string }[]; language: string }) =>
+      api.post<DataChatReply>('/ai/chat', body),
+  })
+
 // ── Reports ─────────────────────────────────────────────────────────────────
 
 export const useMonthlyReport = (month: string, personType: 'student' | 'staff') =>
@@ -363,7 +379,7 @@ export const useUploadMedia = () => useMutation({ mutationFn: (file: File) => ap
 
 export const useCreateActivity = () =>
   useCreate<
-    { type: string; caption: Record<string, string> | null; student_ids: string[]; room_id?: string | null; media_ids: string[] },
+    { type: string; caption: Record<string, string> | null; student_ids: string[]; room_id?: string | null; group_id?: string | null; media_ids: string[] },
     ActivityPost
   >('/activities', ['activities'])
 
@@ -372,6 +388,41 @@ export function useDecideActivity() {
   return useMutation({
     mutationFn: ({ id, action, reason }: { id: string; action: 'approve' | 'reject'; reason?: string }) =>
       api.post<ActivityPost>(`/activities/${id}/actions/${action}`, action === 'reject' ? { reason } : undefined),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['activities'] }),
+  })
+}
+
+/** A child's gallery: shared posts about them, or for their room or the whole nursery, that carry photos or videos. Keyed under 'activities' so new posts refresh it. */
+export const useStudentGallery = (studentId: string) =>
+  useInfiniteList<ActivityPost>(['activities', 'gallery', studentId], '/activities', {
+    student_id: studentId,
+    status: 'approved',
+    with_media: 'true',
+    include_shared: 'true',
+  })
+
+/** Every shared photo or video the signed-in person may see. */
+export const useGallery = () =>
+  useInfiniteList<ActivityPost>(['activities', 'gallery'], '/activities', { status: 'approved', with_media: 'true' })
+
+/** Shares photos with the whole of other centres in the group (every centre when none are named). Group managers only. */
+export function useShareWithCentres() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { caption: Record<string, string> | null; media_ids: string[]; centre_ids: string[] | null }) =>
+      api.post<{ centres: number }>('/activities/centres', body),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['activities'] }),
+  })
+}
+
+/** Every open centre in the group, for people who manage the group. */
+export const useGroupCentres = (enabled = true) =>
+  useQuery({ queryKey: ['group-centres'], enabled, queryFn: () => api.get<GroupCentre[]>('/group/centres') })
+
+export function useDeleteActivity() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/activities/${id}`),
     onSuccess: () => client.invalidateQueries({ queryKey: ['activities'] }),
   })
 }

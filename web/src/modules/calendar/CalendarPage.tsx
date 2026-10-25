@@ -2,8 +2,9 @@ import * as TabsPrimitive from '@radix-ui/react-tabs'
 import { CalendarDays, ChevronLeft, ChevronRight, Copy, Plus, RefreshCw, Rss } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import { useAgenda, useCalendarEvents, useFeedLink, useRotateFeedLink, useSchedules } from '@/api/hooks'
-import type { AgendaItem } from '@/api/types'
+import type { AgendaItem, CalendarOccurrence } from '@/api/types'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ListError, ListSkeleton } from '@/components/shared/ListState'
 import { Button } from '@/components/ui/button'
@@ -13,6 +14,8 @@ import { formatDate, todayIso } from '@/lib/format'
 import { cn, localized } from '@/lib/utils'
 import { can, isParentOnly, useAuth } from '@/stores/auth'
 import { EventDialog } from './EventDialog'
+import { DayEvents, EventDetails } from './EventDetails'
+import { confirmAction } from '@/components/shared/confirm'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
@@ -40,7 +43,12 @@ function MonthBar({ cursor, move, locale }: { cursor: Date; move: (by: number) =
   )
 }
 
-function SchoolMonth({ canWrite, onOpen }: { canWrite: boolean; onOpen: (target: { id: string | null; date: string }) => void }) {
+function SchoolMonth({ canWrite, onOpen, onShow, onMore }: {
+  canWrite: boolean
+  onOpen: (target: { id: string | null; date: string }) => void
+  onShow: (event: CalendarOccurrence) => void
+  onMore: (date: string, events: CalendarOccurrence[]) => void
+}) {
   const { t, i18n } = useTranslation()
   const { cursor, from, to, move } = useMonth()
   const events = useCalendarEvents(from, to)
@@ -80,15 +88,21 @@ function SchoolMonth({ canWrite, onOpen }: { canWrite: boolean; onOpen: (target:
                         <li key={`${e.event_id}-${k}`}>
                           <button
                             type="button"
-                            onClick={() => canWrite && onOpen({ id: e.event_id, date: iso(day) })}
-                            className={cn('block w-full truncate rounded px-1 py-0.5 text-start', typeChip[e.type], !canWrite && 'cursor-default')}
+                            onClick={() => onShow(e)}
+                            className={cn('block w-full truncate rounded px-1 py-0.5 text-start hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', typeChip[e.type])}
                             title={localized(e.title, i18n.language)}
                           >
                             {localized(e.title, i18n.language)}
                           </button>
                         </li>
                       ))}
-                      {byDay(day).length > 3 && <li className="px-1 text-muted-foreground">{t('calendar.more', { count: byDay(day).length - 3 })}</li>}
+                      {byDay(day).length > 3 && (
+                        <li>
+                          <button type="button" onClick={() => onMore(iso(day), byDay(day))} className="px-1 font-semibold text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            {t('calendar.more', { count: byDay(day).length - 3 })}
+                          </button>
+                        </li>
+                      )}
                     </ul>
                   </>
                 )}
@@ -108,8 +122,19 @@ function itemTitle(i: AgendaItem, language: string) {
   return i.label ?? ''
 }
 
-function Agenda({ mine }: { mine: boolean }) {
+/** Where an agenda line leads: the event itself, the child, the leave list or the tours, when the viewer may open it. */
+function agendaLink(i: AgendaItem, may: (permission: string) => boolean): string | null {
+  if (!i.ref_id) return null
+  if (i.kind === 'birthdays_students') return may('students.read') ? `/students/${i.ref_id}` : null
+  if (i.kind === 'birthdays_staff') return may('staff.read') ? '/staff' : null
+  if (i.kind === 'leave') return may('attendance.read') ? '/leave' : null
+  if (i.kind === 'tour') return may('enquiries.read') ? '/enquiries' : null
+  return null
+}
+
+function Agenda({ mine, onShowEvent }: { mine: boolean; onShowEvent: (id: string, date: string) => void }) {
   const { t, i18n } = useTranslation()
+  const me = useAuth((s) => s.me)
   const { cursor, from, to, move } = useMonth()
   const [layers, setLayers] = useState<string[]>(LAYERS)
   const agenda = useAgenda(from, to, layers, mine)
@@ -141,7 +166,11 @@ function Agenda({ mine }: { mine: boolean }) {
                   <span className="w-32 shrink-0 font-bold">{formatDate(day, i18n.language)}</span>
                   <ul className="flex flex-1 flex-wrap gap-2">
                     {items.map((i, k) => (
-                      <li key={k}><Badge tone={kindTone[i.kind] ?? 'neutral'}>{t(`calendar.kinds.${i.kind}`)}: {itemTitle(i, i18n.language)}{i.end !== i.start ? ` → ${formatDate(i.end, i18n.language)}` : ''}</Badge></li>
+                      <li key={k}>
+                        <AgendaEntry item={i} link={agendaLink(i, (p) => can(me, p))} onShowEvent={onShowEvent}>
+                          <Badge tone={kindTone[i.kind] ?? 'neutral'}>{t(`calendar.kinds.${i.kind}`)}: {itemTitle(i, i18n.language)}{i.end !== i.start ? ` → ${formatDate(i.end, i18n.language)}` : ''}</Badge>
+                        </AgendaEntry>
+                      </li>
                     ))}
                   </ul>
                 </li>
@@ -151,6 +180,16 @@ function Agenda({ mine }: { mine: boolean }) {
       </Card>
     </>
   )
+}
+
+const entryClass = 'inline-block rounded-full hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+
+function AgendaEntry({ item, link, onShowEvent, children }: { item: AgendaItem; link: string | null; onShowEvent: (id: string, date: string) => void; children: React.ReactNode }) {
+  if ((item.kind === 'event' || item.kind === 'holiday') && item.ref_id) {
+    const id = item.ref_id
+    return <button type="button" className={entryClass} onClick={() => onShowEvent(id, item.start)}>{children}</button>
+  }
+  return link ? <Link to={link} className={entryClass}>{children}</Link> : <>{children}</>
 }
 
 function Schedules() {
@@ -217,11 +256,19 @@ function FeedLink({ canRotate }: { canRotate: boolean }) {
         <div className="flex flex-wrap items-center gap-2">
           <input readOnly value={url} dir="ltr" aria-label={t('calendar.feed.title')} className="min-w-0 flex-1 rounded-md border bg-slate-50 px-3 py-2 font-mono text-xs" onFocus={(e) => e.currentTarget.select()} />
           <Button variant="secondary" onClick={() => void copy()}><Copy className="h-4 w-4" aria-hidden="true" />{t('calendar.feed.copy')}</Button>
-          {canRotate && <Button variant="ghost" onClick={() => { if (window.confirm(t('calendar.feed.confirmRotate'))) rotate.mutate() }}><RefreshCw className="h-4 w-4" aria-hidden="true" />{t('calendar.feed.rotate')}</Button>}
+          {canRotate && <Button variant="ghost" onClick={() => void confirmAction({ title: t('calendar.feed.confirmRotate'), confirmLabel: t('confirm.replaceLink'), tone: 'neutral' }).then((ok) => { if (ok) rotate.mutate() })}><RefreshCw className="h-4 w-4" aria-hidden="true" />{t('calendar.feed.rotate')}</Button>}
         </div>
       )}
     </Card>
   )
+}
+
+/** Opens an event from the agenda lists: finds that day's occurrence, so a repeating event shows the right date. */
+function AgendaEventDetails({ target, canWrite, onEdit, onClose }: { target: { id: string; date: string }; canWrite: boolean; onEdit: (id: string, date: string) => void; onClose: () => void }) {
+  const events = useCalendarEvents(target.date, target.date)
+  const occurrence = events.data?.find((e) => e.event_id === target.id)
+  if (!occurrence) return null
+  return <EventDetails event={occurrence} canWrite={canWrite} onEdit={() => onEdit(target.id, target.date)} onClose={onClose} />
 }
 
 export default function CalendarPage() {
@@ -231,6 +278,9 @@ export default function CalendarPage() {
   const canWrite = can(me, 'calendar.write')
   const [tab, setTab] = useState('school')
   const [open, setOpen] = useState<{ id: string | null; date: string } | null>(null)
+  const [shown, setShown] = useState<CalendarOccurrence | null>(null)
+  const [day, setDay] = useState<{ date: string; events: CalendarOccurrence[] } | null>(null)
+  const [agendaEvent, setAgendaEvent] = useState<{ id: string; date: string } | null>(null)
   const tabs = ['school', ...(parent ? [] : ['admin', 'mine', 'schedules'])]
 
   return (
@@ -254,12 +304,15 @@ export default function CalendarPage() {
             ))}
           </TabsPrimitive.List>
         )}
-        <TabsPrimitive.Content value="school"><SchoolMonth canWrite={canWrite} onOpen={setOpen} /></TabsPrimitive.Content>
-        {!parent && <TabsPrimitive.Content value="admin"><Agenda mine={false} /></TabsPrimitive.Content>}
-        {!parent && <TabsPrimitive.Content value="mine"><Agenda mine /></TabsPrimitive.Content>}
+        <TabsPrimitive.Content value="school"><SchoolMonth canWrite={canWrite} onOpen={setOpen} onShow={setShown} onMore={(date, events) => setDay({ date, events })} /></TabsPrimitive.Content>
+        {!parent && <TabsPrimitive.Content value="admin"><Agenda mine={false} onShowEvent={(id, date) => setAgendaEvent({ id, date })} /></TabsPrimitive.Content>}
+        {!parent && <TabsPrimitive.Content value="mine"><Agenda mine onShowEvent={(id, date) => setAgendaEvent({ id, date })} /></TabsPrimitive.Content>}
         {!parent && <TabsPrimitive.Content value="schedules"><Schedules /></TabsPrimitive.Content>}
       </TabsPrimitive.Root>
       <FeedLink canRotate={can(me, 'settings.write')} />
+      {day && <DayEvents date={day.date} events={day.events} onPick={(e) => { setDay(null); setShown(e) }} onClose={() => setDay(null)} />}
+      {shown && <EventDetails event={shown} canWrite={canWrite} onEdit={() => { setShown(null); setOpen({ id: shown.event_id, date: iso(new Date(shown.starts_at)) }) }} onClose={() => setShown(null)} />}
+      {agendaEvent && <AgendaEventDetails target={agendaEvent} canWrite={canWrite} onEdit={(id, date) => { setAgendaEvent(null); setOpen({ id, date }) }} onClose={() => setAgendaEvent(null)} />}
       {open && <EventDialog key={open.id ?? 'new'} id={open.id} startDate={open.date} onClose={() => setOpen(null)} />}
     </>
   )

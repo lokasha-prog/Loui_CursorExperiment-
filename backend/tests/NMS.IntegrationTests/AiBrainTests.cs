@@ -56,7 +56,9 @@ public class AiBrainTests(NmsApiFixture api)
             var down = await api.Admin.GetAsync("/api/v1/ai/attendance-summary");
 
             notSetUp.Status.Should().Be(HttpStatusCode.UnprocessableEntity);
+            notSetUp.Raw.Should().Contain("AI_NOT_SET_UP", "screens tell an administrator to add the key instead of asking to try again");
             down.Status.Should().Be(HttpStatusCode.UnprocessableEntity);
+            down.Raw.Should().NotContain("AI_NOT_SET_UP");
         }
         finally
         {

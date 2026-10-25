@@ -1,3 +1,4 @@
+import { Route } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useStudentOptions } from '@/api/hooks'
@@ -16,7 +17,7 @@ export default function JourneyPage() {
   return (
     <>
       <PageHeader title={t('journeyPage.title')} subtitle={t('journeyPage.subtitle')} />
-      {students.isSuccess && list.length === 0 ? <EmptyState title={t('journeyPage.none')} /> : (
+      {students.isSuccess && list.length === 0 ? <EmptyState icon={<Route className="h-7 w-7" aria-hidden="true" />} title={t('journeyPage.none')} /> : (
         <>
           {list.length > 1 && <div className="mb-4"><Select value={current} onChange={(e) => setChosen(e.target.value)} aria-label={t('learning.obs.child')} className="w-64">{list.map((s) => <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>)}</Select></div>}
           <JourneyView studentId={current} />

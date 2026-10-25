@@ -30,6 +30,8 @@ public static class CentreGroupEndpoints
             return result.IsFailure ? ApiResults.Failure(http, result.Errors) : AuthEndpoints.Respond(http, result.Value);
         }).RequireAuthorization();
 
+        g.MapGet("/centres", async (HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new GroupCentresQuery(), ct))).RequireAuthorization(Permissions.GroupManage);
         g.MapGet("/overview", async (HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(new GroupOverviewQuery(), ct))).RequireAuthorization(Permissions.GroupRead);
         g.MapGet("/reports/{kind}", async (

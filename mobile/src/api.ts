@@ -126,6 +126,9 @@ export const api = {
   put: async <T>(path: string, body?: unknown) => (await request<T>('PUT', path, body ?? {})).data,
 }
 
+/** What an image component needs to show a stored photo (the server only serves it to signed-in people). */
+export const mediaSource = (id: string) => ({ uri: `${apiBase()}/api/v1/media/${id}/content`, headers: { 'X-NMS-Client': 'mobile', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) } as Record<string, string> })
+
 /** Sends a photo or file taken on the phone. Returns what the server stored. */
 export async function upload<T>(path: string, uri: string, name: string, type: string): Promise<T> {
   const form = new FormData()

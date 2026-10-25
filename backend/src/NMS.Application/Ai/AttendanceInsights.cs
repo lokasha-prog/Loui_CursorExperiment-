@@ -20,6 +20,26 @@ public interface IAiBrain
     string ModelName { get; }
 
     Task<Result<string>> CompleteAsync(string system, string user, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// A conversation in which the model may call the given tools (any number of rounds, up to a limit) before it answers.
+    /// <paramref name="runTool"/> receives the tool name and its JSON arguments and returns the JSON result the model sees.
+    /// </summary>
+    Task<Result<string>> ChatAsync(
+        string system, IReadOnlyList<AiMessage> messages, IReadOnlyList<AiTool> tools,
+        Func<string, string, CancellationToken, Task<string>> runTool, CancellationToken cancellationToken);
+}
+
+/// <summary>One turn of a conversation: role is "user" or "assistant".</summary>
+public sealed record AiMessage(string Role, string Content);
+
+/// <summary>A function the model may call; <paramref name="Parameters"/> is a JSON Schema object.</summary>
+public sealed record AiTool(string Name, string Description, object Parameters);
+
+public static class AiErrors
+{
+    /// <summary>No provider key on this server: an administrator has to add one; trying again will not help.</summary>
+    public static Error NotSetUp { get; } = new("AI_NOT_SET_UP", "The AI Brain is not set up yet.", ErrorType.InvalidState);
 }
 
 public sealed record DailyAttendanceFigure(DateOnly Date, int StudentsPresent, int StudentsLate, int StudentsLeftEarly, int StudentsAbsent, int StaffPresent);
@@ -52,7 +72,7 @@ public sealed class AttendanceInsightsHandler(IAppDbContext db, CentreCalendar c
     {
         if (!brain.IsConfigured)
         {
-            return Error.InvalidState("The AI Brain is not set up yet.");
+            return AiErrors.NotSetUp;
         }
 
         var to = calendar.Today;

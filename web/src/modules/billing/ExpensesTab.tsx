@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { formatAed, formatDate, todayIso } from '@/lib/format'
 import { toFils } from './InvoiceDialog'
+import { confirmAction } from '@/components/shared/confirm'
 
 export const EXPENSE_CATEGORIES = ['rent', 'utilities', 'salaries', 'supplies', 'food', 'other']
 
@@ -74,7 +75,7 @@ export function ExpensesTab() {
   const money = (v: number) => formatAed(v, i18n.language)
 
   const del = async (id: string) => {
-    if (!window.confirm(t('billing.expenses.confirmDelete'))) return
+    if (!(await confirmAction({ title: t('billing.expenses.confirmDelete'), confirmLabel: t('confirm.remove') }))) return
     try {
       await remove.mutateAsync(id)
     } catch (error) {

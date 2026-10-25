@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { formatDate } from '@/lib/format'
 import { localized } from '@/lib/utils'
+import { confirmAction } from '@/components/shared/confirm'
 
 const stepTone: Record<string, Tone> = { pending: 'neutral', current: 'info', done: 'success', skipped: 'warning' }
 
@@ -174,7 +175,7 @@ export function AdmissionsTab() {
                   <span className="ms-auto flex gap-1">
                     <Button size="sm" variant="ghost" aria-label={t('forms.builder.up')} disabled={i === 0} onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4" aria-hidden="true" /></Button>
                     <Button size="sm" variant="ghost" aria-label={t('forms.builder.down')} disabled={i === list.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4" aria-hidden="true" /></Button>
-                    <Button size="sm" variant="ghost" aria-label={t('common.delete')} onClick={() => { if (window.confirm(t('forms.admissions.confirmDelete'))) void run(() => remove.mutateAsync(s.id)) }}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>
+                    <Button size="sm" variant="ghost" aria-label={t('common.delete')} onClick={() => void confirmAction({ title: t('forms.admissions.confirmDelete'), confirmLabel: t('confirm.remove') }).then((ok) => { if (ok) void run(() => remove.mutateAsync(s.id)) })}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>
                   </span>
                 </li>
               ))}

@@ -10,6 +10,7 @@ import { ApiError } from '@/api/client'
 import { ProtectedMedia } from '@/components/shared/ProtectedMedia'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { StudentDialog } from './StudentForm'
+import { StudentGallery } from './StudentGallery'
 import { countryName } from '@/lib/countries'
 import { Button } from '@/components/ui/button'
 import { Field, Input, Select } from '@/components/ui/form-controls'
@@ -20,6 +21,7 @@ import { ageLabel, emptyToNull, formatDate } from '@/lib/format'
 import { initials, localized } from '@/lib/utils'
 import { can, useAuth } from '@/stores/auth'
 import { CreateUserDialog, type UserPrefill } from '@/modules/users/UserForm'
+import { confirmAction } from '@/components/shared/confirm'
 
 const TRANSITIONS: Record<string, string[]> = {
   signed_up: ['active', 'withdrawn'],
@@ -223,7 +225,7 @@ export default function StudentDetailPage() {
   const room = localized(rooms.data?.find((r) => r.id === s.room_id)?.name, i18n.language)
 
   const remove = async (guardianId: string) => {
-    if (!window.confirm(t('students.guardians.confirmRemove'))) return
+    if (!(await confirmAction({ title: t('students.guardians.confirmRemove'), confirmLabel: t('confirm.remove') }))) return
     try {
       await removeGuardian.mutateAsync(guardianId)
       toast.success(t('students.guardians.removed'))
@@ -300,6 +302,8 @@ export default function StudentDetailPage() {
               </div>
             )}
           </Card>
+
+          <StudentGallery studentId={s.id} childName={s.first_name} />
 
           {canWrite && <StatusChanger studentId={s.id} current={s.status} />}
         </div>

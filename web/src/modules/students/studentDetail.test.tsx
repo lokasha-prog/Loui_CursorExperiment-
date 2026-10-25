@@ -182,6 +182,9 @@ describe('StudentDetailPage', () => {
     renderDetail()
 
     await userEvent.click(await screen.findByRole('button', { name: /Remove: Aisha Hassan/ }))
+    const confirm = await screen.findByRole('alertdialog', { name: 'Remove this guardian from the student?' })
+    expect(calls.some((c) => c.method === 'DELETE')).toBe(false)
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Remove' }))
 
     await waitFor(() => expect(calls.some((c) => c.method === 'DELETE')).toBe(true))
   })
@@ -204,6 +207,51 @@ describe('StudentDetailPage', () => {
     expect(within(dialog).getByLabelText(/^Email/)).toHaveValue('aisha@test.local')
     expect(within(dialog).getByLabelText(/Role/)).toBeDisabled()
     expect(within(dialog).getByLabelText(/Role/)).toHaveValue('parent')
+  })
+
+  it('shows the gallery to staff, who can open a photo and remove it from the gallery', async () => {
+    signIn(makeMe({ id: 'u1', permissions: ['students.read', 'activities.read', 'activities.write', 'activities.approve'] }))
+    const photo = {
+      id: 'p1', type: 'photo', caption: { en: 'Painting day' }, posted_by_user_id: 'u2', posted_by_name: 'Sara Teacher', room_id: null,
+      student_ids: ['s1'], media: [{ id: 'm1', content_type: 'image/png' }], status: 'approved', rejection_reason: null, created_at: '2026-10-20T08:00:00Z',
+    }
+    const calls = mockApi(fetchMock, {
+      'GET /students/s1/guardians': envelope([]),
+      'GET /students/s1': envelope(detail()),
+      'GET /activities': envelope([photo], { pagination: onePage }),
+      'DELETE /activities/p1': new Response(null, { status: 204 }),
+    })
+    renderDetail()
+
+    expect(await screen.findByRole('heading', { name: 'Gallery' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add photos' })).toBeInTheDocument()
+    await userEvent.click(await screen.findByRole('button', { name: 'Open photo: Painting day' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText(/Shared by Sara Teacher/)).toBeInTheDocument()
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Remove' }))
+    const confirm = await screen.findByRole('alertdialog', { name: 'Remove this photo?' })
+    expect(within(confirm).getByRole('button', { name: 'Cancel' })).toHaveFocus()
+    expect(window.confirm).not.toHaveBeenCalled()
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Remove' }))
+
+    await waitFor(() => expect(calls.some((c) => c.method === 'DELETE' && c.url.includes('/activities/p1'))).toBe(true))
+    const list = calls.find((c) => c.method === 'GET' && c.url.includes('/activities'))!
+    expect(list.url).toContain('student_id=s1')
+    expect(list.url).toContain('with_media=true')
+    expect(list.url).toContain('include_shared=true')
+  })
+
+  it('shows parents the gallery of their own child read-only', async () => {
+    signIn(makeMe({ roles: ['parent'], permissions: ['students.read', 'activities.read'] }))
+    mockApi(fetchMock, {
+      'GET /students/s1/guardians': envelope([]),
+      'GET /students/s1': envelope(detail({ custody_notes: null, passport_number: null })),
+      'GET /activities': envelope([], { pagination: onePage }),
+    })
+    renderDetail()
+
+    expect(await screen.findByText('Photos the nursery shares of your child will appear here.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add photos' })).not.toBeInTheDocument()
   })
 
   it('is fully mirrored and translated in Arabic', async () => {

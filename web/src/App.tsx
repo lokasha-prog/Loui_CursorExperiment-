@@ -6,6 +6,7 @@ import { ApiError, refreshSession } from '@/api/client'
 import { AppShell } from '@/components/layout/AppShell'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/surfaces'
+import { ConfirmHost } from '@/components/shared/confirm'
 import { Toaster } from '@/components/ui/toaster'
 import { can, useAuth } from '@/stores/auth'
 
@@ -23,6 +24,8 @@ const UsersPage = lazy(() => import('@/modules/users/UsersPage'))
 const AttendancePage = lazy(() => import('@/modules/attendance/AttendancePage'))
 const ReportsPage = lazy(() => import('@/modules/attendance/ReportsPage'))
 const FeedPage = lazy(() => import('@/modules/feed/FeedPage'))
+const GalleryPage = lazy(() => import('@/modules/gallery/GalleryPage'))
+const ReleaseNotesPage = lazy(() => import('@/modules/release-notes/ReleaseNotesPage'))
 const MessagesPage = lazy(() => import('@/modules/messages/MessagesPage'))
 const NotificationsPage = lazy(() => import('@/modules/notifications/NotificationsPage'))
 const AuditPage = lazy(() => import('@/modules/audit/AuditPage'))
@@ -106,8 +109,10 @@ export function AppRoutes() {
           <Route path="/attendance" element={<RequirePermission permission="attendance.read"><AttendancePage /></RequirePermission>} />
           <Route path="/reports" element={<RequirePermission permission="reports.view"><ReportsPage /></RequirePermission>} />
           <Route path="/feed" element={<RequirePermission permission="activities.read"><FeedPage /></RequirePermission>} />
+          <Route path="/gallery" element={<RequirePermission permission="activities.read"><GalleryPage /></RequirePermission>} />
           <Route path="/messages" element={<RequirePermission permission="messaging.read"><MessagesPage /></RequirePermission>} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/release-notes" element={<ReleaseNotesPage />} />
           <Route path="/audit" element={<RequirePermission permission="audit_log.view"><AuditPage /></RequirePermission>} />
           <Route path="/feedback" element={<RequirePermission permission="settings.read"><FeedbackPage /></RequirePermission>} />
           <Route path="/billing" element={<RequirePermission permission="billing.read"><BillingPage /></RequirePermission>} />
@@ -147,6 +152,7 @@ export default function App() {
         <AppRoutes />
       </BrowserRouter>
       <Toaster />
+      <ConfirmHost />
     </QueryClientProvider>
   )
 }

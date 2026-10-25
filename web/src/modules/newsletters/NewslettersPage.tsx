@@ -14,6 +14,7 @@ import { formatDate } from '@/lib/format'
 import { localized } from '@/lib/utils'
 import { can, useAuth } from '@/stores/auth'
 import { NewsletterDialog } from './NewsletterDialog'
+import { confirmAction } from '@/components/shared/confirm'
 
 const tone: Record<string, Tone> = { draft: 'warning', scheduled: 'info', published: 'success', archived: 'neutral' }
 
@@ -90,7 +91,7 @@ function ManagerView() {
                       {n.status === 'published' && <Button size="sm" variant="secondary" onClick={() => setStats(n.id)}><BarChart3 className="h-4 w-4" aria-hidden="true" />{t('newsletters.stats.title')}</Button>}
                       {n.status === 'published' && <Button size="sm" variant="ghost" onClick={() => void run(() => action.mutateAsync({ id: n.id, action: 'archive' }))}>{t('newsletters.archive')}</Button>}
                       {n.status === 'scheduled' && <Button size="sm" variant="ghost" onClick={() => void run(() => action.mutateAsync({ id: n.id, action: 'unschedule' }))}>{t('newsletters.unschedule')}</Button>}
-                      {(n.status === 'draft' || n.status === 'scheduled') && <Button size="sm" variant="ghost" aria-label={t('common.delete')} onClick={() => { if (window.confirm(t('newsletters.confirmDelete'))) void run(() => remove.mutateAsync(n.id)) }}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>}
+                      {(n.status === 'draft' || n.status === 'scheduled') && <Button size="sm" variant="ghost" aria-label={t('common.delete')} onClick={() => void confirmAction({ title: t('newsletters.confirmDelete'), confirmLabel: t('confirm.remove') }).then((ok) => { if (ok) void run(() => remove.mutateAsync(n.id)) })}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>}
                     </span>
                   </li>
                 ))}

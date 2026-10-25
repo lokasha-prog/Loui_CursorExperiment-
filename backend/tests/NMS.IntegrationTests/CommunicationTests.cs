@@ -187,4 +187,172 @@ public class CommunicationTests(NmsApiFixture api)
         report.GetProperty("summary").GetProperty("en").GetString().Should().Contain("was with us today");
         otherSeen.Items.Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task A_childs_gallery_lists_only_their_photo_posts_and_only_for_their_own_family()
+    {
+        var mine = await FamilyAsync();
+        var other = await FamilyAsync(mine.Room);
+        var teacher = await TeacherOfAsync(mine.Room);
+        var photo = await teacher.PostAsync("/api/v1/activities", Post("photo", mine.ChildId, "Painting", await UploadAsync(teacher)));
+        await teacher.PostAsync("/api/v1/activities", Post("diary", mine.ChildId, "Slept well"));
+        var gallery = $"/api/v1/activities?student_id={mine.ChildId}&status=approved&with_media=true";
+
+        var seenByMine = await mine.Parent.GetAsync(gallery);
+        var seenByStaff = await teacher.GetAsync(gallery);
+        var seenByOther = await other.Parent.GetAsync(gallery);
+
+        photo.Status.Should().Be(HttpStatusCode.Created, photo.Raw);
+        seenByMine.Items.Should().ContainSingle(i => i.GetProperty("id").GetGuid() == photo.Data.GetProperty("id").GetGuid());
+        seenByStaff.Items.Should().ContainSingle("the diary post has no photo");
+        seenByOther.Items.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task A_gallery_photo_can_be_removed_by_its_poster_or_a_manager_and_the_family_then_loses_it()
+    {
+        var family = await FamilyAsync();
+        var teacher = await TeacherOfAsync(family.Room);
+        var colleague = await TeacherOfAsync(family.Room);
+        var media = await UploadAsync(teacher);
+        var first = (await teacher.PostAsync("/api/v1/activities", Post("photo", family.ChildId, "Wrong child", media))).Data.GetProperty("id").GetGuid();
+        var second = (await teacher.PostAsync("/api/v1/activities", Post("photo", family.ChildId, "Sand play", await UploadAsync(teacher)))).Data.GetProperty("id").GetGuid();
+        (await family.Parent.GetBytesAsync($"/api/v1/media/{media}/content")).Status.Should().Be(HttpStatusCode.OK);
+
+        var byColleague = await colleague.DeleteAsync($"/api/v1/activities/{first}");
+        var byParent = await family.Parent.DeleteAsync($"/api/v1/activities/{first}");
+        var byPoster = await teacher.DeleteAsync($"/api/v1/activities/{first}");
+        var byManager = await api.Admin.DeleteAsync($"/api/v1/activities/{second}");
+
+        byColleague.Status.Should().Be(HttpStatusCode.Forbidden);
+        byParent.Status.Should().Be(HttpStatusCode.Forbidden);
+        byPoster.Status.Should().Be(HttpStatusCode.NoContent, byPoster.Raw);
+        byManager.Status.Should().Be(HttpStatusCode.NoContent, byManager.Raw);
+        (await family.Parent.GetAsync($"/api/v1/activities?student_id={family.ChildId}&with_media=true")).Items.Should().BeEmpty();
+        (await family.Parent.GetBytesAsync($"/api/v1/media/{media}/content")).Status.Should().Be(HttpStatusCode.NotFound);
+        (await teacher.DeleteAsync($"/api/v1/activities/{first}")).Status.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task A_whole_nursery_photo_shows_in_every_childs_gallery_but_a_room_photo_only_in_that_rooms()
+    {
+        var first = await FamilyAsync();
+        var second = await FamilyAsync();
+        var media = await UploadAsync(api.Admin);
+        var everyone = await api.Admin.PostAsync("/api/v1/activities", new { type = "photo", caption = new Dictionary<string, string> { ["en"] = "Our nursery" }, student_ids = Array.Empty<Guid>(), media_ids = new[] { media } });
+        var roomOnly = await api.Admin.PostAsync("/api/v1/activities", new { type = "photo", caption = new Dictionary<string, string> { ["en"] = "Room trip" }, student_ids = Array.Empty<Guid>(), room_id = first.Room, media_ids = new[] { await UploadAsync(api.Admin) } });
+        // A post for the whole centre reaches every family in the shared test database, so take it down again afterwards.
+        try
+        {
+            string Gallery(Guid child) => $"/api/v1/activities?student_id={child}&status=approved&with_media=true&include_shared=true";
+
+            var firstSees = await first.Parent.GetAsync(Gallery(first.ChildId));
+            var secondSees = await second.Parent.GetAsync(Gallery(second.ChildId));
+            var staffSees = await api.Admin.GetAsync(Gallery(second.ChildId));
+            var withoutShared = await first.Parent.GetAsync($"/api/v1/activities?student_id={first.ChildId}&with_media=true");
+
+            everyone.Status.Should().Be(HttpStatusCode.Created, everyone.Raw);
+            roomOnly.Status.Should().Be(HttpStatusCode.Created, roomOnly.Raw);
+            var ids = (ApiReply r) => r.Items.Select(i => i.GetProperty("id").GetGuid()).ToList();
+            ids(firstSees).Should().Contain([everyone.Data.GetProperty("id").GetGuid(), roomOnly.Data.GetProperty("id").GetGuid()]);
+            ids(secondSees).Should().Contain(everyone.Data.GetProperty("id").GetGuid()).And.NotContain(roomOnly.Data.GetProperty("id").GetGuid());
+            ids(staffSees).Should().Contain(everyone.Data.GetProperty("id").GetGuid()).And.NotContain(roomOnly.Data.GetProperty("id").GetGuid());
+            withoutShared.Items.Should().BeEmpty("without include_shared only posts naming the child are listed");
+            (await second.Parent.GetBytesAsync($"/api/v1/media/{media}/content")).Status.Should().Be(HttpStatusCode.OK);
+        }
+        finally
+        {
+            await api.Admin.DeleteAsync($"/api/v1/activities/{everyone.Data.GetProperty("id").GetGuid()}");
+            await api.Admin.DeleteAsync($"/api/v1/activities/{roomOnly.Data.GetProperty("id").GetGuid()}");
+        }
+    }
+
+    private async Task<Family> FamilyInGroupAsync(Guid room, Guid? group)
+    {
+        var email = $"fam-{Guid.NewGuid():N}@test.local";
+        var made = await api.Admin.PostAsync("/api/v1/students", new
+        {
+            student = new
+            {
+                first_name = "Noor", last_name = $"Family{Guid.NewGuid():N}"[..14], date_of_birth = DateTime.UtcNow.AddMonths(-30).ToString("yyyy-MM-dd"),
+                gender = "female", room_id = room, group_id = group,
+            },
+            guardians = new[] { new { first_name = "Parent", last_name = "One", email, relationship = "mother", is_primary = true } },
+        });
+        made.Status.Should().Be(HttpStatusCode.Created, made.Raw);
+        var child = made.Data.GetProperty("id").GetGuid();
+        await api.Admin.PostAsync($"/api/v1/students/{child}/actions/transition-status", new { status = "active" });
+        var guardian = (await api.Admin.GetAsync($"/api/v1/students/{child}/guardians")).Items.Single().GetProperty("id").GetGuid();
+        return new Family((await api.CreateUserAsync("parent", guardianId: guardian)).Client, child, room, email);
+    }
+
+    [Fact]
+    public async Task A_photo_for_a_group_reaches_the_children_in_that_group_only()
+    {
+        var room = await api.CreateRoomAsync();
+        var group = (await api.Admin.PostAsync("/api/v1/groups", new { name = new { en = $"Stars {Guid.NewGuid():N}" }, room_id = room })).Data.GetProperty("id").GetGuid();
+        var empty = (await api.Admin.PostAsync("/api/v1/groups", new { name = new { en = $"Empty {Guid.NewGuid():N}" }, room_id = room })).Data.GetProperty("id").GetGuid();
+        var inGroup = await FamilyInGroupAsync(room, group);
+        var outside = await FamilyInGroupAsync(room, null);
+
+        var posted = await api.Admin.PostAsync("/api/v1/activities", new { type = "photo", group_id = group, media_ids = new[] { await UploadAsync(api.Admin) } });
+        var noChildren = await api.Admin.PostAsync("/api/v1/activities", new { type = "photo", group_id = empty, media_ids = new[] { await UploadAsync(api.Admin) } });
+        string Gallery(Guid child) => $"/api/v1/activities?student_id={child}&with_media=true&include_shared=true";
+
+        posted.Status.Should().Be(HttpStatusCode.Created, posted.Raw);
+        posted.Data.GetProperty("student_ids").EnumerateArray().Select(e => e.GetGuid()).Should().Equal(inGroup.ChildId);
+        (await inGroup.Parent.GetAsync(Gallery(inGroup.ChildId))).Items.Should().ContainSingle();
+        (await outside.Parent.GetAsync(Gallery(outside.ChildId))).Items.Should().BeEmpty();
+        noChildren.Status.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task The_group_owner_shares_photos_with_a_chosen_branch_which_gets_its_own_copy()
+    {
+        var owner = (await api.CreateUserAsync("super_admin")).Client;
+        var made = await owner.PostAsync("/api/v1/group/centres", new { name = "Gallery Branch", name_arabic = "فرع", slug = $"gal-{Guid.NewGuid():N}"[..20] });
+        var branchId = made.Data.GetProperty("id").GetGuid();
+        var media = await UploadAsync(owner);
+
+        var centres = await owner.GetAsync("/api/v1/group/centres");
+        var shared = await owner.PostAsync("/api/v1/activities/centres", new { caption = new Dictionary<string, string> { ["en"] = "Open day" }, media_ids = new[] { media }, centre_ids = new[] { branchId } });
+        var unknown = await owner.PostAsync("/api/v1/activities/centres", new { media_ids = new[] { media }, centre_ids = new[] { Guid.NewGuid() } });
+        var teacher = await TeacherOfAsync(await api.CreateRoomAsync());
+        var byTeacher = await teacher.PostAsync("/api/v1/activities/centres", new { media_ids = new[] { await UploadAsync(teacher) } });
+
+        centres.Items.Select(c => c.GetProperty("id").GetGuid()).Should().Contain([api.TenantId, branchId]);
+        shared.Status.Should().Be(HttpStatusCode.Created, shared.Raw);
+        shared.Data.GetProperty("centres").GetInt32().Should().Be(1);
+        unknown.Status.Should().Be(HttpStatusCode.BadRequest);
+        byTeacher.Status.Should().Be(HttpStatusCode.Forbidden);
+
+        var switched = await owner.PostAsync("/api/v1/group/switch", new { centre_id = branchId });
+        var branch = api.NewClient();
+        branch.SetBearer(switched.Data.GetProperty("access_token").GetString()!);
+        var seen = (await branch.GetAsync("/api/v1/activities?with_media=true")).Items.Should().ContainSingle().Subject;
+        seen.GetProperty("caption").GetProperty("en").GetString().Should().Be("Open day");
+        var copy = seen.GetProperty("media")[0].GetProperty("id").GetGuid();
+        copy.Should().NotBe(media, "each centre keeps its own copy of the file");
+        (await branch.GetBytesAsync($"/api/v1/media/{copy}/content")).Bytes.Should().Equal(Png);
+        var headCaptions = (await owner.GetAsync("/api/v1/activities?with_media=true")).Items
+            .Select(i => i.GetProperty("caption").ValueKind == System.Text.Json.JsonValueKind.Object ? i.GetProperty("caption").ToString() : string.Empty).ToList();
+        headCaptions.Should().NotContain(c => c.Contains("Open day"), "only the chosen branch was named");
+    }
+
+    [Fact]
+    public async Task A_super_administrator_can_remove_a_shared_photo_someone_else_posted()
+    {
+        var family = await FamilyAsync();
+        var teacher = await TeacherOfAsync(family.Room);
+        var owner = (await api.CreateUserAsync("super_admin")).Client;
+        var media = await UploadAsync(teacher);
+        var shared = (await teacher.PostAsync("/api/v1/activities", new { type = "photo", room_id = family.Room, media_ids = new[] { media } })).Data.GetProperty("id").GetGuid();
+        (await family.Parent.GetBytesAsync($"/api/v1/media/{media}/content")).Status.Should().Be(HttpStatusCode.OK);
+
+        var removed = await owner.DeleteAsync($"/api/v1/activities/{shared}");
+
+        removed.Status.Should().Be(HttpStatusCode.NoContent, removed.Raw);
+        (await family.Parent.GetAsync($"/api/v1/activities?student_id={family.ChildId}&with_media=true&include_shared=true")).Items.Should().BeEmpty();
+        (await family.Parent.GetBytesAsync($"/api/v1/media/{media}/content")).Status.Should().Be(HttpStatusCode.NotFound);
+    }
 }

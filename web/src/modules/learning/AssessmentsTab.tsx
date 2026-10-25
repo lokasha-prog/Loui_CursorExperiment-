@@ -197,7 +197,7 @@ export function AssessmentsTab({ canWrite, canApprove }: { canWrite: boolean; ca
         <span className="text-sm text-muted-foreground">{t('learning.assess.templates', { count: (templates.data ?? []).length })}</span>
       </div>
       {runs.isLoading ? <ListSkeleton /> : runs.isError ? <ListError error={runs.error} onRetry={() => void runs.refetch()} /> : rows.length === 0 ? (
-        <EmptyState title={t('learning.assess.empty')} description={(templates.data ?? []).length === 0 ? t('learning.assess.emptyNoTemplate') : t('learning.assess.emptyHint')} />
+        <EmptyState icon={<ClipboardCheck className="h-7 w-7" aria-hidden="true" />} title={t('learning.assess.empty')} description={(templates.data ?? []).length === 0 ? t('learning.assess.emptyNoTemplate') : t('learning.assess.emptyHint')} />
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {rows.map((r) => (

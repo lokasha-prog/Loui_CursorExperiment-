@@ -14,6 +14,7 @@ import { Alert, Badge, Card, Dialog, DialogContent, DialogHeader, Skeleton } fro
 import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { can, useAuth } from '@/stores/auth'
+import { confirmAction } from '@/components/shared/confirm'
 
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
@@ -199,7 +200,7 @@ function RolesTab() {
   const [editing, setEditing] = useState<{ role: RoleItem | null } | null>(null)
 
   const del = async (r: RoleItem) => {
-    if (!window.confirm(t('settings.roles.confirmDelete'))) return
+    if (!(await confirmAction({ title: t('settings.roles.confirmDelete'), confirmLabel: t('confirm.remove') }))) return
     try {
       await remove.mutateAsync(r.id)
     } catch (error) {
