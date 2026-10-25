@@ -1,6 +1,6 @@
 import { Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { ApiError } from '@/api/client'
+import { aiErrorText } from './aiError'
 import { useBriefing } from '@/api/hooks'
 import type { BriefingArea } from '@/api/types'
 import { Button } from '@/components/ui/button'
@@ -33,7 +33,7 @@ export function AiBriefingCard({ area }: { area: BriefingArea }) {
 
       <div aria-live="polite" className="mt-4">
         {briefing.isError && (
-          <Alert tone="danger">{briefing.error instanceof ApiError && briefing.error.status === 422 ? t('ai.down') : t('errors.UNKNOWN')}</Alert>
+          <Alert tone="danger">{aiErrorText(briefing.error, t)}</Alert>
         )}
         {result && (
           <div className="rounded-md border bg-white p-4">

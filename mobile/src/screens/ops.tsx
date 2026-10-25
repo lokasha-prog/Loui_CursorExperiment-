@@ -6,7 +6,7 @@ import { cached } from '../cache'
 import { pick, useI18n } from '../i18n'
 import { doOrQueue } from '../queue'
 import { Ionicons } from '@expo/vector-icons'
-import { Banner, Body, Btn, Card, Chip, Empty, Field, Heading, Hero, Pill, Row, Screen, color } from '../ui'
+import { Banner, Body, Btn, Card, Chip, Empty, Field, Heading, Hero, Pill, Row, Screen, Section, color } from '../ui'
 
 /** Words for the operational screens, kept together so both languages stay in step. */
 const words = {
@@ -19,7 +19,7 @@ const words = {
     approvals: 'Posts to approve', approvalsHint: 'Photos and notes teachers want to share with families.', noPhotoPreview: 'Photos are shown in the web app.',
     enquiries: 'New families', enquiriesHint: 'Enquiries, calls to make and tours.', tours: 'Tours in the next 7 days', stage: 'Stage', logCall: 'Add a note', noteHint: 'What was said?', saveNote: 'Save note', stages: { no_stage: 'New', interested: 'Interested', contacted: 'Contacted', tour_appointment: 'Tour booked', toured: 'Toured', enrolled: 'Enrolled' },
     centre: 'Centre at a glance', centreHint: 'People, money and families in one view.', students: 'Children', staff: 'Staff', here: 'Here today', short: 'Rooms short', billed: 'Billed this month', collected: 'Collected this month', overdue: 'Overdue', open: 'Open enquiries', stale: 'Not contacted for 7 days', aed: 'AED',
-    calendar: 'Calendar', calendarHint: 'Events and holidays for the next 30 days.', allDay: 'All day',
+    calendar: 'Calendar', calendarHint: 'Events and holidays for the next 30 days.', allDay: 'All day', eventTypes: { regular: 'Event', holiday: 'Holiday', birthday: 'Birthday', tour: 'Visit', leave: 'Leave' } as Record<string, string>, nextEvents: 'Coming up', dueTotal: 'Total still to pay', settled: 'Settled', toPay: 'To pay',
     invoices: 'Invoices and payments', invoicesHint: 'See what is due and pay by card.', due: 'Due', paid: 'Paid', total: 'Total', owed: 'Still to pay', payNow: 'Pay by card', paying: 'Opening the payment page...', payBack: 'Payment page opened. Come back here when you are done, then pull down to refresh.', payOff: 'Online payment is not switched on yet.',
     statusLabels: { issued: 'To pay', partially_paid: 'Part paid', paid: 'Paid', overdue: 'Overdue', draft: 'Draft', cancelled: 'Cancelled', submitted: 'Waiting', approved: 'Approved', rejected: 'Not approved' },
     newsletters: 'Newsletters', newslettersHint: 'News from the centre.', newNews: 'New', readBack: 'Back to the list',
@@ -33,7 +33,7 @@ const words = {
     approvals: 'منشورات للموافقة', approvalsHint: 'صور وملاحظات يريد المعلمون مشاركتها مع الأسر.', noPhotoPreview: 'تظهر الصور في تطبيق الويب.',
     enquiries: 'أسر جديدة', enquiriesHint: 'الاستفسارات والاتصالات والجولات.', tours: 'جولات خلال 7 أيام', stage: 'المرحلة', logCall: 'إضافة ملاحظة', noteHint: 'ماذا قيل؟', saveNote: 'حفظ الملاحظة', stages: { no_stage: 'جديد', interested: 'مهتم', contacted: 'تم التواصل', tour_appointment: 'تم حجز جولة', toured: 'تمت الجولة', enrolled: 'مسجّل' },
     centre: 'المركز بنظرة', centreHint: 'الأشخاص والمال والأسر في عرض واحد.', students: 'الأطفال', staff: 'الموظفون', here: 'حاضرون اليوم', short: 'غرف ناقصة', billed: 'المفوتر هذا الشهر', collected: 'المحصّل هذا الشهر', overdue: 'المتأخر', open: 'استفسارات مفتوحة', stale: 'بلا تواصل منذ 7 أيام', aed: 'د.إ',
-    calendar: 'التقويم', calendarHint: 'الفعاليات والعطلات خلال 30 يوماً.', allDay: 'طوال اليوم',
+    calendar: 'التقويم', calendarHint: 'الفعاليات والعطلات خلال 30 يوماً.', allDay: 'طوال اليوم', eventTypes: { regular: 'فعالية', holiday: 'عطلة', birthday: 'عيد ميلاد', tour: 'زيارة', leave: 'إجازة' } as Record<string, string>, nextEvents: 'قريباً', dueTotal: 'إجمالي المتبقي للدفع', settled: 'مسددة', toPay: 'للدفع',
     invoices: 'الفواتير والمدفوعات', invoicesHint: 'اطلع على المستحق وادفع بالبطاقة.', due: 'الاستحقاق', paid: 'المدفوع', total: 'الإجمالي', owed: 'المتبقي', payNow: 'ادفع بالبطاقة', paying: 'جارٍ فتح صفحة الدفع...', payBack: 'فُتحت صفحة الدفع. عد إلى هنا بعد الانتهاء ثم اسحب للتحديث.', payOff: 'الدفع الإلكتروني غير مفعّل بعد.',
     statusLabels: { issued: 'للدفع', partially_paid: 'مدفوعة جزئياً', paid: 'مدفوعة', overdue: 'متأخرة', draft: 'مسودة', cancelled: 'ملغاة', submitted: 'بالانتظار', approved: 'تمت الموافقة', rejected: 'لم تتم الموافقة' },
     newsletters: 'النشرات', newslettersHint: 'أخبار من المركز.', newNews: 'جديد', readBack: 'العودة إلى القائمة',
@@ -337,16 +337,28 @@ export function CalendarOps({ onBack }: { onBack: () => void }) {
   const w = useWords()
   const { lang } = useI18n()
   const events = useLoaded<Occurrence[]>('ops.calendar', () => api.get<Occurrence[]>(`/calendar/events?from=${today()}&to=${inDays(30)}`), [])
+  const grouped = new Map<string, Occurrence[]>()
+  for (const e of [...events.data].sort((a, b) => a.starts_at.localeCompare(b.starts_at))) {
+    const day = e.starts_at.slice(0, 10)
+    grouped.set(day, [...(grouped.get(day) ?? []), e])
+  }
+  const days = [...grouped.entries()]
   return (
     <Screen refreshing={events.busy} onRefresh={() => void events.reload()} onBack={onBack} backLabel={w.back}>
       <Top title={w.calendar} />
       <Status offline={events.offline} error={events.error} w={w} />
-      {events.data.length === 0 && !events.busy ? <Empty text={w.none} /> : events.data.map((e, i) => (
-        <Card key={`${e.event_id}${i}`}>
-          <Row><Body bold>{pick(e.title, lang)}</Body><Pill tone="info" label={e.type} /></Row>
-          <Body muted>{e.is_all_day ? `${new Date(e.starts_at).toLocaleDateString()} · ${w.allDay}` : new Date(e.starts_at).toLocaleString()}</Body>
-          {e.description ? <Body>{pick(e.description, lang)}</Body> : null}
-        </Card>
+      <Body muted>{w.calendarHint}</Body>
+      {events.data.length === 0 && !events.busy ? <Empty text={w.none} /> : days.map(([day, list]) => (
+        <View key={day} style={{ gap: 8 }}>
+          <Section>{new Date(`${day}T12:00:00`).toLocaleDateString(lang === 'ar' ? 'ar-AE-u-nu-latn' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</Section>
+          {list.map((e, i) => (
+            <Card key={`${e.event_id}${i}`}>
+              <Row><Body bold>{pick(e.title, lang)}</Body><Pill tone={e.type === 'holiday' ? 'warn' : 'info'} label={w.eventTypes[e.type] ?? e.type} /></Row>
+              <Body muted>{e.is_all_day ? w.allDay : new Date(e.starts_at).toLocaleTimeString(lang === 'ar' ? 'ar-AE-u-nu-latn' : 'en-GB', { hour: '2-digit', minute: '2-digit' })}</Body>
+              {e.description ? <Body>{pick(e.description, lang)}</Body> : null}
+            </Card>
+          ))}
+        </View>
       ))}
     </Screen>
   )
@@ -365,6 +377,9 @@ export function InvoicesOps({ onBack }: { onBack: () => void }) {
   const config = useLoaded<{ enabled: boolean } | null>('ops.pay.config', () => api.get<{ enabled: boolean }>('/billing/payments/config'), null)
   const [note, setNote] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
+  const isOpen = (i: Invoice) => i.total_fils - i.paid_fils > 0 && ['issued', 'partially_paid', 'overdue'].includes(i.status)
+  const ordered = [...list.data].sort((a, b) => Number(isOpen(b)) - Number(isOpen(a)) || a.due_date.localeCompare(b.due_date))
+  const totalOwed = ordered.filter(isOpen).reduce((sum, i) => sum + i.total_fils - i.paid_fils, 0)
 
   const pay = async (id: string) => {
     setBusy(id)
@@ -391,17 +406,22 @@ export function InvoicesOps({ onBack }: { onBack: () => void }) {
       <Status offline={list.offline} error={list.error} w={w} />
       {note && <Banner tone="info" text={note} />}
       {family && config.data && !config.data.enabled && <Body muted>{w.payOff}</Body>}
-      {list.data.length === 0 && !list.busy ? <Empty text={w.none} /> : list.data.map((i) => {
+      {family && totalOwed > 0 && <Card><Body muted>{w.dueTotal}</Body><Heading>{w.aed} {money(totalOwed, lang)}</Heading></Card>}
+      {list.data.length === 0 && !list.busy ? <Empty text={w.none} /> : ordered.map((i, index) => {
         const owed = i.total_fils - i.paid_fils
         const open = owed > 0 && ['issued', 'partially_paid', 'overdue'].includes(i.status)
+        const heading = index === 0 || isOpen(ordered[index - 1]) !== open ? <Section>{open ? w.toPay : w.settled}</Section> : null
         return (
-          <Card key={i.id}>
+          <View key={i.id} style={{ gap: 8 }}>
+          {heading}
+          <Card>
             <Row><Body bold>{i.invoice_number}</Body><Pill tone={i.status === 'paid' ? 'ok' : i.status === 'overdue' ? 'danger' : 'info'} label={w.statusLabels[i.status as keyof typeof w.statusLabels] ?? i.status} /></Row>
             <Body muted>{i.student_name ?? ''} · {w.due} {i.due_date}</Body>
             <Body>{w.total}: {w.aed} {money(i.total_fils, lang)}  ·  {w.paid}: {money(i.paid_fils, lang)}</Body>
             {open && <Body bold>{w.owed}: {w.aed} {money(owed, lang)}</Body>}
             {open && family && config.data?.enabled && <Btn icon="card" label={w.payNow} onPress={() => void pay(i.id)} busy={busy === i.id} />}
           </Card>
+          </View>
         )
       })}
     </Screen>

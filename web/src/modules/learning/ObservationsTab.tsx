@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from 'lucide-react'
+import { Eye, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { flatten, useDeleteObservation, useFramework, useFrameworks, useObservations, useSaveObservation, useStudentOptions, useSuggestMilestones } from '@/api/hooks'
@@ -10,6 +10,7 @@ import { toast } from '@/components/ui/toaster'
 import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { formatDate } from '@/lib/format'
 import { localized } from '@/lib/utils'
+import { confirmAction } from '@/components/shared/confirm'
 
 const tone = { formal: 'info', informal: 'neutral', concern: 'danger' } as const
 
@@ -109,7 +110,7 @@ export function ObservationsTab({ canWrite }: { canWrite: boolean }) {
         {canWrite && <Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" aria-hidden="true" />{t('learning.obs.new')}</Button>}
       </div>
       {query.isLoading ? <ListSkeleton /> : query.isError ? <ListError error={query.error} onRetry={() => void query.refetch()} /> : rows.length === 0 ? (
-        <EmptyState title={t('learning.obs.empty')} description={t('learning.obs.emptyHint')} />
+        <EmptyState icon={<Eye className="h-7 w-7" aria-hidden="true" />} title={t('learning.obs.empty')} description={t('learning.obs.emptyHint')} />
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {rows.map((o) => (
@@ -122,7 +123,7 @@ export function ObservationsTab({ canWrite }: { canWrite: boolean }) {
               <h3 className="mt-1 font-bold">{o.student_name}</h3>
               <p className="mt-1 text-sm">{localized(o.notes, lang)}</p>
               <p className="mt-2 text-xs text-muted-foreground">{t('learning.obs.by', { name: o.observer_name ?? '—' })}</p>
-              {canWrite && <div className="mt-2 border-t pt-2"><Button size="sm" variant="ghost" onClick={() => { if (window.confirm(t('learning.obs.confirmDelete'))) remove.mutate(o.id, { onSuccess: () => toast.success(t('learning.obs.deleted')) }) }}><Trash2 className="h-4 w-4" aria-hidden="true" />{t('common.delete')}</Button></div>}
+              {canWrite && <div className="mt-2 border-t pt-2"><Button size="sm" variant="ghost" onClick={() => void confirmAction({ title: t('learning.obs.confirmDelete'), confirmLabel: t('confirm.delete') }).then((ok) => { if (ok) remove.mutate(o.id, { onSuccess: () => toast.success(t('learning.obs.deleted')) }) })}><Trash2 className="h-4 w-4" aria-hidden="true" />{t('common.delete')}</Button></div>}
             </Card>
           ))}
         </div>

@@ -179,6 +179,12 @@ public interface IAppDbContext
     Task<int> PurgeAuditLogsAsync(DateTimeOffset before, CancellationToken cancellationToken);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Runs work in one database transaction (inside the retry strategy); it is committed only when the work says so.</summary>
+    Task<T> InTransactionAsync<T>(Func<CancellationToken, Task<(T Value, bool Commit)>> work, CancellationToken cancellationToken);
+
+    /// <summary>Drops changes that were added but not saved, so a failed step cannot slip into the next save.</summary>
+    void ForgetPendingChanges();
 }
 
 /// <summary>

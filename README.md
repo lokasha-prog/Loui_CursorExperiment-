@@ -14,6 +14,9 @@ Data lives only in the local Microsoft SQL Server. No seeded data, no hard-coded
 4. Web: `cd web && pnpm install && pnpm dev` (the API address is `VITE_API_PROXY_TARGET` in `web/.env.development`).
 5. Open the web address, choose "Set up your centre", and enter your setup key (`Auth:BootstrapToken`) to create the first administrator.
 
+## Versions
+One version for the whole product (API, web, mobile, website), kept in `VERSION` and following semantic versioning (ADR-0009). Release notes are in `CHANGELOG.md`. Every delivered change raises it with `tools/version.ps1 -Bump major|minor|patch -Change "..."`; `tools/version.ps1 -Check` confirms every copy agrees. The running version is at `GET /api/v1/version` and in the web app's side menu.
+
 ## Tests
 - Backend: `dotnet test backend/NMS.sln` (integration tests need `NMS_TEST_CONNECTION_STRING`, a SQL Server connection string without a database name; each run creates and deletes its own database).
 - Web: `cd web && pnpm test` (`pnpm test:coverage`, `pnpm lint`, `pnpm typecheck`).

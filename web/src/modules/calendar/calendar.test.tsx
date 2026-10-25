@@ -77,6 +77,54 @@ describe('CalendarPage', () => {
     expect(calls.find((c) => c.method === 'POST')!.body).toMatchObject({ title: { en: 'Story time' }, is_all_day: true, type: 'regular', recurrence: 'FREQ=WEEKLY;BYDAY=TU', visibility: 'parents' })
   })
 
+  it('opens an event with its details, and a parent can only add it to their own calendar', async () => {
+    signIn(makeMe({ roles: ['parent'], permissions: ['calendar.read', 'students.read'] }))
+    mockApi(fetchMock, {
+      'GET /calendar/events': envelope([occurrence({ description: { en: 'Bring trainers' } })]),
+      'GET /calendar/feed-link': envelope({ path: '/x.ics' }),
+    })
+    renderWithProviders(<CalendarPage />)
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Sports day' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('Bring trainers')).toBeInTheDocument()
+    expect(within(dialog).getByText('Parents can see it')).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: /Add to my calendar/ })).toBeInTheDocument()
+    expect(within(dialog).queryByRole('button', { name: /Edit/ })).not.toBeInTheDocument()
+    expect(within(dialog).queryByRole('button', { name: /Delete/ })).not.toBeInTheDocument()
+  })
+
+  it('lets a manager edit or remove an event from its details', async () => {
+    signIn(makeMe({ permissions: ['calendar.read', 'calendar.write', 'staff.read'] }))
+    const calls = mockApi(fetchMock, {
+      'GET /calendar/events': envelope([occurrence()]),
+      'DELETE /calendar/events/ev1': envelope(null),
+      'GET /calendar/feed-link': envelope({ path: '/x.ics' }),
+      'GET /rooms': envelope([]),
+    })
+    renderWithProviders(<CalendarPage />)
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Sports day' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByRole('button', { name: /Edit/ })).toBeInTheDocument()
+    await userEvent.click(within(dialog).getByRole('button', { name: /Delete/ }))
+    await userEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' }))
+
+    await waitFor(() => expect(calls.some((c) => c.method === 'DELETE' && c.url.includes('/calendar/events/ev1'))).toBe(true))
+  })
+
+  it('lists every event of a busy day', async () => {
+    signIn(makeMe({ roles: ['parent'], permissions: ['calendar.read'] }))
+    const busy = ['A', 'B', 'C', 'D'].map((x) => occurrence({ event_id: x, title: { en: `Event ${x}` } }))
+    mockApi(fetchMock, { 'GET /calendar/events': envelope(busy), 'GET /calendar/feed-link': envelope({ path: '/x.ics' }) })
+    renderWithProviders(<CalendarPage />)
+
+    await userEvent.click(await screen.findByRole('button', { name: '+1 more' }))
+    const dialog = await screen.findByRole('dialog')
+    await userEvent.click(within(dialog).getByRole('button', { name: /Event D/ }))
+    expect(await screen.findByRole('heading', { name: 'Event D' })).toBeInTheDocument()
+  })
+
   it('works in Arabic', async () => {
     await setLanguage('ar')
     signIn(makeMe({ permissions: ['calendar.read', 'calendar.write', 'staff.read'] }))

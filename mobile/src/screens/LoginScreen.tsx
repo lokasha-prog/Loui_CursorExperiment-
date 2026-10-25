@@ -7,6 +7,19 @@ import { useI18n, pick, type Lang } from '../i18n'
 import { Ionicons } from '@expo/vector-icons'
 import { Banner, Body, Btn, Card, Chip, Field, Heading, Row, Screen, Title, color } from '../ui'
 
+/** Testing phase only: a pick-list that fills in the e-mail. Passwords are never stored in the app. Off unless the build sets EXPO_PUBLIC_TEST_ACCOUNTS=1. */
+const TEST_ACCOUNTS = process.env.EXPO_PUBLIC_TEST_ACCOUNTS === '1'
+const TEST_LIST: [string, string][] = [
+  ['Salam (centre admin)', 'szabalawi@brightfutures.com'],
+  ['Parent', 'test.parent@dev.local'],
+  ['Teacher', 'test.teacher@dev.local'],
+  ['IT', 'test.it@dev.local'],
+  ['Centre admin', 'test.centre.admin@dev.local'],
+  ['Receptionist', 'test.receptionist@dev.local'],
+  ['Accounts', 'test.accounts@dev.local'],
+  ['Marketing', 'test.marketing@dev.local'],
+]
+
 export function LoginScreen() {
   const { t, lang, setLang } = useI18n()
   const { signIn, devSignIn } = useAuth()
@@ -17,6 +30,7 @@ export function LoginScreen() {
   const [error, setError] = useState(false)
   const [server, setServer] = useState(apiBase())
   const [serverSaved, setServerSaved] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const submit = async (tenant?: string) => {
     setBusy(true)
@@ -50,6 +64,12 @@ export function LoginScreen() {
         </Card>
       ) : (
         <Card>
+          {TEST_ACCOUNTS && (
+            <View style={{ gap: 6 }}>
+              <Btn kind="secondary" icon={pickerOpen ? 'chevron-up' : 'chevron-down'} label="Test accounts (testing phase)" onPress={() => setPickerOpen((o) => !o)} />
+              {pickerOpen && TEST_LIST.map(([name, address]) => <Btn key={address} kind="secondary" label={`${name} · ${address}`} onPress={() => { setEmail(address); setPickerOpen(false) }} />)}
+            </View>
+          )}
           <Field label={t('email')} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
           <Field label={t('password')} value={password} onChangeText={setPassword} secureTextEntry autoComplete="password" />
           <Btn icon="log-in" label={busy ? t('signingIn') : t('signIn')} onPress={() => void submit()} busy={busy} disabled={!email || !password} />

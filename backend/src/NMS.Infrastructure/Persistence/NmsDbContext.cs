@@ -96,6 +96,32 @@ public sealed class NmsDbContext(
 
     public DbSet<NMS.Application.Reporting.AuditRetentionRun> AuditRetentionRuns => Set<NMS.Application.Reporting.AuditRetentionRun>();
 
+    public Task<T> InTransactionAsync<T>(Func<CancellationToken, Task<(T Value, bool Commit)>> work, CancellationToken cancellationToken) =>
+        Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            await using var transaction = await Database.BeginTransactionAsync(cancellationToken);
+            var (value, commit) = await work(cancellationToken);
+            if (commit)
+            {
+                await transaction.CommitAsync(cancellationToken);
+            }
+            else
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                ChangeTracker.Clear();
+            }
+
+            return value;
+        });
+
+    public void ForgetPendingChanges()
+    {
+        foreach (var entry in ChangeTracker.Entries().Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted).ToList())
+        {
+            entry.State = EntityState.Detached;
+        }
+    }
+
     public Task<int> PurgeAuditLogsAsync(DateTimeOffset before, CancellationToken cancellationToken) =>
         // The retry strategy must own the whole unit of work when a transaction is opened by hand.
         Database.CreateExecutionStrategy().ExecuteAsync(async () =>

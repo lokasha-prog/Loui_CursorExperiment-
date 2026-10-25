@@ -68,6 +68,19 @@ public sealed class MyCentresHandler(IAppDbContext db, ITenantContext tenant, IC
     }
 }
 
+public sealed record GroupCentresQuery : IRequest<Result<List<GroupCentreDto>>>;
+
+/// <summary>Every open centre in the group, for people who manage the group (for example to share photos with some of them).</summary>
+public sealed class GroupCentresHandler(IAppDbContext db, ITenantContext tenant) : IRequestHandler<GroupCentresQuery, Result<List<GroupCentreDto>>>
+{
+    public async Task<Result<List<GroupCentreDto>>> Handle(GroupCentresQuery request, CancellationToken ct)
+    {
+        var (head, centres) = await GroupMembers.OfAsync(db, tenant.TenantId, ct);
+        return Result<List<GroupCentreDto>>.Success(centres.Where(c => c.Status == "active")
+            .Select(c => new GroupCentreDto(c.Id, c.Slug, c.Name, c.Id == head, c.Status)).ToList());
+    }
+}
+
 // ---------------------------------------------------------------- one sign-in for every centre
 
 public sealed record SwitchCentreCommand(Guid CentreId, string? IpAddress) : IRequest<Result<AuthSession>>;

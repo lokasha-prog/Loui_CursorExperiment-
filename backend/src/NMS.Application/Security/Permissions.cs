@@ -54,6 +54,9 @@ public static class Permissions
     public const string CentreStructureRead = "centre_structure.read";
 
     public const string CentreStructureWrite = "centre_structure.write";
+
+    /// <summary>Free questions to the AI Brain about the centre's data ("chat with data"); the super administrator only.</summary>
+    public const string AiChat = "ai.chat";
 }
 
 /// <summary>The RBAC matrix from spec 09 §2.2 expressed as code. Scoping (room, own child) is enforced in handlers.</summary>
@@ -64,7 +67,7 @@ public static class RolePermissions
     private static readonly Dictionary<string, string[]> Map = new()
     {
         [SystemRoles.SuperAdmin] = [.. AllPermissions()],
-        [SystemRoles.It] = [.. AllPermissions()],
+        [SystemRoles.It] = [.. AllPermissions().Where(p => p != Permissions.AiChat)],
         [SystemRoles.CentreAdmin] =
         [
             .. Everyone,

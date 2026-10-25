@@ -51,7 +51,7 @@ public sealed class ManagementBriefingHandler(IAppDbContext db, CentreCalendar c
     {
         if (!brain.IsConfigured)
         {
-            return Error.InvalidState("The AI Brain is not set up yet.");
+            return AiErrors.NotSetUp;
         }
 
         var facts = request.Area switch

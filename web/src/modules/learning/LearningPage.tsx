@@ -1,5 +1,5 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { Clock, Plus, Sparkles, Search, Trash2, Upload } from 'lucide-react'
+import { BookOpen, Clock, Plus, Sparkles, Search, Trash2, Upload } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { flatten, useStudentOptions, useDeleteLesson, useFramework, useFrameworks, useImportFramework, useLessons, useRoomOptions, useSaveFramework, useSaveLesson, useLessonDraft } from '@/api/hooks'
@@ -17,6 +17,7 @@ import { AssessmentsTab } from './AssessmentsTab'
 import { JourneyView } from './JourneyView'
 import { ObservationsTab } from './ObservationsTab'
 import { ReportsTab } from './ReportsTab'
+import { confirmAction } from '@/components/shared/confirm'
 
 const lines = (text: string) => text.split('\n').map((l) => l.trim()).filter(Boolean)
 
@@ -159,7 +160,7 @@ function LessonsTab({ canWrite }: { canWrite: boolean }) {
         {canWrite && <Button onClick={() => setEditing({ lesson: null })} disabled={(frameworks.data ?? []).length === 0}><Plus className="h-4 w-4" aria-hidden="true" />{t('learning.lesson.new')}</Button>}
       </div>
       {query.isLoading ? <ListSkeleton /> : query.isError ? <ListError error={query.error} onRetry={() => void query.refetch()} /> : lessons.length === 0 ? (
-        <EmptyState title={t('learning.lesson.empty')} description={t('learning.lesson.emptyHint')} />
+        <EmptyState icon={<BookOpen className="h-7 w-7" aria-hidden="true" />} title={t('learning.lesson.empty')} description={t('learning.lesson.emptyHint')} />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {lessons.map((l) => (
@@ -181,7 +182,7 @@ function LessonsTab({ canWrite }: { canWrite: boolean }) {
                 <div className="mt-3 flex gap-2 border-t pt-3">
                   <Button size="sm" variant="secondary" onClick={() => setEditing({ lesson: l })}>{t('common.edit')}</Button>
                   {l.is_template && <Button size="sm" variant="secondary" onClick={() => setEditing({ lesson: { ...l, id: '', is_template: false } as Lesson })}>{t('learning.lesson.useTemplate')}</Button>}
-                  <Button size="sm" variant="ghost" onClick={() => { if (window.confirm(t('learning.lesson.confirmDelete'))) remove.mutate(l.id, { onSuccess: () => toast.success(t('learning.lesson.deleted')) }) }}><Trash2 className="h-4 w-4" aria-hidden="true" />{t('common.delete')}</Button>
+                  <Button size="sm" variant="ghost" onClick={() => void confirmAction({ title: t('learning.lesson.confirmDelete'), confirmLabel: t('confirm.delete') }).then((ok) => { if (ok) remove.mutate(l.id, { onSuccess: () => toast.success(t('learning.lesson.deleted')) }) })}><Trash2 className="h-4 w-4" aria-hidden="true" />{t('common.delete')}</Button>
                 </div>
               )}
             </Card>
@@ -199,7 +200,7 @@ function FrameworkTree({ detail }: { detail: FrameworkDetail }) {
   const lang = i18n.language
   return (
     <div className="space-y-4">
-      {detail.areas.length === 0 && <EmptyState title={t('learning.curriculum.emptyTree')} description={t('learning.curriculum.emptyTreeHint')} />}
+      {detail.areas.length === 0 && <EmptyState icon={<BookOpen className="h-7 w-7" aria-hidden="true" />} title={t('learning.curriculum.emptyTree')} description={t('learning.curriculum.emptyTreeHint')} />}
       {detail.areas.map((area) => {
         const inArea = detail.milestones.filter((m) => m.area_id === area.id)
         return (
@@ -306,7 +307,7 @@ function CurriculumTab({ canManage }: { canManage: boolean }) {
         {canManage && current && <Button variant="secondary" onClick={() => setDialog('import')}><Upload className="h-4 w-4" aria-hidden="true" />{t('learning.curriculum.import')}</Button>}
       </div>
       {frameworks.isLoading ? <ListSkeleton /> : list.length === 0 ? (
-        <EmptyState title={t('learning.curriculum.none')} description={canManage ? t('learning.curriculum.noneHint') : t('learning.curriculum.noneStaff')} />
+        <EmptyState icon={<BookOpen className="h-7 w-7" aria-hidden="true" />} title={t('learning.curriculum.none')} description={canManage ? t('learning.curriculum.noneHint') : t('learning.curriculum.noneStaff')} />
       ) : !detail.data ? <ListSkeleton /> : (
         <>
           <p className="mb-3 text-sm text-muted-foreground">{t('learning.curriculum.summary', { areas: detail.data.areas.length, bands: detail.data.age_bands.length, milestones: detail.data.milestones.length })}</p>

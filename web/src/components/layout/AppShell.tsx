@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Baby, Building2, BarChart3, CalendarDays, ClipboardList, FolderOpen, GraduationCap, Sprout, IdCard, Newspaper, Inbox, Settings, Wallet, MessageCircleHeart, Bell, History, CalendarOff, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, Users, UsersRound, X } from 'lucide-react'
+import { Baby, Building2, BarChart3, CalendarDays, ClipboardList, FolderOpen, GraduationCap, Sprout, IdCard, Newspaper, Inbox, Settings, Wallet, MessageCircleHeart, Bell, History, CalendarOff, GalleryHorizontalEnd, Images, MessageSquare, LayoutDashboard, LogOut, Menu, ScanLine, School, ShieldCheck, ScrollText, Users, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
@@ -12,6 +12,7 @@ import { useLiveUpdates } from '@/hooks/use-live-updates'
 import { ShortageBanner } from '@/modules/attendance/ShortageBanner'
 import { useUnreadCount } from '@/api/hooks'
 import { FeedbackButton } from '@/modules/feedback/FeedbackButton'
+import { DataChatWidget } from '@/modules/ai/DataChatWidget'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
 interface NavItem {
@@ -30,6 +31,7 @@ export function useNavItems(): NavItem[] {
     { to: '/students', label: parent ? t('nav.myChildren') : t('nav.students'), icon: Baby, permission: 'students.read' },
     { to: '/staff', label: t('nav.staff'), icon: UsersRound, permission: 'staff.read' },
     { to: '/feed', label: t('nav.feed'), icon: Images, permission: 'activities.read' },
+    { to: '/gallery', label: parent ? t('nav.myGallery') : t('nav.gallery'), icon: GalleryHorizontalEnd, permission: 'activities.read' },
     { to: '/messages', label: t('nav.messages'), icon: MessageSquare, permission: 'messaging.read' },
     { to: '/attendance', label: t('nav.attendance'), icon: ScanLine, permission: 'attendance.read' },
     { to: '/calendar', label: t('nav.calendar'), icon: CalendarDays, permission: 'calendar.read' },
@@ -49,6 +51,7 @@ export function useNavItems(): NavItem[] {
     { to: '/tools', label: t('nav.tools'), icon: IdCard, permission: 'tools.use' },
     { to: '/users', label: t('nav.users'), icon: ShieldCheck, permission: 'user_management.manage' },
     { to: '/settings', label: t('nav.settings'), icon: Settings, permission: 'settings.read' },
+    { to: '/release-notes', label: t('nav.releaseNotes'), icon: ScrollText },
   ]
   return items.filter((item) => (!item.permission || can(me, item.permission)) && !(item.to === '/journey' && can(me, 'learning.read')))
 }
@@ -147,6 +150,14 @@ export function AppShell() {
           <p className="truncate px-3 pb-2 font-mono text-[10px] text-muted-foreground">
             {localized(me?.tenant.name, i18n.language)}
           </p>
+          <NavLink
+            to="/release-notes"
+            onClick={() => setOpen(false)}
+            title={t('releaseNotes.title')}
+            className="block px-3 pb-1 font-mono text-[10px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            <span dir="ltr">{t('common.version', { version: __APP_VERSION__ })}</span> · {t('releaseNotes.title')}
+          </NavLink>
         </div>
       </aside>
 
@@ -185,6 +196,7 @@ export function AppShell() {
         </header>
         <ShortageBanner />
         <FeedbackButton />
+        <DataChatWidget />
         <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 focus:outline-none lg:px-8 lg:py-8">
           <Outlet />
         </main>

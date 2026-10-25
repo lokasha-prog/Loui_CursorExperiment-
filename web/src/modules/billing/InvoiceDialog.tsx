@@ -11,6 +11,7 @@ import { useApiErrorMessage } from '@/hooks/use-api-error'
 import { formatAed, formatDate, todayIso } from '@/lib/format'
 import { localized } from '@/lib/utils'
 import { can, isParentOnly, useAuth } from '@/stores/auth'
+import { confirmAction } from '@/components/shared/confirm'
 
 export const statusTone: Record<string, Tone> = { draft: 'neutral', issued: 'info', partially_paid: 'warning', paid: 'success', overdue: 'danger', cancelled: 'neutral' }
 
@@ -108,7 +109,7 @@ export function InvoiceDialog({ id, onClose }: { id: string | null; onClose: () 
   }
 
   const run = async (kind: 'issue' | 'cancel' | 'send') => {
-    if (kind === 'cancel' && !window.confirm(t('billing.invoice.confirmCancel'))) return
+    if (kind === 'cancel' && !(await confirmAction({ title: t('billing.invoice.confirmCancel'), confirmLabel: t('confirm.cancelInvoice'), cancelLabel: t('confirm.keepInvoice') }))) return
     try {
       await action.mutateAsync({ id: id!, action: kind })
       toast.success(t(`billing.invoice.${kind === 'issue' ? 'issued' : kind === 'cancel' ? 'cancelled' : 'sent'}`))

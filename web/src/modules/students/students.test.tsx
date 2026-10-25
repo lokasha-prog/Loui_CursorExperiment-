@@ -102,6 +102,19 @@ describe('StudentsPage', () => {
     expect(screen.queryByPlaceholderText('Search by name or barcode')).not.toBeInTheDocument()
   })
 
+  it('offers a shortcut to the gallery, called "My gallery" for a parent', async () => {
+    signIn(makeMe({ roles: ['parent'], permissions: ['students.read', 'activities.read'] }))
+    serve([])
+    const parentView = renderPage()
+    expect(await screen.findByRole('link', { name: 'My gallery' })).toHaveAttribute('href', '/gallery')
+    parentView.unmount()
+
+    signIn(makeMe({ permissions: ['students.read', 'activities.read'] }))
+    serve([])
+    renderPage()
+    expect(await screen.findByRole('link', { name: 'Gallery' })).toHaveAttribute('href', '/gallery')
+  })
+
   it('explains a server failure in plain language and lets people retry', async () => {
     fetchMock.mockResolvedValue(failure(500, 'INTERNAL_ERROR'))
     renderPage()

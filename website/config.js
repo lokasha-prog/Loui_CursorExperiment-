@@ -9,7 +9,7 @@ window.SITE_CONFIG = {
   email: '',
   address: { en: '', ar: '' },
   // Where the Sign in buttons go: the NMS web app's sign-in page. '' means /login on the same address as this website.
-  portalUrl: 'http://localhost:5173/login',
+  portalUrl: 'http://localhost:5178/login',
   // Optional: a line shown above the header, for example an open day. { en: '...', ar: '...', link: '#enquire' }
   notice: null,
   // Optional: REAL parent comments only, with their permission. [{ name: 'A. Parent', text: { en: '...', ar: '...' } }]. Empty hides the section.

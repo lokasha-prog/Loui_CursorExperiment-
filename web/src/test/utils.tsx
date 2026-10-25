@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, type RenderOptions } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { MemoryRouter } from 'react-router-dom'
+import { ConfirmHost } from '@/components/shared/confirm'
 import type { Me } from '@/api/types'
 import i18n from '@/lib/i18n'
 import { useAuth } from '@/stores/auth'
@@ -39,6 +40,7 @@ export function renderWithProviders(ui: ReactElement, options: { route?: string 
     wrapper: ({ children }) => (
       <QueryClientProvider client={client}>
         <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+        <ConfirmHost />
       </QueryClientProvider>
     ),
     ...rest,

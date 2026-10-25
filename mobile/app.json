@@ -2,7 +2,7 @@
   "expo": {
     "name": "Bright Futures",
     "slug": "bright-futures",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "runtimeVersion": { "policy": "appVersion" },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,12 +11,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mobilityeye.brightfutures",
-      "buildNumber": "3",
+      "buildNumber": "8",
       "infoPlist": { "NSCameraUsageDescription": "The camera is used to scan the QR code on a child or staff card.", "NSFaceIDUsageDescription": "Face ID unlocks the app." }
     },
     "android": {
       "package": "com.mobilityeye.brightfutures",
-      "versionCode": 3,
+      "versionCode": 8,
       "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#ffffff" },
       "permissions": ["CAMERA", "USE_BIOMETRIC", "USE_FINGERPRINT", "POST_NOTIFICATIONS"]
     },

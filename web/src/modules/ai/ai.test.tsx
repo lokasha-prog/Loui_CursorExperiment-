@@ -63,4 +63,15 @@ describe('AiInsightsCard', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('The AI Brain is not available right now')
   })
+
+  it('says the AI Brain is not set up, rather than asking to try again, when the server has no AI key', async () => {
+    mockApi(fetchMock, { 'GET /ai/attendance-summary': failure(422, 'AI_NOT_SET_UP') })
+    renderWithProviders(<AiInsightsCard />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Summarise attendance' }))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent("The AI Brain isn't set up yet")
+    expect(alert).not.toHaveTextContent('try again')
+  })
 })

@@ -38,11 +38,20 @@ public static class CommunicationEndpoints
         }).RequireAuthorization();
 
         var a = routes.MapGroup("/api/v1/activities").WithTags("Activities");
-        a.MapGet("/", async (string? status, [FromQuery(Name = "student_id")] Guid? studentId, string? cursor, int? limit, HttpContext http, ISender s, CancellationToken ct) =>
-            ApiResults.FromPage(http, await s.Send(new ListActivitiesQuery(status, studentId, cursor, limit), ct)))
+        a.MapGet("/", async (
+            string? status, [FromQuery(Name = "student_id")] Guid? studentId, [FromQuery(Name = "with_media")] bool? withMedia,
+            [FromQuery(Name = "include_shared")] bool? includeShared, string? cursor, int? limit,
+            HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.FromPage(http, await s.Send(new ListActivitiesQuery(status, studentId, cursor, limit, withMedia, includeShared), ct)))
             .RequireAuthorization(Permissions.ActivitiesRead);
         a.MapPost("/", async (CreateActivityCommand body, HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(body, ct), StatusCodes.Status201Created))
+            .RequireAuthorization(Permissions.ActivitiesWrite);
+        a.MapPost("/centres", async (ShareWithCentresCommand body, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(body, ct), StatusCodes.Status201Created))
+            .RequireAuthorization(Permissions.GroupManage);
+        a.MapDelete("/{id:guid}", async (Guid id, HttpContext http, ISender s, CancellationToken ct) =>
+            ApiResults.From(http, await s.Send(new DeleteActivityCommand(id), ct)))
             .RequireAuthorization(Permissions.ActivitiesWrite);
         a.MapPost("/{id:guid}/actions/approve", async (Guid id, HttpContext http, ISender s, CancellationToken ct) =>
             ApiResults.From(http, await s.Send(new DecideActivityCommand(id, true, null), ct)))

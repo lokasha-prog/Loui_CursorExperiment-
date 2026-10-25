@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NMS.Application.Abstractions;
+using NMS.Application.Import;
 using NMS.Application.Ai;
 using NMS.Application.Attendance;
 using NMS.Application.Auth;
@@ -68,6 +69,7 @@ public static class DependencyInjection
         services.AddSingleton<NMS.Application.Tools.IIdCardRenderer, NMS.Infrastructure.Services.QuestIdCardRenderer>();
         services.AddSingleton<NMS.Application.Tools.ICertificateRenderer, NMS.Infrastructure.Services.QuestCertificateRenderer>();
         services.AddSingleton<CentreCalendar>();
+        services.AddSingleton<IImportWorkbook, ClosedXmlImportWorkbook>();
 
         services.AddOptions<AiOptions>().Bind(configuration.GetSection(AiOptions.SectionName));
         services.AddHttpClient<IAiBrain, GroqAiBrain>((provider, client) =>

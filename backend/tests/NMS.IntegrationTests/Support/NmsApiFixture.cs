@@ -402,6 +402,34 @@ public sealed class FakeAiBrain : NMS.Application.Ai.IAiBrain
         LastUser = user;
         return Task.FromResult(Answer);
     }
+
+    /// <summary>Tool calls the fake "model" makes, in order, before answering with <see cref="Answer"/>.</summary>
+    public List<(string Name, string Arguments)> ToolCalls { get; } = [];
+
+    /// <summary>What each tool call returned, in order.</summary>
+    public List<string> ToolResults { get; } = [];
+
+    public IReadOnlyList<NMS.Application.Ai.AiMessage>? LastMessages { get; private set; }
+
+    public async Task<NMS.Shared.Results.Result<string>> ChatAsync(
+        string system, IReadOnlyList<NMS.Application.Ai.AiMessage> messages, IReadOnlyList<NMS.Application.Ai.AiTool> tools,
+        Func<string, string, CancellationToken, Task<string>> runTool, CancellationToken cancellationToken)
+    {
+        LastSystem = system;
+        LastMessages = messages;
+        ToolResults.Clear();
+        if (!IsConfigured)
+        {
+            return NMS.Application.Ai.AiErrors.NotSetUp;
+        }
+
+        foreach (var (name, arguments) in ToolCalls)
+        {
+            ToolResults.Add(await runTool(name, arguments, cancellationToken));
+        }
+
+        return Answer;
+    }
 }
 
 public sealed class FakeSmsSender : NMS.Application.Notifications.ISmsSender
